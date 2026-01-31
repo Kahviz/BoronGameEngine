@@ -124,7 +124,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 #else
     graphics.SetRenderTargetToBackBuffer();
 #endif
-
     graphics.ClearBuffer(0.0f, 0.0f, 1.0f);
 
     static bool CubeB = false;
@@ -169,15 +168,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     graphics.ClearSceneBuffer(0.1f, 0.2f, 0.3f);
 #endif
     
+    graphics.DrawAFrame(deltatime, Drawables);
 
-    for (auto& instPtr : Drawables) {
-        Instance* inst = instPtr.get();
-        if (inst->CanDraw()) {
-            graphics.DrawMesh(deltatime, inst->OBJmesh, inst->Orientation,
-                inst->pos, inst->Size, inst->color, inst->Velocity,
-                inst->Anchored, 1.0f, 1.0f);
-        }
-    }
 #if INEDITOR == 1
     graphics.SetRenderTargetToBackBuffer();
 #endif

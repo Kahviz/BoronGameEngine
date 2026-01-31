@@ -149,24 +149,9 @@ void Graphics::EndFrame()
     }
 }
 
-void Graphics::DrawMesh(
-    float deltaTime,
-    Mesh& mesh,
-    FLOAT3 Orientation,
-    FLOAT3& pos,
-    FLOAT3& size,
-    INT3 color,
-    FLOAT3& Velocity,
-    bool Anchored,
-    float Roughness,
-    float Brightness
-)
-{
+void Graphics::DrawAFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables) {
     if (UsesDx11) {
-        DR.get()->DrawMesh(deltaTime, mesh, Orientation, pos, size, color, Velocity, Anchored, Roughness, Brightness);
-    }
-    if (UsesVulkan) {
-
+        DR.get()->DrawAFrame(DELTATIME,Drawables);
     }
 }
 

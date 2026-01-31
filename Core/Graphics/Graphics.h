@@ -28,12 +28,6 @@ public:
     void InitGraphics(GLFWwindow* window);
     void SetRenderTargetToScene();
     void SetRenderTargetToBackBuffer();
-    void CreateDeviceAndSwapChain(int width, int height, HWND hWnd);
-    void CreateViewport(int width, int height);
-    void CreateDepthStencil(int width, int height);
-    void CreateRenderTarget();
-    void CreateConstantBuffers();
-    void CompileShaders();
 
     Camera& GetCamera();
     ID3D11Device* GetDevice() noexcept;
@@ -41,9 +35,7 @@ public:
 
     void EndFrame();
 
-    void DrawMesh(float deltaTime, Mesh& mesh, FLOAT3 Orientation, FLOAT3& pos,
-        FLOAT3& size, INT3 color, FLOAT3& Velocity, bool Anchored,
-        float Roughness, float Brightness);
+    void DrawAFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables);
 
     void ClearBuffer(float r, float g, float b);
     void ClearSceneBuffer(float r, float g, float b);
@@ -59,7 +51,4 @@ public:
 private:
     std::unique_ptr<VulkanRender> VR;
     std::unique_ptr<Dx11Renderer> DR;
-
-    bool UsesDx11 = true;
-    bool UsesVulkan = false;
 };

@@ -394,11 +394,147 @@ void Dx11Renderer::EndFrame()
     }
 }
 
-void Dx11Renderer::DrawAFrame(float deltatime,)
+void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Instance>>& Drawables)
 {
+    for (auto& Instptr : Drawables) {
+        Instance& inst = *Instptr.get();
 
+        if (inst.CanDraw()) {
+            const Mesh& mesh = inst.OBJmesh;
+            FLOAT3 Orientation = inst.Orientation;
+            FLOAT3& pos = inst.pos;
+            FLOAT3& size = inst.Size;
+            INT3 color = inst.color;
+            FLOAT3& Velocity = inst.Velocity;
+            bool Anchored = inst.Anchored;
+            float Roughness = 1.0f;
+            float Brightness = 1.0f;
+
+            if (!pContext || !pConstantBuffer || !pColorBuffer || !pLightingBuffer)
+                throw std::runtime_error("Dx11Renderer not properly initialized");
+
+            // Physics
+            float restitution = std::clamp(
+                (size.x + size.y + size.z) / 6.0f,
+                0.1f,
+                0.9f
+            );
+
+            if (Running && !Anchored)
+            {
+                // Gravity
+                Velocity.y -= Gravity * deltatime;
+
+                // Integrate
+                pos.x += Velocity.x * deltatime;
+                pos.y += Velocity.y * deltatime;
+                pos.z += Velocity.z * deltatime;
+
+                // Ground collision
+                if (pos.y < -10.0f)
+                {
+                    pos.y = -10.0f;
+                    Velocity.y = -Velocity.y * restitution;
+
+                    float friction = 0.9f;
+                    Velocity.x *= friction;
+                    Velocity.z *= friction;
+
+                    if (std::abs(Velocity.y) < 0.05f)
+                        Velocity.y = 0.0f;
+                }
+            }
+
+            // Matrices
+            XMMATRIX scale = XMMatrixScaling(size.x, size.y, size.z);
+            XMMATRIX world = scale *
+                XMMatrixRotationRollPitchYaw(Orientation.x, Orientation.y, Orientation.z) *
+                XMMatrixTranslation(pos.x, pos.y, pos.z);
+
+            Matrix4x4 mat = camera.GetViewMatrix();
+            XMMATRIX view = XMMATRIX(
+                XMVectorSet(mat.x.x, mat.x.y, mat.x.z, mat.x.w),
+                XMVectorSet(mat.y.x, mat.y.y, mat.y.z, mat.y.w),
+                XMVectorSet(mat.z.x, mat.z.y, mat.z.z, mat.z.w),
+                XMVectorSet(mat.w.x, mat.w.y, mat.w.z, mat.w.w)
+            );
+
+            Matrix4x4 projMat = camera.GetProjectionMatrix();
+            XMMATRIX proj = XMMATRIX(
+                XMVectorSet(projMat.x.x, projMat.x.y, projMat.x.z, projMat.x.w),
+                XMVectorSet(projMat.y.x, projMat.y.y, projMat.y.z, projMat.y.w),
+                XMVectorSet(projMat.z.x, projMat.z.y, projMat.z.z, projMat.z.w),
+                XMVectorSet(projMat.w.x, projMat.w.y, projMat.w.z, projMat.w.w)
+            );
+
+            XMMATRIX transform = XMMatrixTranspose(world * view * proj);
+
+            // VS constant buffer
+            ConstantBuffer cb = {};
+            cb.transfrom = transform;
+            cb.cubeColor = XMFLOAT3(
+                color.x / 255.0f,
+                color.y / 255.0f,
+                color.z / 255.0f
+            );
+
+            D3D11_MAPPED_SUBRESOURCE msrVS;
+            HRESULT hr = pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
+            if (FAILED(hr)) throw std::runtime_error("Failed to map VS constant buffer");
+            memcpy(msrVS.pData, &cb, sizeof(cb));
+            pContext->Unmap(pConstantBuffer.Get(), 0);
+
+            // PS Color buffer (b0)
+            PixelConstantBuffer pcb = {};
+            pcb.color = XMFLOAT4(color.x / 255.f, color.y / 255.f, color.z / 255.f, 1.0f);
+
+            D3D11_MAPPED_SUBRESOURCE msrColor;
+            hr = pContext->Map(pColorBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrColor);
+            if (FAILED(hr)) throw std::runtime_error("Failed to map color buffer");
+            memcpy(msrColor.pData, &pcb, sizeof(pcb));
+            pContext->Unmap(pColorBuffer.Get(), 0);
+
+            // Lighting
+            static float angle = 0.0f;
+            const float radius = 5.0f;
+            const float speed = 0.0001f;
+
+            angle += speed;
+            if (angle >= XM_2PI)
+                angle -= XM_2PI;
+
+            XMFLOAT3 lightpos;
+            lightpos.x = radius * cosf(angle);
+            lightpos.z = radius * sinf(angle);
+            lightpos.y = 2.0f;
+
+            LightingCB lcb = {};
+            lcb.lightpos = FLOAT3(lightpos.x, lightpos.y, lightpos.z);
+            lcb.Brightness = Brightness;
+            lcb.WorldPos = FLOAT3(pos.x, pos.y, pos.z);
+            lcb.lightRange = 10.0f;
+
+            D3D11_MAPPED_SUBRESOURCE msrLighting;
+            hr = pContext->Map(pLightingBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrLighting);
+            if (FAILED(hr)) throw std::runtime_error("Failed to map lighting buffer");
+            memcpy(msrLighting.pData, &lcb, sizeof(lcb));
+            pContext->Unmap(pLightingBuffer.Get(), 0);
+
+            // Pipeline
+            pContext->IASetInputLayout(pLayout.Get());
+            pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+            pContext->VSSetShader(pVS.Get(), nullptr, 0);
+            pContext->PSSetShader(pPS.Get(), nullptr, 0);
+
+            pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
+            pContext->PSSetConstantBuffers(0, 1, pColorBuffer.GetAddressOf());
+            pContext->PSSetConstantBuffers(1, 1, pLightingBuffer.GetAddressOf());
+
+            mesh.Draw(pContext.Get());
+        }
+    }
 }
-
 void Dx11Renderer::DrawMesh(
     float deltaTime,
     Mesh& mesh,
@@ -412,128 +548,7 @@ void Dx11Renderer::DrawMesh(
     float Brightness
 )
 {
-    if (!pContext || !pConstantBuffer || !pColorBuffer || !pLightingBuffer)
-        throw std::runtime_error("Dx11Renderer not properly initialized");
-
-    // Physics
-    float restitution = std::clamp(
-        (size.x + size.y + size.z) / 6.0f,
-        0.1f,
-        0.9f
-    );
-
-    if (Running && !Anchored)
-    {
-        // Gravity
-        Velocity.y -= Gravity * deltaTime;
-
-        // Integrate
-        pos.x += Velocity.x * deltaTime;
-        pos.y += Velocity.y * deltaTime;
-        pos.z += Velocity.z * deltaTime;
-
-        // Ground collision
-        if (pos.y < -10.0f)
-        {
-            pos.y = -10.0f;
-            Velocity.y = -Velocity.y * restitution;
-
-            float friction = 0.9f;
-            Velocity.x *= friction;
-            Velocity.z *= friction;
-
-            if (std::abs(Velocity.y) < 0.05f)
-                Velocity.y = 0.0f;
-        }
-    }
-
-    // Matrices
-    XMMATRIX scale = XMMatrixScaling(size.x, size.y, size.z);
-    XMMATRIX world = scale *
-        XMMatrixRotationRollPitchYaw(Orientation.x, Orientation.y, Orientation.z) *
-        XMMatrixTranslation(pos.x, pos.y, pos.z);
-
-    Matrix4x4 mat = camera.GetViewMatrix();
-    XMMATRIX view = XMMATRIX(
-        XMVectorSet(mat.x.x, mat.x.y, mat.x.z, mat.x.w),
-        XMVectorSet(mat.y.x, mat.y.y, mat.y.z, mat.y.w),
-        XMVectorSet(mat.z.x, mat.z.y, mat.z.z, mat.z.w),
-        XMVectorSet(mat.w.x, mat.w.y, mat.w.z, mat.w.w)
-    );
-
-    Matrix4x4 projMat = camera.GetProjectionMatrix();
-    XMMATRIX proj = XMMATRIX(
-        XMVectorSet(projMat.x.x, projMat.x.y, projMat.x.z, projMat.x.w),
-        XMVectorSet(projMat.y.x, projMat.y.y, projMat.y.z, projMat.y.w),
-        XMVectorSet(projMat.z.x, projMat.z.y, projMat.z.z, projMat.z.w),
-        XMVectorSet(projMat.w.x, projMat.w.y, projMat.w.z, projMat.w.w)
-    );
-
-    XMMATRIX transform = XMMatrixTranspose(world * view * proj);
-
-    // VS constant buffer
-    ConstantBuffer cb = {};
-    cb.transfrom = transform;
-    cb.cubeColor = XMFLOAT3(
-        color.x / 255.0f,
-        color.y / 255.0f,
-        color.z / 255.0f
-    );
-
-    D3D11_MAPPED_SUBRESOURCE msrVS;
-    HRESULT hr = pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
-    if (FAILED(hr)) throw std::runtime_error("Failed to map VS constant buffer");
-    memcpy(msrVS.pData, &cb, sizeof(cb));
-    pContext->Unmap(pConstantBuffer.Get(), 0);
-
-    // PS Color buffer (b0)
-    PixelConstantBuffer pcb = {};
-    pcb.color = XMFLOAT4(color.x / 255.f, color.y / 255.f, color.z / 255.f, 1.0f);
-
-    D3D11_MAPPED_SUBRESOURCE msrColor;
-    hr = pContext->Map(pColorBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrColor);
-    if (FAILED(hr)) throw std::runtime_error("Failed to map color buffer");
-    memcpy(msrColor.pData, &pcb, sizeof(pcb));
-    pContext->Unmap(pColorBuffer.Get(), 0);
-
-    // Lighting
-    static float angle = 0.0f;
-    const float radius = 5.0f;
-    const float speed = 0.0001f;
-
-    angle += speed;
-    if (angle >= XM_2PI)
-        angle -= XM_2PI;
-
-    XMFLOAT3 lightpos;
-    lightpos.x = radius * cosf(angle);
-    lightpos.z = radius * sinf(angle);
-    lightpos.y = 2.0f;
-
-    LightingCB lcb = {};
-    lcb.lightpos = FLOAT3(lightpos.x, lightpos.y, lightpos.z);
-    lcb.Brightness = Brightness;
-    lcb.WorldPos = FLOAT3(pos.x, pos.y, pos.z);
-    lcb.lightRange = 10.0f;
-
-    D3D11_MAPPED_SUBRESOURCE msrLighting;
-    hr = pContext->Map(pLightingBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrLighting);
-    if (FAILED(hr)) throw std::runtime_error("Failed to map lighting buffer");
-    memcpy(msrLighting.pData, &lcb, sizeof(lcb));
-    pContext->Unmap(pLightingBuffer.Get(), 0);
-
-    // Pipeline
-    pContext->IASetInputLayout(pLayout.Get());
-    pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    pContext->VSSetShader(pVS.Get(), nullptr, 0);
-    pContext->PSSetShader(pPS.Get(), nullptr, 0);
-
-    pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
-    pContext->PSSetConstantBuffers(0, 1, pColorBuffer.GetAddressOf());
-    pContext->PSSetConstantBuffers(1, 1, pLightingBuffer.GetAddressOf());
-
-    mesh.Draw(pContext.Get());
+    
 }
 
 void Dx11Renderer::ClearSceneBuffer(float r, float g, float b)

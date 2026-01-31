@@ -5,6 +5,7 @@
 #include <string>
 #include "Camera.h"
 #include <wrl/client.h>
+#include <Instance.h>
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -39,7 +40,7 @@ public:
 
     void EndFrame();
 
-    void DrawAFrame(float deltatime, );
+    void DrawAFrame(float deltatime, std::vector<std::unique_ptr<Instance>>& Drawables);
 
     void DrawMesh(float deltaTime, Mesh& mesh, FLOAT3 Orientation, FLOAT3& pos, FLOAT3& size, INT3 color, FLOAT3& Velocity, bool Anchored, float Roughness, float Brightness);
 

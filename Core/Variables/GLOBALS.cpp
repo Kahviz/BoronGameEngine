@@ -12,7 +12,11 @@ extern int viewport_height = 200;
 
 bool InEditor = true;
 bool vSync = true;
-bool Running = false;
+bool Running = true;
+
+bool UsesDx11 = true;
+bool UsesVulkan = false;
+
 float FOV = 100.0f;
 
 int Index = 0;

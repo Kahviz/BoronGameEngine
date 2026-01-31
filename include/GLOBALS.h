@@ -18,4 +18,6 @@ extern bool InEditor;
 extern int Index;
 extern bool vSync;
 extern bool Running;
+extern bool UsesDx11;
+extern bool UsesVulkan;
 extern float FOV;
