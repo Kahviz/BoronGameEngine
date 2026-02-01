@@ -146,7 +146,7 @@ bool CopyDirectoryRecursive(const fs::path& sourceDir, const fs::path& targetDir
 void MakeFiles::MakeAPPDATAFolders() {
 #ifdef INEDITOR == 1
     fs::path currentDir = fs::current_path();
-    fs::path parentPath = currentDir.parent_path();
+    fs::path parentPath = currentDir.parent_path().parent_path().parent_path();
     fs::path AssetTemplateFolder = parentPath / "UntilitedGameEngine";
 
     std::cout << "\n=== MAKE APPDATA FOLDERS ===\n";
@@ -208,7 +208,7 @@ void MakeFiles::MakeAPPDATAFolders() {
             std::cerr << "Error reading directory: " << e.what() << "\n";
         }
 
-        std::cout << "\nAttempting to copy files recursively..\n";
+        std::cout << "\nAttempting to copy files recursively...\n";
         bool success = CopyDirectoryRecursive(AssetTemplateFolder, appDataTarget);
 
         if (success) {
