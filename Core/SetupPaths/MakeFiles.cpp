@@ -152,28 +152,6 @@ void MakeFiles::MakeAPPDATAFolders() {
     std::cout << "\n=== MAKE APPDATA FOLDERS ===\n";
 
     // Luo oma alihakemisto AppDataan
-#ifdef _WIN32
-    char* appDataPath = nullptr;
-    size_t sz = 0;
-    fs::path appDataTarget;
-    if (_dupenv_s(&appDataPath, &sz, "APPDATA") == 0 && appDataPath != nullptr) {
-        appDataTarget = fs::path(appDataPath) / "UntilitedGameEngine";
-        free(appDataPath);
-        std::cout << "APPDATA path found: " << appDataTarget << "\n";
-    }
-    else {
-        std::cerr << "Failed to get APPDATA path\n";
-        return;
-    }
-#else
-    const char* homeDir = getenv("HOME");
-    if (!homeDir) {
-        std::cerr << "Failed to get HOME directory\n";
-        return;
-    }
-    fs::path appDataTarget = fs::path(homeDir) / ".config" / "UntilitedGameEngine";
-    std::cout << "HOME directory found: " << appDataTarget << "\n";
-#endif
 
     std::cout << "DEBUG INFO:\n";
     std::cout << "currentDir: " << currentDir << "\n";
