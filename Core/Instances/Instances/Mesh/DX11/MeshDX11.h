@@ -15,10 +15,11 @@ public:
     const std::vector<Vertex>& GetVertices() const {
         return verts;
     }
+    std::vector<Vertex> verts;
+    std::vector<uint32_t> indices;
 private:
     ID3D11Buffer* vb = nullptr;
     ID3D11Buffer* ib = nullptr;
     UINT indexCount = 0;
-    std::vector<Vertex> verts;
-    std::vector<uint32_t> indices;
+
 };

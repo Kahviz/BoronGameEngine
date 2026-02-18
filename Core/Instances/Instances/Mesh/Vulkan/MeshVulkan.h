@@ -21,6 +21,8 @@ public:
     const std::vector<Vertex>& GetVertices() const {
         return verts;
     }
+    std::vector<Vertex> verts;
+    std::vector<uint32_t> indices;
 private:
     VkBuffer vertexBuffer = VK_NULL_HANDLE;
     VkDeviceMemory vertexMemory = VK_NULL_HANDLE;
@@ -30,6 +32,5 @@ private:
 
     uint32_t indexCount = 0;
 
-    std::vector<Vertex> verts;
-    std::vector<uint32_t> indices;
+
 };

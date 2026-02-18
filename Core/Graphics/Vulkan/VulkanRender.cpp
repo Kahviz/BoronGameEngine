@@ -1005,8 +1005,55 @@ bool VulkanRender::RenderAMesh(
     int Index
 )
 {
-    updateUniformBuffer(Index, size, Orientation, pos,color);
+    if (drawable == nullptr) {
+        return false;
+    }
+
+    if (!drawable->OBJmesh.GetVertices().empty() && vertexBufferMemory != VK_NULL_HANDLE) {
+        VkDeviceSize meshVertexBytes = static_cast<VkDeviceSize>(drawable->OBJmesh.GetVertices().size()) *
+                                       static_cast<VkDeviceSize>(sizeof(drawable->OBJmesh.GetVertices()[0]));
+
+        VkDeviceSize allocatedVertexBytes = 0;
+        if (!vertices.empty()) {
+            allocatedVertexBytes = static_cast<VkDeviceSize>(vertices.size()) *
+                                   static_cast<VkDeviceSize>(sizeof(vertices[0]));
+        }
+
+        VkDeviceSize copyVertexBytes = meshVertexBytes;
+        if (allocatedVertexBytes > 0 && copyVertexBytes > allocatedVertexBytes) {
+            copyVertexBytes = allocatedVertexBytes;
+        }
+
+        void* vertexDst = nullptr;
+        vkMapMemory(device, vertexBufferMemory, 0, copyVertexBytes, 0, &vertexDst);
+        memcpy(vertexDst, drawable->OBJmesh.GetVertices().data(), static_cast<size_t>(copyVertexBytes));
+        vkUnmapMemory(device, vertexBufferMemory);
+    }
+
+    if (!drawable->OBJmesh.GetIndices().empty() && indexBufferMemory != VK_NULL_HANDLE) {
+        VkDeviceSize meshIndexBytes = static_cast<VkDeviceSize>(drawable->OBJmesh.GetIndices().size()) *
+                                      static_cast<VkDeviceSize>(sizeof(drawable->OBJmesh.GetIndices()[0]));
+
+        VkDeviceSize allocatedIndexBytes = 0;
+        if (!indices.empty()) {
+            allocatedIndexBytes = static_cast<VkDeviceSize>(indices.size()) *
+                                  static_cast<VkDeviceSize>(sizeof(indices[0]));
+        }
+
+        VkDeviceSize copyIndexBytes = meshIndexBytes;
+        if (allocatedIndexBytes > 0 && copyIndexBytes > allocatedIndexBytes) {
+            copyIndexBytes = allocatedIndexBytes;
+        }
+
+        void* indexDst = nullptr;
+        vkMapMemory(device, indexBufferMemory, 0, copyIndexBytes, 0, &indexDst);
+        memcpy(indexDst, drawable->OBJmesh.GetIndices().data(), static_cast<size_t>(copyIndexBytes));
+        vkUnmapMemory(device, indexBufferMemory);
+    }
+
+    updateUniformBuffer(Index, size, Orientation, pos, color);
     drawObjectIndices.push_back(Index);
+
     return true;
 }
 

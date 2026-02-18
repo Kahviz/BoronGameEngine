@@ -63,12 +63,11 @@ public:
             return DM.GetVertices();
         #endif
     }
-private:
-#if VULKAN == 1
-    MeshVK VM;
-#endif
+    #if VULKAN == 1
+        MeshVK VM;
+    #endif
 
-#if DIRECTX11 == 1
-    MeshDX11 DM;
-#endif
+    #if DIRECTX11 == 1
+        MeshDX11 DM;
+    #endif
 };

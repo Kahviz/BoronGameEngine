@@ -119,6 +119,8 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
 #if DIRECTX11 == 1
     obj->OBJmesh.Load(assets + Path, window.GetGraphics().GetDevice());
 #endif
+    obj.get()->OBJmesh.VM.verts = {};
+    obj.get()->OBJmesh.VM.indices = {};
 
     obj->Selected = Selec;
 
