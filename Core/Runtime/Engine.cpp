@@ -119,8 +119,42 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
 #if DIRECTX11 == 1
     obj->OBJmesh.Load(assets + Path, window.GetGraphics().GetDevice());
 #endif
-    obj.get()->OBJmesh.VM.verts = {};
-    obj.get()->OBJmesh.VM.indices = {};
+    std::vector<Vertex> vertices = {
+        {1.0f, {-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // punainen
+        {1.0f, {0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // vihreä
+        {1.0f, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}}, // sininen
+        {1.0f, {-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // keltainen
+
+        {1.0f, {-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+        {1.0f, {0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+        {1.0f, {0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+        {1.0f, {-0.5f, 0.5f, -0.5f}, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, -1.0f}}
+    };
+
+
+
+    const std::vector<uint32_t> indices = {
+        0, 1, 2,
+        2, 3, 0,
+
+        5, 4, 7,
+        7, 6, 5,
+
+        3, 2, 6,
+        6, 7, 3,
+
+        4, 5, 1,
+        1, 0, 4,
+
+        1, 5, 6,
+        6, 2, 1,
+
+        4, 0, 3,
+        3, 7, 4
+    };
+
+    obj.get()->OBJmesh.VM.verts = vertices;
+    obj.get()->OBJmesh.VM.indices = indices;
 
     obj->Selected = Selec;
 

@@ -11,41 +11,7 @@
 #include <GLFW/glfw3.h>
 #include "Vulkan/VulkanHelpers.h"
 #include <Instance.h>
-
-struct VVertex {
-    Vector3 pos;
-    Vector3 color;
-    
-    static VkVertexInputBindingDescription getBindingDescription() {
-        VkVertexInputBindingDescription bindingDescription{};
-        bindingDescription.binding = 0;
-        bindingDescription.stride = sizeof(VVertex);
-        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        return bindingDescription;
-    }
-
-    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
-
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[0].offset = offsetof(VVertex, pos);
-
-        attributeDescriptions[1].binding = 0;
-        attributeDescriptions[1].location = 1;
-        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[1].offset = offsetof(VVertex, color);
-
-        return attributeDescriptions;
-    }
-
-    VVertex& operator=(const VVertex& v2) {
-        return *this;
-    }
-};
-
-
+#include "Instances/Vertex.h"
 
 class VulkanRender {
 public:
@@ -80,7 +46,7 @@ private:
     uint32_t imageIndex;
     int windowWidth = 800;
     int windowHeight = 800;
-    int graphicsFamilyIndex = -1;
+    size_t graphicsFamilyIndex = -1;
     size_t dynamicAlignment;
 
     std::vector<std::unique_ptr<Instance>> DrawablesCopy;
@@ -123,23 +89,21 @@ private:
 
     ScoreCounter m_SC;
 
-    std::vector<VVertex> vertices = {
-        // Front face
-        {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // punainen
-        {{ 0.5f, -0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}}, // vihreä
-        {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}}, // sininen
-        {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}}, // keltainen
+    std::vector<Vertex> vertices = {
+        {1.0f, {-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // punainen
+        {1.0f, {0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // vihreä
+        {1.0f, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}}, // sininen
+        {1.0f, {-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // keltainen
 
-        // Back face
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}}, // magenta
-        {{ 0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}}, // syaani
-        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}, // valkoinen
-        {{-0.5f,  0.5f, -0.5f}, {0.5f, 0.5f, 0.5f}}  // harmaa
+        {1.0f, {-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+        {1.0f, {0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+        {1.0f, {0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+        {1.0f, {-0.5f, 0.5f, -0.5f}, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, -1.0f}}
     };
 
 
 
-    const std::vector<uint16_t> indices = {
+    const std::vector<uint32_t> indices = {
         0, 1, 2,
         2, 3, 0,
 
@@ -158,5 +122,4 @@ private:
         4, 0, 3,
         3, 7, 4
     };
-
 };

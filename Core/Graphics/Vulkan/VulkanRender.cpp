@@ -274,7 +274,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS) {
-        MakeAError("Failed to create VVertex buffer!");
+        MakeAError("Failed to create Vertex buffer!");
         return false;
     }
 
@@ -327,8 +327,8 @@ bool VulkanRender::Init(GLFWwindow* window)
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-    auto bindingDescription = VVertex::getBindingDescription();
-    auto attributeDescriptions = VVertex::getAttributeDescriptions();
+    auto bindingDescription = Vertex::getBindingDescription();
+    auto attributeDescriptions = Vertex::getAttributeDescriptions();
 
     vertexInputInfo.vertexBindingDescriptionCount = 1;
     vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;

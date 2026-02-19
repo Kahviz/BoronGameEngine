@@ -83,28 +83,32 @@ bool siirraKaikki(const fs::path& lahdeHakemisto,
 
 bool CopyDirectoryRecursive(const fs::path& sourceDir, const fs::path& targetDir) {
     try {
-        std::cout << "\n--- CopyDirectoryRecursive ---\n";
-        std::cout << "Source: " << sourceDir << "\n";
-        std::cout << "Target: " << targetDir << "\n";
+        #ifdef _DEBUG
+            std::cout << "\n--- CopyDirectoryRecursive ---\n";
+                    std::cout << "Source: " << sourceDir << "\n";
+                    std::cout << "Target: " << targetDir << "\n";
+        #endif  
+        
 
-        // Tarkista lähde
         if (!fs::exists(sourceDir)) {
             std::cerr << "Source directory doesn't exist: " << sourceDir << "\n";
             return false;
         }
+
         if (!fs::is_directory(sourceDir)) {
             std::cerr << "Source is not a directory: " << sourceDir << "\n";
             return false;
         }
 
-        // Luo kohdekansio jos ei ole olemassa
-        std::cout << "Creating target directory: " << targetDir << "\n";
+        #ifdef _DEBUG
+                std::cout << "Creating target directory: " << targetDir << "\n";
+        #endif
+
         fs::create_directories(targetDir);
 
         int totalFiles = 0;
         int totalDirs = 0;
 
-        // Käy läpi kaikki tiedostot ja alihakemistot
         for (const auto& entry : fs::recursive_directory_iterator(sourceDir)) {
             try {
                 const auto& sourcePath = entry.path();
@@ -112,28 +116,34 @@ bool CopyDirectoryRecursive(const fs::path& sourceDir, const fs::path& targetDir
                 auto targetPath = targetDir / relativePath;
 
                 if (entry.is_directory()) {
-                    // Luo alihakemisto
                     fs::create_directories(targetPath);
                     totalDirs++;
-                    std::cout << "Created directory: " << targetPath << "\n";
+                    #ifdef _DEBUG
+                        std::cout << "Created directory: " << targetPath << "\n";
+                    #endif
                 }
                 else if (entry.is_regular_file()) {
-                    // Kopioi tiedosto
                     fs::copy_file(sourcePath, targetPath, fs::copy_options::overwrite_existing);
                     totalFiles++;
-                    std::cout << "Copied file: " << sourcePath.filename()
-                        << " -> " << targetPath << "\n";
+
+                    #ifdef _DEBUG
+                        std::cout << "Copied file: " << sourcePath.filename()
+                            << " -> " << targetPath << "\n";
+                    #endif
                 }
             }
+
             catch (const fs::filesystem_error& e) {
                 std::cerr << "Error processing " << entry.path() << ": " << e.what() << "\n";
-                // Jatka muiden tiedostojen käsittelyä
             }
         }
 
-        std::cout << "--- Copy completed ---\n";
-        std::cout << "Total directories created: " << totalDirs << "\n";
-        std::cout << "Total files copied: " << totalFiles << "\n";
+        #ifdef _DEBUG
+            std::cout << "--- Copy completed ---\n";
+            std::cout << "Total directories created: " << totalDirs << "\n";
+            std::cout << "Total files copied: " << totalFiles << "\n";
+        #endif
+        
 
         return (totalFiles > 0 || totalDirs > 0);
     }

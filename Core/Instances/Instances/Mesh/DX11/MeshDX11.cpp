@@ -39,7 +39,7 @@ void MeshDX11::Load(const std::string& file, ID3D11Device* device)
             m->mNormals[i].z
         };
 
-        verts[i].color = { 1, 1, 1, 1 };
+        verts[i].color = { 1, 1, 1 };
         verts[i].brightness = 1.0f;
     }
 
