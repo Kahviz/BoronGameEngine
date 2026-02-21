@@ -1,6 +1,11 @@
 #pragma once
 
 #include "Vulkan/vulkan.h"
+#include <filesystem>
+#include <fstream>      // Add this for ifstream
+#include <vector>       // Add this for vector
+#include <string>       // Add this for string
+#include <stdexcept>    // Add this for exceptions
 
 struct UniformBufferObject {
     Matrix4x4 model;
@@ -122,15 +127,14 @@ inline void CopyBuffer(
     VkBuffer dst,
     VkDeviceSize size,
     VkCommandPool cmdp,
-    VkCommandBuffer cmdBuf,
     VkDevice device,
     VkQueue gQ
 ) {
-    VkCommandBuffer cmd = BeginSingleTimeCommands(cmdp,device);
+    VkCommandBuffer cmd = BeginSingleTimeCommands(cmdp, device);
 
     VkBufferCopy copy{};
     copy.size = size;
-    vkCmdCopyBuffer(cmdBuf, src, dst, 1, & copy);
+    vkCmdCopyBuffer(cmd, src, dst, 1, &copy);
 
-    EndSingleTimeCommands(cmdBuf, gQ,device, cmdp);
+    EndSingleTimeCommands(cmd, gQ, device, cmdp);
 }

@@ -9,14 +9,12 @@
 #include <wrl/client.h>
 #include "GLFW/glfw3.h"
 
-// LISÄÄ FORWARD DECLARATION:
-class Window;  // <-- TÄRKEÄÄ!
+class Window;
 
 #include "Dx11/Dx11Renderer.h"
 #include "Vulkan/VulkanRender.h"
 #include "ErrorHandling/ErrorMessage.h"
 
-// LISÄÄ PUUTTUVAT INCLUDET:
 #include <vector>
 #include "Instance.h"
 
@@ -24,13 +22,11 @@ class Graphics
 {
 public:
     Graphics() = default;
-    ~Graphics() = default;  // Vain yksi destruktori!
+    ~Graphics() = default;
 
-    // Poista kopiointi
     Graphics(const Graphics&) = delete;
     Graphics& operator=(const Graphics&) = delete;
 
-    // Muut metodit
     bool InitGraphics(GLFWwindow* window);
     void SetRenderTargetToScene();
     void SetRenderTargetToBackBuffer();
@@ -47,7 +43,6 @@ public:
     void ReSizeWindow(int width, int height, Window* wnd);
 
     void CreateSceneResources(int width, int height);
-
 #if DIRECTX11 == 1
     ID3D11DepthStencilView* GetDepthStencil();
 

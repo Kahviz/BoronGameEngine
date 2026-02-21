@@ -47,6 +47,7 @@ add_executable(UntitledGameEngine
     Core/ErrorHandling/Expectation/Expection.cpp
     Core/Graphics/Graphics.cpp
     Core/Instances/Instances/Mesh/DX11/MeshDX11.cpp
+    Core/Instances/Instances/Mesh/Vulkan/MeshVulkan.cpp
     Core/Gui/ImGuiManager.cpp
     Core/Gui/MakeGui.cpp
     Core/Misc/Colission/Colission.cpp

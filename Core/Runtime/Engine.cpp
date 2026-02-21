@@ -119,42 +119,11 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
 #if DIRECTX11 == 1
     obj->OBJmesh.Load(assets + Path, window.GetGraphics().GetDevice());
 #endif
-    std::vector<Vertex> vertices = {
-        {1.0f, {-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // punainen
-        {1.0f, {0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // vihreä
-        {1.0f, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}}, // sininen
-        {1.0f, {-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // keltainen
 
-        {1.0f, {-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-        {1.0f, {0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-        {1.0f, {0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-        {1.0f, {-0.5f, 0.5f, -0.5f}, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, -1.0f}}
-    };
-
-
-
-    const std::vector<uint32_t> indices = {
-        0, 1, 2,
-        2, 3, 0,
-
-        5, 4, 7,
-        7, 6, 5,
-
-        3, 2, 6,
-        6, 7, 3,
-
-        4, 5, 1,
-        1, 0, 4,
-
-        1, 5, 6,
-        6, 2, 1,
-
-        4, 0, 3,
-        3, 7, 4
-    };
-
-    obj.get()->OBJmesh.VM.verts = vertices;
-    obj.get()->OBJmesh.VM.indices = indices;
+#if VULKAN == 1
+    obj.get()->OBJmesh.VM.Load(assets + Path, window.GetGraphics().GetDevice(), window.GetGraphics().GetPhysicalDevice(), window.GetGraphics().VR.get()->commandPool, window.GetGraphics().VR.get()->graphicsQueue);
+#endif
+    //Settaa vert ja ind
 
     obj->Selected = Selec;
 
@@ -219,14 +188,14 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     if (!CubeB) {
         window.GetGraphics().ReSizeWindow(screen_width, screen_height, wnd);
-        AddAMesh("\\Cube.obj", "TestCube", { 1,1,1 }, { 1,1,1 }, false);
+        AddAMesh("\\Cube.obj", "TestCube", { 0,0,0 }, { 0.5,0.5,0.5 }, false);
 
         CubeB = true;
     }
 
     bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
     if (ctrlPressed) {
-        AddAMesh("\\Cube.obj", "TestCube", { 1,1,1 }, { 1,1,1 }, false);
+        AddAMesh("\\Cube.obj", "TestCube", { 0,0,0 }, { 0.5,0.5,0.5 }, false);
     }
 
 #if INEDITOR == 1

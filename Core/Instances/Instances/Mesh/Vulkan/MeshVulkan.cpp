@@ -1,10 +1,10 @@
 #include "MeshVulkan.h"
 
-#include "MeshVK.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <stdexcept>
+#include "Vulkan/VulkanHelpers.h"
 
 void MeshVK::Load(
     const std::string& file,
@@ -48,7 +48,7 @@ void MeshVK::Load(
             m->mNormals[i].z
         };
 
-        verts[i].color = { 1, 1, 1, 1 };
+        verts[i].color = { 1, 1, 1 };
         verts[i].brightness = 1.0f;
     }
 
@@ -76,20 +76,23 @@ void MeshVK::Load(
     VkBuffer vStaging, iStaging;
     VkDeviceMemory vStagingMem, iStagingMem;
 
-    createBuffer(
-        physicalDevice, device,
-        vSize,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        vStaging, vStagingMem
-    );
-
-    createBuffer(
-        physicalDevice, device,
+    CreateBuffer(
         iSize,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        iStaging, iStagingMem
+        vStaging,
+        vStagingMem,
+        device, physicalDevice
+    );
+
+    CreateBuffer(
+        iSize,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        iStaging,
+        iStagingMem,
+        device,
+        physicalDevice
     );
 
     void* data;
@@ -101,25 +104,43 @@ void MeshVK::Load(
     memcpy(data, indices.data(), (size_t)iSize);
     vkUnmapMemory(device, iStagingMem);
 
-    // -------- GPU buffers --------
-    createBuffer(
-        physicalDevice, device,
+    CreateBuffer(
         vSize,
         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        vertexBuffer, vertexMemory
+        vertexBuffer,
+        vertexMemory,
+        device,
+        physicalDevice
     );
 
-    createBuffer(
-        physicalDevice, device,
+    CreateBuffer(
         iSize,
         VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        indexBuffer, indexMemory
+        indexBuffer,
+        indexMemory,
+        device,
+        physicalDevice
     );
 
-    copyBuffer(device, commandPool, graphicsQueue, vStaging, vertexBuffer, vSize);
-    copyBuffer(device, commandPool, graphicsQueue, iStaging, indexBuffer, iSize);
+    CopyBuffer(
+        vStaging,        // src
+        vertexBuffer,    // dst
+        vSize,           // size
+        commandPool,     // cmdp
+        device,          // device
+        graphicsQueue    // gQ
+    );
+    CopyBuffer(
+        iStaging,
+        indexBuffer,
+        iSize,
+        commandPool,
+        device,
+        graphicsQueue
+    );
+
 
     vkDestroyBuffer(device, vStaging, nullptr);
     vkFreeMemory(device, vStagingMem, nullptr);

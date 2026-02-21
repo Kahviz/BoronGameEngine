@@ -629,7 +629,7 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex)
     VkBuffer vb[] = { vertexBuffer };
     VkDeviceSize off[] = { 0 };
     vkCmdBindVertexBuffers(cmd, 0, 1, vb, off);
-    vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
     for (uint32_t obj : drawObjectIndices)
     {

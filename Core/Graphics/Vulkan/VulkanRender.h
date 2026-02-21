@@ -40,6 +40,13 @@ public:
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkDevice device = VK_NULL_HANDLE;
 private:
+    struct DrawCommand {
+        uint32_t objectIndex;
+        const MeshVK* mesh;
+    };
+
+    std::vector<DrawCommand> drawObjects;
+
     const uint32_t MAX_OBJECTS = 100;
     size_t maxInstances = 100;
 
