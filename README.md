@@ -20,3 +20,8 @@
 1. Vulkan SDK
 2. Windows
 3. Vs Commynity 2026
+
+# Contact me on Discord
+My Discord is kahviz_
+# How can I help
+If you want to help you can make this work on linux
