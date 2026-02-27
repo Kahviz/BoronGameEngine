@@ -6,6 +6,7 @@
 #include <wrl/client.h>
 #include <Instance.h>
 #include <Instances/Instances/Mesh/Mesh.h>
+#include "GLOBALS.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -56,6 +57,7 @@ public:
     ID3D11DepthStencilView* GetDepthStencil() { return pDepthStencilView.Get(); }
 private:
     // Alustusfunktiot
+    ComPtr<ID3D11DepthStencilState> pDepthStencilState;
     void CreateDeviceAndSwapChain(int width, int height, HWND hWnd);
     void CreateViewport(int width, int height);
     void CreateDepthStencil(int width, int height);
@@ -66,7 +68,6 @@ private:
     Camera camera;
     const float Gravity = 9.81f;
     float Fov = DirectX::XMConvertToRadians(90.0f);
-    bool vSync = false;
 
     // COM smart pointerit
     ComPtr<ID3D11Device> pDevice;

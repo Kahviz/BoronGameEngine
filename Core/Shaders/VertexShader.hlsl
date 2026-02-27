@@ -1,41 +1,35 @@
 cbuffer CBuf : register(b0)
 {
-    matrix transfrom; // WorldViewProjection-matriisi
-    float3 cubeColor; // Objektin väri
-};
-
-cbuffer LightingCB : register(b1)
-{
-    float3 lightpos; // Valon sijainti maailmakoordinaatistossa
-    float Brightness;
-    float3 WorldPos;
-    float lightRange;
+    matrix transform;
+    float3 cubeColor;
 };
 
 struct VS_INPUT
 {
-    float3 pos : POSITION;
-    float3 normal : NORMAL;
+    float3 pos : POSITION; // 12 tavua
+    float3 normal : NORMAL; // 12 tavua
+    float3 color : COLOR; // 12 tavua
+    float brightness : BRIGHTNESS; // 4 tavua
 };
 
 struct VS_OUTPUT
 {
-    float4 pos : SV_POSITION; // Clip-space positio
-    float3 worldPos : TEXCOORD0; // Maailmakoordinaatit
-    float3 normal : TEXCOORD1; // Normaali
-    float3 color : COLOR0; // Base väri
+    float4 pos : SV_POSITION;
+    float3 worldPos : TEXCOORD0;
+    float3 normal : TEXCOORD1;
+    float3 color : COLOR0;
+    float brightness : TEXCOORD2;
 };
 
 VS_OUTPUT main(VS_INPUT input)
 {
     VS_OUTPUT output;
 
-    output.pos = mul(float4(input.pos, 1.0f), transfrom);
-
+    output.pos = mul(float4(input.pos, 1.0f), transform);
     output.worldPos = input.pos;
     output.normal = normalize(input.normal);
-
-    output.color = cubeColor;
+    output.color = input.color; // Käytä meshin omaa väriä
+    output.brightness = input.brightness;
 
     return output;
 }

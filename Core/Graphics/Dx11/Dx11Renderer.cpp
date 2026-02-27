@@ -52,7 +52,8 @@ void Dx11Renderer::SetRenderTargetToScene() {
 }
 
 void Dx11Renderer::SetRenderTargetToBackBuffer() {
-    pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), nullptr);
+    // TÄRKEÄ: Älä aseta  view'tä nulliksi!
+    pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
 }
 
 void Dx11Renderer::CreateDeviceAndSwapChain(int width, int height, HWND hWnd)
@@ -162,6 +163,16 @@ void Dx11Renderer::CreateDepthStencil(int width, int height)
 
     hr = pDevice->CreateDepthStencilView(pDepthStencil.Get(), &dsvDesc, &pDepthStencilView);
     if (FAILED(hr)) throw std::runtime_error("Failed to create depth stencil view");
+
+    D3D11_DEPTH_STENCIL_DESC dsDesc = {};
+    dsDesc.DepthEnable = TRUE;
+    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+    hr = pDevice->CreateDepthStencilState(&dsDesc, &pDepthStencilState);
+    if (FAILED(hr)) throw std::runtime_error("Failed to create depth stencil state");
+
+    pContext->OMSetDepthStencilState(pDepthStencilState.Get(), 1);
 }
 
 void Dx11Renderer::CreateRenderTarget()
@@ -282,8 +293,17 @@ void Dx11Renderer::CompileShaders()
     if (FAILED(hr)) throw std::runtime_error("Failed to create pixel shader");
 
     D3D11_INPUT_ELEMENT_DESC ied[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        // BRIGHTNESS (float) offset 0
+        {"BRIGHTNESS", 0, DXGI_FORMAT_R32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+
+        // POSITION (float3) offset 4
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 4, D3D11_INPUT_PER_VERTEX_DATA, 0},
+
+        // COLOR (float3) offset 16  <-- TÄMÄ LUKEE NORMALS
+        {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
+
+        // NORMAL (float3) offset 28 <-- TÄMÄ LUKEE COLORIN
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
     hr = pDevice->CreateInputLayout(
@@ -293,6 +313,7 @@ void Dx11Renderer::CompileShaders()
         vsBlob->GetBufferSize(),
         &pLayout
     );
+
     if (FAILED(hr)) throw std::runtime_error("Failed to create input layout");
 }
 
@@ -387,7 +408,7 @@ void Dx11Renderer::EndFrame()
 {
     if (!pSwap) return;
 
-    HRESULT hr = pSwap->Present(vSync ? 1 : 0, 0);
+    HRESULT hr = pSwap->Present(vSync, 0);
 
     if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
         throw std::runtime_error("DirectX device lost");
@@ -549,7 +570,7 @@ void Dx11Renderer::DrawMesh(
     float Brightness
 )
 {
-    
+
 }
 
 void Dx11Renderer::ClearSceneBuffer(float r, float g, float b)

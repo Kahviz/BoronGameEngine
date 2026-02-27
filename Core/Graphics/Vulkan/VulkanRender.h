@@ -14,6 +14,7 @@
 #include "Instances/Vertex.h"
 #include <unordered_map>
 #include "Mesh/Vulkan/MeshVulkan.h"
+#include "GLOBALS.h"
 
 class VulkanRender {
 public:
@@ -41,12 +42,25 @@ public:
     VkQueue graphicsQueue;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkDevice device = VK_NULL_HANDLE;
+
+    VkInstance& GetVulkanInstance() { return instance; };
+    VkDescriptorPool& GetImGuiPool() { return imguiPool; };
+    size_t GetGraphicsFamilyIndex() { return graphicsFamilyIndex; };
+    std::vector<VkImageView> GetSwapChainImageViews() { return swapchainImageViews; };
+    VkRenderPass GetRenderPass() { return renderPass; };  
+    std::vector<VkCommandBuffer> commandBuffers;
+    VkPipeline graphicsPipeline;
+
+    VkCommandBuffer GetCurrentFrameCommandBuffer() {
+        return commandBuffers[currentFrame];
+    }
 private:
     struct DrawCommand {
         const MeshVK* mesh;
         uint32_t objectIndex;
     };
 
+    int currentFrame = 0;
     std::vector<DrawCommand> drawCommands;
     std::unordered_map<const Mesh*, std::unique_ptr<MeshVK>> meshCache;
 
@@ -64,12 +78,12 @@ private:
     std::vector<VkImage> swapchainImages;
     std::vector<VkFramebuffer> swapchainFramebuffers;
     std::vector<VkImageView> swapchainImageViews;
-    std::vector<VkCommandBuffer> commandBuffers;
 
     VkBuffer uniformBuffer;
     VkDeviceMemory uniformBufferMemory;
     VkDescriptorPool descriptorPool;
     VkDescriptorSet descriptorSet;
+    VkDescriptorPool imguiPool;
 
     void* uniformBufferMapped;
 
@@ -89,7 +103,6 @@ private:
     VkExtent2D swapchainExtent;
     VkFormat swapchainImageFormat;
     VkPipelineLayout pipelineLayout;
-    VkPipeline graphicsPipeline;
 
     VkBuffer vertexBuffer = VK_NULL_HANDLE;
     VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;

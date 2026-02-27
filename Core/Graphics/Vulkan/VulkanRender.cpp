@@ -10,6 +10,7 @@
 #include <string>
 #include "ErrorHandling/ErrorMessage.h"
 #include "Mesh/Vulkan/MeshVulkan.h"
+#include <imgui.h>
 
 bool VulkanRender::Init(GLFWwindow* window)
 {
@@ -164,12 +165,13 @@ bool VulkanRender::Init(GLFWwindow* window)
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data());
 
-    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
-    for (const auto& mode : presentModes) {
-        if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
-            presentMode = mode;
-            break;
-        }
+    VkPresentModeKHR presentMode;
+
+    if (vSync) {
+        presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    }
+    else {
+        presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
     }
 
     VkExtent2D extent;
@@ -549,6 +551,33 @@ bool VulkanRender::Init(GLFWwindow* window)
     }
 
     dynamicAlignment = alignedUBOSize;
+
+
+    VkDescriptorPoolSize pool_sizes[] =
+    {
+        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+    };
+
+    VkDescriptorPoolCreateInfo pool_info = {};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
+    pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+    pool_info.pPoolSizes = pool_sizes;
+
+    if (vkCreateDescriptorPool(device, &pool_info, nullptr, &imguiPool) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create ImGui descriptor pool");
+    }
 
     createUniformBuffers();
     createDescriptorPool();
@@ -1008,6 +1037,8 @@ bool VulkanRender::RenderAMesh(
     int Index
 )
 {
+    
+#if VULKAN == 1
     if (drawable == nullptr) {
         return false;
     }
@@ -1022,10 +1053,14 @@ bool VulkanRender::RenderAMesh(
     drawCommands.push_back(cmd);
 
     return true;
+#else
+    return false;
+#endif // VULKAN == 1
 }
 
 void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables)
 {
+    currentFrame += 1;
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
     vkResetFences(device, 1, &inFlightFence);
 

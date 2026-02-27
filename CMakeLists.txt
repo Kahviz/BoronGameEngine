@@ -33,7 +33,8 @@ set(IMGUI_SOURCES
     Core/Libs/ImGui/imgui_tables.cpp
     Core/Libs/ImGui/imgui_widgets.cpp
     Core/Libs/ImGui/backends/imgui_impl_glfw.cpp
-    Core/Libs/ImGui/backends/imgui_impl_dx11.cpp
+    Core/Libs/ImGui/backends/imgui_impl_dx11.cpp 
+    Core/Libs/ImGui/backends/imgui_impl_vulkan.cpp
 )
 
 #Definitions

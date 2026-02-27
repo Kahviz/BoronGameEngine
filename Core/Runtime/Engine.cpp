@@ -13,8 +13,7 @@
 
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_dx11.h"
-#include <imgui_impl_vulkan.h>
-
+#include "backends/imgui_impl_vulkan.h"
 
 Engine::Engine()
     : window(1280, 800, "UntilitedGameEngine")
@@ -45,14 +44,33 @@ Engine::Engine()
                 ImGuiInited = true;
             }
         #else
-            /*
-                * if (!ImGui_ImplVulkan_Init()) {
-                    throw std::runtime_error("Failed to initialize ImGui Vulkan backend");
+            VulkanRender* vr = window.GetGraphics().VR.get();
+
+            ImGui_ImplVulkan_InitInfo init_info = {};
+            init_info.Instance = vr->GetVulkanInstance();
+            init_info.PhysicalDevice = vr->physicalDevice;
+            init_info.Device = vr->device;
+            init_info.QueueFamily = vr->GetGraphicsFamilyIndex();
+            init_info.Queue = vr->graphicsQueue;
+            init_info.PipelineCache = VK_NULL_HANDLE;
+            init_info.DescriptorPool = vr->GetImGuiPool();
+            init_info.MinImageCount = 2;
+            init_info.ImageCount = vr->GetSwapChainImageViews().size();
+
+            init_info.Allocator = nullptr;
+            init_info.CheckVkResultFn = [](VkResult err) {
+                if (err != VK_SUCCESS) {
+                    std::cerr << "Vulkan Error: " << err << std::endl;
                 }
-                else {
-                    ImGuiInited = true;
-                }
-            */
+            };
+            VkRenderPass renderPass = vr->GetRenderPass();
+
+            if (!ImGui_ImplVulkan_Init(&init_info)) {
+                throw std::runtime_error("Failed to initialize ImGui Vulkan backend");
+            }
+            else {
+                ImGuiInited = true;
+            }
         #endif
 
         #ifdef _DEBUG
@@ -69,7 +87,11 @@ Engine::~Engine()
 {
     if (ImGuiInited) {
         #if DIRECTX11 == 1
-                ImGui_ImplDX11_Shutdown();
+            ImGui_ImplDX11_Shutdown();
+        #endif
+
+        #if VULKAN == 1
+            ImGui_ImplVulkan_Shutdown();
         #endif
 
         ImGui_ImplGlfw_Shutdown();
@@ -119,7 +141,13 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     obj->UniqueID = Index;
 
 #if DIRECTX11 == 1
-    obj->OBJmesh.Load(assets + Path, window.GetGraphics().GetDevice());
+    obj->OBJmesh.DM.Load(assets + Path, window.GetGraphics().GetDevice());
+
+    #ifdef _DEBUG
+        std::cout << "DX11 Mesh loaded: " << assets + Path << std::endl;
+        std::cout << "Vertices: " << obj->OBJmesh.GetVertices().size() << std::endl;
+        std::cout << "Indices: " << obj->OBJmesh.GetIndices().size() << std::endl;
+    #endif
 #endif
 
 #if VULKAN == 1
@@ -169,6 +197,7 @@ void ScreenResizerDetector(Window* wnd) {
         wnd->GetGraphics().ReSizeWindow(width, height, wnd);
         screen_width = width;
         screen_height = height;
+
         #ifdef _DEBUG
             std::cout << "Screen resized to: " << screen_width << "x" << screen_height << std::endl;
         #endif
@@ -184,27 +213,35 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     Graphics& graphics = wnd->GetGraphics();
 
+    #if VULKAN == 1
+       VulkanRender* vr = graphics.VR.get();
+    #endif
     ScreenResizerDetector(wnd);
 
-#if INEDITOR == 1
-    if (ImGuiInited) {
-#if DIRECTX11 == 1
-        ImGui_ImplDX11_NewFrame();
-#endif
+    #if INEDITOR == 1
+        if (ImGuiInited) {
+            #if DIRECTX11 == 1
+                ImGui_ImplDX11_NewFrame();
+            #endif
 
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-    }
-#else
-    graphics.SetRenderTargetToBackBuffer();
-#endif
+            #if VULKAN == 1
+                ImGui_ImplVulkan_NewFrame();
+            #endif
+
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+        }
+    #else
+        graphics.SetRenderTargetToBackBuffer();
+    #endif
+
     graphics.ClearBuffer(0.0f, 0.0f, 1.0f);
 
     static bool CubeB = false;
 
     if (!CubeB) {
         window.GetGraphics().ReSizeWindow(screen_width, screen_height, wnd);
-        AddAMesh("\\Cube.obj", "TestCube", { -1,0,0 }, { 0.5,0.5,0.5 }, false);
+        AddAMesh("\\Cube.obj", "TestCube", { 0,0,0 }, { 0.5,0.5,0.5 }, false);
 
         CubeB = true;
     }
@@ -243,27 +280,33 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         );
     }
 #endif
+    //Fps
+    int fps = static_cast<int>(1.0f / deltatime);
+    MakeASuccess("FPS: " + std::to_string(fps));
 
-    //Draw
+    //Draws
     for (auto& Drawableptr : Drawables) {
         auto Drawable = Drawableptr.get();
         if (Drawable->CanDraw()) {
-#if VULKAN == 1
-            wnd->GetGraphics().VR.get()->RenderAMesh(Drawable, Drawable->Orientation, Drawable->pos, Drawable->Size, Drawable->color, Drawable->Velocity, Drawable->Anchored, 1.0f, 1.0f, Drawable->UniqueID);
-#elif DIRECTX11
-            wnd->GetGraphics().DR.get()->DrawMesh(deltatime, Drawable->OBJmesh, Drawable->Orientation, Drawable->pos, Drawable->Size, Drawable->color, Drawable->Velocity, Drawable->Anchored, 1.0f, 1.0f);
-#endif
+            #if VULKAN == 1
+                 wnd->GetGraphics().VR.get()->RenderAMesh(Drawable, Drawable->Orientation, Drawable->pos, Drawable->Size, Drawable->color, Drawable->Velocity, Drawable->Anchored, 1.0f, 1.0f, Drawable->UniqueID);
+            #endif
         }
     }
+
     CameraControl camC;
     if (!ctrlPressed)
         camC.MakeCameraControls(*wnd, deltatime);
+
 #if INEDITOR == 1 
     if (ImGuiInited) {
         ImGui::Render();
-#if DIRECTX11 == 1
-        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-#endif
+        #if DIRECTX11 == 1
+            ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+        #endif
+        #if VULKAN == 1
+            //ImGui_ImplDX11_RenderDrawData tänne
+        #endif
     }
 #endif
 

@@ -39,7 +39,7 @@ bool Graphics::InitGraphics(GLFWwindow* window)
 
 void Graphics::SetRenderTargetToScene() {
     #if DIRECTX11 == 1
-
+        //DR.get()->SetRenderTargetToScene();
     #else
 
     #endif
@@ -47,7 +47,7 @@ void Graphics::SetRenderTargetToScene() {
 
 void Graphics::SetRenderTargetToBackBuffer() {
     #if DIRECTX11 == 1
-
+        DR.get()->SetRenderTargetToBackBuffer();
     #else
 
     #endif

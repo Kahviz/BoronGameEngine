@@ -27,20 +27,21 @@ void MeshDX11::Load(const std::string& file, ID3D11Device* device)
     verts.resize(m->mNumVertices);
     for (UINT i = 0; i < m->mNumVertices; ++i)
     {
+        verts[i].brightness = 1.0f;  // brightness ensin!
+
         verts[i].pos = {
             m->mVertices[i].x,
             m->mVertices[i].y,
             m->mVertices[i].z
         };
 
+        verts[i].color = { 1, 1, 1 };
+
         verts[i].normal = {
             m->mNormals[i].x,
             m->mNormals[i].y,
             m->mNormals[i].z
         };
-
-        verts[i].color = { 1, 1, 1 };
-        verts[i].brightness = 1.0f;
     }
 
     // --- Indices (32-bit) ---
