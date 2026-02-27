@@ -15,5 +15,13 @@
 2. Go File Onto Top Right and press Open And Then CMake Project
 3. Press The Run Button and wait about half minute So It can clone all the resources from The Repo to AppData Folder
    
-+You need Vulkan SDK
+# Requirements
 
+1. Vulkan SDK
+2. Windows
+3. Vs Commynity 2026
+
+# Contact me on Discord
+My Discord is kahviz_
+# How can I help
+If you want to help you can make this work on linux
