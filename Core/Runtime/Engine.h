@@ -6,6 +6,7 @@
 #include "Window/Window.h"
 #include "GLOBALS.h"
 #include "MakeGui.h"
+#include <Misc/Profiler/Profiler.h>
 
 class Instance;
 
@@ -21,6 +22,7 @@ private:
     void EngineDoFrame(Window* wnd, float deltatime);
     bool ImGuiInited = false;
 
+    Profiler profiler;
     MakeGui makeGui;
     Window window;
     std::vector<std::unique_ptr<Instance>> Drawables;

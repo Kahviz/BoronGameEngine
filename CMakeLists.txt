@@ -63,7 +63,7 @@ add_executable(UntitledGameEngine
     Core/Graphics/Vulkan/VulkanRender.cpp
     Core/Graphics/Vulkan/ScoreCounter.cpp
     ${IMGUI_SOURCES}
-)
+ "Core/Misc/Profiler/Profiler.h" "Core/Misc/Profiler/Profiler.cpp")
 
 # ---------------- Include dirs ----------------
 target_include_directories(UntitledGameEngine PRIVATE

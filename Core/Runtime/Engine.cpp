@@ -28,61 +28,86 @@ Engine::Engine()
 
         GLFWwindow* glfwWindow = window.GetWindow();
 #if DIRECTX11 == 1
-    ID3D11Device* device = window.GetGraphics().GetDevice();
-    ID3D11DeviceContext* contextDX11 = window.GetGraphics().GetpContext();
+        ID3D11Device* device = window.GetGraphics().GetDevice();
+        ID3D11DeviceContext* contextDX11 = window.GetGraphics().GetpContext();
 #endif
 
         if (!ImGui_ImplGlfw_InitForOther(glfwWindow, true)) {
             throw std::runtime_error("Failed to initialize ImGui GLFW backend");
         }
 
-        #if DIRECTX11 == 1 
-            if (!ImGui_ImplDX11_Init(device, contextDX11)) {
-                throw std::runtime_error("Failed to initialize ImGui DX11 backend");
-            }
-            else {
-                ImGuiInited = true;
-            }
-        #else
-            VulkanRender* vr = window.GetGraphics().VR.get();
+#if DIRECTX11 == 1 
+        if (!ImGui_ImplDX11_Init(device, contextDX11)) {
+            throw std::runtime_error("Failed to initialize ImGui DX11 backend");
+        }
+        else {
+            ImGuiInited = true;
+        }
+#else
+        VulkanRender* vr = window.GetGraphics().VR.get();
 
-            ImGui_ImplVulkan_InitInfo init_info = {};
-            init_info.Instance = vr->GetVulkanInstance();
-            init_info.PhysicalDevice = vr->physicalDevice;
-            init_info.Device = vr->device;
-            init_info.QueueFamily = vr->GetGraphicsFamilyIndex();
-            init_info.Queue = vr->graphicsQueue;
-            init_info.PipelineCache = VK_NULL_HANDLE;
-            init_info.DescriptorPool = vr->GetImGuiPool();
-            init_info.MinImageCount = 2;
-            init_info.ImageCount = vr->GetSwapChainImageViews().size();
+        VkRenderPass renderPass = vr->GetRenderPass();
+        if (renderPass == VK_NULL_HANDLE) {
+            throw std::runtime_error("Render pass is null!");
+        }
 
-            init_info.Allocator = nullptr;
-            init_info.CheckVkResultFn = [](VkResult err) {
-                if (err != VK_SUCCESS) {
-                    std::cerr << "Vulkan Error: " << err << std::endl;
-                }
-            };
-            VkRenderPass renderPass = vr->GetRenderPass();
+        ImGui_ImplVulkan_InitInfo init_info = {};
+        init_info.ApiVersion = VK_API_VERSION_1_2;
+        init_info.Instance = vr->GetVulkanInstance();
+        init_info.PhysicalDevice = vr->physicalDevice;
+        init_info.Device = vr->device;
+        init_info.QueueFamily = vr->GetGraphicsFamilyIndex();
+        init_info.Queue = vr->graphicsQueue;
 
-            if (!ImGui_ImplVulkan_Init(&init_info)) {
-                throw std::runtime_error("Failed to initialize ImGui Vulkan backend");
+        init_info.DescriptorPool = vr->GetImGuiPool();
+        init_info.DescriptorPoolSize = 0;
+
+        init_info.MinImageCount = 2;
+        init_info.ImageCount = static_cast<uint32_t>(vr->GetSwapChainImageViews().size());
+        init_info.PipelineCache = VK_NULL_HANDLE;
+
+        init_info.PipelineInfoMain.RenderPass = renderPass;
+        init_info.PipelineInfoMain.Subpass = 0;
+
+        init_info.PipelineInfoForViewports = init_info.PipelineInfoMain;
+
+        init_info.UseDynamicRendering = false;
+        init_info.Allocator = nullptr;
+        init_info.CheckVkResultFn = [](VkResult err) {
+            if (err != VK_SUCCESS) {
+                std::cerr << "Vulkan Error: " << err << std::endl;
             }
-            else {
-                ImGuiInited = true;
-            }
-        #endif
+        };
+
+        init_info.MinAllocationSize = 0;
+
+        if (!ImGui_ImplVulkan_Init(&init_info)) {
+            throw std::runtime_error("Failed to initialize ImGui Vulkan backend");
+        }
+
+
+        ImGuiInited = true;
+#endif
+        ImGuiIO& io = ImGui::GetIO();
+
+        std::string fontPath = fonts + "\\RobotoFont.ttf";
+        ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f);
+
+        if (font == nullptr) {
+            std::cout << "Could not load font, using default font" << std::endl;
+            io.Fonts->AddFontDefault();
+        }
 
         #ifdef _DEBUG
             std::cout << "ImGui initialized successfully!" << std::endl;
         #endif
 
+        
         window.SetWindowIcon(window.GetWindow());
         ImGuiIO& IO = ImGui::GetIO();
         IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     }
 }
-
 Engine::~Engine()
 {
     if (ImGuiInited) {
@@ -120,6 +145,8 @@ int Engine::EngineRun()
         glfwPollEvents();
     }
 
+    profiler.PrintInformation();
+
     return 0;
 }
 
@@ -137,7 +164,7 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
             static_cast<int>(Color3.z * 255.0f)
         )
     );
-
+    
     obj->UniqueID = Index;
 
 #if DIRECTX11 == 1
@@ -210,6 +237,9 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         std::cerr << "ERROR: No ImGui context set!" << std::endl;
         return;
     }
+    static bool CubeB = false;
+
+
 
     Graphics& graphics = wnd->GetGraphics();
 
@@ -237,8 +267,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     graphics.ClearBuffer(0.0f, 0.0f, 1.0f);
 
-    static bool CubeB = false;
-
     if (!CubeB) {
         window.GetGraphics().ReSizeWindow(screen_width, screen_height, wnd);
         AddAMesh("\\Cube.obj", "TestCube", { 0,0,0 }, { 0.5,0.5,0.5 }, false);
@@ -257,7 +285,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     graphics.ClearSceneBuffer(0.1f, 0.2f, 0.3f);
 #endif
 
-    graphics.DrawAFrame(deltatime, Drawables);
 
 #if INEDITOR == 1
     graphics.SetRenderTargetToBackBuffer();
@@ -281,8 +308,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 #endif
     //Fps
-    int fps = static_cast<int>(1.0f / deltatime);
-    MakeASuccess("FPS: " + std::to_string(fps));
 
     //Draws
     for (auto& Drawableptr : Drawables) {
@@ -304,11 +329,12 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         #if DIRECTX11 == 1
             ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         #endif
-        #if VULKAN == 1
-            //ImGui_ImplDX11_RenderDrawData tänne
-        #endif
     }
 #endif
+    graphics.DrawAFrame(deltatime, Drawables);
+
+    float fps = 1.0f / deltatime;
+    profiler.AddFPS(static_cast<int>(fps));
 
     wnd->GetGraphics().EndFrame();
 }

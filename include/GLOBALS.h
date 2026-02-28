@@ -5,10 +5,16 @@
 
 namespace fs = std::filesystem;
 
-#define INEDITOR 1 //Laita 1
+#define INEDITOR 1 //Use 1 For Editing 0 For The Release
 
-#define DIRECTX11 1 //1 = True, 0 = False
-#define VULKAN 0 //1 = True, 0 = False
+#define DIRECTX11 0 //1 = True, 0 = False
+#define VULKAN 1 //1 = True, 0 = False
+
+#if INEDITOR == 1
+	#define PROFILER
+#endif
+
+#define AURA // Most Useful thing in this project
 
 extern int screen_width;
 extern int screen_height;

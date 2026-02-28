@@ -22,7 +22,7 @@ public:
     bool Init(GLFWwindow* window);
     void createDescriptorSetLayout();
     void Cleanup();
-    void RecordCommandBuffer(uint32_t imageIndex);
+    void RecordCommandBuffer(uint32_t imageIndex, bool renderImGui);
     void RecreateSwapchain();
     void UpdateViewportAndScissor();
     void CreateCommandBuffers();
@@ -37,6 +37,10 @@ public:
     bool RenderAMesh(const Instance* drawable, FLOAT3 Orientation, FLOAT3& pos, FLOAT3& size, INT3 color, FLOAT3& Velocity, bool Anchored, float Roughness, float Brightness, int Index);
 
     void DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables);
+
+    VkCommandBuffer BeginSingleTimeCommands();
+
+    void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
     VkCommandPool commandPool;
     VkQueue graphicsQueue;

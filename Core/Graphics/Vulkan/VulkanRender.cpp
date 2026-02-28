@@ -11,6 +11,7 @@
 #include "ErrorHandling/ErrorMessage.h"
 #include "Mesh/Vulkan/MeshVulkan.h"
 #include <imgui.h>
+#include <imgui_impl_vulkan.h>
 
 bool VulkanRender::Init(GLFWwindow* window)
 {
@@ -648,7 +649,7 @@ void VulkanRender::Cleanup()
     MakeASuccess("Cleanupped succesfull!");
 }
 
-void VulkanRender::RecordCommandBuffer(uint32_t imageIndex)
+void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui)
 {
     VkCommandBuffer cmd = commandBuffers[imageIndex];
     vkResetCommandBuffer(cmd, 0);
@@ -666,8 +667,8 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex)
     rp.pClearValues = &clear;
 
     vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
-    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
     for (const auto& drawCmd : drawCommands)
     {
         uint32_t dynamicOffset = drawCmd.objectIndex * dynamicAlignment;
@@ -678,8 +679,11 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex)
             0, 1, &descriptorSet,
             1, &dynamicOffset
         );
-
         drawCmd.mesh->Draw(cmd);
+    }
+
+    if (renderImGui && ImGui::GetDrawData()) {
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
     }
 
     vkCmdEndRenderPass(cmd);
@@ -697,7 +701,7 @@ void VulkanRender::RecreateSwapchain() {
     CreateCommandBuffers();
 
     for (size_t i = 0; i < commandBuffers.size(); i++) {
-        RecordCommandBuffer(static_cast<uint32_t>(i));
+        RecordCommandBuffer(static_cast<uint32_t>(i),false);
     }
 }
 
@@ -1060,7 +1064,6 @@ bool VulkanRender::RenderAMesh(
 
 void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables)
 {
-    currentFrame += 1;
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
     vkResetFences(device, 1, &inFlightFence);
 
@@ -1077,7 +1080,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         return;
     }
 
-    RecordCommandBuffer(imageIndex);
+    RecordCommandBuffer(imageIndex,true);
 
     VkSubmitInfo submitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
     VkSemaphore waitSemaphores[] = { imageAvailableSemaphore };
@@ -1107,4 +1110,51 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
     vkQueuePresentKHR(graphicsQueue, &presentInfo);
 
     drawCommands.clear();
+}
+
+VkCommandBuffer VulkanRender::BeginSingleTimeCommands() {
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer;
+    if (vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer) != VK_SUCCESS) {
+        MakeAError("Failed to allocate command buffer for single time commands");
+        return VK_NULL_HANDLE;
+    }
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
+        MakeAError("Failed to begin command buffer");
+        return VK_NULL_HANDLE;
+    }
+
+    return commandBuffer;
+}
+
+void VulkanRender::EndSingleTimeCommands(VkCommandBuffer commandBuffer) {
+    if (commandBuffer == VK_NULL_HANDLE) return;
+
+    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
+        MakeAError("Failed to end command buffer");
+        return;
+    }
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+        MakeAError("Failed to submit command buffer");
+    }
+
+    vkQueueWaitIdle(graphicsQueue);
+
+    vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
