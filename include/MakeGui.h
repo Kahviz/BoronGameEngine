@@ -23,6 +23,7 @@ public:
         bool Selec
     );
     void MakeIMViewPort(Window& wnd);
+    bool MakeDashBoard();
 private:
     Instance world;
 };

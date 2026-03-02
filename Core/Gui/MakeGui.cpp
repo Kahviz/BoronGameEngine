@@ -163,41 +163,32 @@ void MakeGui::MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Dra
 
 void MakeGui::MakeIMViewPort(Window& wnd)
 {
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+}
 
-    ImGui::Begin("Viewport", nullptr,
-        ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoScrollWithMouse
+bool MakeGui::MakeDashBoard()
+{
+    ImGui::SetNextWindowSize(ImVec2(screen_width, screen_height), ImGuiCond_Always);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f,0.0f,0.0f, 1.0f)); //Color
+
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+
+    ImGui::Begin("Backround", nullptr,
+        ImGuiWindowFlags_NoTitleBar | //No TitleBar
+        ImGuiWindowFlags_NoResize |   //No resize
+        ImGuiWindowFlags_NoMove |     //No Moving
+        ImGuiWindowFlags_NoCollapse   //No Smalling
     );
+    ImGui::PopStyleColor();
 
-    ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-    static ImVec2 previousSize = ImGui::GetContentRegionAvail();
+    ImVec2 windowSize = ImGui::GetWindowSize();
+    ImVec2 buttonSize = ImVec2(150, 30);
 
-#if INEDITOR == 1
-    viewport_height = viewportSize.y;
-    viewport_width = viewportSize.x;
-#endif
-
-    
-    #if DIRECTX11 == 1
-        ID3D11ShaderResourceView* srv = wnd.GetGraphics().GetSceneSRV();
-
-        if (srv) {
-            ImVec2 currentSize = ImGui::GetWindowSize();
-
-            if (currentSize.x != previousSize.x || currentSize.y != previousSize.y)
-            {
-
-            }
-            ImGui::Image((ImTextureID)srv, viewportSize, ImVec2(0, 0), ImVec2(1, 1));
-
-        }
-        else {
-            ImGui::TextColored(ImVec4(1, 0, 0, 1), "No Viewport (No ID3D11ShaderResourceView)  I donno what to do....");
-        }
-    #endif
+    if (ImGui::Button("Create A New Project", buttonSize)) {
+        ImGui::End();
+        return true;
+    }
 
     ImGui::End();
-    ImGui::PopStyleVar();
 
+    return false;
 }

@@ -45,6 +45,29 @@ void Graphics::SetRenderTargetToScene() {
     #endif
 }
 
+void Graphics::RenderAMesh(
+    float Deltatime,
+    const Instance* drawable,
+    FLOAT3 Orientation,
+    FLOAT3& pos,
+    FLOAT3& size,
+    INT3 color,
+    FLOAT3& Velocity,
+    bool Anchored,
+    float Roughness,
+    float Brightness,
+    int Index
+) 
+{
+    #if VULKAN == 1
+        VR.get()->RenderAMesh(drawable, Orientation, pos, size, color, Velocity, Anchored, Roughness, Brightness, Index);
+    #endif
+
+    #if DIRECTX11 == 1
+        Instance inst = *drawable;
+        DR.get()->DrawMesh(Deltatime, inst.OBJmesh, Orientation, pos, size, color, Velocity, Anchored, Roughness, Brightness);
+    #endif
+}
 void Graphics::SetRenderTargetToBackBuffer() {
     #if DIRECTX11 == 1
         DR.get()->SetRenderTargetToBackBuffer();
@@ -138,7 +161,7 @@ void Graphics::ClearBuffer(float r, float g, float b)
     #if DIRECTX11 == 1
         DR.get()->ClearBuffer(r, g, b);
     #else
-
+        
     #endif
 }
 

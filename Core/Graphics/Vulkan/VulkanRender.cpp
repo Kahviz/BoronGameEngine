@@ -10,9 +10,43 @@
 #include <string>
 #include "ErrorHandling/ErrorMessage.h"
 #include "Mesh/Vulkan/MeshVulkan.h"
-#include <imgui.h>
-#include <imgui_impl_vulkan.h>
 #include <CameraControl.h>
+#include "imgui.h"
+#include <imgui_impl_vulkan.h>
+
+std::vector<Vertex> vertices = {
+    {1.0f, {-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+    {1.0f, {0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+    {1.0f, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
+    {1.0f, {-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+
+    {1.0f, {-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+    {1.0f, {0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+    {1.0f, {0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+    {1.0f, {-0.5f, 0.5f, -0.5f}, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, -1.0f}}
+};
+
+
+
+const std::vector<uint32_t> indices = {
+    0, 1, 2,
+    2, 3, 0,
+
+    5, 4, 7,
+    7, 6, 5,
+
+    3, 2, 6,
+    6, 7, 3,
+
+    4, 5, 1,
+    1, 0, 4,
+
+    1, 5, 6,
+    6, 2, 1,
+
+    4, 0, 3,
+    3, 7, 4
+};
 
 bool VulkanRender::Init(GLFWwindow* window)
 {
@@ -26,7 +60,7 @@ bool VulkanRender::Init(GLFWwindow* window)
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "Vulkan Renderer";
+    appInfo.pApplicationName = "UntilitedGameEngine";
     appInfo.apiVersion = VK_API_VERSION_1_2;
 
     VkInstanceCreateInfo instInfo{};
@@ -244,14 +278,14 @@ bool VulkanRender::Init(GLFWwindow* window)
 
 
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = surfaceFormat.format;           // sama kuin swapchainin format
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;         // ei multisamplingia
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;    // tyhjennä framebuffer ennen renderiä
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;  // säilytä renderin tulos
+    colorAttachment.format = surfaceFormat.format; 
+    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;  
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // valmiina esitettäväksi
+    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
@@ -661,15 +695,19 @@ void VulkanRender::Cleanup()
     MakeASuccess("Cleanupped succesfull!");
 }
 
-void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui)
+uint32_t VulkanRender::GetImageIndex() {
+    return CurrentimageIndex;
+}
+
+void VulkanRender::RecordCommandBuffer(uint32_t imageIndex,bool renderImGui)
 {
+    CurrentimageIndex = imageIndex;
     VkCommandBuffer cmd = commandBuffers[imageIndex];
     vkResetCommandBuffer(cmd, 0);
 
     VkCommandBufferBeginInfo beginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     vkBeginCommandBuffer(cmd, &beginInfo);
 
-    // Aseta dynaaminen viewport (TÄRKEÄ: screen_width/height päivittyvät automaattisesti)
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -679,7 +717,6 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui)
     viewport.maxDepth = 1.0f;
     vkCmdSetViewport(cmd, 0, 1, &viewport);
 
-    // Aseta dynaaminen scissor
     VkRect2D scissor{};
     scissor.offset = { 0, 0 };
     scissor.extent = { (uint32_t)screen_width, (uint32_t)screen_height };
@@ -1049,7 +1086,7 @@ void VulkanRender::updateUniformBuffer(
         color.z / 255.0f
     );
 
-    Matrix4x4 view = camera.GetViewMatrix();
+    Matrix4x4 view = m_Camera.GetViewMatrix();
 
     ubo.view = view;
 
@@ -1127,8 +1164,9 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         RecreateSwapchain();
         return;
     }
+    bool RenderImGui = true;
 
-    RecordCommandBuffer(imageIndex, true);
+    RecordCommandBuffer(imageIndex,RenderImGui);
 
     VkSubmitInfo submitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
     VkSemaphore waitSemaphores[] = { imageAvailableSemaphore };
@@ -1170,7 +1208,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
 }
 Camera& VulkanRender::GetCamera()
 {
-    return camera;
+    return m_Camera;
 }
 
 VkCommandBuffer VulkanRender::BeginSingleTimeCommands() {

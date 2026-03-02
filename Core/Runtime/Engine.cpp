@@ -7,8 +7,9 @@
 #include <GLOBALS.h>
 #include <CameraControl.h>
 #include "MakeGui.h"
-
-#define GLFW_EXPOSE_NATIVE_WIN32
+#ifdef _WIN32
+    #define GLFW_EXPOSE_NATIVE_WIN32
+#endif
 #include <GLFW/glfw3native.h>
 
 #include "backends/imgui_impl_glfw.h"
@@ -19,6 +20,7 @@ Engine::Engine()
     : window(1280, 800, "UntilitedGameEngine")
 {
     if (!ImGuiInited) {
+        std::cout << "ImGui version: " << IMGUI_VERSION << std::endl;
         IMGUI_CHECKVERSION();
         ImGuiContext* context = ImGui::CreateContext();
 
@@ -43,7 +45,7 @@ Engine::Engine()
         else {
             ImGuiInited = true;
         }
-#else
+#else  // VULKAN
         VulkanRender* vr = window.GetGraphics().VR.get();
 
         VkRenderPass renderPass = vr->GetRenderPass();
@@ -54,14 +56,11 @@ Engine::Engine()
         ImGui_ImplVulkan_InitInfo init_info = {};
         init_info.ApiVersion = VK_API_VERSION_1_2;
         init_info.Instance = vr->GetVulkanInstance();
-        init_info.PhysicalDevice = vr->physicalDevice;
-        init_info.Device = vr->device;
+        init_info.PhysicalDevice = vr->GetPhysicalDevice();
+        init_info.Device = vr->GetDevice();
         init_info.QueueFamily = vr->GetGraphicsFamilyIndex();
-        init_info.Queue = vr->graphicsQueue;
-
+        init_info.Queue = vr->GetGraphicsQueue();
         init_info.DescriptorPool = vr->GetImGuiPool();
-        init_info.DescriptorPoolSize = 0;
-
         init_info.MinImageCount = 2;
         init_info.ImageCount = static_cast<uint32_t>(vr->GetSwapChainImageViews().size());
         init_info.PipelineCache = VK_NULL_HANDLE;
@@ -70,21 +69,17 @@ Engine::Engine()
         init_info.PipelineInfoMain.Subpass = 0;
 
         init_info.PipelineInfoForViewports = init_info.PipelineInfoMain;
-
         init_info.UseDynamicRendering = false;
         init_info.Allocator = nullptr;
         init_info.CheckVkResultFn = [](VkResult err) {
             if (err != VK_SUCCESS) {
                 std::cerr << "Vulkan Error: " << err << std::endl;
             }
-        };
-
-        init_info.MinAllocationSize = 0;
+            };
 
         if (!ImGui_ImplVulkan_Init(&init_info)) {
             throw std::runtime_error("Failed to initialize ImGui Vulkan backend");
         }
-
 
         ImGuiInited = true;
 #endif
@@ -102,7 +97,6 @@ Engine::Engine()
             std::cout << "ImGui initialized successfully!" << std::endl;
         #endif
 
-        
         window.SetWindowIcon(window.GetWindow());
         ImGuiIO& IO = ImGui::GetIO();
         IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -182,8 +176,8 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
         assets + Path,
         window.GetGraphics().GetDevice(),
         window.GetGraphics().GetPhysicalDevice(),
-        window.GetGraphics().VR.get()->commandPool,
-        window.GetGraphics().VR.get()->graphicsQueue
+        window.GetGraphics().VR.get()->GetCommandPool(),
+        window.GetGraphics().VR.get()->GetGraphicsQueue()
     );
 #endif
 
@@ -233,75 +227,70 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         std::cerr << "ERROR: No ImGui context set!" << std::endl;
         return;
     }
+
     static bool CubeB = false;
 
     Graphics& graphics = wnd->GetGraphics();
 
-    #if VULKAN == 1
-       VulkanRender* vr = graphics.VR.get();
-    #endif
+#if VULKAN == 1
+    VulkanRender* vr = graphics.VR.get();
+#endif
     ScreenResizerDetector(wnd);
-
-    #if INEDITOR == 1
-        if (ImGuiInited) {
-            #if DIRECTX11 == 1
-                ImGui_ImplDX11_NewFrame();
-            #endif
-
-            #if VULKAN == 1
-                ImGui_ImplVulkan_NewFrame();
-            #endif
-
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-        }
-    #else
-        graphics.SetRenderTargetToBackBuffer();
-    #endif
-
-    graphics.ClearBuffer(0.0f, 0.0f, 1.0f);
-
-    if (!CubeB) {
-        AddAMesh("\\Cube.obj", "TestCube", { 0,0,0 }, { 0.5,0.5,0.5 }, false);
-        wnd->GetGraphics().GetCamera().SetPosition({ 5,5,5 });
-        wnd->GetGraphics().GetCamera().SetRotation({ 0.625999,3.926,0 });
-        CubeB = true;
-    }
-
-    bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
-    if (ctrlPressed) {
-        AddAMesh("\\Cylinder.obj", "TestCylinder", { 0,0,0 }, { 0.5,1,0.5 }, false);
-    }
-
-#if INEDITOR == 1
-    graphics.SetRenderTargetToScene();
-
-    graphics.ClearSceneBuffer(0.1f, 0.2f, 0.3f);
-#endif
-
-
-#if INEDITOR == 1
-    graphics.SetRenderTargetToBackBuffer();
-#endif
-
-    //Draws
-    
 
 #if INEDITOR == 1
     if (ImGuiInited) {
-        makeGui.MakeIMViewPort(*wnd);
+        #if DIRECTX11 == 1
+            ImGui_ImplDX11_NewFrame();
+        #endif
 
-        makeGui.MakeIMGui(
-            *wnd,
-            Drawables,
-            [this](const std::string& path, const std::string& name,
-                FLOAT3 pos, FLOAT3 size, bool Selec) -> Instance*
-            {
-                return &AddAMesh(path, name, pos, size, Selec);
-            },
-            reinterpret_cast<float*>(&Color3),
-            false
-        );
+        #if VULKAN == 1
+            ImGui_ImplVulkan_NewFrame();
+        #endif
+        
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+    }
+#endif
+
+    graphics.ClearBuffer(0.0f, 0.0f, 1.0f);
+
+    if (InProject) {
+        if (!CubeB) {
+            AddAMesh("\\Cube.obj", "Cube", { 0,0,0 }, { 0.5,0.5,0.5 }, false);
+            wnd->GetGraphics().GetCamera().SetPosition({ 5,5,5 });
+            wnd->GetGraphics().GetCamera().SetRotation({ 0.625999,3.926,0 });
+            CubeB = true;
+        }
+    }
+
+    bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
+    if (InProject) {
+        if (ctrlPressed) {
+            AddAMesh("\\Cylinder.obj", "TestCylinder", { 0,0,0 }, { 0.5,1,0.5 }, false);
+        }
+    }
+
+#if INEDITOR == 1
+    if (ImGuiInited) {
+        if (InProject) {
+            makeGui.MakeIMViewPort(*wnd);
+            makeGui.MakeIMGui(
+                *wnd,
+                Drawables,
+                [this](const std::string& path, const std::string& name,
+                    FLOAT3 pos, FLOAT3 size, bool Selec) -> Instance*
+                {
+                    return &AddAMesh(path, name, pos, size, Selec);
+                },
+                reinterpret_cast<float*>(&Color3),
+                false
+            );
+        }
+        else {
+            if (makeGui.MakeDashBoard()) {
+                InProject = true;
+            }
+        }
     }
 #endif
 
@@ -309,11 +298,26 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     for (auto& Drawableptr : Drawables) {
         auto Drawable = Drawableptr.get();
         if (Drawable->CanDraw()) {
-            wnd->GetGraphics().VR.get()->RenderAMesh(Drawable, Drawable->Orientation, Drawable->pos, Drawable->Size, Drawable->color, Drawable->Velocity, Drawable->Anchored, 1.0f, 1.0f, Drawable->UniqueID);
+            wnd->GetGraphics().RenderAMesh(
+                deltatime,
+                Drawable,
+                Drawable->Orientation,
+                Drawable->pos,
+                Drawable->Size,
+                Drawable->color,
+                Drawable->Velocity,
+                Drawable->Anchored,
+                1.0f,
+                1.0f,
+                Drawable->UniqueID
+            );
         }
     }
 #endif
-    graphics.DrawAFrame(deltatime, Drawables);
+
+#if DIRECTX11 == 1
+    wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
+#endif
 
     CameraControl camC;
     if (!ctrlPressed)
@@ -325,11 +329,15 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         #if DIRECTX11 == 1
             ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         #endif
+        //Vulkan Does it in the renderer
     }
 #endif
-
     float fps = 1.0f / deltatime;
     profiler.AddFPS(static_cast<int>(fps));
+
+#if VULKAN == 1
+    wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
+#endif
 
     wnd->GetGraphics().EndFrame();
 }

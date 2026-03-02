@@ -25,6 +25,7 @@ public:
     bool Init(GLFWwindow* window);
     void createDescriptorSetLayout();
     void Cleanup();
+    uint32_t GetImageIndex();
     void RecordCommandBuffer(uint32_t imageIndex, bool renderImGui);
     void RecreateSwapchain();
     void UpdateViewportAndScissor();
@@ -46,114 +47,80 @@ public:
 
     void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
-    VkCommandPool commandPool;
-    VkQueue graphicsQueue;
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-    VkDevice device = VK_NULL_HANDLE;
 
+    //Getters
+    VkPipeline GetPipeline() { return graphicsPipeline; };
     VkInstance& GetVulkanInstance() { return instance; };
     VkDescriptorPool& GetImGuiPool() { return imguiPool; };
+    std::vector<VkCommandBuffer> GetCommandBuffers() { return commandBuffers; };
     size_t GetGraphicsFamilyIndex() { return graphicsFamilyIndex; };
     std::vector<VkImageView> GetSwapChainImageViews() { return swapchainImageViews; };
     VkRenderPass GetRenderPass() { return renderPass; };  
-    std::vector<VkCommandBuffer> commandBuffers;
-    VkPipeline graphicsPipeline;
-
-    VkCommandBuffer GetCurrentFrameCommandBuffer() {
-        return commandBuffers[currentFrame];
-    }
-
+    VkCommandBuffer GetCurrentFrameCommandBuffer() { return commandBuffers[currentFrame]; };
+    VkCommandPool GetCommandPool() { return commandPool; }
+    VkDevice GetDevice() { return device; };
+    VkQueue GetGraphicsQueue() { return graphicsQueue; };
+    VkPhysicalDevice GetPhysicalDevice() { return physicalDevice; };
 private:
+    Camera m_Camera;
+    ScoreCounter m_SC;
+
     struct DrawCommand {
         const MeshVK* mesh;
         uint32_t objectIndex;
     };
 
-    Camera camera;
+    uint32_t CurrentimageIndex = -1;
     bool framebufferResized = false;
 
     int currentFrame = 0;
-    std::vector<DrawCommand> drawCommands;
-    std::unordered_map<const Mesh*, std::unique_ptr<MeshVK>> meshCache;
 
     const uint32_t MAX_OBJECTS = 100;
+    uint32_t imageIndex = -1;
     size_t maxInstances = 100;
-
-    uint32_t imageIndex;
-
     size_t graphicsFamilyIndex = -1;
-    size_t dynamicAlignment;
+    size_t dynamicAlignment = -1;
 
-    std::vector<std::unique_ptr<Instance>> DrawablesCopy;
-    std::vector<uint32_t> drawObjectIndices;
-    std::vector<VkImage> swapchainImages;
-    std::vector<VkFramebuffer> swapchainFramebuffers;
-    std::vector<VkImageView> swapchainImageViews;
-
-    VkBuffer uniformBuffer;
-    VkDeviceMemory uniformBufferMemory;
-    VkDescriptorPool descriptorPool;
-    VkDescriptorSet descriptorSet;
-    VkDescriptorPool imguiPool;
-
-    void* uniformBufferMapped;
-
+    VkExtent2D swapchainExtent = {};
+    VkFormat swapchainImageFormat = {};
     VkViewport viewport{};
-    GLFWwindow* main_window;
-    VkRect2D scissor{};
-    VkDescriptorSetLayout descriptorSetLayout;
-    VkBuffer indexBuffer;
-    VkDeviceMemory indexBufferMemory;
-    VkSemaphore imageAvailableSemaphore;
-    VkSemaphore renderFinishedSemaphore;
-    VkFence inFlightFence;
+    VkRect2D scissor = {};
+
+    std::unordered_map<const Mesh*, std::unique_ptr<MeshVK>> meshCache = {};
+    std::vector<DrawCommand> drawCommands = {};
+    std::vector<VkCommandBuffer> commandBuffers = {};
+    std::vector<std::unique_ptr<Instance>> DrawablesCopy = {};
+    std::vector<uint32_t> drawObjectIndices = {};
+    std::vector<VkImage> swapchainImages = {};
+    std::vector<VkFramebuffer> swapchainFramebuffers = {};
+    std::vector<VkImageView> swapchainImageViews = {};
+
+    GLFWwindow* main_window = nullptr;
+    void* uniformBufferMapped = nullptr;
+
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+    VkCommandPool commandPool = VK_NULL_HANDLE;
+    VkDevice device = VK_NULL_HANDLE;
+    VkQueue graphicsQueue = VK_NULL_HANDLE;
+    VkPipeline graphicsPipeline = VK_NULL_HANDLE;
+    VkBuffer uniformBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory uniformBufferMemory = VK_NULL_HANDLE;
+    VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+    VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+    VkDescriptorPool imguiPool = VK_NULL_HANDLE;
+    VkDeviceMemory indexBufferMemory = VK_NULL_HANDLE;
+    VkSemaphore imageAvailableSemaphore = VK_NULL_HANDLE;
+    VkSemaphore renderFinishedSemaphore = VK_NULL_HANDLE;
+    VkBuffer indexBuffer = VK_NULL_HANDLE;
+    VkFence inFlightFence = VK_NULL_HANDLE;
     VkInstance instance = VK_NULL_HANDLE;
     VkSurfaceKHR surface = VK_NULL_HANDLE;
     VkSwapchainKHR swapchain = VK_NULL_HANDLE;
     VkRenderPass renderPass = VK_NULL_HANDLE;
-    VkExtent2D swapchainExtent;
-    VkFormat swapchainImageFormat;
-    VkPipelineLayout pipelineLayout;
-
-    VkBuffer vertexBuffer = VK_NULL_HANDLE;
-    VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
-
     VkShaderModule vertShaderModule = VK_NULL_HANDLE;
     VkShaderModule fragShaderModule = VK_NULL_HANDLE;
-
-    ScoreCounter m_SC;
-
-    std::vector<Vertex> vertices = {
-        {1.0f, {-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // punainen
-        {1.0f, {0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // vihreä
-        {1.0f, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}}, // sininen
-        {1.0f, {-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}, // keltainen
-
-        {1.0f, {-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-        {1.0f, {0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-        {1.0f, {0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-        {1.0f, {-0.5f, 0.5f, -0.5f}, {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, -1.0f}}
-    };
-
-
-
-    const std::vector<uint32_t> indices = {
-        0, 1, 2,
-        2, 3, 0,
-
-        5, 4, 7,
-        7, 6, 5,
-
-        3, 2, 6,
-        6, 7, 3,
-
-        4, 5, 1,
-        1, 0, 4,
-
-        1, 5, 6,
-        6, 2, 1,
-
-        4, 0, 3,
-        3, 7, 4
-    };
+    VkBuffer vertexBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
+    VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+    VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
 };

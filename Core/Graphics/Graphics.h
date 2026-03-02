@@ -29,6 +29,7 @@ public:
 
     bool InitGraphics(GLFWwindow* window);
     void SetRenderTargetToScene();
+    void RenderAMesh(float Deltatime, const Instance* drawable, FLOAT3 Orientation, FLOAT3& pos, FLOAT3& size, INT3 color, FLOAT3& Velocity, bool Anchored, float Roughness, float Brightness, int Index);
     void SetRenderTargetToBackBuffer();
 
     Camera& GetCamera();
@@ -61,11 +62,11 @@ public:
 
 #if VULKAN == 1
     VkPhysicalDevice GetPhysicalDevice() const {
-        return VR.get()->physicalDevice;
+        return VR.get()->GetPhysicalDevice();
     }
 
     VkDevice GetDevice() const {
-        VkDevice device = VR.get()->device;
+        VkDevice device = VR.get()->GetDevice();
 
         if (device == VK_NULL_HANDLE) {
             MakeAError("Logical device not initialized!");
@@ -75,11 +76,11 @@ public:
     }
 
     auto GetCmdPool() {
-        return this->VR.get()->commandPool;
+        return this->VR.get()->GetCommandPool();
     }
 
     auto GetGfxQueue() {
-        return this->VR.get()->graphicsQueue;
+        return this->VR.get()->GetGraphicsQueue();
     }
 #endif
 

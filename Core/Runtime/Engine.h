@@ -6,7 +6,7 @@
 #include "Window/Window.h"
 #include "GLOBALS.h"
 #include "MakeGui.h"
-#include <Misc/Profiler/Profiler.h>
+#include <Debugging/Profiler/Profiler.h>
 
 class Instance;
 
@@ -26,6 +26,8 @@ private:
     MakeGui makeGui;
     Window window;
     std::vector<std::unique_ptr<Instance>> Drawables;
+
+    bool InProject = false;
     int Index = 0;
     int screen_width = 1280;
     int screen_height = 800;

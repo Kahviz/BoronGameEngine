@@ -1,12 +1,15 @@
 ﻿#include <iostream>
 #include "Runtime/Engine.h"
 #include "SetupPaths/MakeFiles.h"
-#include "Misc/Profiler/Profiler.h"
+#include <Debugging/Profiler/Profiler.h>
 #include <thread>
+#include "ErrorHandling/ErrorMessage.h"
+#include <format>
 
 int main() {
     MakeFiles mf;
 
+    int WaitTime = 2;
     mf.MakeAPPDATAFolders();
 
 #if INEDITOR == 0
@@ -24,9 +27,10 @@ int main() {
         std::this_thread::sleep_for(std::chrono::seconds(3));
         return -5;
     }
+    std::string WaitTimeString = std::format("Waiting For {}", WaitTime," Secund before closing!");
 
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-    std::cout << "This is the end..." << std::endl;
-
+    MakeASuccess(WaitTimeString);
+    std::this_thread::sleep_for(std::chrono::seconds(WaitTime));
+    MakeASuccess("This is the end...");
     return 0;
 }

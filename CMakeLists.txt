@@ -4,7 +4,6 @@ project(UntitledGameEngine)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# ---------------- Vulkan ----------------
 find_package(Vulkan REQUIRED)
 
 if(NOT Vulkan_FOUND)
@@ -20,6 +19,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/glfw/glfw.git
     GIT_TAG 3.4
 )
+
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -62,8 +62,9 @@ add_executable(UntitledGameEngine
     Core/Graphics/Dx11/Dx11Renderer.cpp
     Core/Graphics/Vulkan/VulkanRender.cpp
     Core/Graphics/Vulkan/ScoreCounter.cpp
+    Core/Debugging/Profiler/Profiler.cpp
     ${IMGUI_SOURCES}
- "Core/Misc/Profiler/Profiler.h" "Core/Misc/Profiler/Profiler.cpp")
+ "Core/Debugging/Functions/ASSERT.h")
 
 # ---------------- Include dirs ----------------
 target_include_directories(UntitledGameEngine PRIVATE
