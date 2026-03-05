@@ -67,6 +67,7 @@ add_executable(UntitledGameEngine
     Core/Debugging/Profiler/Profiler.cpp
     ${IMGUI_SOURCES}
     Core/Debugging/Functions/UGE_ASSERTS.h
+    Core/Libs/ImGui/imgui_demo.cpp
 )
 
 # ---------------- Include dirs ----------------

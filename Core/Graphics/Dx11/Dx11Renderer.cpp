@@ -60,7 +60,7 @@ void Dx11Renderer::CreateDeviceAndSwapChain(int width, int height, HWND hWnd)
     DXGI_SWAP_CHAIN_DESC scd = {};
     scd.BufferDesc.Width = width;
     scd.BufferDesc.Height = height;
-    scd.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+    scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
     scd.BufferDesc.RefreshRate.Numerator = 60;
     scd.BufferDesc.RefreshRate.Denominator = 1;
     scd.SampleDesc.Count = 1;

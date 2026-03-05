@@ -267,9 +267,10 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 
     bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
+
     if (InProject) {
         if (ctrlPressed) {
-            AddAMesh("\\Cylinder.obj", "TestCylinder", { 0,0,0 }, { 0.5,1,0.5 }, false);
+            // AddAMesh("\\Cylinder.obj", "TestCylinder", { 0,0,0 }, { 0.5,1,0.5 }, false);
         }
     }
 

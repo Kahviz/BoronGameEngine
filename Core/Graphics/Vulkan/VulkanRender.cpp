@@ -1093,7 +1093,7 @@ void VulkanRender::updateUniformBuffer(
     float fovY = 45.0f * PI / 180.0f;
     float aspect = (float)screen_width / (float)screen_height;
 
-    ubo.proj = CreateVulkanPerspective(fovY, aspect, 0.1f, 10.0f);
+    ubo.proj = CreateVulkanPerspective(fovY, aspect, 0.1f, zFar);
 
     uint8_t* dst =
         (uint8_t*)uniformBufferMapped +
