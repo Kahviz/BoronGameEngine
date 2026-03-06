@@ -1,4 +1,5 @@
 #pragma once
+#include "Variables.h"
 
 inline float DegreesToRadians(float degrees)
 {
