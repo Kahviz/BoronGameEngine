@@ -35,7 +35,8 @@ void MakeChildrenNodes(Instance* inst) {
             ImGui::TreeNodeEx((void*)child,
                 ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen,
                 "%s",
-                child->Name.c_str());
+                child->Name.c_str()
+            );
         }
         else
         {
@@ -148,15 +149,18 @@ void MakeGui::MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Dra
             if (!inst || inst->Parent != &world)
                 continue;
 
-            if (ImGui::TreeNodeEx(
-                (void*)inst,
-                ImGuiTreeNodeFlags_OpenOnArrow,
-                "%s",
-                inst->Name.c_str()))
-            {
-                MakeChildrenNodes(inst);
-                ImGui::TreePop();
+            if (inst->IsVisibleInExplorer) {
+                if (ImGui::TreeNodeEx(
+                    (void*)inst,
+                    ImGuiTreeNodeFlags_OpenOnArrow,
+                    "%s",
+                    inst->Name.c_str()))
+                {
+                    MakeChildrenNodes(inst);
+                    ImGui::TreePop();
+                }
             }
+            
 
             if (ImGui::IsItemClicked())
             {
@@ -182,8 +186,17 @@ void MakeGui::MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Dra
         if (ImGui::BeginTabBar("##TABS")) {
             if (ImGui::BeginTabItem("Home")) {
                 if (ImGui::Button("Move",ImVec2(screen_w / 10,screen_h / 10))) {
+                    for (auto& DrawablePTR : Drawables) {
+                        if (DrawablePTR.get()->Selected) {
+                            Instance* inst = DrawablePTR.get();
 
+                            if (inst->IsVisibleInExplorer) {
+                                //Move it makes arrow that cant be deleted by user...
+                            }
+                        }
+                    }
                 }
+
                 ImGui::EndTabItem();
             }
 

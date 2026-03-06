@@ -40,20 +40,21 @@ public:
         const bool Anchored = false,
         Mesh OBJmesh = Mesh()
     )
-        : Instance(name,    // 1. name
-            position,       // 2. position
-            Size,           // 3. SIZE
-            col,            // 4. COLOR
-            ogcolor,        // 5. OGCOLOR
-            ORIENTATION,    // 6. ORIENTATION
-            VELOCITY,       // 7. VELOCITY
-            OBJmesh,        // 8. MESH
-            UniqueID,              // 9. uniqueID
-            instanceID,     // 10. instanceID
-            false,          // 11. selected ← KORJATTU: Selected → false
-            false,          // 12. deleted ← KORJATTU: Deleted → false
-            Anchored,       // 13. ANCHORED
-            "Decent"     // 14. codeTag ← KORJATTU: CodeTag → "Decent"
+        : Instance(name,  
+            position,     
+            Size,          
+            col,          
+            ogcolor,     
+            ORIENTATION,    
+            VELOCITY,  
+            OBJmesh, 
+            UniqueID,
+            instanceID,
+            false,
+            false,
+            true, //In Explorer
+            Anchored,
+            "Decent"
         ), 
         Path("")
     {
@@ -65,6 +66,7 @@ public:
     bool HaveSize() const override { return true; }
     bool HavePos() const override { return true; }
     bool HaveOrientation() const override { return true; }
+    bool ShowsInExplorer() const { return true; };
 
     bool HaveVelocity() const override { return true; }
     bool HaveAnchored() const override { return true; }

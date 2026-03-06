@@ -1,12 +1,9 @@
 #pragma once
 #include <vector>
-#include <DirectXMath.h>
 #include <string>
 #include <memory>
 #include "Math/UntilitedMath.h"
 #include "Instances/Instances/Mesh/Mesh.h"
-
-using namespace DirectX;
 
 class Instance {
 public:
@@ -38,6 +35,8 @@ public:
     std::string CodeTag = "Instance";
     int InstanceID = 0;
 
+    bool IsVisibleInExplorer = false;
+
     Instance(
         const std::string& name = "",
         const FLOAT3& position = { 0, 0, 0 },
@@ -51,6 +50,7 @@ public:
         int instanceID = 0,
         bool selected = false,
         bool deleted = false,
+        bool isvisibleinexplorer = false,
         bool ANCHORED = false,
         const std::string& codeTag = "Instance"
     )
@@ -68,6 +68,7 @@ public:
         InstanceID(instanceID),
         Selected(selected),
         Deleted(deleted),
+        IsVisibleInExplorer(isvisibleinexplorer),
         CodeTag(codeTag)
     {
     }
@@ -77,7 +78,7 @@ public:
     virtual bool HaveSize() const { return false; }
     virtual bool HavePos() const { return false; }
     virtual bool HaveOrientation() const { return false; }
-
+    virtual bool ShowsInExplorer() const { return false; };
     virtual bool HaveVelocity() const { return false; }
     virtual bool HaveAnchored() const { return false; }
     virtual bool HaveOBJMesh() const { return false; }
