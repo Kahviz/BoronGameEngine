@@ -9,7 +9,7 @@ struct Vertex
     FLOAT3 pos;        // offset 4
     FLOAT3 color;      // offset 16
     FLOAT3 normal;     // offset 28
-
+    FLOAT2 uv;
     Vertex() = default;
 
     Vertex(float b, const FLOAT3& p, const FLOAT3& c, const FLOAT3& n)

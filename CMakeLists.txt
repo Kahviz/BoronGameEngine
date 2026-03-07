@@ -52,7 +52,7 @@ add_executable(UntitledGameEngine
     Core/Instances/Instances/Mesh/DX11/MeshDX11.cpp
     Core/Instances/Instances/Mesh/Vulkan/MeshVulkan.cpp
     Core/Gui/ImGuiManager.cpp
-    Core/Gui/MakeGui.cpp
+    "Editor/Gui/MakeGui.cpp"
     Core/Misc/Colission/Colission.cpp
     Core/Misc/Controller/Controller.cpp
     Core/Misc/Timer/Timer.cpp
@@ -68,7 +68,7 @@ add_executable(UntitledGameEngine
     ${IMGUI_SOURCES}
     Core/Debugging/Functions/UGE_ASSERTS.h
     Core/Libs/ImGui/imgui_demo.cpp
- "include/Math/M_Utils.h" "include/Math/StoreFloat.h" "include/Math/MatrixLookAtLH.h" "include/Math/TransformNormal.h" "include/Math/LoadINT.h" "include/Math/Variables.h")
+ "include/Math/M_Utils.h" "include/Math/StoreFloat.h" "include/Math/MatrixLookAtLH.h" "include/Math/TransformNormal.h" "include/Math/LoadINT.h" "include/Math/Variables.h" "Core/Graphics/Texture/Texture.h" "Core/Graphics/Texture/Texture.cpp" "include/Math/FLOAT2.h")
 
 # ---------------- Include dirs ----------------
 target_include_directories(UntitledGameEngine PRIVATE

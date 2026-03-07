@@ -65,20 +65,23 @@ private:
     void CreateConstantBuffers();
     void CompileShaders();
 
+    ID3D11ShaderResourceView* Load(std::string path);
+
     Camera camera;
     const float Gravity = 9.81f;
     float Fov = DirectX::XMConvertToRadians(90.0f);
 
-    // COM smart pointerit
     ComPtr<ID3D11Device> pDevice;
     ComPtr<ID3D11DeviceContext> pContext;
     ComPtr<IDXGISwapChain> pSwap;
     ComPtr<ID3D11RenderTargetView> pTarget;
     ComPtr<ID3D11DepthStencilView> pDepthStencilView;
+    ComPtr<ID3D11ShaderResourceView> pTexture;
 
     ComPtr<ID3D11Buffer> pConstantBuffer;
     ComPtr<ID3D11Buffer> pColorBuffer;
     ComPtr<ID3D11Buffer> pLightingBuffer;
+    ComPtr<ID3D11SamplerState> pSampler;
 
     ComPtr<ID3D11VertexShader> pVS;
     ComPtr<ID3D11PixelShader> pPS;

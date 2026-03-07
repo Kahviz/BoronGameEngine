@@ -42,9 +42,20 @@ void MeshDX11::Load(const std::string& file, ID3D11Device* device)
             m->mNormals[i].y,
             m->mNormals[i].z
         };
+
+        if (m->HasTextureCoords(0))
+        {
+            verts[i].uv = {
+                m->mTextureCoords[0][i].x,
+                m->mTextureCoords[0][i].y
+            };
+        }
+        else
+        {
+            verts[i].uv = { 0.0f, 0.0f };
+        }
     }
 
-    // --- Indices (32-bit) ---
     indices.clear();
     indices.reserve(m->mNumFaces * 3);
 
@@ -64,7 +75,6 @@ void MeshDX11::Load(const std::string& file, ID3D11Device* device)
     if (indexCount == 0)
         throw std::runtime_error("Mesh has no indices");
 
-    // --- Vertex buffer ---
     D3D11_BUFFER_DESC vbd{};
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vbd.ByteWidth = sizeof(Vertex) * static_cast<UINT>(verts.size());
@@ -76,7 +86,6 @@ void MeshDX11::Load(const std::string& file, ID3D11Device* device)
     if (FAILED(device->CreateBuffer(&vbd, &vsd, &vb)))
         throw std::runtime_error("Failed to create Vertex buffer");
 
-    // --- Index buffer ---
     D3D11_BUFFER_DESC ibd{};
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
     ibd.ByteWidth = sizeof(uint32_t) * indexCount;

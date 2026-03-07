@@ -6,10 +6,11 @@ cbuffer CBuf : register(b0)
 
 struct VS_INPUT
 {
-    float3 pos : POSITION; // 12 tavua
-    float3 normal : NORMAL; // 12 tavua
-    float3 color : COLOR; // 12 tavua
-    float brightness : BRIGHTNESS; // 4 tavua
+    float3 pos : POSITION;
+    float3 normal : NORMAL;
+    float3 color : COLOR;
+    float brightness : BRIGHTNESS;
+    float2 tex : TEXCOORD0;
 };
 
 struct VS_OUTPUT
@@ -19,17 +20,19 @@ struct VS_OUTPUT
     float3 normal : TEXCOORD1;
     float3 color : COLOR0;
     float brightness : TEXCOORD2;
+    float2 tex : TEXCOORD3;
 };
 
 VS_OUTPUT main(VS_INPUT input)
 {
     VS_OUTPUT output;
 
-    output.pos = mul(float4(input.pos, 1.0f), transform);
+    output.pos = mul(float4(input.pos, 1), transform);
     output.worldPos = input.pos;
     output.normal = normalize(input.normal);
-    output.color = input.color; // Käytä meshin omaa väriä
+    output.color = input.color;
     output.brightness = input.brightness;
+    output.tex = input.tex;
 
     return output;
 }

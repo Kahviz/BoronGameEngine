@@ -6,7 +6,6 @@
 #include <Object.h>
 #include <GLOBALS.h>
 #include <CameraControl.h>
-#include "MakeGui.h"
 #include "UGE_ASSERTS.h"
 
 #ifdef _WIN32

@@ -5,7 +5,9 @@
 #include "imgui.h"
 #include "Window/Window.h"
 #include "GLOBALS.h"
-#include "MakeGui.h"
+#if INEDITOR == 1
+    #include "../Editor/Gui/MakeGui.h"
+#endif
 #include <Debugging/Profiler/Profiler.h>
 
 class Instance;

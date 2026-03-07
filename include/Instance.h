@@ -74,6 +74,7 @@ public:
     }
 
     virtual bool CanDraw() const { return false; }
+    virtual bool HasTexture() const { return false; }
     virtual bool HaveColor() const { return false; }
     virtual bool HaveSize() const { return false; }
     virtual bool HavePos() const { return false; }

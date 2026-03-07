@@ -66,11 +66,12 @@ public:
     bool HaveSize() const override { return true; }
     bool HavePos() const override { return true; }
     bool HaveOrientation() const override { return true; }
-    bool ShowsInExplorer() const { return true; };
+    bool ShowsInExplorer() const override { return true; };
 
     bool HaveVelocity() const override { return true; }
     bool HaveAnchored() const override { return true; }
     bool HaveOBJMesh() const override { return true; }
+    bool HasTexture() const override { return true; }
 
     bool RayIntersects(const Vector3& rayOrigin, const Vector3& rayDir) override {
         auto& Vertices = OBJmesh.GetVertices();

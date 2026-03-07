@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include "GLOBALS.h"
 #include <wrl/client.h>
+#include <wincodec.h>
 
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"d3dcompiler.lib")
@@ -45,6 +46,17 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd)
     CreateConstantBuffers();
 
     CompileShaders();
+
+    D3D11_SAMPLER_DESC samp = {};
+    samp.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    samp.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samp.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samp.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    samp.MaxLOD = D3D11_FLOAT32_MAX;
+
+    pDevice->CreateSamplerState(&samp, &pSampler);
+
+    pTexture = Load(assets + "//Textures//TestTexture.png");
 }
 
 void Dx11Renderer::SetRenderTargetToScene() {
@@ -209,7 +221,6 @@ void Dx11Renderer::CreateConstantBuffers()
     hr = pDevice->CreateBuffer(&pcbd, nullptr, &pColorBuffer);
     if (FAILED(hr)) throw std::runtime_error("Failed to create pixel constant buffer");
 
-    // Lighting buffer (b1)
     D3D11_BUFFER_DESC lcbd = {};
     lcbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     lcbd.ByteWidth = sizeof(LightingCB);
@@ -241,7 +252,6 @@ void Dx11Renderer::CompileShaders()
     );
 
     if (FAILED(hr)) {
-        // Yritä ilman debug flagia
         hr = D3DCompileFromFile(
             L"VertexShader.hlsl",
             nullptr,
@@ -291,17 +301,11 @@ void Dx11Renderer::CompileShaders()
     if (FAILED(hr)) throw std::runtime_error("Failed to create pixel shader");
 
     D3D11_INPUT_ELEMENT_DESC ied[] = {
-        // BRIGHTNESS (float) offset 0
         {"BRIGHTNESS", 0, DXGI_FORMAT_R32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-
-        // POSITION (float3) offset 4
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 4, D3D11_INPUT_PER_VERTEX_DATA, 0},
-
-        // COLOR (float3) offset 16  <-- TÄMÄ LUKEE NORMALS
         {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
-
-        // NORMAL (float3) offset 28 <-- TÄMÄ LUKEE COLORIN
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
     hr = pDevice->CreateInputLayout(
@@ -313,6 +317,86 @@ void Dx11Renderer::CompileShaders()
     );
 
     if (FAILED(hr)) throw std::runtime_error("Failed to create input layout");
+}
+
+ID3D11ShaderResourceView* Dx11Renderer::Load(std::string path)
+{
+    if (!std::filesystem::exists(path))
+        return nullptr;
+
+    std::wstring wpath(path.begin(), path.end());
+
+    IWICImagingFactory* factory = nullptr;
+    CoCreateInstance(
+        CLSID_WICImagingFactory,
+        nullptr,
+        CLSCTX_INPROC_SERVER,
+        IID_PPV_ARGS(&factory)
+    );
+
+    IWICBitmapDecoder* decoder = nullptr;
+
+    factory->CreateDecoderFromFilename(
+        wpath.c_str(),
+        nullptr,
+        GENERIC_READ,
+        WICDecodeMetadataCacheOnLoad,
+        &decoder
+    );
+
+    IWICBitmapFrameDecode* frame = nullptr;
+    decoder->GetFrame(0, &frame);
+
+    IWICFormatConverter* converter = nullptr;
+    factory->CreateFormatConverter(&converter);
+
+    converter->Initialize(
+        frame,
+        GUID_WICPixelFormat32bppRGBA,
+        WICBitmapDitherTypeNone,
+        nullptr,
+        0.0,
+        WICBitmapPaletteTypeCustom
+    );
+
+    UINT width, height;
+    frame->GetSize(&width, &height);
+
+    std::vector<BYTE> pixels(width * height * 4);
+
+    converter->CopyPixels(
+        nullptr,
+        width * 4,
+        pixels.size(),
+        pixels.data()
+    );
+
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = width;
+    desc.Height = height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+    D3D11_SUBRESOURCE_DATA data = {};
+    data.pSysMem = pixels.data();
+    data.SysMemPitch = width * 4;
+
+    ID3D11Texture2D* texture = nullptr;
+    pDevice->CreateTexture2D(&desc, &data, &texture);
+
+    ID3D11ShaderResourceView* srv = nullptr;
+    pDevice->CreateShaderResourceView(texture, nullptr, &srv);
+
+    texture->Release();
+    converter->Release();
+    frame->Release();
+    decoder->Release();
+    factory->Release();
+
+    return srv;
 }
 
 void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd)
@@ -417,6 +501,12 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
 {
     for (auto& Instptr : Drawables) {
         Instance& inst = *Instptr.get();
+
+        pContext->VSSetShader(pVS.Get(), nullptr, 0);
+        pContext->PSSetShader(pPS.Get(), nullptr, 0);
+
+        pContext->PSSetShaderResources(0, 1, pTexture.GetAddressOf());
+        pContext->PSSetSamplers(0, 1, pSampler.GetAddressOf());
 
         if (inst.CanDraw()) {
             const Mesh& mesh = inst.OBJmesh;
