@@ -1,16 +1,16 @@
 @echo off
-echo === Compiling Vulkan Shaders ===
+echo Compiling Vulkan shaders
 
 REM Vertex shader
 if exist "Shaders\Source\vertex.glsl" (
     echo Compiling vertex.glsl...
-    "C:\VulkanSDK\1.4.335.0\Bin\glslangValidator.exe" -V "Shaders\Source\vertex.glsl" -o "Shaders\vertex.spv" --target-env vulkan1.2 -S vert
+    "C:\VulkanSDK\1.4.335.0\Bin\glslangValidator.exe" -V "Core\Shaders\Source\vertex.glsl" -o "Shaders\vertex.spv" --target-env vulkan1.2 -S vert
     if errorlevel 1 (
         echo ERROR: Failed to compile vertex shader
         pause
         exit /b 1
     ) else (
-        echo ✓ vertex.spv created
+        echo vertex.spv created
     )
 ) else (
     echo ERROR: vertex.glsl not found
@@ -22,13 +22,13 @@ if exist "Shaders\Source\vertex.glsl" (
 REM Fragment shader
 if exist "Shaders\Source\fragment.glsl" (
     echo Compiling fragment.glsl...
-    "C:\VulkanSDK\1.4.335.0\Bin\glslangValidator.exe" -V "Shaders\Source\fragment.glsl" -o "Shaders\fragment.spv" --target-env vulkan1.2 -S frag
+    "C:\VulkanSDK\1.4.335.0\Bin\glslangValidator.exe" -V "Core\Shaders\Source\fragment.glsl" -o "Shaders\fragment.spv" --target-env vulkan1.2 -S frag
     if errorlevel 1 (
         echo ERROR: Failed to compile fragment shader
         pause
         exit /b 1
     ) else (
-        echo ✓ fragment.spv created
+        echo fragment.spv created
     )
 ) else (
     echo ERROR: fragment.glsl not found
@@ -37,5 +37,5 @@ if exist "Shaders\Source\fragment.glsl" (
     exit /b 1
 )
 
-echo === Shaders compiled successfully ===
+echo Vulkan Shaders compiled successfully
 pause

@@ -9,6 +9,7 @@
 #include "Math/UntilitedMath.h"
 #include <Instances/Vertex.h>
 #include <Instances/Instances/Mesh/Mesh.h>
+#include "Graphics/Texture/Texture.h"
 
 using namespace DirectX;
 
@@ -24,14 +25,14 @@ class Raycasting;
 
 class Object : public Instance {
 public:
-
     std::string Path;
     std::string CodeTag;
+    Texture texture;
 
     Object(
         const std::string& name = "",
         int instanceID = 1,
-        const FLOAT3& position = { 0.0f,0.0f,0.0f },  // ← NIMI: position
+        const FLOAT3& position = { 0.0f,0.0f,0.0f },
         const FLOAT3& Size = { 1.0f,1.0f,1.0f },
         const INT3& col = { 168, 160, 160 },
         const INT3& ogcolor = { 168, 160, 160 },
@@ -40,25 +41,30 @@ public:
         const bool Anchored = false,
         Mesh OBJmesh = Mesh()
     )
-        : Instance(name,  
-            position,     
-            Size,          
-            col,          
-            ogcolor,     
-            ORIENTATION,    
-            VELOCITY,  
-            OBJmesh, 
+        : Instance(name,
+            position,
+            Size,
+            col,
+            ogcolor,
+            ORIENTATION,
+            VELOCITY,
+            OBJmesh,
             UniqueID,
             instanceID,
             false,
             false,
-            true, //In Explorer
+            true,
             Anchored,
             "Decent"
-        ), 
-        Path("")
+        ),
+        Path(""),
+        texture()
     {
         
+    }
+
+    Texture* GetTexture() override {
+        return &texture;
     }
 
     bool CanDraw() const override { return true; }

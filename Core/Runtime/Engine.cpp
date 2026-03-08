@@ -192,6 +192,13 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
 #endif
     obj->Selected = Selec;
 
+    std::string fullPath = assets + "\\Textures\\TestTexture.png";
+    std::cout << fullPath << std::endl;
+
+
+#if DIRECTX11 == 1
+    obj->texture.Load(fullPath, *window.GetGraphics().DR.get());
+#endif
     Instance* objPtr = obj.get();
     Drawables.push_back(std::move(obj));
 
@@ -258,7 +265,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     if (InProject) {
         if (!CubeB) {
-            AddAMesh("\\Cube.obj", "Cube", { 0,0,0 }, { 0.5,0.5,0.5 }, false);
+            AddAMesh("\\Cube.obj", "Cube", { 0,0,0 }, { 0.5,1,0.5 }, false);
             wnd->GetGraphics().GetCamera().SetPosition({ 5,5,5 });
             wnd->GetGraphics().GetCamera().SetRotation({ 0.625999,3.926,0 });
             CubeB = true;

@@ -68,9 +68,9 @@ add_executable(UntitledGameEngine
     ${IMGUI_SOURCES}
     Core/Debugging/Functions/UGE_ASSERTS.h
     Core/Libs/ImGui/imgui_demo.cpp
- "include/Math/M_Utils.h" "include/Math/StoreFloat.h" "include/Math/MatrixLookAtLH.h" "include/Math/TransformNormal.h" "include/Math/LoadINT.h" "include/Math/Variables.h" "Core/Graphics/Texture/Texture.h" "Core/Graphics/Texture/Texture.cpp" "include/Math/FLOAT2.h")
+    "include/Math/M_Utils.h" "include/Math/StoreFloat.h" "include/Math/MatrixLookAtLH.h" "include/Math/TransformNormal.h" "include/Math/LoadINT.h" "include/Math/Variables.h" "Core/Graphics/Texture/Texture.h" "Core/Graphics/Texture/Texture.cpp" "include/Math/FLOAT2.h"
+)
 
-# ---------------- Include dirs ----------------
 target_include_directories(UntitledGameEngine PRIVATE
     include
     Core
@@ -80,11 +80,10 @@ target_include_directories(UntitledGameEngine PRIVATE
     Core/Libs/ImGui/backends
     Core/Instances/Instances/
     Core/Debugging/Functions/
-
+    Core/Graphics/Texture/
     ${Vulkan_INCLUDE_DIRS}
 )
 
-# ---------------- Link libraries ----------------
 target_link_libraries(UntitledGameEngine PRIVATE
     ${CMAKE_SOURCE_DIR}/Libs/assimp-vc143-mt.lib
     ${CMAKE_SOURCE_DIR}/Libs/SDL3.lib

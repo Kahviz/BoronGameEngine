@@ -8,6 +8,7 @@
 #include "GLOBALS.h"
 #include <wrl/client.h>
 #include <wincodec.h>
+#include <Instance.h>
 
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"d3dcompiler.lib")
@@ -55,8 +56,6 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd)
     samp.MaxLOD = D3D11_FLOAT32_MAX;
 
     pDevice->CreateSamplerState(&samp, &pSampler);
-
-    pTexture = Load(assets + "//Textures//TestTexture.png");
 }
 
 void Dx11Renderer::SetRenderTargetToScene() {
@@ -505,7 +504,12 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
         pContext->VSSetShader(pVS.Get(), nullptr, 0);
         pContext->PSSetShader(pPS.Get(), nullptr, 0);
 
-        pContext->PSSetShaderResources(0, 1, pTexture.GetAddressOf());
+        if (Texture* tex = inst.GetTexture()) {
+            #if DIRECTX11 == 1
+                pContext->PSSetShaderResources(0, 1, tex->GetTextureComPtr().GetAddressOf());
+            #endif
+        }
+
         pContext->PSSetSamplers(0, 1, pSampler.GetAddressOf());
 
         if (inst.CanDraw()) {

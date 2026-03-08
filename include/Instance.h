@@ -5,6 +5,8 @@
 #include "Math/UntilitedMath.h"
 #include "Instances/Instances/Mesh/Mesh.h"
 
+class Texture;
+
 class Instance {
 public:
     Mesh OBJmesh;
@@ -73,13 +75,14 @@ public:
     {
     }
 
+    virtual Texture* GetTexture() { return nullptr; }
     virtual bool CanDraw() const { return false; }
     virtual bool HasTexture() const { return false; }
     virtual bool HaveColor() const { return false; }
     virtual bool HaveSize() const { return false; }
     virtual bool HavePos() const { return false; }
     virtual bool HaveOrientation() const { return false; }
-    virtual bool ShowsInExplorer() const { return false; };
+    virtual bool ShowsInExplorer() const { return false; }
     virtual bool HaveVelocity() const { return false; }
     virtual bool HaveAnchored() const { return false; }
     virtual bool HaveOBJMesh() const { return false; }

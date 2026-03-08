@@ -7,6 +7,7 @@
 #include <Instance.h>
 #include <Instances/Instances/Mesh/Mesh.h>
 #include "GLOBALS.h"
+#include "Graphics/Texture/Texture.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -76,7 +77,6 @@ private:
     ComPtr<IDXGISwapChain> pSwap;
     ComPtr<ID3D11RenderTargetView> pTarget;
     ComPtr<ID3D11DepthStencilView> pDepthStencilView;
-    ComPtr<ID3D11ShaderResourceView> pTexture;
 
     ComPtr<ID3D11Buffer> pConstantBuffer;
     ComPtr<ID3D11Buffer> pColorBuffer;

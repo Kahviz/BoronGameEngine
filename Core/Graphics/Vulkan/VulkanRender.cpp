@@ -346,7 +346,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     memcpy(data, vertices.data(), (size_t)bufferInfo.size);
     vkUnmapMemory(device, vertexBufferMemory);
 
-    std::string Shaders = std::string(PROJECT_DIR) + "Shaders/";
+    std::string Shaders = std::string(PROJECT_DIR) + "Core/Shaders/";
 
     auto vertShaderCode = ReadFile(Shaders + "vertex.spv");
     auto fragShaderCode = ReadFile(Shaders + "fragment.spv");
