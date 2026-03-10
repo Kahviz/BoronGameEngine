@@ -81,7 +81,7 @@ add_executable(UntitledGameEngine
     Core/Libs/ImGui/imgui_demo.cpp
     Core/Graphics/Texture/Texture.h 
     Core/Graphics/Texture/Texture.cpp 
-
+    Core/UntilitedPhysics/Physics.cpp
     #Editor
     Editor/Gui/MakeGui.cpp
     Editor/Camera/CameraControl.cpp
@@ -94,7 +94,7 @@ add_executable(UntitledGameEngine
     include/Math/LoadINT.h
     include/Math/Variables.h 
     include/Math/FLOAT2.h
- "UntilitedGameEngine.h" "Core/Multiplatform/UntilitedPlatform.h" "Core/UntilitedPhysics/Gravity.h")
+ "UntilitedGameEngine.h" "Core/Multiplatform/UntilitedPlatform.h" "Core/UntilitedPhysics/Gravity.h" "Core/UntilitedPhysics/Physics.h")
 
 target_include_directories(UntitledGameEngine PRIVATE
     include

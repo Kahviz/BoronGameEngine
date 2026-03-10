@@ -120,10 +120,16 @@ void MakeGui::MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Dra
         Typing = false;
     }
 
-    world.Name = "World";
-    world.Parent = nullptr;
-    world.CodeTag = "World";
+    static bool firstTime = true;
+    if (firstTime) {
+        firstTime = false;
 
+        world.Name = "World";
+        world.Parent = nullptr;
+        world.CodeTag = "World";
+        strcpy_s(world.NameText, sizeof(world.NameText), "World");
+    }
+    
     ImGuiIO& io = ImGui::GetIO();
     ImGuiWindowFlags window_flags = 0;
 
@@ -172,11 +178,24 @@ void MakeGui::MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Dra
         ImGuiWindowFlags_AlwaysHorizontalScrollbar |
         ImGuiWindowFlags_AlwaysVerticalScrollbar
     );
+    
+    if (world.Selected) {
+        for (const auto& Drawable : Drawables) {
+            Drawable.get()->Selected = false;
+        }
+
+        ImGui::Text("Name: ");
+        ImGui::SameLine();
+        ImGui::InputText("##NameWORLD", world.NameText, sizeof(world.NameText));
+        world.Name = world.NameText;
+    }
 
     for (const auto& Drawable : Drawables) {
         if (Drawable.get()->Selected) {
+            world.Selected = false;
+
             Instance& inst = *Drawable.get();
-            
+
             //Name
             ImGui::Text("Name: ");
             ImGui::SameLine();
@@ -184,9 +203,12 @@ void MakeGui::MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Dra
             inst.Name = inst.NameText;
             //Pos
             MakeFloat3Edit("Position", inst.pos);
-           
+            
+
+            //Anchored
+            ImGui::Checkbox("Anchored: ", &inst.Anchored);
             //Size
-            //MakeFloat3Edit("Size", inst.Size);
+            //MakeFloat3Edit("Size", inst.Size); UNIQUE ID
         }
     }
 
@@ -212,7 +234,18 @@ void MakeGui::MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Dra
         ImGuiWindowFlags_AlwaysVerticalScrollbar
     );
 
-    if (ImGui::TreeNodeEx("World", ImGuiTreeNodeFlags_OpenOnArrow))
+    std::string WorldName = world.Name + " ##world";
+
+    bool worldNodeOpen = ImGui::TreeNodeEx(WorldName.c_str(), ImGuiTreeNodeFlags_OpenOnArrow);
+
+    if (ImGui::IsItemClicked()) {
+        for (auto& i : Drawables) {
+            i->Deselect();
+        }
+        world.Selected = true;
+    }
+
+    if (worldNodeOpen)
     {
         for (auto& instPtr : Drawables)
         {
@@ -233,7 +266,6 @@ void MakeGui::MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Dra
                     ImGui::TreePop();
                 }
             }
-            
 
             if (ImGui::IsItemClicked())
             {
@@ -241,8 +273,10 @@ void MakeGui::MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Dra
                     i->Deselect();
 
                 inst->Select();
+                world.Selected = false;
             }
         }
+
         ImGui::TreePop();
     }
 

@@ -12,7 +12,7 @@ public:
     Mesh OBJmesh;
     FLOAT3 Velocity;
 
-    bool Anchored;
+    bool Anchored = true;
 
     Instance* Parent = nullptr;
     std::vector<Instance*> Children;
@@ -42,7 +42,7 @@ public:
     bool IsVisibleInExplorer = false;
 
     Instance(
-        const std::string& name = "",
+        const std::string& name = "Instance",
         const FLOAT3& position = { 0, 0, 0 },
         const FLOAT3& SIZE = { 0, 0, 0 },
         const INT3& COLOR = { 0, 0, 0 },

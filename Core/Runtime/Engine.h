@@ -11,6 +11,7 @@
 #endif
 #include "Debugging/Profiler/Profiler.h"
 #include "Instances/Instance.h"
+#include "UntilitedPhysics/Physics.h"
 
 class Instance;
 
@@ -26,10 +27,11 @@ private:
     void EngineDoFrame(Window* wnd, float deltatime);
     bool ImGuiInited = false;
 
+    Physics physics;
     Profiler profiler;
     MakeGui makeGui;
     Window window;
-    std::vector<std::unique_ptr<Instance>> Drawables;
+    std::vector<std::unique_ptr<Instance>> Drawables = {};
 
     bool InProject = false;
     int Index = 0;

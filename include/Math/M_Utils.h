@@ -12,6 +12,12 @@ inline float RadiansToDegrees(float radians)
 }
 
 template<typename T>
+//Requaires x,y,z
+inline auto SumAllVec3(T a) {
+	return a.x + a.y + a.z;
+}
+
+template<typename T>
 inline T Min(T a, T b) {
     return (a < b) ? a : b;
 }

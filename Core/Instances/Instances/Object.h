@@ -38,7 +38,7 @@ public:
         const INT3& ogcolor = { 168, 160, 160 },
         const FLOAT3& VELOCITY = { 0.0f,0.0f,0.0f },
         const FLOAT3& ORIENTATION = { 0.0f,0.0f,0.0f },
-        const bool Anchored = false,
+        const bool Anchored = true,
         Mesh OBJmesh = Mesh()
     )
         : Instance(name,

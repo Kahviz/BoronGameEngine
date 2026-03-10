@@ -6,6 +6,7 @@
 #include <GLOBALS.h>
 #include "../Editor/Camera/CameraControl.h"
 #include "UGE_ASSERTS.h"
+#include "UntilitedPhysics/Physics.h"
 
 #ifdef _WIN32
     #define GLFW_EXPOSE_NATIVE_WIN32
@@ -159,7 +160,8 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
             static_cast<int>(Color3.z * 255.0f)
         )
     );
-    
+    memcpy(obj->NameText, obj->Name.c_str(), sizeof(obj->NameText));
+
     obj->UniqueID = Index;
 
 #if DIRECTX11 == 1
@@ -264,6 +266,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     if (InProject) {
         if (!CubeB) {
             AddAMesh("\\Cube.obj", "Cube", { 0,0,0 }, { 0.5,1,0.5 }, false);
+            AddAMesh("\\Cylinder.obj", "Cylinder", { 1,0,0 }, { 0.5,1,0.5 }, false);
             wnd->GetGraphics().GetCamera().SetPosition({ 5,5,5 });
             wnd->GetGraphics().GetCamera().SetRotation({ 0.625999,3.926,0 });
             CubeB = true;
@@ -271,12 +274,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 
     bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
-
-    if (InProject) {
-        if (ctrlPressed) {
-            // AddAMesh("\\Cylinder.obj", "TestCylinder", { 0,0,0 }, { 0.5,1,0.5 }, false);
-        }
-    }
 
 #if INEDITOR == 1
     if (ImGuiInited) {
@@ -322,7 +319,15 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         }
     }
 #endif
+    //Physics
+    for (auto& Drawableptr : Drawables) {
+        auto Drawable = Drawableptr.get();
 
+        if (Drawable->Anchored) { continue; }
+        if (!Drawable->CanDraw()) { continue; }
+
+        physics.ApplyGravity(*Drawable,deltatime);
+    }
 #if DIRECTX11 == 1
     wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
 #endif
