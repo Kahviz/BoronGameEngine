@@ -20,11 +20,14 @@ void MeshVK::Load(
         file,
         aiProcess_Triangulate |
         aiProcess_FlipUVs |
-        aiProcess_GenNormals
+        aiProcess_GenNormals |
+        aiProcess_JoinIdenticalVertices |
+        aiProcess_OptimizeMeshes
     );
 
     if (!scene || !scene->HasMeshes())
         throw std::runtime_error("Failed to load model: " + std::string(imp.GetErrorString()));
+
 
     aiMesh* m = scene->mMeshes[0];
     if (!m || m->mNumVertices == 0)
@@ -50,6 +53,7 @@ void MeshVK::Load(
 
         verts[i].color = { 1, 1, 1 };
         verts[i].brightness = 1.0f;
+        verts[i].uv = { 0,0 };
     }
 
     indices.reserve(m->mNumFaces * 3);
@@ -71,12 +75,12 @@ void MeshVK::Load(
     VkDeviceSize vSize = sizeof(Vertex) * verts.size();
     VkDeviceSize iSize = sizeof(uint32_t) * indices.size();
 
-    // -------- Staging buffers --------
+    //Staging buffers
     VkBuffer vStaging, iStaging;
     VkDeviceMemory vStagingMem, iStagingMem;
 
     CreateBuffer(
-        iSize,
+        vSize,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         vStaging,

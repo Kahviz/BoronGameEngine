@@ -2,9 +2,9 @@
 echo Compiling Vulkan shaders
 
 REM Vertex shader
-if exist "Shaders\Source\vertex.glsl" (
+if exist "Core\Shaders\Source\vertex.glsl" (
     echo Compiling vertex.glsl...
-    "C:\VulkanSDK\1.4.335.0\Bin\glslangValidator.exe" -V "Core\Shaders\Source\vertex.glsl" -o "Shaders\vertex.spv" --target-env vulkan1.2 -S vert
+    "C:\VulkanSDK\1.4.335.0\Bin\glslangValidator.exe" -V "Core\Shaders\Source\vertex.glsl" -o "Core\Shaders\vertex.spv" --target-env vulkan1.2 -S vert
     if errorlevel 1 (
         echo ERROR: Failed to compile vertex shader
         pause
@@ -20,9 +20,9 @@ if exist "Shaders\Source\vertex.glsl" (
 )
 
 REM Fragment shader
-if exist "Shaders\Source\fragment.glsl" (
+if exist "Core\Shaders\Source\fragment.glsl" (
     echo Compiling fragment.glsl...
-    "C:\VulkanSDK\1.4.335.0\Bin\glslangValidator.exe" -V "Core\Shaders\Source\fragment.glsl" -o "Shaders\fragment.spv" --target-env vulkan1.2 -S frag
+    "C:\VulkanSDK\1.4.335.0\Bin\glslangValidator.exe" -V "Core\Shaders\Source\fragment.glsl" -o "Core\Shaders\fragment.spv" --target-env vulkan1.2 -S frag
     if errorlevel 1 (
         echo ERROR: Failed to compile fragment shader
         pause

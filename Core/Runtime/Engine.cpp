@@ -141,6 +141,14 @@ int Engine::EngineRun()
         glfwPollEvents();
     }
 
+#if VULKAN == 1
+    for (auto& Drawable : Drawables) {
+        if (Drawable->GetTexture()->IsLoaded()) {
+            Drawable->GetTexture()->Cleanup(window.GetGraphics().GetDevice());
+        }
+    }
+#endif
+
     profiler.PrintInformation();
 
     return 0;
@@ -198,6 +206,9 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
 
 #if DIRECTX11 == 1
     obj->texture.Load(fullPath, *window.GetGraphics().DR.get());
+#endif
+#if VULKAN == 1
+    obj->texture.LoadVK(fullPath, *window.GetGraphics().VR.get());
 #endif
     Instance* objPtr = obj.get();
     Drawables.push_back(std::move(obj));

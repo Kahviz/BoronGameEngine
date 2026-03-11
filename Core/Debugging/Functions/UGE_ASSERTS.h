@@ -38,14 +38,14 @@
 	template<typename T>
 	void UGE_ASSERT_VK_HANDLE(T handle, const std::string& message,
 		const std::source_location& location = std::source_location::current()) {
-	#if VULKAN == 1
-		if (handle == VK_NULL_HANDLE) {
-			std::string errorMsg = std::format("UGE_ASSERT failed: Vulkan handle is VK_NULL_HANDLE!\nMessage: {}\nFile: {} (line: {})",
-				message,
-				location.file_name(), location.line());
-			MakeAError(errorMsg);
-		}
-	#endif
+		#if VULKAN == 1
+			if (handle == VK_NULL_HANDLE) {
+				std::string errorMsg = std::format("UGE_ASSERT failed: Vulkan handle is VK_NULL_HANDLE!\nMessage: {}\nFile: {} (line: {})",
+					message,
+					location.file_name(), location.line());
+				MakeAError(errorMsg);
+			}
+		#endif
 	}
 
 	#define UGE_VK_ASSERT(handle, message) \

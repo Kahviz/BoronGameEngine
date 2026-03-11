@@ -110,6 +110,7 @@ target_include_directories(UntitledGameEngine PRIVATE
     Core/Graphics/Texture/
     Editor/Camera/
     Core/Services/
+    Libs/STBIcons/ 
     ${Vulkan_INCLUDE_DIRS}
 )
 
