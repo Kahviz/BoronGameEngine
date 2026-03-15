@@ -1,3 +1,6 @@
+#include "GLOBALS.h"
+
+#if DIRECTX11 == 1
 #pragma once
 #include <d3d11.h>
 #include <DirectXMath.h>
@@ -103,3 +106,4 @@ private:
     ComPtr<ID3D11PixelShader> pPSTexture;
     ComPtr<ID3D11PixelShader> pPSNoTexture;
 };
+#endif

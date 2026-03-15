@@ -1,4 +1,9 @@
+#include "GLOBALS.h"
+
+#if VULKAN == 1
+
 #include "VulkanRender.h"
+
 #include <cstdint>
 #include <vulkan/vulkan.h>
 #include <iostream>
@@ -1038,7 +1043,7 @@ void VulkanRender::createDescriptorSets(const Instance* inst) {
     VkDescriptorBufferInfo bufferInfo{};
     bufferInfo.buffer = uniformBuffer;
     bufferInfo.offset = 0;
-    bufferInfo.range = dynamicAlignment; 
+    bufferInfo.range = dynamicAlignment;
 
     VkDescriptorImageInfo imageInfo{};
     if (texture != nullptr && texture->IsLoadedConst()) {
@@ -1295,3 +1300,5 @@ void VulkanRender::EndSingleTimeCommands(VkCommandBuffer commandBuffer) {
 
     vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
+
+#endif

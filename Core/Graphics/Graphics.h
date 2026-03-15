@@ -1,16 +1,17 @@
 #pragma once
 
 #include <memory>
-#include <d3d11.h>
-#include <DirectXMath.h>
 #include <string>
 #include "Camera/Camera.h"
-#include <wrl/client.h>
 #include "GLFW/glfw3.h"
 #include "GLOBALS.h"
+
 class Window;
 
 #if DIRECTX11 == 1
+    #include <d3d11.h>
+    #include <DirectXMath.h>
+    #include <wrl/client.h>
     #include "Dx11/Dx11Renderer.h"
 #endif
 #if VULKAN == 1

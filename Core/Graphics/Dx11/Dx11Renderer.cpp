@@ -1,3 +1,5 @@
+#include "GLOBALS.h"
+
 #if DIRECTX11 == 1
 #include "Dx11Renderer.h"
 #include "Releaser.h"
@@ -6,7 +8,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <stdexcept>
-#include "GLOBALS.h"
 #include <wrl/client.h>
 #include <wincodec.h>
 #include <Instances/Instance.h>

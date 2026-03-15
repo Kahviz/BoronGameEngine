@@ -1,3 +1,6 @@
+#include "GLOBALS.h"
+
+#if VULKAN == 1
 #pragma once
 #include <vector>
 #include <array>
@@ -57,7 +60,7 @@ public:
     std::vector<VkCommandBuffer> GetCommandBuffers() { return commandBuffers; };
     size_t GetGraphicsFamilyIndex() { return graphicsFamilyIndex; };
     std::vector<VkImageView> GetSwapChainImageViews() { return swapchainImageViews; };
-    VkRenderPass GetRenderPass() { return renderPass; };  
+    VkRenderPass GetRenderPass() { return renderPass; };
     VkCommandBuffer GetCurrentFrameCommandBuffer() { return commandBuffers[currentFrame]; };
     VkCommandPool GetCommandPool() { return commandPool; }
     VkDevice GetDevice() { return device; };
@@ -126,3 +129,4 @@ private:
     VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
     VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
 };
+#endif

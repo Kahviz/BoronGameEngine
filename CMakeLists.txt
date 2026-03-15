@@ -5,6 +5,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
+##How to add a new shader to DX11
+##You just need add it's properties to SHADER_FILES, SHADER_NAMES, SHADER_TYPES,SHADER_FILES
+
 if(MSVC)
     set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<CONFIG:Debug,RelWithDebInfo>,ProgramDatabase,Embedded>")
     
@@ -20,7 +23,7 @@ endif()
 find_package(Vulkan REQUIRED)
 
 if(NOT Vulkan_FOUND)
-    message(FATAL_ERROR "Vulkan SDK not found.\nInstall it from https://vulkan.lunarg.com/")
+    message(FATAL_ERROR "Vulkan SDK not found.\nInstall it from https://vulkan.lunarg.com/ or just goto GLOBALS.h and put VULKAN = 0 and DIRECTX11 = 1")
 endif()
 
 message(STATUS "Using Vulkan SDK at: ${Vulkan_INCLUDE_DIRS}")
@@ -82,6 +85,9 @@ add_executable(UntitledGameEngine
     Core/Graphics/Texture/Texture.h 
     Core/Graphics/Texture/Texture.cpp 
     Core/UntilitedPhysics/Physics.cpp
+    Core/Multiplatform/UntilitedPlatform.h
+    Core/UntilitedPhysics/Gravity.h
+    Core/UntilitedPhysics/Physics.h
     #Editor
     Editor/Gui/MakeGui.cpp
     Editor/Camera/CameraControl.cpp
@@ -94,7 +100,9 @@ add_executable(UntitledGameEngine
     include/Math/LoadINT.h
     include/Math/Variables.h 
     include/Math/FLOAT2.h
- "UntilitedGameEngine.h" "Core/Multiplatform/UntilitedPlatform.h" "Core/UntilitedPhysics/Gravity.h" "Core/UntilitedPhysics/Physics.h")
+
+    UntilitedGameEngine.h
+)
 
 target_include_directories(UntitledGameEngine PRIVATE
     include
@@ -155,29 +163,52 @@ foreach(shader ${SHADER_FILES})
 endforeach()
 
 if(WIN32)
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/VertexShader.cso
-        COMMAND fxc.exe /T vs_5_0 /E main /Fo "${CMAKE_CURRENT_BINARY_DIR}/VertexShader.cso"
-                "${CMAKE_SOURCE_DIR}/Core/Shaders/VertexShader.hlsl"
-        DEPENDS "${CMAKE_SOURCE_DIR}/Core/Shaders/VertexShader.hlsl"
-        COMMENT "Compiling Vertex Shader"
+    set(SHADER_NAMES
+        VertexShader
+        PixelShader
+        PixelShaderTexture
     )
     
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PixelShader.cso
-        COMMAND fxc.exe /T ps_5_0 /E main /Fo "${CMAKE_CURRENT_BINARY_DIR}/PixelShader.cso"
-                "${CMAKE_SOURCE_DIR}/Core/Shaders/PixelShader.hlsl"
-        DEPENDS "${CMAKE_SOURCE_DIR}/Core/Shaders/PixelShader.hlsl"
-        COMMENT "Compiling Pixel Shader"
+    set(SHADER_TYPES
+        vs_5_0
+        ps_5_0
+        ps_5_0
     )
-
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PixelShaderTexture.cso
-        COMMAND fxc.exe /T ps_5_0 /E main /Fo "${CMAKE_CURRENT_BINARY_DIR}/PixelShaderTexture.cso"
-                "${CMAKE_SOURCE_DIR}/Core/Shaders/PixelShaderTexture.hlsl"
-        DEPENDS "${CMAKE_SOURCE_DIR}/Core/Shaders/PixelShaderTexture.hlsl"
-        COMMENT "Compiling PixelTexture Shader"
+    
+    set(SHADER_FILES
+        VertexShader.hlsl
+        PixelShader.hlsl
+        PixelShaderTexture.hlsl
     )
+    
+    list(LENGTH SHADER_NAMES SHADER_COUNT)
+    
+    foreach(index RANGE ${SHADER_COUNT})
+        math(EXPR current_index "${index} - 1")
+        
+        if(current_index GREATER -1 AND current_index LESS ${SHADER_COUNT})
+            list(GET SHADER_NAMES ${current_index} shader_name)
+            list(GET SHADER_TYPES ${current_index} shader_type)
+            list(GET SHADER_FILES ${current_index} shader_file)
+            
+            set(output_file "${CMAKE_CURRENT_BINARY_DIR}/${shader_name}.cso")
+            set(input_file "${CMAKE_SOURCE_DIR}/Core/Shaders/${shader_file}")
+            
+            add_custom_command(
+                OUTPUT ${output_file}
+                COMMAND fxc.exe /T ${shader_type} /E main /Fo "${output_file}" "${input_file}"
+                DEPENDS ${input_file}
+                COMMENT "Compiling ${shader_name}"
+            )
+            
+            list(APPEND GENERATED_SHADERS ${output_file})
+        endif()
+    endforeach()
+    
+    if(GENERATED_SHADERS)
+        add_custom_target(CompileShaders DEPENDS ${GENERATED_SHADERS})
+        add_dependencies(UntitledGameEngine CompileShaders)
+    endif()
 endif()
 
 if(MSVC)

@@ -17,10 +17,8 @@ layout(binding = 1) uniform sampler2D texSampler;
 
 void main() {
     if (ubo.usesTexture > 0.5) {
-        // Käytä tekstuuria
         outColor = texture(texSampler, fragUV);
     } else {
-        // Käytä vain väriä
         outColor = vec4(fragColor, 1.0);
     }
 }
