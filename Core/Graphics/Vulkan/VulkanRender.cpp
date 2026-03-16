@@ -56,27 +56,12 @@ const std::vector<uint32_t> indices = {
 
 bool VulkanRender::Init(GLFWwindow* window)
 {
-#ifdef _DEBUG
-    std::cout << "Vulkan Init Started\n";
-#endif
-
+    #ifdef _DEBUG
+        std::cout << "Vulkan Init Started\n";
+    #endif
 
     uint32_t extCount = 0;
-    const char** extensions = glfwGetRequiredInstanceExtensions(&extCount);
-
-    VkApplicationInfo appInfo{};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "UntilitedGameEngine";
-    appInfo.apiVersion = VK_API_VERSION_1_2;
-
-    VkInstanceCreateInfo instInfo{};
-    instInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    instInfo.pApplicationInfo = &appInfo;
-    instInfo.enabledExtensionCount = extCount;
-    instInfo.ppEnabledExtensionNames = extensions;
-
-    if (vkCreateInstance(&instInfo, nullptr, &instance) != VK_SUCCESS) {
-        MakeAError("Vulkan doesnt work");
+    if (!builder.MakeInstance(extCount, instance)) {
         return false;
     }
 
@@ -89,97 +74,15 @@ bool VulkanRender::Init(GLFWwindow* window)
 
     MakeASuccess("Surface Created");
 
-    uint32_t gpuCount = 0;
-    vkEnumeratePhysicalDevices(instance, &gpuCount, nullptr);
-
-    if (gpuCount == 0) {
-        MakeAError("No Vulkan GPU found");
+    if (!builder.ChooseGPU(physicalDevice, m_SC, instance)) {
         return false;
     }
 
-    std::vector<VkPhysicalDevice> gpus(gpuCount);
-    vkEnumeratePhysicalDevices(instance, &gpuCount, gpus.data());
-
-    int bestScore = -100000;
-
-    for (VkPhysicalDevice device : gpus) {
-        int score = m_SC.ScoreDevice(device);
-
-        VkPhysicalDeviceProperties props;
-        vkGetPhysicalDeviceProperties(device, &props);
-
-        #ifdef _DEBUG
-            std::cout << props.deviceName << " score = " << score << "\n";
-        #endif // _DEBUG
-
-
-        if (score > bestScore) {
-            bestScore = score;
-            physicalDevice = device;
-        }
-    }
-
-    if (physicalDevice == VK_NULL_HANDLE) {
-        MakeAError("No suitable GPU found");
+    if (!builder.InitQueueFamily(physicalDevice, graphicsFamilyIndex, surface)) {
         return false;
     }
 
-    VkPhysicalDeviceProperties selectedProps;
-    vkGetPhysicalDeviceProperties(physicalDevice, &selectedProps);
-
-#ifdef _DEBUG
-    std::cout << "Selected GPU: " << selectedProps.deviceName << "\n";
-
-    MakeAError("Test Error Message");
-    MakeAProblem("Test Problem");
-    MakeAWarning("Test Warning");
-#endif // _DEBUG
-
-    uint32_t queueFamilyCount = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
-
-    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
-
-    graphicsFamilyIndex = -1;
-
-    for (size_t i = 0; i < queueFamilies.size(); i++) {
-        if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-            VkBool32 presentSupport = false;
-
-            vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
-            if (presentSupport) {
-                graphicsFamilyIndex = i;
-                break;
-            }
-        }
-    }
-
-    if (graphicsFamilyIndex == -1) {
-        MakeAError("graphicsFamilyIndex == -1");
-        return false;
-    }
-
-    const char* deviceExtensions[] = { "VK_KHR_swapchain" };
-
-    float queuePriority = 1.0f;
-    VkDeviceQueueCreateInfo queueCreateInfo{};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueFamilyIndex = graphicsFamilyIndex;
-    queueCreateInfo.queueCount = 1;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
-
-    VkDeviceCreateInfo deviceCreateInfo{};
-    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    deviceCreateInfo.queueCreateInfoCount = 1;
-    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
-    deviceCreateInfo.enabledExtensionCount = 1;
-    deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions;
-    deviceCreateInfo.enabledLayerCount = 0;
-    deviceCreateInfo.pEnabledFeatures = nullptr;
-
-    if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device) != VK_SUCCESS) {
-        MakeAError("Can't Create a VkDevice");
+    if (!builder.CreateDevice(physicalDevice, device, graphicsFamilyIndex)) {
         return false;
     }
 
@@ -284,18 +187,9 @@ bool VulkanRender::Init(GLFWwindow* window)
 
 
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = surfaceFormat.format; 
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;  
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
     VkAttachmentReference colorAttachmentRef{};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    builder.CreateAttachments(colorAttachment, colorAttachmentRef, surfaceFormat);
 
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -638,7 +532,6 @@ bool VulkanRender::Init(GLFWwindow* window)
     createUniformBuffers();
     createDescriptorPool();
     createDescriptorSets(nullptr);
-
 
     MakeASuccess("No Fatal Errors in Vulkan Initing :D");
     return true;

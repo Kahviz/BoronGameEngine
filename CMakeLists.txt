@@ -102,7 +102,7 @@ add_executable(UntitledGameEngine
     include/Math/FLOAT2.h
 
     UntilitedGameEngine.h
-)
+ "Core/Graphics/Vulkan/VulkanBuilderInit.h" "Core/Graphics/Vulkan/VulkanBuilderInit.cpp")
 
 target_include_directories(UntitledGameEngine PRIVATE
     include

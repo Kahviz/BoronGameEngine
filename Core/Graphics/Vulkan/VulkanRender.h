@@ -21,6 +21,7 @@
 #include <Camera/Camera.h>
 #include <minmax.h>
 #include <algorithm>
+#include "VulkanBuilderInit.h"
 
 class Texture;
 
@@ -67,6 +68,7 @@ public:
     VkQueue GetGraphicsQueue() { return graphicsQueue; };
     VkPhysicalDevice GetPhysicalDevice() { return physicalDevice; };
 private:
+    Builder builder;
     Camera m_Camera;
     ScoreCounter m_SC;
     Texture* defaultTexture;
