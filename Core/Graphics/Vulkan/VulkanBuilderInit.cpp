@@ -138,3 +138,14 @@ void Builder::CreateAttachments(VkAttachmentDescription& colorAttachment, VkAtta
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 }
+
+void Builder::ChooseSurfaceFormat(VkSurfaceFormatKHR& surfaceFormat, std::vector<VkSurfaceFormatKHR>& formats)
+{
+    for (const auto& availableFormat : formats) {
+        if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
+            availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+            surfaceFormat = availableFormat;
+            break;
+        }
+    }
+}

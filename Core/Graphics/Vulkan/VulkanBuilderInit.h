@@ -15,6 +15,7 @@ public:
 	bool CreateDevice(VkPhysicalDevice& physicalDevice, VkDevice& device, size_t& graphicsFamilyIndex);
 
 	void CreateAttachments(VkAttachmentDescription& colorAttachment, VkAttachmentReference& colorAttachmentRef, VkSurfaceFormatKHR& surfaceFormat);
+	void ChooseSurfaceFormat(VkSurfaceFormatKHR& surfaceFormat, std::vector<VkSurfaceFormatKHR>& formats);
 private:
 };
 #endif

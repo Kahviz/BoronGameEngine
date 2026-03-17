@@ -54,7 +54,24 @@ inline uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags proper
 
     throw std::runtime_error("Failed to find suitable memory type!");
 }
+inline VkFormat FindDepthFormat(VkPhysicalDevice physicalDevice) {
+    std::vector<VkFormat> candidates = {
+        VK_FORMAT_D32_SFLOAT,
+        VK_FORMAT_D24_UNORM_S8_UINT,
+        VK_FORMAT_D16_UNORM
+    };
 
+    for (VkFormat format : candidates) {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+
+        if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) {
+            return format;
+        }
+    }
+
+    throw std::runtime_error("Failed to find depth format!");
+}
 inline VkCommandBuffer BeginSingleTimeCommands(VkCommandPool commandPool,VkDevice device)
 {
     VkCommandBufferAllocateInfo allocInfo{};

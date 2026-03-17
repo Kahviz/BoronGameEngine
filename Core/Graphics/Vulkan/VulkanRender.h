@@ -28,6 +28,7 @@ class Texture;
 class VulkanRender {
 public:
     VulkanRender() = default;
+    void CreateDepthResources(uint32_t width, uint32_t height);
     bool Init(GLFWwindow* window);
     void createDescriptorSetLayout();
     void Cleanup();
@@ -130,5 +131,11 @@ private:
     VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
     VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
     VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+
+    //Depth
+    VkImage depthImage = VK_NULL_HANDLE;
+    VkDeviceMemory depthImageMemory = VK_NULL_HANDLE;
+    VkImageView depthImageView = VK_NULL_HANDLE;
+    VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
 };
 #endif
