@@ -30,5 +30,6 @@ float4 main(PS_INPUT input) : SV_TARGET
 
     float3 finalColor = baseColor * diffuse * (input.brightness / 2);
 
+    clamp(finalColor, 0, lightpos.b);
     return float4(finalColor, 1.0f);
 }

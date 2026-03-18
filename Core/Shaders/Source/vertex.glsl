@@ -4,7 +4,7 @@ layout(binding = 0) uniform UBO {
     mat4 model;
     mat4 view;
     mat4 proj;
-    float UsesTexture; // Kaikki ubosta
+    float UsesTexture;
 } ubo;
 
 layout(location = 0) in vec3 inPos;
