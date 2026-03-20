@@ -17,10 +17,11 @@ using Microsoft::WRL::ComPtr;
 
 struct ConstantBuffer
 {
-    XMMATRIX transfrom;
+    XMMATRIX worldViewProj;  // world * view * proj
+    XMMATRIX world;          // Pelkkä world-matriisi
     XMFLOAT3 cubeColor;
+    float padding;
 };
-
 struct PixelConstantBuffer
 {
     XMFLOAT4 color;
@@ -57,6 +58,11 @@ public:
     ID3D11RenderTargetView* GetMainTarget() { return pTarget.Get(); }
 
     ID3D11DepthStencilView* GetDepthStencil() { return pDepthStencilView.Get(); }
+
+    //Shadows
+    void CreateShadowResources();
+    void RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawables);
+    void SetShadowMapToShader();
 private:
     // Alustusfunktiot
     ComPtr<ID3D11DepthStencilState> pDepthStencilState;
@@ -105,5 +111,22 @@ private:
 
     ComPtr<ID3D11PixelShader> pPSTexture;
     ComPtr<ID3D11PixelShader> pPSNoTexture;
+
+    //Shadows
+    ComPtr<ID3D11Texture2D> pShadowMap;
+    ComPtr<ID3D11DepthStencilView> pShadowDSV;
+    ComPtr<ID3D11ShaderResourceView> pShadowSRV;
+    ComPtr<ID3D11RasterizerState> pShadowRasterizer;
+    ComPtr<ID3D11SamplerState> pShadowSampler;
+    ComPtr<ID3D11Buffer> pShadowCB;
+
+    const UINT SHADOW_MAP_SIZE = 2048;
+
+    struct ShadowCB
+    {
+        XMMATRIX lightViewProj;
+        XMFLOAT3 lightPos;
+        float padding;
+    };
 };
 #endif

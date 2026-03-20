@@ -133,6 +133,7 @@ if(WIN32)
     target_link_options(UntitledGameEngine PRIVATE "/SUBSYSTEM:CONSOLE")
 endif()
 
+
 if(WIN32)
     set(DLLS
         ${CMAKE_SOURCE_DIR}/Libs/assimp-vc143-mt.dll
@@ -148,60 +149,64 @@ if(WIN32)
     endforeach()
 endif()
 
+# Määrittele shaderit erillisissä listoissa
 set(SHADER_FILES
-    ${CMAKE_SOURCE_DIR}/Core/Shaders/VertexShader.hlsl
-    ${CMAKE_SOURCE_DIR}/Core/Shaders/PixelShader.hlsl
-    ${CMAKE_SOURCE_DIR}/Core/Shaders/PixelShaderTexture.hlsl
+    VertexShader.hlsl
+    PixelShader.hlsl
+    PixelShaderTexture.hlsl
 )
 
-foreach(shader ${SHADER_FILES})
+set(SHADER_TYPES
+    vs_5_0
+    ps_5_0
+    ps_5_0
+)
+
+
+# Kopioi HLSL-tiedostot build-kansioon (joka kerta)
+foreach(shader_file ${SHADER_FILES})
+    set(source_file "${CMAKE_SOURCE_DIR}/Core/Shaders/${shader_file}")
+    
     add_custom_command(TARGET UntitledGameEngine POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${shader}
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${source_file}
         $<TARGET_FILE_DIR:UntitledGameEngine>
+        COMMENT "Copying ${shader_file}"
     )
 endforeach()
 
 if(WIN32)
-    set(SHADER_NAMES
-        VertexShader
-        PixelShader
-        PixelShaderTexture
-    )
-    
-    set(SHADER_TYPES
-        vs_5_0
-        ps_5_0
-        ps_5_0
-    )
-    
-    set(SHADER_FILES
-        VertexShader.hlsl
-        PixelShader.hlsl
-        PixelShaderTexture.hlsl
-    )
-    
-    list(LENGTH SHADER_NAMES SHADER_COUNT)
+    # Käännä shaderit CSO-tiedostoiksi
+    list(LENGTH SHADER_FILES SHADER_COUNT)
     
     foreach(index RANGE ${SHADER_COUNT})
         math(EXPR current_index "${index} - 1")
         
         if(current_index GREATER -1 AND current_index LESS ${SHADER_COUNT})
-            list(GET SHADER_NAMES ${current_index} shader_name)
-            list(GET SHADER_TYPES ${current_index} shader_type)
             list(GET SHADER_FILES ${current_index} shader_file)
+            list(GET SHADER_TYPES ${current_index} shader_type)
+            
+            string(REPLACE ".hlsl" "" shader_name ${shader_file})
             
             set(output_file "${CMAKE_CURRENT_BINARY_DIR}/${shader_name}.cso")
             set(input_file "${CMAKE_SOURCE_DIR}/Core/Shaders/${shader_file}")
             
             add_custom_command(
                 OUTPUT ${output_file}
+                COMMAND ${CMAKE_COMMAND} -E remove -f ${output_file}
                 COMMAND fxc.exe /T ${shader_type} /E main /Fo "${output_file}" "${input_file}"
                 DEPENDS ${input_file}
-                COMMENT "Compiling ${shader_name}"
+                COMMENT "Compiling ${shader_file} -> ${shader_name}.cso"
             )
             
             list(APPEND GENERATED_SHADERS ${output_file})
+            
+            add_custom_command(TARGET UntitledGameEngine POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                ${output_file}
+                $<TARGET_FILE_DIR:UntitledGameEngine>
+                COMMENT "Copying ${shader_name}.cso"
+            )
         endif()
     endforeach()
     

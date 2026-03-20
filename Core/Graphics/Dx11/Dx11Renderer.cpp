@@ -30,34 +30,229 @@ struct LightingCB
 void Dx11Renderer::InitDx11Renderer(HWND hWnd)
 {
     CreateDeviceAndSwapChain(screen_width, screen_height, hWnd);
-
     CreateViewport(screen_width, screen_height);
-
     CreateDepthStencil(screen_width, screen_height);
-
     CreateRenderTarget();
-
     pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
 
     camera.SetPosition(0.0f, 0.0f, -5.0f);
     float AspectX = screen_width;
     float AspectY = screen_height;
     float Aspect = AspectX / AspectY;
-
     camera.SetProjectionValues(FOV, Aspect, 0.5f, 1000.0f);
 
     CreateConstantBuffers();
+    CreateShadowResources();
 
     CompileShaders();
 
+    // Tavallinen sampler
     D3D11_SAMPLER_DESC samp = {};
     samp.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     samp.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
     samp.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
     samp.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
     samp.MaxLOD = D3D11_FLOAT32_MAX;
-
     pDevice->CreateSamplerState(&samp, &pSampler);
+
+    // Shadow sampler
+    D3D11_SAMPLER_DESC shadowSamp = {};
+    shadowSamp.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+    shadowSamp.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+    shadowSamp.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+    shadowSamp.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+    shadowSamp.BorderColor[0] = 1.0f;
+    shadowSamp.BorderColor[1] = 1.0f;
+    shadowSamp.BorderColor[2] = 1.0f;
+    shadowSamp.BorderColor[3] = 1.0f;
+    shadowSamp.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+    shadowSamp.MaxLOD = D3D11_FLOAT32_MAX;
+
+    HRESULT hr = pDevice->CreateSamplerState(&shadowSamp, &pShadowSampler);
+    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow sampler");
+}
+
+void Dx11Renderer::CreateShadowResources()
+{
+    D3D11_TEXTURE2D_DESC shadowDesc = {};
+    shadowDesc.Width = SHADOW_MAP_SIZE;
+    shadowDesc.Height = SHADOW_MAP_SIZE;
+    shadowDesc.MipLevels = 1;
+    shadowDesc.ArraySize = 1;
+    shadowDesc.Format = DXGI_FORMAT_R24G8_TYPELESS; // Tärkeä: typeless format
+    shadowDesc.SampleDesc.Count = 1;
+    shadowDesc.Usage = D3D11_USAGE_DEFAULT;
+    shadowDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+
+    HRESULT hr = pDevice->CreateTexture2D(&shadowDesc, nullptr, &pShadowMap);
+    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow map texture");
+
+    // Luo DSV varjokartalle
+    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+    dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    dsvDesc.Texture2D.MipSlice = 0;
+
+    hr = pDevice->CreateDepthStencilView(pShadowMap.Get(), &dsvDesc, &pShadowDSV);
+    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow DSV");
+
+    // Luo SRV varjokartalle (shader-resource view)
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+
+    hr = pDevice->CreateShaderResourceView(pShadowMap.Get(), &srvDesc, &pShadowSRV);
+    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow SRV");
+
+    // Luo rasterizer state varjorenderöintiä varten
+    D3D11_RASTERIZER_DESC rasterDesc = {};
+    rasterDesc.FillMode = D3D11_FILL_SOLID;
+    rasterDesc.CullMode = D3D11_CULL_BACK;
+    rasterDesc.DepthBias = 1000; // Bias estää itsevarjostuksen
+    rasterDesc.DepthBiasClamp = 0.0f;
+    rasterDesc.SlopeScaledDepthBias = 1.0f;
+    rasterDesc.DepthClipEnable = TRUE;
+
+    hr = pDevice->CreateRasterizerState(&rasterDesc, &pShadowRasterizer);
+    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow rasterizer");
+
+    // Luo constant buffer varjoshaderille
+    D3D11_BUFFER_DESC cbd = {};
+    cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cbd.ByteWidth = sizeof(ShadowCB);
+    cbd.Usage = D3D11_USAGE_DYNAMIC;
+    cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    hr = pDevice->CreateBuffer(&cbd, nullptr, &pShadowCB);
+    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow constant buffer");
+}
+
+void Dx11Renderer::SetShadowMapToShader()
+{
+    ID3D11ShaderResourceView* shadowSRV = pShadowSRV.Get();
+    pContext->PSSetShaderResources(2, 1, &shadowSRV);
+
+    ID3D11SamplerState* shadowSampler = pShadowSampler.Get();
+    pContext->PSSetSamplers(1, 1, &shadowSampler);
+}
+
+void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawables)
+{
+    static float angle = 0.0f;
+    float radius = 10.0f;
+
+    angle += 0.01f;
+    if (angle >= XM_2PI) angle -= XM_2PI;
+
+    XMFLOAT3 lightPos(radius * cosf(angle), 5.0f, radius * sinf(angle));
+    XMVECTOR lightPosition = XMLoadFloat3(&lightPos);
+    XMVECTOR lightTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+    XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+    XMMATRIX lightView = XMMatrixLookAtLH(lightPosition, lightTarget, up);
+    XMMATRIX lightProj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 1.0f, 1.0f, 50.0f);
+    XMMATRIX lightViewProj = lightView * lightProj;
+
+    ShadowCB scb = {};
+    scb.lightViewProj = XMMatrixTranspose(lightViewProj);
+    XMStoreFloat3(&scb.lightPos, lightPosition);
+
+    D3D11_MAPPED_SUBRESOURCE msr;
+    pContext->Map(pShadowCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+    memcpy(msr.pData, &scb, sizeof(scb));
+    pContext->Unmap(pShadowCB.Get(), 0);
+
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    pContext->PSSetShaderResources(2, 1, &nullSRV);
+
+    //old
+    ID3D11RenderTargetView* oldRTV = nullptr;
+    ID3D11DepthStencilView* oldDSV = nullptr;
+    pContext->OMGetRenderTargets(1, &oldRTV, &oldDSV);
+
+    ID3D11RasterizerState* oldRasterizer = nullptr;
+    pContext->RSGetState(&oldRasterizer);
+
+    ID3D11VertexShader* oldVS = nullptr;
+    ID3D11PixelShader* oldPS = nullptr;
+    ID3D11ClassInstance* oldVSInstances = nullptr;
+    ID3D11ClassInstance* oldPSInstances = nullptr;
+    UINT oldVSNumInstances = 0;
+    UINT oldPSNumInstances = 0;
+    pContext->VSGetShader(&oldVS, &oldVSInstances, &oldVSNumInstances);
+    pContext->PSGetShader(&oldPS, &oldPSInstances, &oldPSNumInstances);
+
+    D3D11_VIEWPORT oldViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
+    UINT numViewports = 1;
+    pContext->RSGetViewports(&numViewports, oldViewports);
+
+    // Aseta varjorenderöinnin asetukset
+    D3D11_VIEWPORT shadowVP = {};
+    shadowVP.Width = static_cast<float>(SHADOW_MAP_SIZE);
+    shadowVP.Height = static_cast<float>(SHADOW_MAP_SIZE);
+    shadowVP.MinDepth = 0.0f;
+    shadowVP.MaxDepth = 1.0f;
+    pContext->RSSetViewports(1, &shadowVP);
+    pContext->RSSetState(pShadowRasterizer.Get());
+
+    pContext->OMSetRenderTargets(0, nullptr, pShadowDSV.Get());
+    pContext->ClearDepthStencilView(pShadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+    pContext->VSSetShader(pVS.Get(), nullptr, 0);  // Käytä pVS:ää, ei pShadowVS:ää
+    pContext->PSSetShader(nullptr, nullptr, 0);
+
+    pContext->VSSetConstantBuffers(1, 1, pShadowCB.GetAddressOf());
+
+    pContext->IASetInputLayout(pLayout.Get());
+    pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    for (auto& Instptr : Drawables) {
+        Instance& inst = *Instptr.get();
+        if (inst.CanDraw()) {
+            const Mesh& mesh = inst.OBJmesh;
+
+            XMMATRIX scale = XMMatrixScaling(inst.Size.x, inst.Size.y, inst.Size.z);
+            XMMATRIX rotation = XMMatrixRotationRollPitchYaw(
+                inst.Orientation.x, inst.Orientation.y, inst.Orientation.z);
+            XMMATRIX translation = XMMatrixTranslation(inst.pos.x, inst.pos.y, inst.pos.z);
+            XMMATRIX world = scale * rotation * translation;
+
+            XMMATRIX lightViewProj = XMMatrixTranspose(world * lightView * lightProj);
+
+            ConstantBuffer cb = {};
+            cb.worldViewProj = lightViewProj;
+            cb.world = XMMatrixTranspose(world);
+            cb.cubeColor = XMFLOAT3(1.0f, 1.0f, 1.0f);
+            cb.padding = 0.0f;
+
+            D3D11_MAPPED_SUBRESOURCE msrVS;
+            pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
+            memcpy(msrVS.pData, &cb, sizeof(cb));
+            pContext->Unmap(pConstantBuffer.Get(), 0);
+
+            pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
+            pContext->VSSetConstantBuffers(1, 1, pShadowCB.GetAddressOf());
+
+            mesh.DrawForDX11(pContext.Get());
+        }
+    }
+
+    pContext->RSSetState(oldRasterizer);
+    if (oldRasterizer) oldRasterizer->Release();
+
+    pContext->RSSetViewports(numViewports, oldViewports);
+
+    pContext->VSSetShader(oldVS, &oldVSInstances, oldVSNumInstances);
+    pContext->PSGetShader(&oldPS, &oldPSInstances, &oldPSNumInstances);
+    if (oldVS) oldVS->Release();
+    if (oldPS) oldPS->Release();
+
+    if (oldRTV) {
+        pContext->OMSetRenderTargets(1, &oldRTV, oldDSV);
+        oldRTV->Release();
+    }
+    if (oldDSV) oldDSV->Release();
 }
 
 void Dx11Renderer::SetRenderTargetToScene() {
@@ -241,7 +436,6 @@ void Dx11Renderer::CompileShaders()
     ComPtr<ID3DBlob> psTextureBlob;
     ComPtr<ID3DBlob> errorBlob;
 
-    // Vertex shader (sama molemmille)
     HRESULT hr = D3DCompileFromFile(
         L"VertexShader.hlsl",
         nullptr,
@@ -269,11 +463,9 @@ void Dx11Renderer::CompileShaders()
     }
     if (FAILED(hr)) throw std::runtime_error("Failed to compile Vertex shader");
 
-    // Luo vertex shader
     hr = pDevice->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &pVS);
     if (FAILED(hr)) throw std::runtime_error("Failed to create Vertex shader");
 
-    // Yritä ladata tekstuurillinen pixel shader (PixelShaderTexture.hlsl)
     hr = D3DCompileFromFile(
         L"PixelShaderTexture.hlsl",
         nullptr,
@@ -289,12 +481,10 @@ void Dx11Renderer::CompileShaders()
     bool textureShaderExists = SUCCEEDED(hr);
 
     if (textureShaderExists) {
-        // Jos tekstuurishader löytyy, luo se
         hr = pDevice->CreatePixelShader(psTextureBlob->GetBufferPointer(), psTextureBlob->GetBufferSize(), nullptr, &pPSTexture);
         if (FAILED(hr)) textureShaderExists = false;
     }
 
-    // Lataa perus pixel shader (PixelShader.hlsl)
     hr = D3DCompileFromFile(
         L"PixelShader.hlsl",
         nullptr,
@@ -323,7 +513,6 @@ void Dx11Renderer::CompileShaders()
 
     if (FAILED(hr)) throw std::runtime_error("Failed to compile pixel shader");
 
-    // Luo perus pixel shader
     hr = pDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &pPSNoTexture);
     if (FAILED(hr)) throw std::runtime_error("Failed to create pixel shader");
 
@@ -532,6 +721,9 @@ void Dx11Renderer::EndFrame()
 
 void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Instance>>& Drawables)
 {
+    RenderShadowMap(Drawables);
+    SetShadowMapToShader();
+
     for (auto& Instptr : Drawables) {
         Instance& inst = *Instptr.get();
 
@@ -540,16 +732,18 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
         Texture* tex = inst.GetTexture();
         bool hasTexture = tex->IsLoaded();
 
-        if (hasTexture) {
+        if (hasTexture && tex->GetTextureComPtr() != nullptr) {
             selectedPS = pPSTexture.Get();
-
             ID3D11ShaderResourceView* textureSRV = tex->GetTextureComPtr().Get();
             pContext->PSSetShaderResources(0, 1, &textureSRV);
+        }
+        else {
+            ID3D11ShaderResourceView* nullSRV = nullptr;
+            pContext->PSSetShaderResources(1, 1, &nullSRV);
         }
 
         pContext->VSSetShader(pVS.Get(), nullptr, 0);
         pContext->PSSetShader(selectedPS, nullptr, 0);
-
         pContext->PSSetSamplers(0, 1, pSampler.GetAddressOf());
 
         if (inst.CanDraw()) {
@@ -558,23 +752,15 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             FLOAT3& pos = inst.pos;
             FLOAT3& size = inst.Size;
             INT3 color = inst.color;
-            FLOAT3& Velocity = inst.Velocity;
-            bool Anchored = inst.Anchored;
-            float Roughness = 1.0f;
             float Brightness = 1.0f;
 
-            std::string UGE_ASSERT_DX11 = "Dx11Renderer not properly initialized";
-            UGE_ASSERT(pContext, UGE_ASSERT_DX11);
-            UGE_ASSERT(pConstantBuffer, UGE_ASSERT_DX11);
-            UGE_ASSERT(pColorBuffer, UGE_ASSERT_DX11);
-            UGE_ASSERT(pLightingBuffer, UGE_ASSERT_DX11);
-
-            // Matrices
+            // Matriisit
             XMMATRIX scale = XMMatrixScaling(size.x, size.y, size.z);
-            XMMATRIX world = scale *
-                XMMatrixRotationRollPitchYaw(Orientation.x, Orientation.y, Orientation.z) *
-                XMMatrixTranslation(pos.x, pos.y, pos.z);
+            XMMATRIX rotation = XMMatrixRotationRollPitchYaw(Orientation.x, Orientation.y, Orientation.z);
+            XMMATRIX translation = XMMatrixTranslation(pos.x, pos.y, pos.z);
+            XMMATRIX world = scale * rotation * translation;  // world-matriisi
 
+            // Kamera matriisit
             Matrix4x4 mat = camera.GetViewMatrix();
             XMMATRIX view = XMMATRIX(
                 XMVectorSet(mat.x.x, mat.x.y, mat.x.z, mat.x.w),
@@ -591,16 +777,18 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
                 XMVectorSet(projMat.w.x, projMat.w.y, projMat.w.z, projMat.w.w)
             );
 
-            XMMATRIX transform = XMMatrixTranspose(world * view * proj);
+            XMMATRIX worldViewProj = world * view * proj;
 
             // VS constant buffer
             ConstantBuffer cb = {};
-            cb.transfrom = transform;
+            cb.worldViewProj = XMMatrixTranspose(worldViewProj);
+            cb.world = XMMatrixTranspose(world);  // Lähetä world-matriisi
             cb.cubeColor = XMFLOAT3(
                 color.x / 255.0f,
                 color.y / 255.0f,
                 color.z / 255.0f
             );
+            cb.padding = 0.0f;
 
             D3D11_MAPPED_SUBRESOURCE msrVS;
             HRESULT hr = pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
@@ -608,7 +796,7 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             memcpy(msrVS.pData, &cb, sizeof(cb));
             pContext->Unmap(pConstantBuffer.Get(), 0);
 
-            // PS Color buffer (b0)
+            // PS Color buffer
             PixelConstantBuffer pcb = {};
             pcb.color = XMFLOAT4(color.x / 255.f, color.y / 255.f, color.z / 255.f, 1.0f);
 
@@ -618,25 +806,24 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             memcpy(msrColor.pData, &pcb, sizeof(pcb));
             pContext->Unmap(pColorBuffer.Get(), 0);
 
-            // Lighting
+            // Lighting (käytä samaa valoa kuin shadow mapissa)
             static float angle = 0.0f;
-            const float radius = 5.0f;
-            const float speed = 0.0001f;
+            const float radius = 10.0f;
+            const float speed = 0.01f;
 
             angle += speed;
-            if (angle >= XM_2PI)
-                angle -= XM_2PI;
+            if (angle >= XM_2PI) angle -= XM_2PI;
 
             XMFLOAT3 lightpos;
             lightpos.x = radius * cosf(angle);
             lightpos.z = radius * sinf(angle);
-            lightpos.y = 2.0f;
+            lightpos.y = 5.0f;
 
             LightingCB lcb = {};
             lcb.lightpos = FLOAT3(lightpos.x, lightpos.y, lightpos.z);
             lcb.Brightness = Brightness;
             lcb.WorldPos = FLOAT3(pos.x, pos.y, pos.z);
-            lcb.lightRange = 10.0f;
+            lcb.lightRange = 20.0f;
 
             D3D11_MAPPED_SUBRESOURCE msrLighting;
             hr = pContext->Map(pLightingBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrLighting);
@@ -644,13 +831,13 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             memcpy(msrLighting.pData, &lcb, sizeof(lcb));
             pContext->Unmap(pLightingBuffer.Get(), 0);
 
-            // Pipeline
-            pContext->IASetInputLayout(pLayout.Get());
-            pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
+            // Aseta constant bufferit
             pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
             pContext->PSSetConstantBuffers(0, 1, pColorBuffer.GetAddressOf());
             pContext->PSSetConstantBuffers(1, 1, pLightingBuffer.GetAddressOf());
+
+            pContext->IASetInputLayout(pLayout.Get());
+            pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
             mesh.DrawForDX11(pContext.Get());
         }

@@ -137,5 +137,7 @@ private:
     VkDeviceMemory depthImageMemory = VK_NULL_HANDLE;
     VkImageView depthImageView = VK_NULL_HANDLE;
     VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
+
+    //Sha
 };
 #endif

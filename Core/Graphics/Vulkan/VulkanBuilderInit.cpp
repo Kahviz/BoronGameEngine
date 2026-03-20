@@ -1,3 +1,6 @@
+#include "GLOBALS.h"
+
+#if VULKAN == 1
 #include "VulkanBuilderInit.h"
 
 bool Builder::MakeInstance(uint32_t& extCount, VkInstance& instance)
@@ -69,7 +72,7 @@ bool Builder::ChooseGPU(VkPhysicalDevice& physicaldevice, ScoreCounter& SC, VkIn
     return true;
 }
 
-bool Builder::InitQueueFamily(VkPhysicalDevice& physicalDevice, size_t& graphicsFamilyIndex,VkSurfaceKHR& surface)
+bool Builder::InitQueueFamily(VkPhysicalDevice& physicalDevice, size_t& graphicsFamilyIndex, VkSurfaceKHR& surface)
 {
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
@@ -99,7 +102,7 @@ bool Builder::InitQueueFamily(VkPhysicalDevice& physicalDevice, size_t& graphics
     return true;
 }
 
-bool Builder::CreateDevice(VkPhysicalDevice& physicalDevice,VkDevice& device, size_t& graphicsFamilyIndex)
+bool Builder::CreateDevice(VkPhysicalDevice& physicalDevice, VkDevice& device, size_t& graphicsFamilyIndex)
 {
     const char* deviceExtensions[] = { "VK_KHR_swapchain" };
 
@@ -149,3 +152,4 @@ void Builder::ChooseSurfaceFormat(VkSurfaceFormatKHR& surfaceFormat, std::vector
         }
     }
 }
+#endif
