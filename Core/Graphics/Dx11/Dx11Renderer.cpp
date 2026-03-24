@@ -212,10 +212,10 @@ void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawa
         if (inst.CanDraw()) {
             const Mesh& mesh = inst.OBJmesh;
 
-            XMMATRIX scale = XMMatrixScaling(inst.Size.x, inst.Size.y, inst.Size.z);
+            XMMATRIX scale = XMMatrixScaling(inst.Size.x(), inst.Size.y(), inst.Size.z());
             XMMATRIX rotation = XMMatrixRotationRollPitchYaw(
-                inst.Orientation.x, inst.Orientation.y, inst.Orientation.z);
-            XMMATRIX translation = XMMatrixTranslation(inst.pos.x, inst.pos.y, inst.pos.z);
+                inst.Orientation.x(), inst.Orientation.y(), inst.Orientation.z());
+            XMMATRIX translation = XMMatrixTranslation(inst.pos.x(), inst.pos.y(), inst.pos.z());
             XMMATRIX world = scale * rotation * translation;
 
             XMMATRIX lightViewProj = XMMatrixTranspose(world * lightView * lightProj);
@@ -751,32 +751,32 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             Vector3 Orientation = inst.Orientation;
             Vector3& pos = inst.pos;
             Vector3& size = inst.Size;
-            INT3 color = inst.color;
+            Int3 color = inst.color;
             float Brightness = 1.0f;
 
             // Matriisit
-            XMMATRIX scale = XMMatrixScaling(size.x, size.y, size.z);
-            XMMATRIX rotation = XMMatrixRotationRollPitchYaw(Orientation.x, Orientation.y, Orientation.z);
-            XMMATRIX translation = XMMatrixTranslation(pos.x, pos.y, pos.z);
+            XMMATRIX scale = XMMatrixScaling(size.x(), size.y(), size.z());
+            XMMATRIX rotation = XMMatrixRotationRollPitchYaw(Orientation.x(), Orientation.y(), Orientation.z());
+            XMMATRIX translation = XMMatrixTranslation(pos.x(), pos.y(), pos.z());
             XMMATRIX world = scale * rotation * translation;  // world-matriisi
 
             // Kamera matriisit
             Matrix4x4 mat = camera.GetViewMatrix();
-            XMMATRIX view = XMMATRIX(
-                XMVectorSet(mat.x.x, mat.x.y, mat.x.z, mat.x.w),
-                XMVectorSet(mat.y.x, mat.y.y, mat.y.z, mat.y.w),
-                XMVectorSet(mat.z.x, mat.z.y, mat.z.z, mat.z.w),
-                XMVectorSet(mat.w.x, mat.w.y, mat.w.z, mat.w.w)
-            );
-
             Matrix4x4 projMat = camera.GetProjectionMatrix();
+
             XMMATRIX proj = XMMATRIX(
-                XMVectorSet(projMat.x.x, projMat.x.y, projMat.x.z, projMat.x.w),
-                XMVectorSet(projMat.y.x, projMat.y.y, projMat.y.z, projMat.y.w),
-                XMVectorSet(projMat.z.x, projMat.z.y, projMat.z.z, projMat.z.w),
-                XMVectorSet(projMat.w.x, projMat.w.y, projMat.w.z, projMat.w.w)
+                XMVectorSet(projMat(0, 0), projMat(0, 1), projMat(0, 2), projMat(0, 3)),
+                XMVectorSet(projMat(1, 0), projMat(1, 1), projMat(1, 2), projMat(1, 3)),
+                XMVectorSet(projMat(2, 0), projMat(2, 1), projMat(2, 2), projMat(2, 3)),
+                XMVectorSet(projMat(3, 0), projMat(3, 1), projMat(3, 2), projMat(3, 3))
             );
 
+            XMMATRIX view = XMMATRIX(
+                XMVectorSet(mat(0, 0), mat(1, 0), mat(2, 0), mat(3, 0)),  // Sarake 0
+                XMVectorSet(mat(0, 1), mat(1, 1), mat(2, 1), mat(3, 1)),  // Sarake 1
+                XMVectorSet(mat(0, 2), mat(1, 2), mat(2, 2), mat(3, 2)),  // Sarake 2
+                XMVectorSet(mat(0, 3), mat(1, 3), mat(2, 3), mat(3, 3))   // Sarake 3
+            );
             XMMATRIX worldViewProj = world * view * proj;
 
             // VS constant buffer
@@ -784,9 +784,9 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             cb.worldViewProj = XMMatrixTranspose(worldViewProj);
             cb.world = XMMatrixTranspose(world);  // Lähetä world-matriisi
             cb.cubeColor = XMFLOAT3(
-                color.x / 255.0f,
-                color.y / 255.0f,
-                color.z / 255.0f
+                color.x() / 255.0f,
+                color.y() / 255.0f,
+                color.z() / 255.0f
             );
             cb.padding = 0.0f;
 
@@ -798,7 +798,7 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
 
             // PS Color buffer
             PixelConstantBuffer pcb = {};
-            pcb.color = XMFLOAT4(color.x / 255.f, color.y / 255.f, color.z / 255.f, 1.0f);
+            pcb.color = XMFLOAT4(color.x() / 255.f, color.y() / 255.f, color.z() / 255.f, 1.0f);
 
             D3D11_MAPPED_SUBRESOURCE msrColor;
             hr = pContext->Map(pColorBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrColor);
@@ -822,7 +822,7 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             LightingCB lcb = {};
             lcb.lightpos = Vector3(lightpos.x, lightpos.y, lightpos.z);
             lcb.Brightness = Brightness;
-            lcb.WorldPos = Vector3(pos.x, pos.y, pos.z);
+            lcb.WorldPos = Vector3(pos.x(), pos.y(), pos.z());
             lcb.lightRange = 20.0f;
 
             D3D11_MAPPED_SUBRESOURCE msrLighting;

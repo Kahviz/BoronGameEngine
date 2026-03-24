@@ -14,6 +14,7 @@ bool Raycasting::RayIntersectsTriangle(
     const Vector3& v2,
     float& tOut
 ) {
+    /*
     const float T_MIN = 0.001f;
     const float T_MAX = 1e6f;
     const float PARALLEL_EPSILON = 1e-8f;
@@ -49,5 +50,6 @@ bool Raycasting::RayIntersectsTriangle(
         return false;
 
     tOut = t;
+    */
     return true;
 }

@@ -60,13 +60,13 @@ namespace {
     {
         Vec3 v = makeVec3FromVertex(Vertex);
         Vec3 scaled = mul(v, mul(Vec3{
-            inst.Size.x,
-            inst.Size.y,
-            inst.Size.z
+            inst.Size.x(),
+            inst.Size.y(),
+            inst.Size.z()
             }, 1.001f));
 
         return add(
-            Vec3{ inst.pos.x, inst.pos.y, inst.pos.z },
+            Vec3{ inst.pos.x(), inst.pos.y(), inst.pos.z() },
             scaled
         );
     }
@@ -89,19 +89,19 @@ namespace {
 }
 
 bool Colission::AABBOverlap(const Instance& a, const Instance& b) {
-    float aMinX = a.pos.x;
-    float aMaxX = a.pos.x + a.Size.x;
-    float aMinY = a.pos.y;
-    float aMaxY = a.pos.y + a.Size.y;
-    float aMinZ = a.pos.z;
-    float aMaxZ = a.pos.z + a.Size.z;
+    float aMinX = a.pos.x();
+    float aMaxX = a.pos.x() + a.Size.x();
+    float aMinY = a.pos.y();
+    float aMaxY = a.pos.y() + a.Size.y();
+    float aMinZ = a.pos.z();
+    float aMaxZ = a.pos.z() + a.Size.z();
 
-    float bMinX = b.pos.x;
-    float bMaxX = b.pos.x + b.Size.x;
-    float bMinY = b.pos.y;
-    float bMaxY = b.pos.y + b.Size.y;
-    float bMinZ = b.pos.z;
-    float bMaxZ = b.pos.z + b.Size.z;
+    float bMinX = b.pos.x();
+    float bMaxX = b.pos.x() + b.Size.x();
+    float bMinY = b.pos.y();
+    float bMaxY = b.pos.y() + b.Size.y();
+    float bMinZ = b.pos.z();
+    float bMaxZ = b.pos.z() + b.Size.z();
 
     return (aMinX <= bMaxX && aMaxX >= bMinX) &&
         (aMinY <= bMaxY && aMaxY >= bMinY) &&

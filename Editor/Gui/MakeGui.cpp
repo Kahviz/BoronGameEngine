@@ -99,13 +99,13 @@ void MakeFloat3Edit(const char* Name, Vector3& vec) {
     ImGui::Text("%s", label);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(80);
-    ImGui::InputFloat("##x", &vec.x, 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
+    ImGui::InputFloat("##x", &vec.x(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(80);
-    ImGui::InputFloat("##y", &vec.y, 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
+    ImGui::InputFloat("##y", &vec.y(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(80);
-    ImGui::InputFloat("##z", &vec.z, 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
+    ImGui::InputFloat("##z", &vec.z(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
 }
 
 
@@ -359,7 +359,7 @@ bool MakeGui::MakeDashBoard()
     ImGui::PopStyleColor();
 
     ImVec2 windowSize = ImGui::GetWindowSize();
-    float size = min(windowSize.x, windowSize.y);
+    float size = std::min(windowSize.x, windowSize.y);
 
     ImVec2 buttonSize = ImVec2(size / 8, size / 8);
     ImVec2 NewProjectSize = ImVec2(sw / 8, sh / 16);

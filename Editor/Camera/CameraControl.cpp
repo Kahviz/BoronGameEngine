@@ -23,16 +23,16 @@ void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
     }
 
     if (glfwGetKey(glfwWND, GLFW_KEY_A) == GLFW_PRESS)
-        Cam.AdjustPosition(-right.x * speed, -right.y * speed, -right.z * speed);
+        Cam.AdjustPosition(-right.x() * speed, -right.y() * speed, -right.z() * speed);
 
     if (glfwGetKey(glfwWND, GLFW_KEY_D) == GLFW_PRESS)
-        Cam.AdjustPosition(right.x * speed, right.y * speed, right.z * speed);
+        Cam.AdjustPosition(right.x() * speed, right.y() * speed, right.z() * speed);
 
     if (glfwGetKey(glfwWND, GLFW_KEY_S) == GLFW_PRESS)
-        Cam.AdjustPosition(-forward.x * speed, -forward.y * speed, -forward.z * speed);
+        Cam.AdjustPosition(-forward.x() * speed, -forward.y() * speed, -forward.z() * speed);
 
     if (glfwGetKey(glfwWND, GLFW_KEY_W) == GLFW_PRESS)
-        Cam.AdjustPosition(forward.x * speed, forward.y * speed, forward.z * speed);
+        Cam.AdjustPosition(forward.x() * speed, forward.y() * speed, forward.z() * speed);
 
     if (glfwGetKey(glfwWND, GLFW_KEY_Q) == GLFW_PRESS)
         Cam.AdjustPosition(0.0f, -speed, 0.0f);

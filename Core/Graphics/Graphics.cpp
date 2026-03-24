@@ -52,7 +52,7 @@ void Graphics::RenderAMesh(
     Vector3 Orientation,
     Vector3& pos,
     Vector3& size,
-    INT3 color,
+    Int3 color,
     Vector3& Velocity,
     bool Anchored,
     float Roughness,

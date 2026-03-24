@@ -1,22 +1,22 @@
 #pragma once
 #include <array>
-#include "Math/UntilitedMath.h"
+#include "UntilitedMathLibrary.h"
 #include "Vulkan/vulkan.h"
 
 struct Vertex
 {
     float brightness;  // offset 0
-    Vector3 pos;        // offset 4
-    Vector3 color;      // offset 16
-    Vector3 normal;     // offset 28
-    Vector2 uv;
+    GPUVector3 pos;        // offset 4
+    GPUVector3 color;      // offset 16
+    GPUVector3 normal;     // offset 28
+    GPUVector2 uv;
     Vertex() = default;
 
-    Vertex(float b, const Vector3& p, const Vector3& c, const Vector3& n)
+    Vertex(float b, const GPUVector3& p, const GPUVector3& c, const GPUVector3& n)
         : brightness(b), pos(p), color(c), normal(n) {
     }
 
-    Vertex(float b, Vector3& p, Vector3&& c, Vector3&& n)
+    Vertex(float b, GPUVector3& p, GPUVector3&& c, GPUVector3&& n)
         : brightness(b), pos(std::move(p)), color(std::move(c)), normal(std::move(n)) {
     }
 

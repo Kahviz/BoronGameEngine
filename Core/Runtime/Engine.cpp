@@ -162,10 +162,10 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
         1,
         pos,
         Size,
-        INT3(
-            static_cast<int>(Color3.x * 255.0f),
-            static_cast<int>(Color3.y * 255.0f),
-            static_cast<int>(Color3.z * 255.0f)
+        Int3(
+            static_cast<int>(Color3.x() * 255.0f),
+            static_cast<int>(Color3.y() * 255.0f),
+            static_cast<int>(Color3.z() * 255.0f)
         )
     );
     memcpy(obj->NameText, obj->Name.c_str(), sizeof(obj->NameText));
@@ -245,6 +245,7 @@ void ScreenResizerDetector(Window* wnd) {
 
 void Engine::EngineDoFrame(Window* wnd, float deltatime)
 {
+
     if (ImGui::GetCurrentContext() == nullptr) {
         std::cerr << "ERROR: No ImGui context set!" << std::endl;
         return;
@@ -281,8 +282,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             AddAMesh("\\Cube.obj", "Cube", { 0,0,0 }, { 0.5,1,0.5 }, false);
             AddAMesh("\\Cube.obj", "Cube", { 0,-5,0 }, { 10,1,10 }, false);
             AddAMesh("\\Cylinder.obj", "Cylinder", { 1,0,0 }, { 0.5,1,0.5 }, false);
-            wnd->GetGraphics().GetCamera().SetPosition({ 5,5,5 });
-            wnd->GetGraphics().GetCamera().SetRotation({ 0.625999,3.926,0 });
+            wnd->GetGraphics().GetCamera().SetPosition( 5,5,5 );
+            wnd->GetGraphics().GetCamera().SetRotation( 0.625999,3.926,0 );
             CubeB = true;
         }
     }
@@ -345,7 +346,10 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 #if DIRECTX11 == 1
     wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
 #endif
-
+    if (ctrlPressed) {
+        std::cout << "Position: " << wnd->GetGraphics().GetCamera().GetPositionVector3() << std::endl;
+        std::cout << "View Matrix:\n" << wnd->GetGraphics().GetCamera().GetViewMatrix() << std::endl;
+    }
     CameraControl camC;
     if (!ctrlPressed && !Typing)
         camC.MakeCameraControls(*wnd, deltatime);

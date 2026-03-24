@@ -1,5 +1,5 @@
 #pragma once
-#include "Math/UntilitedMath.h"
+#include "UntilitedMathLibrary.h"
 
 class Camera
 {
@@ -26,9 +26,9 @@ public:
 
     Vector3 GetForward() const;
     Vector3 GetRight() const;
+    void UpdateViewMatrix();
 
 private:
-    void UpdateViewMatrix();
 
     Vector4 posVector;
     Vector4 rotVector;
@@ -37,7 +37,7 @@ private:
     Matrix4x4 viewMatrix;
     Matrix4x4 projectionMatrix;
 
-    const Vector4 DEFAULT_RIGHT_VECTOR = VectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-    const Vector4 DEFAULT_FORWARD_VECTOR = VectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-    const Vector4 DEFAULT_UP_VECTOR = VectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    const Vector3 DEFAULT_RIGHT_VECTOR = { 1.0f, 0.0f, 0.0f };
+    const Vector3 DEFAULT_FORWARD_VECTOR = { 0.0f, 0.0f, 1.0f };
+    const Vector3 DEFAULT_UP_VECTOR = { 0.0f, 1.0f, 0.0f };
 };

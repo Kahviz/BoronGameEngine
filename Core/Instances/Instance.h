@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include "Math/UntilitedMath.h"
+#include "UntilitedMathLibrary.h"
 #include "Instances/Instances/Mesh/Mesh.h"
 
 class Texture;
@@ -24,8 +24,8 @@ public:
     char PosText[128] = "0,0,0";
 
     //Color
-    INT3 color = { 0,0,0 };
-    INT3 originalColor = { 0,0,0 };
+    Int3 color = { 0,0,0 };
+    Int3 originalColor = { 0,0,0 };
 
     Vector3 Size = { 1.0f, 1.0f, 1.0f };
     char SizeText[128] = "1,1,1";
@@ -45,8 +45,8 @@ public:
         const std::string& name = "Instance",
         const Vector3& position = { 0, 0, 0 },
         const Vector3& SIZE = { 0, 0, 0 },
-        const INT3& COLOR = { 0, 0, 0 },
-        const INT3& OGCOLOR = { 0, 0, 0 },
+        const Int3& COLOR = { 0, 0, 0 },
+        const Int3& OGCOLOR = { 0, 0, 0 },
         const Vector3& ORIENTATION = { 0, 0, 0 },
         const Vector3& VELOCITY = { 0, 0, 0 },
         const Mesh& MESH = Mesh(),

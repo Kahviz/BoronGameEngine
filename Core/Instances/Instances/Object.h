@@ -6,7 +6,7 @@
 #include <DirectXMath.h>
 #include <string>
 #include "Instances/Instance.h"
-#include "Math/UntilitedMath.h"
+#include "UntilitedMathLibrary.h"
 #include <Instances/Vertex.h>
 #include <Instances/Instances/Mesh/Mesh.h>
 #include "Graphics/Texture/Texture.h"
@@ -15,9 +15,9 @@ using namespace DirectX;
 
 inline Vector3 LoadWorldVertex(const Vertex& v, const Vector3& objPos, const Vector3& objSize) {
     return Vector3(
-        v.pos.x * objSize.x + objPos.x,
-        v.pos.y * objSize.y + objPos.y,
-        v.pos.z * objSize.z + objPos.z
+        v.pos.x * objSize.x() + objPos.x(),
+        v.pos.y * objSize.y() + objPos.y(),
+        v.pos.z * objSize.z() + objPos.z()
     );
 }
 
@@ -34,8 +34,8 @@ public:
         int instanceID = 1,
         const Vector3& position = { 0.0f,0.0f,0.0f },
         const Vector3& Size = { 1.0f,1.0f,1.0f },
-        const INT3& col = { 168, 160, 160 },
-        const INT3& ogcolor = { 168, 160, 160 },
+        const Int3& col = { 168, 160, 160 },
+        const Int3& ogcolor = { 168, 160, 160 },
         const Vector3& VELOCITY = { 0.0f,0.0f,0.0f },
         const Vector3& ORIENTATION = { 0.0f,0.0f,0.0f },
         const bool Anchored = true,
