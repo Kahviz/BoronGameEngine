@@ -99,15 +99,6 @@ add_executable(UntitledGameEngine
     Editor/Gui/MakeGui.cpp
     Editor/Camera/CameraControl.cpp
 
-    #Math
-    include/Math/M_Utils.h
-    include/Math/StoreFloat.h
-    include/Math/MatrixLookAtLH.h
-    include/Math/TransformNormal.h
-    include/Math/LoadINT.h
-    include/Math/Variables.h 
-    include/Math/Vector2.h
-
     UntilitedGameEngine.h
     Core/Graphics/Vulkan/VulkanBuilderInit.h
     Core/Graphics/Vulkan/VulkanBuilderInit.cpp
