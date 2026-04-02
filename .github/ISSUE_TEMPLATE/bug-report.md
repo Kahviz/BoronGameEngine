@@ -1,7 +1,7 @@
 ---
 name: Bug Report
 about: Report a bug in UntilitedGameEngine
-title: New project button doesn't work
+title: ''
 labels: bug
 assignees: Kahviz
 
@@ -15,3 +15,6 @@ Explain exactly what you expected the function to do and why
 
 **System Info**
 Tell what GPU you are using, what OS you are using, and what graphics backend you are using
+
+**Additional context**
+Add any other context or screenshots about the bug request here.
