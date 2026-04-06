@@ -54,6 +54,7 @@ public:
 
     void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
+    void createShadowResources();
 
     //Getters
     VkPipeline GetPipeline() { return graphicsPipeline; };
@@ -138,6 +139,14 @@ private:
     VkImageView depthImageView = VK_NULL_HANDLE;
     VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
 
-    //Sha
+    //Shadows
+
+    // Shadow map
+    VkImage shadowImage;
+    VkImageView shadowImageView;
+    VkDeviceMemory shadowImageMemory;
+    VkSampler shadowSampler;
+
+    const uint32_t SHADOW_MAP_SIZE = 2048;
 };
 #endif

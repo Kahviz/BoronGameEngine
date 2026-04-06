@@ -552,7 +552,10 @@ bool VulkanRender::Init(GLFWwindow* window)
     createDescriptorPool();
     createDescriptorSets(nullptr);
 
-    MakeASuccess("No Fatal Errors in Vulkan Initing :D");
+    createShadowResources();
+
+    //InitEnd
+    MakeASuccess("No Fatal Errors in Vulkan Initing :D-<");
     return true;
 }
 
@@ -1278,4 +1281,69 @@ void VulkanRender::EndSingleTimeCommands(VkCommandBuffer commandBuffer) {
     vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
 
+//Shadows
+
+void VulkanRender::createShadowResources()
+{
+    VkImageCreateInfo imageinfo{};
+    imageinfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageinfo.imageType = VK_IMAGE_TYPE_2D;
+    imageinfo.extent.width = SHADOW_MAP_SIZE;
+    imageinfo.extent.height = SHADOW_MAP_SIZE;
+    imageinfo.format = VK_FORMAT_D32_SFLOAT;
+    imageinfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    imageinfo.samples = VK_SAMPLE_COUNT_1_BIT;
+
+    if (vkCreateImage(device, &imageinfo, nullptr, &shadowImage) != VK_SUCCESS) {
+        MakeAError("Failed to create shadowImage");
+    }
+
+
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements(device, shadowImage, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = FindMemoryType(
+        memRequirements.memoryTypeBits,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        physicalDevice
+    );
+
+    vkAllocateMemory(device, &allocInfo, nullptr, &shadowImageMemory);
+    vkBindImageMemory(device, shadowImage, shadowImageMemory, 0);
+
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = shadowImage;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.format = VK_FORMAT_D32_SFLOAT;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+
+    if (vkCreateImageView(device, &viewInfo, nullptr, &shadowImageView) != VK_SUCCESS) {
+        MakeAError("Failed to create shadowImageView");
+    }
+
+
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.compareEnable = VK_TRUE;
+    samplerInfo.compareOp = VK_COMPARE_OP_LESS;
+    samplerInfo.anisotropyEnable = VK_FALSE;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+
+    if (vkCreateSampler(device, &samplerInfo, nullptr, &shadowSampler) != VK_SUCCESS) {
+        MakeAError("Failed to create shadow sampler!");
+    }
+}
 #endif
