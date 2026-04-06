@@ -57,8 +57,8 @@ const std::vector<uint32_t> indices = {
 
 bool VulkanRender::Init(GLFWwindow* window)
 {
-    float AspectX = screen_width;
-    float AspectY = screen_height;
+    float AspectX = (float)screen_width;
+    float AspectY = (float)screen_height;
     float Aspect = AspectX / AspectY;
 
     m_Camera.SetProjectionValues(FOV, Aspect, 0.0f, 1000.0f);
@@ -107,18 +107,10 @@ bool VulkanRender::Init(GLFWwindow* window)
     VkSurfaceFormatKHR surfaceFormat = formats[0];
     builder.ChooseSurfaceFormat(surfaceFormat, formats);
 
-    uint32_t presentModeCount;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
-    std::vector<VkPresentModeKHR> presentModes(presentModeCount);
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data());
+   
 
     VkPresentModeKHR presentMode;
-    if (vSync) {
-        presentMode = VK_PRESENT_MODE_FIFO_KHR;
-    }
-    else {
-        presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-    }
+    builder.ChoosePresentMode(presentMode, physicalDevice, surface);
 
     VkExtent2D extent;
     if (surfaceCapabilities.currentExtent.width != UINT32_MAX) {
@@ -458,27 +450,7 @@ bool VulkanRender::Init(GLFWwindow* window)
         throw std::runtime_error("Failed to create graphics pipeline!");
     }
 
-    swapchainFramebuffers.resize(swapchainImageViews.size());
-
-    for (size_t i = 0; i < swapchainImageViews.size(); i++) {
-        VkImageView attachments[] = {
-            swapchainImageViews[i]
-        };
-
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = renderPass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = extent.width;
-        framebufferInfo.height = extent.height;
-        framebufferInfo.layers = 1;
-
-        if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapchainFramebuffers[i]) != VK_SUCCESS) {
-            MakeAError("Failed to create framebuffer!");
-            return false;
-        }
-    }
+    CreateFramebuffers();
 
     MakeASuccess("Framebuffers created");
 
@@ -907,18 +879,8 @@ void VulkanRender::CreateSwapchain() {
         }
     }
 
-    uint32_t presentModeCount;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
-    std::vector<VkPresentModeKHR> presentModes(presentModeCount);
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data());
-
-    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
-    for (const auto& mode : presentModes) {
-        if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
-            presentMode = mode;
-            break;
-        }
-    }
+    VkPresentModeKHR presentMode;
+    builder.ChoosePresentMode(presentMode, physicalDevice, surface);
 
     VkExtent2D extent = surfaceCapabilities.currentExtent;
     if (extent.width == UINT32_MAX || extent.width == 0) {
@@ -1013,7 +975,6 @@ void VulkanRender::createUniformBuffers() {
 
     vkBindBufferMemory(device, uniformBuffer, uniformBufferMemory, 0);
 
-    // Mapataan muisti jatkuvaa käyttöä varten
     vkMapMemory(device, uniformBufferMemory, 0, bufferSize, 0, &uniformBufferMapped);
 }
 
@@ -1302,7 +1263,7 @@ void VulkanRender::EndSingleTimeCommands(VkCommandBuffer commandBuffer) {
         MakeAError("Failed to end command buffer");
         return;
     }
-
+    
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;

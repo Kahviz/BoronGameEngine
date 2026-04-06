@@ -72,7 +72,7 @@ bool Builder::ChooseGPU(VkPhysicalDevice& physicaldevice, ScoreCounter& SC, VkIn
     return true;
 }
 
-bool Builder::InitQueueFamily(VkPhysicalDevice& physicalDevice, size_t& graphicsFamilyIndex, VkSurfaceKHR& surface)
+bool Builder::InitQueueFamily(VkPhysicalDevice& physicalDevice, uint32_t& graphicsFamilyIndex, VkSurfaceKHR& surface)
 {
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
@@ -102,7 +102,7 @@ bool Builder::InitQueueFamily(VkPhysicalDevice& physicalDevice, size_t& graphics
     return true;
 }
 
-bool Builder::CreateDevice(VkPhysicalDevice& physicalDevice, VkDevice& device, size_t& graphicsFamilyIndex)
+bool Builder::CreateDevice(VkPhysicalDevice& physicalDevice, VkDevice& device, uint32_t& graphicsFamilyIndex)
 {
     const char* deviceExtensions[] = { "VK_KHR_swapchain" };
 
@@ -128,6 +128,28 @@ bool Builder::CreateDevice(VkPhysicalDevice& physicalDevice, VkDevice& device, s
     }
 
     return true;
+}
+
+void Builder::ChoosePresentMode(VkPresentModeKHR& presentMode, VkPhysicalDevice& physicalDevice, VkSurfaceKHR& surface)
+{
+    uint32_t presentModeCount;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
+    std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data());
+
+    if (vSync) {
+        presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    }
+    else {
+        presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+
+        for (const auto& mode : presentModes) {
+            if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+                presentMode = mode;
+                break;
+            }
+        }
+    }
 }
 
 void Builder::CreateAttachments(VkAttachmentDescription& colorAttachment, VkAttachmentReference& colorAttachmentRef, VkSurfaceFormatKHR& surfaceFormat)

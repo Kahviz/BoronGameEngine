@@ -5,23 +5,19 @@
 
 struct Vertex
 {
-    float brightness;
-    GPUVector3 pos;
-    GPUVector3 color;
-    GPUVector3 normal;
-    GPUVector2 uv;
+    float brightness = 1.0f;
+    GPUVector3 pos = { 0,0,0 };
+    GPUVector3 color = { 0,0,0 };
+    GPUVector3 normal = { 0,0,0 };
+    GPUVector2 uv = { 0,0 };
     Vertex() = default;
+
+    Vertex(float b, const GPUVector3& p, const GPUVector3& c, const GPUVector3& n)
+        : brightness(b), pos(p), color(c), normal(n), uv{ 0.0f, 0.0f } {
+    }
 
     Vertex(float b, const GPUVector3& p, const GPUVector3& c, const GPUVector3& n, const GPUVector2& uv_coords)
         : brightness(b), pos(p), color(c), normal(n), uv(uv_coords) {
-    }
-
-    Vertex(float b, const GPUVector3& p, const GPUVector3& c, const GPUVector3& n)
-        : brightness(b), pos(p), color(c), normal(n) {
-    }
-
-    Vertex(float b, GPUVector3& p, GPUVector3&& c, GPUVector3&& n)
-        : brightness(b), pos(std::move(p)), color(std::move(c)), normal(std::move(n)) {
     }
 
     static VkVertexInputBindingDescription getBindingDescription() {

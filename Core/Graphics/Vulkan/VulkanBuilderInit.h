@@ -11,8 +11,10 @@ class Builder {
 public:
 	bool MakeInstance(uint32_t& extCount, VkInstance& instance);
 	bool ChooseGPU(VkPhysicalDevice& physicaldevice,ScoreCounter& SC, VkInstance& instance);
-	bool InitQueueFamily(VkPhysicalDevice& physicalDevice, size_t& graphicsFamilyIndex, VkSurfaceKHR& surface);
-	bool CreateDevice(VkPhysicalDevice& physicalDevice, VkDevice& device, size_t& graphicsFamilyIndex);
+	bool InitQueueFamily(VkPhysicalDevice& physicalDevice, uint32_t& graphicsFamilyIndex, VkSurfaceKHR& surface);
+	bool CreateDevice(VkPhysicalDevice& physicalDevice, VkDevice& device, uint32_t& graphicsFamilyIndex);
+
+	void ChoosePresentMode(VkPresentModeKHR& presentMode, VkPhysicalDevice& physicalDevice, VkSurfaceKHR& surface);
 
 	void CreateAttachments(VkAttachmentDescription& colorAttachment, VkAttachmentReference& colorAttachmentRef, VkSurfaceFormatKHR& surfaceFormat);
 	void ChooseSurfaceFormat(VkSurfaceFormatKHR& surfaceFormat, std::vector<VkSurfaceFormatKHR>& formats);

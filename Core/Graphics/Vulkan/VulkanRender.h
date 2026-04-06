@@ -60,7 +60,7 @@ public:
     VkInstance& GetVulkanInstance() { return instance; };
     VkDescriptorPool& GetImGuiPool() { return imguiPool; };
     std::vector<VkCommandBuffer> GetCommandBuffers() { return commandBuffers; };
-    size_t GetGraphicsFamilyIndex() { return graphicsFamilyIndex; };
+    uint32_t GetGraphicsFamilyIndex() { return graphicsFamilyIndex; };
     std::vector<VkImageView> GetSwapChainImageViews() { return swapchainImageViews; };
     VkRenderPass GetRenderPass() { return renderPass; };
     VkCommandBuffer GetCurrentFrameCommandBuffer() { return commandBuffers[currentFrame]; };
@@ -86,7 +86,7 @@ private:
     const uint32_t MAX_OBJECTS = 100;
     uint32_t imageIndex = -1;
     size_t maxInstances = 100;
-    size_t graphicsFamilyIndex = -1;
+    uint32_t graphicsFamilyIndex = -1;
     size_t dynamicAlignment = -1;
 
     VkExtent2D swapchainExtent = {};
