@@ -5,12 +5,16 @@
 
 struct Vertex
 {
-    float brightness;  // offset 0
-    GPUVector3 pos;        // offset 4
-    GPUVector3 color;      // offset 16
-    GPUVector3 normal;     // offset 28
+    float brightness;
+    GPUVector3 pos;
+    GPUVector3 color;
+    GPUVector3 normal;
     GPUVector2 uv;
     Vertex() = default;
+
+    Vertex(float b, const GPUVector3& p, const GPUVector3& c, const GPUVector3& n, const GPUVector2& uv_coords)
+        : brightness(b), pos(p), color(c), normal(n), uv(uv_coords) {
+    }
 
     Vertex(float b, const GPUVector3& p, const GPUVector3& c, const GPUVector3& n)
         : brightness(b), pos(p), color(c), normal(n) {
@@ -28,8 +32,8 @@ struct Vertex
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
 
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
@@ -43,8 +47,13 @@ struct Vertex
 
         attributeDescriptions[2].binding = 0;
         attributeDescriptions[2].location = 2;
-        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[2].offset = offsetof(Vertex, uv);
+        attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[2].offset = offsetof(Vertex, normal);
+
+        attributeDescriptions[3].binding = 0;
+        attributeDescriptions[3].location = 3;
+        attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[3].offset = offsetof(Vertex, uv);
 
         return attributeDescriptions;
     }
