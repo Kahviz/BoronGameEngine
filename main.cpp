@@ -9,9 +9,9 @@
 
 int main() {
     MakeFiles mf;
+    mf.MakeAPPDATAFolders();
 
     int WaitTime = 2;
-    mf.MakeAPPDATAFolders();
 
 #if INEDITOR == 0
     #ifdef NDEBUG
@@ -28,7 +28,7 @@ int main() {
         std::this_thread::sleep_for(std::chrono::seconds(3));
         return -5;
     }
-    std::string WaitTimeString = std::format("Waiting For {}", WaitTime," Secund before closing!");
+    std::string WaitTimeString = std::format("Waiting For {}", WaitTime," Secund(s) before closing!");
 
     MakeASuccess(WaitTimeString);
     std::this_thread::sleep_for(std::chrono::seconds(WaitTime));
