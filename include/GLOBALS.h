@@ -25,6 +25,7 @@ extern int viewport_height;
 extern std::string appData;
 extern std::string fonts;
 extern std::string assets;
+extern std::string textures;
 extern std::string ProjectName;
 
 extern fs::path appDataTarget;

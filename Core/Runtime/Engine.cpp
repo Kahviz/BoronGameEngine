@@ -201,7 +201,7 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
 #endif
     obj->Selected = Selec;
 
-    std::string fullPath = assets + "\\Textures\\TestTexture.png";
+    std::string fullPath = textures + "\\TestTexture.png";
     std::cout << fullPath << std::endl;
 
 #if DIRECTX11 == 1
@@ -210,7 +210,14 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     //obj->texture.Load(fullPath, *window.GetGraphics().DR.get());
 #endif
 #if VULKAN == 1
-    obj->texture.LoadVK(fullPath, *window.GetGraphics().VR.get());
+    if (Name != "Cube2") {
+        obj->texture.LoadVK(fullPath, *window.GetGraphics().VR.get());
+        window.GetGraphics().VR->UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
+    }
+    else {
+        MakeAError("Making so Cube2 doesnt have texture for showcase! This is a remainder for me! 1F1G");
+    }
+
 #endif
     Instance* objPtr = obj.get();
     Drawables.push_back(std::move(obj));
@@ -227,9 +234,9 @@ void ScreenResizerDetector(Window* wnd) {
         wnd->GetGraphics().ReSizeWindow(screen_width, screen_height, wnd);
         lastWidth = screen_width;
         lastHeight = screen_height;
-#ifdef _DEBUG
-    std::cout << "Screen resized to: " << screen_width << "x" << screen_height << std::endl;
-#endif
+        #ifdef _DEBUG
+            std::cout << "Screen resized to: " << screen_width << "x" << screen_height << std::endl;
+        #endif
     }
 
     ImGuiIO& io = ImGui::GetIO();
@@ -280,7 +287,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     if (InProject) {
         if (!CubeB) {
             std::cout << "Starting..." << std::endl;
-            AddAMesh("\\Cube.obj", "Cube", { 0,0,0 }, { 0.5,1,0.5 }, false);
+            AddAMesh("\\Cube.obj", "Cube2", { 0,0,0 }, { 0.5,1,0.5 }, false);
             AddAMesh("\\Cube.obj", "Cube", { 0,-5,0 }, { 10,1,10 }, false);
             //AddAMesh("\\Cylinder.obj", "Cylinder", { 1,0,0 }, { 0.5,1,0.5 }, false);
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);
@@ -317,7 +324,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
 #if VULKAN == 1
     for (auto& Drawableptr : Drawables) {
-        auto Drawable = Drawableptr.get();
+        Instance* Drawable = Drawableptr.get();
         if (Drawable->CanDraw()) {
             wnd->GetGraphics().RenderAMesh(
                 deltatime,
@@ -335,6 +342,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         }
     }
 #endif
+
     //Physics
     for (auto& Drawableptr : Drawables) {
         auto Drawable = Drawableptr.get();

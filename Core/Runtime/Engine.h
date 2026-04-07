@@ -37,5 +37,6 @@ private:
     int Index = 0;
     int screen_width = 1280;
     int screen_height = 800;
-    Vector3 Color3 = { 1.0f, 1.0f, 1.0f };
+
+    Vector3 Color3 = { 0.0f, 0.0f, 1.0f };
 };

@@ -10,22 +10,31 @@ layout(binding = 0) uniform UBO {
     mat4 model;
     mat4 view;
     mat4 proj;
+    vec3 color;
     float usesTexture;
 } ubo;
 
 layout(binding = 1) uniform sampler2D texSampler;
 
 void main() {
-    vec4 maincolor = { 1.0, 0.0, 0.0, 1.0};
-
-    if (ubo.usesTexture >= 0.5) {
-        maincolor = texture(texSampler, fragUV);
+    vec4 maincolor;
+    if (ubo.usesTexture > 0.5) {
+        //Texture
+        outColor = texture(texSampler, fragUV);
+    } else {
+        //No Texture
+        outColor = vec4(ubo.color, 1.0);
     }
-    else {
-        maincolor = vec4(fragColor,1.0);
-    }
-
-    vec3 normalColor = fragNormal * 0.5 + 0.5;
-    
-    outColor = vec4(maincolor);
 }
+/*
+void main() {
+    vec4 maincolor;
+    if (ubo.usesTexture > 0.5) {
+        //Texture
+        outColor = texture(texSampler, fragUV);
+    } else {
+        //No Texture
+        outColor = vec4(ubo.color, 1.0);
+    }
+}
+*/

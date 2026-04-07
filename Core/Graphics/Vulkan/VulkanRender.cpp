@@ -544,10 +544,6 @@ bool VulkanRender::Init(GLFWwindow* window)
         throw std::runtime_error("Failed to create ImGui descriptor pool");
     }
 
-    std::string fullPath = assets + "\\Textures\\TestTexture.png";
-    defaultTexture = new Texture();
-    defaultTexture->LoadVK(fullPath, *this);
-
     createUniformBuffers();
     createDescriptorPool();
     createDescriptorSets(nullptr);
@@ -571,8 +567,14 @@ void VulkanRender::CreateDepthResources(uint32_t width, uint32_t height) {
     imageInfo.format = depthFormat;
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     if (vkCreateImage(device, &imageInfo, nullptr, &depthImage) != VK_SUCCESS) {
@@ -718,10 +720,10 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui)
     scissor.extent = { (uint32_t)screen_width, (uint32_t)screen_height };
     vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-    // MÄÄRITÄ CLEAR VALUES ENNEN RENDER PASSIN ALOITUSTA
     std::array<VkClearValue, 2> clearValues{};
-    clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+    clearValues[0].color = { {0.208f, 0.51f, 0.741f, 1.0f} };
     clearValues[1].depthStencil = { 1.0f, 0 };
+
 
     VkRenderPassBeginInfo rp{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
     rp.renderPass = renderPass;
@@ -1001,6 +1003,16 @@ void VulkanRender::createDescriptorPool() {
     }
 }
 
+void VulkanRender::UpdateDescriptorSet(const Instance* inst) {
+    if (descriptorPool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+        descriptorPool = VK_NULL_HANDLE;
+    }
+
+    createDescriptorPool();
+    createDescriptorSets(inst);
+}
+
 void VulkanRender::createDescriptorSets(const Instance* inst) {
     const Texture* texture = (inst != nullptr) ? inst->GetConstTexture() : nullptr;
 
@@ -1021,18 +1033,6 @@ void VulkanRender::createDescriptorSets(const Instance* inst) {
     bufferInfo.offset = 0;
     bufferInfo.range = dynamicAlignment;
 
-    VkDescriptorImageInfo imageInfo{};
-    if (texture != nullptr && texture->IsLoadedConst()) {
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = texture->GetImageView();
-        imageInfo.sampler = texture->GetSampler();
-    }
-    else {
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = defaultTexture->GetImageView();
-        imageInfo.sampler = defaultTexture->GetSampler();
-    }
-
     std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
     descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1045,20 +1045,27 @@ void VulkanRender::createDescriptorSets(const Instance* inst) {
     descriptorWrites[0].pImageInfo = nullptr;
     descriptorWrites[0].pTexelBufferView = nullptr;
 
-    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrites[1].dstSet = descriptorSet;
-    descriptorWrites[1].dstBinding = 1;
-    descriptorWrites[1].dstArrayElement = 0;
-    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrites[1].descriptorCount = 1;
-    descriptorWrites[1].pImageInfo = &imageInfo;
-    descriptorWrites[1].pBufferInfo = nullptr;
-    descriptorWrites[1].pTexelBufferView = nullptr;
+    VkDescriptorImageInfo imageInfo{};
+    if (texture != nullptr && texture->IsLoadedConst()) {
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = texture->GetImageView();
+        imageInfo.sampler = texture->GetSampler();
 
-    vkUpdateDescriptorSets(device,
-        static_cast<uint32_t>(descriptorWrites.size()),
-        descriptorWrites.data(),
-        0, nullptr);
+        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[1].dstSet = descriptorSet;
+        descriptorWrites[1].dstBinding = 1;
+        descriptorWrites[1].dstArrayElement = 0;
+        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrites[1].descriptorCount = 1;
+        descriptorWrites[1].pImageInfo = &imageInfo;
+        descriptorWrites[1].pBufferInfo = nullptr;
+        descriptorWrites[1].pTexelBufferView = nullptr;
+
+        vkUpdateDescriptorSets(device, 2, descriptorWrites.data(), 0, nullptr); // 2 bindings
+    }
+    else {
+        vkUpdateDescriptorSets(device, 1, &descriptorWrites[0], 0, nullptr); //only 1 binding
+    }
 }
 
 Matrix4x4 VulkanRender::CreateVulkanPerspective(float fovY, float aspect, float zNear, float zFar) {
@@ -1069,7 +1076,7 @@ Matrix4x4 VulkanRender::CreateVulkanPerspective(float fovY, float aspect, float 
     result(0, 0) = f / aspect;
     result(1, 1) = -f;
     result(2, 2) = zFar * rangeInv;
-    result(2, 3) = 1.0f;          // w-komponentti
+    result(2, 3) = 1.0f;
     result(3, 2) = -(zFar * zNear) * rangeInv;
 
     return result;
@@ -1108,13 +1115,23 @@ void VulkanRender::updateUniformBuffer(
     );
 
     const Texture* tex = inst.GetConstTexture();
+    //std::cout << "Texture pointer: " << tex << std::endl;
+
+    if (tex != nullptr) {
+        //std::cout << "IsLoadedConst: " << tex->IsLoadedConst() << std::endl;
+        //std::cout << "ImageView: " << tex->GetImageView() << std::endl;
+    }
 
     if (tex != nullptr && tex->IsLoadedConst()) {
+       //std::cout << "Using Texture 1.0" << std::endl;
+
         ubo.UsesTexture = 1.0f;
     }
     else {
+        //std::cout << "Not Using 0.0" << std::endl;
         ubo.UsesTexture = 0.0f;
     }
+
     ubo.view = m_Camera.GetViewMatrix().transposed();
 
     float fovY = 45.0f * PI / 180.0f;

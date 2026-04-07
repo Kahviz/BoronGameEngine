@@ -43,6 +43,7 @@ public:
     void CreateSwapchain();
     void createUniformBuffers();
     void createDescriptorPool();
+    void UpdateDescriptorSet(const Instance* inst);
     void createDescriptorSets(const Instance* inst = nullptr);
     Matrix4x4 CreateVulkanPerspective(float fovY, float aspect, float zNear, float zFar);
     void updateUniformBuffer(const Instance& inst, uint32_t objectIndex, Vector3 scale, Vector3 Orientation, Vector3 pos, Int3 color);
@@ -73,7 +74,7 @@ private:
     Builder builder;
     Camera m_Camera;
     ScoreCounter m_SC;
-    Texture* defaultTexture;
+    //Texture* defaultTexture;
     struct DrawCommand {
         const MeshVK* mesh;
         uint32_t objectIndex;

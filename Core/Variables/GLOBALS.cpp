@@ -85,7 +85,7 @@ fs::path GetAppDataDir() {
 std::string ProjectName = "ProjectTest1";
 std::string appData = GetAppDataPath();
 std::string assets = appData + "\\UntilitedGameEngine\\Assets";
+std::string textures = appData + "\\UntilitedGameEngine\\Textures";
 std::string fonts = appData + "\\UntilitedGameEngine\\Fonts";
-
 fs::path appDataTarget = GetAppDataDir();
 
