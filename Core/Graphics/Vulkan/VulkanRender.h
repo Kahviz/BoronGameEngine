@@ -24,6 +24,7 @@
 //SubClasses
 #include "VulkanDevice/VulkanDevice.h"
 #include "VulkanInstance/VulkanInstance.h"
+#include "VulkanSwapchain/VulkanSwapchain.h"
 
 class Texture;
 
@@ -67,14 +68,16 @@ public:
     VkDescriptorPool& GetImGuiPool() { return imguiPool; };
     std::vector<VkCommandBuffer> GetCommandBuffers() { return commandBuffers; };
     uint32_t GetGraphicsFamilyIndex() { return vkDevice.GetFamilyIndex(); };
-    std::vector<VkImageView> GetSwapChainImageViews() { return swapchainImageViews; };
+    std::vector<VkImageView> GetSwapChainImageViews() { return vkSwapchain.GetSwapchainImageViews(); };
     VkRenderPass GetRenderPass() { return renderPass; };
     VkCommandBuffer GetCurrentFrameCommandBuffer() { return commandBuffers[currentFrame]; };
     VkCommandPool GetCommandPool() { return commandPool; }
     VkQueue GetGraphicsQueue() { return vkDevice.GetGraphicsQueue(); }
 private:
+    //SubClasses
     VulkanDevice vkDevice;
     VulkanInstance vkInstance;
+    VulkanSwapchain vkSwapchain;
 
     Camera m_Camera;
 
@@ -93,8 +96,6 @@ private:
     size_t maxInstances = 100;
     size_t dynamicAlignment = -1;
 
-    VkExtent2D swapchainExtent = {};
-    VkFormat swapchainImageFormat = {};
     VkViewport viewport{};
     VkRect2D scissor = {};
 
@@ -103,9 +104,6 @@ private:
     std::vector<VkCommandBuffer> commandBuffers = {};
     std::vector<std::unique_ptr<Instance>> DrawablesCopy = {};
     std::vector<uint32_t> drawObjectIndices = {};
-    std::vector<VkImage> swapchainImages = {};
-    std::vector<VkFramebuffer> swapchainFramebuffers = {};
-    std::vector<VkImageView> swapchainImageViews = {};
 
     GLFWwindow* main_window = nullptr;
     void* uniformBufferMapped = nullptr;
@@ -122,7 +120,6 @@ private:
     VkSemaphore renderFinishedSemaphore = VK_NULL_HANDLE;
     VkBuffer indexBuffer = VK_NULL_HANDLE;
     VkFence inFlightFence = VK_NULL_HANDLE;
-    VkSwapchainKHR swapchain = VK_NULL_HANDLE;
     VkRenderPass renderPass = VK_NULL_HANDLE;
     VkShaderModule vertShaderModule = VK_NULL_HANDLE;
     VkShaderModule fragShaderModule = VK_NULL_HANDLE;
