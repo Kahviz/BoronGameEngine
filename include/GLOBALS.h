@@ -10,9 +10,18 @@ namespace fs = std::filesystem;
 #define DIRECTX11 0 //1 = True, 0 = False
 #define VULKAN 1 //1 = True, 0 = False
 #define DEBUGFILEMAKING 0 //1 = True, 0 = False
+
 #if INEDITOR == 1
 	#define PROFILER
 #endif
+
+#if VULKAN == 1
+	#ifndef GLFW_INCLUDE_VULKAN
+	#define GLFW_INCLUDE_VULKAN
+	#endif
+#endif
+
+#include <GLFW/glfw3.h>
 
 #define AURA // Most Useful thing in this project
 

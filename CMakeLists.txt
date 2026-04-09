@@ -100,6 +100,12 @@ add_executable(UntitledGameEngine
     Editor/Camera/CameraControl.cpp
 
     UntilitedGameEngine.h
+
+    #VulkanRenderer Subclasses
+    Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.h
+    Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.cpp
+    Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.h
+    Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.cpp
 )
 
 target_include_directories(UntitledGameEngine PRIVATE

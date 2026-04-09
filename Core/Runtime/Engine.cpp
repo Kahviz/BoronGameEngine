@@ -56,7 +56,7 @@ Engine::Engine()
 
         ImGui_ImplVulkan_InitInfo init_info = {};
         init_info.ApiVersion = VK_API_VERSION_1_2;
-        init_info.Instance = vr->GetVulkanInstance();
+        init_info.Instance = vr->GetInstance();
         init_info.PhysicalDevice = vr->GetPhysicalDevice();
         init_info.Device = vr->GetDevice();
         init_info.QueueFamily = vr->GetGraphicsFamilyIndex();

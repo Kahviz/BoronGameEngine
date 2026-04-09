@@ -21,6 +21,10 @@
 #include <minmax.h>
 #include <algorithm>
 
+//SubClasses
+#include "VulkanDevice/VulkanDevice.h"
+#include "VulkanInstance/VulkanInstance.h"
+
 class Texture;
 
 class VulkanRender {
@@ -33,7 +37,6 @@ public:
     uint32_t GetImageIndex();
     void RecordCommandBuffer(uint32_t imageIndex, bool renderImGui);
     void RecreateSwapchain();
-    void UpdateViewportAndScissor();
     void CreateCommandBuffers();
     void CreateFramebuffers();
     void CreateImageViews();
@@ -56,22 +59,25 @@ public:
     void createShadowResources();
 
     //Getters
+    VkDevice GetDevice() { return vkDevice.GetDevice(); };
+    VkPhysicalDevice GetPhysicalDevice() { return vkDevice.GetPhysicalDevice(); };
+
     VkPipeline GetPipeline() { return graphicsPipeline; };
-    VkInstance& GetVulkanInstance() { return instance; };
+    VkInstance& GetInstance() { return vkInstance.GetInstance(); };
     VkDescriptorPool& GetImGuiPool() { return imguiPool; };
     std::vector<VkCommandBuffer> GetCommandBuffers() { return commandBuffers; };
-    uint32_t GetGraphicsFamilyIndex() { return graphicsFamilyIndex; };
+    uint32_t GetGraphicsFamilyIndex() { return vkDevice.GetFamilyIndex(); };
     std::vector<VkImageView> GetSwapChainImageViews() { return swapchainImageViews; };
     VkRenderPass GetRenderPass() { return renderPass; };
     VkCommandBuffer GetCurrentFrameCommandBuffer() { return commandBuffers[currentFrame]; };
     VkCommandPool GetCommandPool() { return commandPool; }
-    VkDevice GetDevice() { return device; };
-    VkQueue GetGraphicsQueue() { return graphicsQueue; };
-    VkPhysicalDevice GetPhysicalDevice() { return physicalDevice; };
+    VkQueue GetGraphicsQueue() { return vkDevice.GetGraphicsQueue(); }
 private:
+    VulkanDevice vkDevice;
+    VulkanInstance vkInstance;
+
     Camera m_Camera;
-    ScoreCounter m_SC;
-    //Texture* defaultTexture;
+
     struct DrawCommand {
         const MeshVK* mesh;
         uint32_t objectIndex;
@@ -85,7 +91,6 @@ private:
     const uint32_t MAX_OBJECTS = 100;
     uint32_t imageIndex = -1;
     size_t maxInstances = 100;
-    uint32_t graphicsFamilyIndex = -1;
     size_t dynamicAlignment = -1;
 
     VkExtent2D swapchainExtent = {};
@@ -105,10 +110,7 @@ private:
     GLFWwindow* main_window = nullptr;
     void* uniformBufferMapped = nullptr;
 
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkCommandPool commandPool = VK_NULL_HANDLE;
-    VkDevice device = VK_NULL_HANDLE;
-    VkQueue graphicsQueue = VK_NULL_HANDLE;
     VkPipeline graphicsPipeline = VK_NULL_HANDLE;
     VkBuffer uniformBuffer = VK_NULL_HANDLE;
     VkDeviceMemory uniformBufferMemory = VK_NULL_HANDLE;
@@ -120,8 +122,6 @@ private:
     VkSemaphore renderFinishedSemaphore = VK_NULL_HANDLE;
     VkBuffer indexBuffer = VK_NULL_HANDLE;
     VkFence inFlightFence = VK_NULL_HANDLE;
-    VkInstance instance = VK_NULL_HANDLE;
-    VkSurfaceKHR surface = VK_NULL_HANDLE;
     VkSwapchainKHR swapchain = VK_NULL_HANDLE;
     VkRenderPass renderPass = VK_NULL_HANDLE;
     VkShaderModule vertShaderModule = VK_NULL_HANDLE;
