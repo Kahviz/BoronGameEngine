@@ -9,7 +9,7 @@
 class VulkanDevice {
 public:
 	bool Init(GLFWwindow* window, VkInstance& instance);
-
+	
 	//Getters
 	VkDevice& GetDevice() { return device; }
 	const VkDevice& GetDevice() const { return device; }
@@ -17,7 +17,6 @@ public:
 	VkPhysicalDevice& GetPhysicalDevice() { return physicalDevice; }
 	const VkPhysicalDevice& GetPhysicalDevice() const { return physicalDevice; }
 	
-
 	VkSurfaceKHR& GetSurface() { return surface; }
 	const VkSurfaceKHR& GetSurface() const { return surface; }
 

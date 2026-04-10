@@ -69,10 +69,17 @@ bool VulkanRender::Init(GLFWwindow* window)
     
     if (!vkInstance.Init()) {
         MakeAError("A Unexpected error happened on vkInstance.Init");
+        return false;
     }
 
     if (!vkDevice.Init(window, vkInstance.GetInstance())) {
         MakeAError("A Unexpected error happened on vkDevice.Init");
+        return false;
+    }
+
+    if (!vkCommandBuffer.CreateCommandPool(vkDevice.GetDevice(), vkDevice.GetFamilyIndex())) {
+        MakeAError("A Unexpected error happened on vkDevice.CreateCommandPool");
+        return false;
     }
 
     VkPhysicalDeviceProperties selectedProps;
@@ -393,31 +400,12 @@ bool VulkanRender::Init(GLFWwindow* window)
 
     MakeASuccess("Synchronization objects created");
 
-    commandBuffers.resize(vkSwapchain.GetSwapchainFramebuffers().size());
+    uint32_t framebufferCount = static_cast<uint32_t>(vkSwapchain.GetSwapchainFramebuffers().size());
 
-    VkCommandPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.queueFamilyIndex = vkDevice.GetFamilyIndex();
-    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
-    if (vkCreateCommandPool(vkDevice.GetDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
-        MakeAError("Failed to create command pool!");
-        return false;
-    }
-
-    MakeASuccess("Command buffers allocated");
-
-    VkCommandBufferAllocateInfo cmdAllocInfo{};
-    cmdAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    cmdAllocInfo.commandPool = commandPool;
-    cmdAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    cmdAllocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
-
-    if (vkAllocateCommandBuffers(vkDevice.GetDevice(), &cmdAllocInfo, commandBuffers.data()) != VK_SUCCESS) {
+    if (!vkCommandBuffer.AllocateCommandBuffers(vkDevice.GetDevice(), framebufferCount)) {
         MakeAError("Failed to allocate command buffers!");
         return false;
     }
-    MakeASuccess("Command buffers allocated");
 
     vkSwapchain.GetSwapchainExtent() = vkSwapchain.ChooseSwapchainExtent(vkDevice.GetPhysicalDevice(),vkDevice.GetSurface());
     vkSwapchain.GetSwapchainImageFormat() = surfaceFormat.format;
@@ -572,13 +560,8 @@ void VulkanRender::Cleanup()
 
     meshCache.clear();
 
-    for (auto framebuffer : vkSwapchain.GetSwapchainFramebuffers()) {
-        vkDestroyFramebuffer(vkDevice.GetDevice(), framebuffer, nullptr);
-    }
-
-    // Destroys image views
-    for (auto imageView : vkSwapchain.GetSwapchainImageViews()) {
-        vkDestroyImageView(vkDevice.GetDevice(), imageView, nullptr);
+    if (!vkSwapchain.CleanupSwapchain(vkDevice.GetDevice(),vkCommandBuffer.GetCommandPool(),vkCommandBuffer.GetCommandBuffers())) {
+        MakeAError("A Error happened in vkSwapchain.CleanupSwapchain");
     }
 
     if (indexBuffer != VK_NULL_HANDLE) {
@@ -589,31 +572,39 @@ void VulkanRender::Cleanup()
         vkFreeMemory(vkDevice.GetDevice(), indexBufferMemory, nullptr);
     }
 
-    if (vertShaderModule != VK_NULL_HANDLE)
+    if (vertShaderModule != VK_NULL_HANDLE) {
         vkDestroyShaderModule(vkDevice.GetDevice(), vertShaderModule, nullptr);
+    }
 
-    if (fragShaderModule != VK_NULL_HANDLE)
+    if (fragShaderModule != VK_NULL_HANDLE) {
         vkDestroyShaderModule(vkDevice.GetDevice(), fragShaderModule, nullptr);
+    }
 
-    if (vkDevice.GetSurface() != VK_NULL_HANDLE)
+    if (vkDevice.GetSurface() != VK_NULL_HANDLE) {
         vkDestroySurfaceKHR(vkInstance.GetInstance(), vkDevice.GetSurface(), nullptr);
+    }
 
-    if (vkInstance.GetInstance() != VK_NULL_HANDLE)
+    if (vkInstance.GetInstance() != VK_NULL_HANDLE) {
         vkDestroyInstance(vkInstance.GetInstance(), nullptr);
-
-    if (vkDevice.GetDevice() != VK_NULL_HANDLE)
+    }
+        
+    if (vkDevice.GetDevice() != VK_NULL_HANDLE) {
         vkDestroyDevice(vkDevice.GetDevice(), nullptr);
+    }
 
-    if (depthImageView != VK_NULL_HANDLE)
+    if (depthImageView != VK_NULL_HANDLE) {
         vkDestroyImageView(vkDevice.GetDevice(), depthImageView, nullptr);
+    }
 
-    if (depthImage != VK_NULL_HANDLE)
+    if (depthImage != VK_NULL_HANDLE) {
         vkDestroyImage(vkDevice.GetDevice(), depthImage, nullptr);
+    }
 
-    if (depthImageMemory != VK_NULL_HANDLE)
+    if (depthImageMemory != VK_NULL_HANDLE) {
         vkFreeMemory(vkDevice.GetDevice(), depthImageMemory, nullptr);
+    }
 
-    MakeASuccess("Cleanupped succesfull!");
+    MakeASuccess("Cleanupped succesful!");
 }
 
 uint32_t VulkanRender::GetImageIndex() {
@@ -623,7 +614,7 @@ uint32_t VulkanRender::GetImageIndex() {
 void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui)
 {
     CurrentimageIndex = imageIndex;
-    VkCommandBuffer cmd = commandBuffers[imageIndex];
+    VkCommandBuffer cmd = vkCommandBuffer.GetCommandBuffers()[imageIndex];
     vkResetCommandBuffer(cmd, 0);
 
     VkCommandBufferBeginInfo beginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
@@ -683,28 +674,20 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui)
 void VulkanRender::RecreateSwapchain() {
     vkDeviceWaitIdle(vkDevice.GetDevice());
 
-    vkSwapchain.CleanupSwapchain(vkDevice.GetDevice(),commandPool,commandBuffers);
+    vkSwapchain.CleanupSwapchain(vkDevice.GetDevice(), vkCommandBuffer.GetCommandPool(), vkCommandBuffer.GetCommandBuffers());
 
     CreateSwapchain();
     CreateImageViews();
     CreateDepthResources(vkSwapchain.GetSwapchainExtent().width, vkSwapchain.GetSwapchainExtent().height);
     CreateFramebuffers();
-    CreateCommandBuffers();
-    for (size_t i = 0; i < commandBuffers.size(); i++) {
-        RecordCommandBuffer(static_cast<uint32_t>(i),false);
+    uint32_t framebufferCount = static_cast<uint32_t>(vkSwapchain.GetSwapchainFramebuffers().size());
+
+    if (!vkCommandBuffer.AllocateCommandBuffers(vkDevice.GetDevice(), framebufferCount)) {
+        MakeAError("Failed to allocate command buffers at RecreateSwapchain!");
     }
-}
-void VulkanRender::CreateCommandBuffers() {
-    commandBuffers.resize(vkSwapchain.GetSwapchainFramebuffers().size());
 
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = commandPool;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
-
-    if (vkAllocateCommandBuffers(vkDevice.GetDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to allocate command buffers!");
+    for (size_t i = 0; i < vkCommandBuffer.GetCommandBuffers().size(); i++) {
+        RecordCommandBuffer(static_cast<uint32_t>(i),false);
     }
 }
 
@@ -727,7 +710,7 @@ void VulkanRender::CreateFramebuffers() {
         framebufferInfo.layers = 1;
 
         if (vkCreateFramebuffer(vkDevice.GetDevice(), &framebufferInfo, nullptr, &vkSwapchain.GetSwapchainFramebuffers()[i]) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create framebuffer!");
+            MakeAError("Failed to create framebuffer!");
         }
     }
 }
@@ -1117,7 +1100,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
     submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
+    submitInfo.pCommandBuffers = &vkCommandBuffer.GetCommandBuffers()[imageIndex];
 
     VkSemaphore signalSemaphores[] = { renderFinishedSemaphore };
     submitInfo.signalSemaphoreCount = 1;
@@ -1154,7 +1137,7 @@ VkCommandBuffer VulkanRender::BeginSingleTimeCommands() {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = commandPool;
+    allocInfo.commandPool = vkCommandBuffer.GetCommandPool();
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
@@ -1194,7 +1177,7 @@ void VulkanRender::EndSingleTimeCommands(VkCommandBuffer commandBuffer) {
 
     vkQueueWaitIdle(vkDevice.GetGraphicsQueue());
 
-    vkFreeCommandBuffers(vkDevice.GetDevice(), commandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(vkDevice.GetDevice(), vkCommandBuffer.GetCommandPool(), 1, &commandBuffer);
 }
 
 //Shadows

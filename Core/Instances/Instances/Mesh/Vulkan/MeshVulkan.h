@@ -28,6 +28,4 @@ private:
     VkDeviceMemory indexMemory = VK_NULL_HANDLE;
 
     uint32_t indexCount = 0;
-
-
 };

@@ -106,7 +106,7 @@ add_executable(UntitledGameEngine
     Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.cpp
     Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.h
     Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.cpp
- "Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.h" "Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.cpp")
+ "Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.h" "Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.cpp" "Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.h" "Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.cpp")
 
 target_include_directories(UntitledGameEngine PRIVATE
     include

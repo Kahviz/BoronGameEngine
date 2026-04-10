@@ -25,6 +25,7 @@
 #include "VulkanDevice/VulkanDevice.h"
 #include "VulkanInstance/VulkanInstance.h"
 #include "VulkanSwapchain/VulkanSwapchain.h"
+#include "VulkanCommandBuffer/VulkanCommandBuffer.h"
 
 class Texture;
 
@@ -38,7 +39,6 @@ public:
     uint32_t GetImageIndex();
     void RecordCommandBuffer(uint32_t imageIndex, bool renderImGui);
     void RecreateSwapchain();
-    void CreateCommandBuffers();
     void CreateFramebuffers();
     void CreateImageViews();
     void CreateSwapchain();
@@ -65,18 +65,19 @@ public:
     VkPipeline GetPipeline() { return graphicsPipeline; };
     VkInstance& GetInstance() { return vkInstance.GetInstance(); };
     VkDescriptorPool& GetImGuiPool() { return imguiPool; };
-    std::vector<VkCommandBuffer> GetCommandBuffers() { return commandBuffers; };
+    std::vector<VkCommandBuffer> GetCommandBuffers() { return vkCommandBuffer.GetCommandBuffers(); };
     uint32_t GetGraphicsFamilyIndex() { return vkDevice.GetFamilyIndex(); };
     std::vector<VkImageView> GetSwapChainImageViews() { return vkSwapchain.GetSwapchainImageViews(); };
     VkRenderPass GetRenderPass() { return renderPass; };
-    VkCommandBuffer GetCurrentFrameCommandBuffer() { return commandBuffers[currentFrame]; };
-    VkCommandPool GetCommandPool() { return commandPool; }
+    VkCommandBuffer GetCurrentFrameCommandBuffer() { return vkCommandBuffer.GetCommandBuffers()[currentFrame]; };
+    VkCommandPool GetCommandPool() { return vkCommandBuffer.GetCommandPool(); }
     VkQueue GetGraphicsQueue() { return vkDevice.GetGraphicsQueue(); }
 private:
     //SubClasses
     VulkanDevice vkDevice;
     VulkanInstance vkInstance;
     VulkanSwapchain vkSwapchain;
+    VulkanCommandBuffer vkCommandBuffer;
 
     Camera m_Camera;
 
@@ -100,14 +101,12 @@ private:
 
     std::unordered_map<const Mesh*, std::unique_ptr<MeshVK>> meshCache = {};
     std::vector<DrawCommand> drawCommands = {};
-    std::vector<VkCommandBuffer> commandBuffers = {};
     std::vector<std::unique_ptr<Instance>> DrawablesCopy = {};
     std::vector<uint32_t> drawObjectIndices = {};
 
     GLFWwindow* main_window = nullptr;
     void* uniformBufferMapped = nullptr;
 
-    VkCommandPool commandPool = VK_NULL_HANDLE;
     VkPipeline graphicsPipeline = VK_NULL_HANDLE;
     VkBuffer uniformBuffer = VK_NULL_HANDLE;
     VkDeviceMemory uniformBufferMemory = VK_NULL_HANDLE;
