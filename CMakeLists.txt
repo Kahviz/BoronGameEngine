@@ -106,7 +106,13 @@ add_executable(UntitledGameEngine
     Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.cpp
     Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.h
     Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.cpp
- "Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.h" "Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.cpp" "Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.h" "Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.cpp" "Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.h" "Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.cpp")
+    Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.h
+    Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.cpp
+    Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.h
+    Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.cpp
+    Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.h
+    Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.cpp
+)
 
 target_include_directories(UntitledGameEngine PRIVATE
     include
@@ -120,7 +126,6 @@ target_include_directories(UntitledGameEngine PRIVATE
     Core/Instances/Instances/
     Core/Instances/
     Core/Debugging/Functions/
-
     Core/Graphics/Texture/
     Editor/Camera/
     Core/Services/
@@ -156,7 +161,7 @@ if(WIN32)
     endforeach()
 endif()
 
-# Määrittele shaderit erillisissä listoissa
+#Shaders
 set(SHADER_FILES
     VertexShader.hlsl
     PixelShader.hlsl

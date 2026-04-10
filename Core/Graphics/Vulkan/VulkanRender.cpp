@@ -566,21 +566,31 @@ void VulkanRender::CreateSwapchain() {
 }
 
 void VulkanRender::createUniformBuffers() {
-    VkDeviceSize bufferSize =
-        dynamicAlignment * MAX_OBJECTS;
+    m_CurrentObjectCount = 100;
+    ReallocateUniformBuffer(m_CurrentObjectCount);
+}
+
+void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount) {
+    if (m_UniformBuffer != VK_NULL_HANDLE) {
+        vkDestroyBuffer(vkDevice.GetDevice(), m_UniformBuffer, nullptr);
+        vkFreeMemory(vkDevice.GetDevice(), m_UniformBufferMemory, nullptr);
+    }
+
+    m_UniformBufferSize = dynamicAlignment * newObjectCount;
+    m_CurrentObjectCount = newObjectCount;
 
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = bufferSize;
+    bufferInfo.size = m_UniformBufferSize;
     bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateBuffer(vkDevice.GetDevice(), &bufferInfo, nullptr, &uniformBuffer) != VK_SUCCESS) {
+    if (vkCreateBuffer(vkDevice.GetDevice(), &bufferInfo, nullptr, &m_UniformBuffer) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create uniform buffer!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(vkDevice.GetDevice(), uniformBuffer, &memRequirements);
+    vkGetBufferMemoryRequirements(vkDevice.GetDevice(), m_UniformBuffer, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -591,13 +601,12 @@ void VulkanRender::createUniformBuffers() {
         vkDevice.GetPhysicalDevice()
     );
 
-    if (vkAllocateMemory(vkDevice.GetDevice(), &allocInfo, nullptr, &uniformBufferMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(vkDevice.GetDevice(), &allocInfo, nullptr, &m_UniformBufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("Failed to allocate uniform buffer memory!");
     }
 
-    vkBindBufferMemory(vkDevice.GetDevice(), uniformBuffer, uniformBufferMemory, 0);
-
-    vkMapMemory(vkDevice.GetDevice(), uniformBufferMemory, 0, bufferSize, 0, &uniformBufferMapped);
+    vkBindBufferMemory(vkDevice.GetDevice(), m_UniformBuffer, m_UniformBufferMemory, 0);
+    vkMapMemory(vkDevice.GetDevice(), m_UniformBufferMemory, 0, m_UniformBufferSize, 0, &uniformBufferMapped);
 }
 
 void VulkanRender::createDescriptorPool() {
@@ -646,7 +655,7 @@ void VulkanRender::createDescriptorSets(const Instance* inst) {
     }
 
     VkDescriptorBufferInfo bufferInfo{};
-    bufferInfo.buffer = uniformBuffer;
+    bufferInfo.buffer = m_UniformBuffer;
     bufferInfo.offset = 0;
     bufferInfo.range = dynamicAlignment;
 
@@ -707,6 +716,13 @@ void VulkanRender::updateUniformBuffer(
     Int3 color
 )
 {
+    if (objectIndex >= m_CurrentObjectCount) {
+        uint32_t newSize = max(m_CurrentObjectCount * 2, objectIndex + 1);
+        ReallocateUniformBuffer(newSize);
+
+        UpdateDescriptorSet(&inst);
+    }
+
     UniformBufferObject ubo{};
 
     float angle = Orientation.y();

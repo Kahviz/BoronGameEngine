@@ -26,7 +26,6 @@ struct LightingCB
     float lightRange;      // 4
 };
 
-
 void Dx11Renderer::InitDx11Renderer(HWND hWnd)
 {
     CreateDeviceAndSwapChain(screen_width, screen_height, hWnd);
@@ -45,7 +44,7 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd)
 
     CompileShaders();
 
-    // Tavallinen sampler
+    //Sampler
     D3D11_SAMPLER_DESC samp = {};
     samp.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     samp.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -78,7 +77,7 @@ void Dx11Renderer::CreateShadowResources()
     shadowDesc.Height = SHADOW_MAP_SIZE;
     shadowDesc.MipLevels = 1;
     shadowDesc.ArraySize = 1;
-    shadowDesc.Format = DXGI_FORMAT_R24G8_TYPELESS; // Tärkeä: typeless format
+    shadowDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
     shadowDesc.SampleDesc.Count = 1;
     shadowDesc.Usage = D3D11_USAGE_DEFAULT;
     shadowDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
@@ -86,7 +85,6 @@ void Dx11Renderer::CreateShadowResources()
     HRESULT hr = pDevice->CreateTexture2D(&shadowDesc, nullptr, &pShadowMap);
     if (FAILED(hr)) throw std::runtime_error("Failed to create shadow map texture");
 
-    // Luo DSV varjokartalle
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
     dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
@@ -104,11 +102,10 @@ void Dx11Renderer::CreateShadowResources()
     hr = pDevice->CreateShaderResourceView(pShadowMap.Get(), &srvDesc, &pShadowSRV);
     if (FAILED(hr)) throw std::runtime_error("Failed to create shadow SRV");
 
-    // Luo rasterizer state varjorenderöintiä varten
     D3D11_RASTERIZER_DESC rasterDesc = {};
     rasterDesc.FillMode = D3D11_FILL_SOLID;
     rasterDesc.CullMode = D3D11_CULL_BACK;
-    rasterDesc.DepthBias = 1000; // Bias estää itsevarjostuksen
+    rasterDesc.DepthBias = 1000;
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.SlopeScaledDepthBias = 1.0f;
     rasterDesc.DepthClipEnable = TRUE;
@@ -116,7 +113,6 @@ void Dx11Renderer::CreateShadowResources()
     hr = pDevice->CreateRasterizerState(&rasterDesc, &pShadowRasterizer);
     if (FAILED(hr)) throw std::runtime_error("Failed to create shadow rasterizer");
 
-    // Luo constant buffer varjoshaderille
     D3D11_BUFFER_DESC cbd = {};
     cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     cbd.ByteWidth = sizeof(ShadowCB);
@@ -138,13 +134,8 @@ void Dx11Renderer::SetShadowMapToShader()
 
 void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawables)
 {
-    static float angle = 0.0f;
-    float radius = 10.0f;
+    XMFLOAT3 lightPos(radius * cosf(lightAngle), 5.0f, radius * sinf(lightAngle));
 
-    angle += 0.01f;
-    if (angle >= XM_2PI) angle -= XM_2PI;
-
-    XMFLOAT3 lightPos(radius * cosf(angle), 5.0f, radius * sinf(angle));
     XMVECTOR lightPosition = XMLoadFloat3(&lightPos);
     XMVECTOR lightTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
     XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -641,6 +632,19 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
     RenderShadowMap(Drawables);
     SetShadowMapToShader();
 
+    const float lightSpeed = 0.1f;
+    lightAngle += lightSpeed * deltatime;
+    if (lightAngle >= DOUBLE_PI) lightAngle -= DOUBLE_PI;
+
+    XMFLOAT3 lightpos;
+    lightpos.x = radius * cosf(lightAngle);
+    lightpos.z = radius * sinf(lightAngle);
+    lightpos.y = 5.0f;
+
+    LightingCB lcb = {};
+    lcb.lightpos = Vector3(lightpos.x, lightpos.y, lightpos.z);
+    lcb.lightRange = 20.0f;
+
     for (auto& Instptr : Drawables) {
         Instance& inst = *Instptr.get();
 
@@ -671,13 +675,13 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             Int3 color = inst.color;
             float Brightness = 1.0f;
 
-            // Matriisit
+            // Matrix
             XMMATRIX scale = XMMatrixScaling(size.x(), size.y(), size.z());
             XMMATRIX rotation = XMMatrixRotationRollPitchYaw(Orientation.x(), Orientation.y(), Orientation.z());
             XMMATRIX translation = XMMatrixTranslation(pos.x(), pos.y(), pos.z());
-            XMMATRIX world = scale * rotation * translation;  // world-matriisi
+            XMMATRIX world = scale * rotation * translation;
 
-            // Kamera matriisit
+            // Camera Matrix
             Matrix4x4 mat = camera.GetViewMatrix();
             Matrix4x4 projMat = camera.GetProjectionMatrix();
 
@@ -689,17 +693,17 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             );
 
             XMMATRIX view = XMMATRIX(
-                XMVectorSet(mat(0, 0), mat(1, 0), mat(2, 0), mat(3, 0)),  // Sarake 0
-                XMVectorSet(mat(0, 1), mat(1, 1), mat(2, 1), mat(3, 1)),  // Sarake 1
-                XMVectorSet(mat(0, 2), mat(1, 2), mat(2, 2), mat(3, 2)),  // Sarake 2
-                XMVectorSet(mat(0, 3), mat(1, 3), mat(2, 3), mat(3, 3))   // Sarake 3
+                XMVectorSet(mat(0, 0), mat(1, 0), mat(2, 0), mat(3, 0)),
+                XMVectorSet(mat(0, 1), mat(1, 1), mat(2, 1), mat(3, 1)),
+                XMVectorSet(mat(0, 2), mat(1, 2), mat(2, 2), mat(3, 2)),
+                XMVectorSet(mat(0, 3), mat(1, 3), mat(2, 3), mat(3, 3))
             );
             XMMATRIX worldViewProj = world * view * proj;
 
             // VS constant buffer
             ConstantBuffer cb = {};
             cb.worldViewProj = XMMatrixTranspose(worldViewProj);
-            cb.world = XMMatrixTranspose(world);  // Lähetä world-matriisi
+            cb.world = XMMatrixTranspose(world);
             cb.cubeColor = XMFLOAT3(
                 color.x() / 255.0f,
                 color.y() / 255.0f,
@@ -723,32 +727,16 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             memcpy(msrColor.pData, &pcb, sizeof(pcb));
             pContext->Unmap(pColorBuffer.Get(), 0);
 
-            // Lighting (käytä samaa valoa kuin shadow mapissa)
-            static float angle = 0.0f;
-            const float radius = 10.0f;
-            const float speed = 0.01f;
-
-            angle += speed;
-            if (angle >= XM_2PI) angle -= XM_2PI;
-
-            XMFLOAT3 lightpos;
-            lightpos.x = radius * cosf(angle);
-            lightpos.z = radius * sinf(angle);
-            lightpos.y = 5.0f;
-
-            LightingCB lcb = {};
-            lcb.lightpos = Vector3(lightpos.x, lightpos.y, lightpos.z);
-            lcb.Brightness = Brightness;
-            lcb.WorldPos = Vector3(pos.x(), pos.y(), pos.z());
-            lcb.lightRange = 20.0f;
+            LightingCB lcbPerMesh = lcb;
+            lcbPerMesh.WorldPos = Vector3(pos.x(), pos.y(), pos.z());
+            lcbPerMesh.Brightness = Brightness;
 
             D3D11_MAPPED_SUBRESOURCE msrLighting;
             hr = pContext->Map(pLightingBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrLighting);
             if (FAILED(hr)) throw std::runtime_error("Failed to map lighting buffer");
-            memcpy(msrLighting.pData, &lcb, sizeof(lcb));
+            memcpy(msrLighting.pData, &lcbPerMesh, sizeof(lcbPerMesh));
             pContext->Unmap(pLightingBuffer.Get(), 0);
 
-            // Aseta constant bufferit
             pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
             pContext->PSSetConstantBuffers(0, 1, pColorBuffer.GetAddressOf());
             pContext->PSSetConstantBuffers(1, 1, pLightingBuffer.GetAddressOf());

@@ -42,6 +42,7 @@ public:
     void CreateImageViews();
     void CreateSwapchain();
     void createUniformBuffers();
+    void ReallocateUniformBuffer(uint32_t newObjectCount);
     void createDescriptorPool();
     void UpdateDescriptorSet(const Instance* inst);
     void createDescriptorSets(const Instance* inst = nullptr);
@@ -90,7 +91,13 @@ private:
 
     int currentFrame = 0;
 
-    const uint32_t MAX_OBJECTS = 100;
+    std::vector<UniformBufferObject> m_UniformBuffers;
+    VkBuffer m_UniformBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory m_UniformBufferMemory = VK_NULL_HANDLE;
+
+    size_t m_UniformBufferSize = 0;
+    uint32_t m_CurrentObjectCount = 0;
+
     uint32_t imageIndex = -1;
     size_t maxInstances = 100;
     size_t dynamicAlignment = -1;

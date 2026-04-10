@@ -64,7 +64,6 @@ public:
     void RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawables);
     void SetShadowMapToShader();
 private:
-    // Alustusfunktiot
     ComPtr<ID3D11DepthStencilState> pDepthStencilState;
     void CreateDeviceAndSwapChain(int width, int height, HWND hWnd);
     void CreateViewport(int width, int height);
@@ -126,5 +125,9 @@ private:
         XMFLOAT3 lightPos;
         float padding;
     };
+
+    //Light Setting
+    float lightAngle = 0.0f;
+    float radius = 10.0f;
 };
 #endif

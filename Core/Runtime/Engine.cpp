@@ -250,8 +250,20 @@ void ScreenResizerDetector(Window* wnd) {
     );
 }
 
+#include <random>
+
+float GetRandomFloat(float min, float max) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dist(min, max);
+    return dist(gen);
+}
+
 void Engine::EngineDoFrame(Window* wnd, float deltatime)
 {
+    bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
+
+   
 
     if (ImGui::GetCurrentContext() == nullptr) {
         std::cerr << "ERROR: No ImGui context set!" << std::endl;
@@ -296,7 +308,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         }
     }
 
-    bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
 
 #if INEDITOR == 1
     if (ImGuiInited) {
