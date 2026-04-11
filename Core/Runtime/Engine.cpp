@@ -129,6 +129,10 @@ int Engine::EngineRun()
     auto lastFrameTime = clock::now();
     ImGuiIO& IO = ImGui::GetIO();
 
+    #if INEDITOR == 0
+        InProject = true;
+    #endif
+
     while (!glfwWindowShouldClose(glfwWND))
     {
         auto now = clock::now();
@@ -141,13 +145,13 @@ int Engine::EngineRun()
         glfwPollEvents();
     }
 
-#if VULKAN == 1
-    for (auto& Drawable : Drawables) {
-        if (Drawable->GetTexture()->IsLoaded()) {
-            Drawable->GetTexture()->Cleanup(window.GetGraphics().GetDevice());
+    #if VULKAN == 1
+        for (auto& Drawable : Drawables) {
+            if (Drawable->GetTexture()->IsLoaded()) {
+                Drawable->GetTexture()->Cleanup(window.GetGraphics().GetDevice());
+            }
         }
-    }
-#endif
+    #endif
 
     profiler.PrintInformation();
 
@@ -252,7 +256,7 @@ void ScreenResizerDetector(Window* wnd) {
 
 #include <random>
 
-float GetRandomFloat(float min, float max) {
+float GetRandomFloat(float min, float max) { //Mathlib
     static std::random_device rd;
     static std::mt19937 gen(rd());
     std::uniform_real_distribution<float> dist(min, max);
@@ -261,9 +265,25 @@ float GetRandomFloat(float min, float max) {
 
 void Engine::EngineDoFrame(Window* wnd, float deltatime)
 {
+
+    //If InEditor == 1 InProject = true
     bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
 
-   
+    static int frames = 0;
+    static int cubes = 0;
+    frames++;
+
+    if (frames == 1000) {
+        frames = 0;
+    }
+
+    if (ctrlPressed) {
+        AddAMesh("\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false);
+        std::cout << "Cubes: "<< cubes << std::endl;
+        std::cout << "FPS: " << 1.0f / deltatime << std::endl;
+
+        cubes++;
+    }
 
     if (ImGui::GetCurrentContext() == nullptr) {
         std::cerr << "ERROR: No ImGui context set!" << std::endl;
@@ -310,25 +330,23 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
 
 #if INEDITOR == 1
-    if (ImGuiInited) {
-        if (InProject) {
-            makeGui.MakeIMViewPort(*wnd);
-            makeGui.MakeIMGui(
-                *wnd,
-                Drawables,
-                [this](const std::string& path, const std::string& name,
-                    Vector3 pos, Vector3 size, bool Selec) -> Instance*
-                {
-                    return &AddAMesh(path, name, pos, size, Selec);
-                },
-                reinterpret_cast<float*>(&Color3),
-                false
-            );
-        }
-        else {
-            if (makeGui.MakeDashBoard()) {
-                InProject = true;
-            }
+    if (InProject && ImGuiInited) {
+        makeGui.MakeIMViewPort(*wnd);
+        makeGui.MakeIMGui(
+            *wnd,
+            Drawables,
+            [this](const std::string& path, const std::string& name,
+                Vector3 pos, Vector3 size, bool Selec) -> Instance*
+            {
+                return &AddAMesh(path, name, pos, size, Selec);
+            },
+            reinterpret_cast<float*>(&Color3),
+            false
+        );
+    }
+    else {
+        if (makeGui.MakeDashBoard()) {
+            InProject = true;
         }
     }
 #endif

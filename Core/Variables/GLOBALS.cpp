@@ -11,7 +11,6 @@ float zFar = 1000.0f;
 extern int viewport_width = 400;
 extern int viewport_height = 200;
 
-bool InEditor = true;
 bool vSync = false;
 bool Running = true;
 bool Typing = false;

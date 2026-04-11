@@ -5,7 +5,7 @@
 
 namespace fs = std::filesystem;
 
-#define INEDITOR 1 //Use 1 For Editing 0 For The Release
+#define INEDITOR 0 //Use 1 For Editing 0 For The Release
 
 #define DIRECTX11 0 //1 = True, 0 = False
 #define VULKAN 1 //1 = True, 0 = False
@@ -39,7 +39,6 @@ extern std::string ProjectName;
 
 extern fs::path appDataTarget;
 
-extern bool InEditor;
 extern int Index;
 extern bool vSync;
 extern bool Running;

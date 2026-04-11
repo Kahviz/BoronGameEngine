@@ -29,7 +29,7 @@ inline void MakeAProblem(const std::string& text) {
 inline void MakeASuccess(const std::string& text) {
     #ifdef _DEBUG
         #if INEDITOR == 1
-            std::cout << "Success: " << text << std::endl;
+            std::cout << "\033[32mSuccess: " << text << "\033[0m" << std::endl; //green
         #endif
     #endif
 }
