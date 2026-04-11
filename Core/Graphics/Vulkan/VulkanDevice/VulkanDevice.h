@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <Graphics/Vulkan/ScoreCounter.h>
+#include <vector>
 
 class VulkanDevice {
 public:
@@ -34,5 +35,8 @@ private:
 	VkQueue graphicsQueue = VK_NULL_HANDLE;
 
 	uint32_t graphicsFamilyIndex = -1;
+
+	std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+	std::vector<const char*> extensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 };
 #endif

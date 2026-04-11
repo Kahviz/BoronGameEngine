@@ -80,6 +80,22 @@ bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)
     queueCreateInfo.pQueuePriorities = &queuePriority;
 
     VkDeviceCreateInfo deviceCreateInfo{};
+    #ifdef _DEBUG
+        #if VALIDATIONLAYERS == 1
+            deviceCreateInfo.enabledLayerCount = validationLayers.size();
+            deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+            deviceCreateInfo.enabledExtensionCount = extensions.size();
+            deviceCreateInfo.ppEnabledExtensionNames = extensions.data();
+
+            MakeAInfo("Using VulkanValidationLayers");
+        #else
+            MakeAInfo("Not Using VulkanValidationLayers");
+        #endif
+    #else
+        deviceCreateInfo.enabledLayerCount = 0;
+        deviceCreateInfo.enabledExtensionCount = extensions.size();
+        deviceCreateInfo.ppEnabledExtensionNames = extensions.data();
+    #endif
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceCreateInfo.queueCreateInfoCount = 1;
     deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;

@@ -34,6 +34,14 @@ inline void MakeASuccess(const std::string& text) {
     #endif
 }
 
+inline void MakeAInfo(const std::string& text) {
+    #ifdef _DEBUG
+        #if INEDITOR == 1
+            std::cout << "\033[1;30mInfo: " << text << "\033[0m" << std::endl;
+        #endif
+    #endif
+}
+
 inline void ProfilerInformation(const std::string& text) {
     #ifdef _DEBUG
         #if INEDITOR == 1
