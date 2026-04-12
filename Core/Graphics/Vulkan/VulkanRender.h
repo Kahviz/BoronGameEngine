@@ -136,10 +136,17 @@ private:
 
     //To-Do  render pass, pipeline, framebuffer, command buffer
     // Shadow map
-    VkImage shadowImage;
-    VkImageView shadowImageView;
-    VkDeviceMemory shadowImageMemory;
-    VkSampler shadowSampler;
+    VkImage shadowImage = VK_NULL_HANDLE;
+    VkImageView shadowImageView = VK_NULL_HANDLE;
+    VkDeviceMemory shadowImageMemory = VK_NULL_HANDLE;
+    VkSampler shadowSampler = VK_NULL_HANDLE;
+
+    //TO-DO
+    VkRenderPass shadowRenderPass = VK_NULL_HANDLE;
+    VkPipeline shadowPipeline = VK_NULL_HANDLE;
+    VkPipelineLayout shadowPipelineLayout = VK_NULL_HANDLE;
+    VkFramebuffer shadowFramebuffer = VK_NULL_HANDLE;
+    VkCommandBuffer shadowCommandBuffer = VK_NULL_HANDLE;
 
     const uint32_t SHADOW_MAP_SIZE = 2048;
 };
