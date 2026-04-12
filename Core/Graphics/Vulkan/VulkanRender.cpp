@@ -75,7 +75,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     }
 
     std::array<VkAttachmentDescription, 2> attachments = {};
-
+    
     // Color attachment
     attachments[0].format = surfaceFormat.format;
     attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
@@ -211,7 +211,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     createDescriptorSets(nullptr);
 
     createShadowResources();
-
+    createShadowRenderPass();
     //InitEnd
     MakeASuccess("No Fatal Errors in Vulkan Initing :D-<");
     return true;
@@ -940,7 +940,7 @@ void VulkanRender::createShadowResources()
     imageinfo.extent.width = SHADOW_MAP_SIZE;
     imageinfo.extent.height = SHADOW_MAP_SIZE;
     imageinfo.format = VK_FORMAT_D32_SFLOAT;
-    imageinfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    imageinfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;;
     imageinfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
     if (vkCreateImage(vkDevice.GetDevice(), &imageinfo, nullptr, &shadowImage) != VK_SUCCESS) {
@@ -993,6 +993,41 @@ void VulkanRender::createShadowResources()
     
     if (vkCreateSampler(vkDevice.GetDevice(), &samplerInfo, nullptr, &shadowSampler) != VK_SUCCESS) {
         MakeAError("Failed to create shadow sampler!");
+    }
+}
+void VulkanRender::createShadowRenderPass() {
+    VkAttachmentDescription depthAttachment{};
+    depthAttachment.format = VK_FORMAT_D32_SFLOAT;
+    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    VkAttachmentReference depthAttachmentRef{};
+    depthAttachmentRef.attachment = 0;
+    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 0;
+    subpass.pColorAttachments = nullptr;
+    subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+    VkRenderPassCreateInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = 1;
+    renderPassInfo.pAttachments = &depthAttachment;
+    renderPassInfo.subpassCount = 1;
+    renderPassInfo.pSubpasses = &subpass;
+
+    if (vkCreateRenderPass(vkDevice.GetDevice(), &renderPassInfo, nullptr, &shadowRenderPass) != VK_SUCCESS) {
+        MakeAError("Failed to create shadowRenderpass");
+    }
+    else {
+        MakeAInfo("shadowRenderpass created!");
     }
 }
 #endif

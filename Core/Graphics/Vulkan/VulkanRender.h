@@ -58,6 +58,8 @@ public:
 
     void createShadowResources();
 
+    void createShadowRenderPass();
+
     //Getters
     VkDevice GetDevice() { return vkDevice.GetDevice(); };
     VkPhysicalDevice GetPhysicalDevice() { return vkDevice.GetPhysicalDevice(); };
