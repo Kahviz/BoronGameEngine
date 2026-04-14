@@ -37,8 +37,8 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
-    UntilitedMathLibrary
-    GIT_REPOSITORY https://github.com/Kahviz/UntilitedMathLibrary.git
+    EclipseMathLibrary
+    GIT_REPOSITORY https://github.com/Kahviz/EclipseMathLibrary.git
     GIT_TAG master
 )
 
@@ -47,7 +47,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glfw)
-FetchContent_MakeAvailable(UntilitedMathLibrary)
+FetchContent_MakeAvailable(EclipseMathLibrary)
 
 #ImGui
 set(IMGUI_SOURCES

@@ -868,6 +868,7 @@ void VulkanRender::PrintInfo() {
     if (shadowFramebuffer == VK_NULL_HANDLE) {
         MakeAError("shadowFramebuffer is VK_NULL_HANDLE");
     }
+
     MakeAInfo("Checked all the shadowResources");
 }
 
