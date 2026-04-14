@@ -90,10 +90,10 @@ add_executable(EclipseEngine
     Core/Libs/ImGui/imgui_demo.cpp
     Core/Graphics/Texture/Texture.h 
     Core/Graphics/Texture/Texture.cpp 
-    Core/UntilitedPhysics/Physics.cpp
     Core/Multiplatform/UntilitedPlatform.h
-    Core/UntilitedPhysics/Gravity.h
-    Core/UntilitedPhysics/Physics.h
+    Core/EclipsePhysics/Gravity.h
+    Core/EclipsePhysics/Physics.h
+    Core/EclipsePhysics/Physics.cpp
     #Editor
     Editor/Gui/MakeGui.cpp
     Editor/Camera/CameraControl.cpp

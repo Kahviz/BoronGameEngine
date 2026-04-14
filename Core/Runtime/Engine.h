@@ -11,7 +11,7 @@
 #endif
 #include "Debugging/Profiler/Profiler.h"
 #include "Instances/Instance.h"
-#include "UntilitedPhysics/Physics.h"
+#include "EclipsePhysics/Physics.h"
 
 class Instance;
 

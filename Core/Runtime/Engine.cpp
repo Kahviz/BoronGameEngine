@@ -6,7 +6,6 @@
 #include <GLOBALS.h>
 #include "../Editor/Camera/CameraControl.h"
 #include "UGE_ASSERTS.h"
-#include "UntilitedPhysics/Physics.h"
 
 #ifdef _WIN32
     #define GLFW_EXPOSE_NATIVE_WIN32
@@ -18,7 +17,7 @@
 #include "backends/imgui_impl_vulkan.h"
 
 Engine::Engine()
-    : window(1280, 800, "UntilitedGameEngine")
+    : window(1280, 800, "EclipseEngine")
 {
     if (!ImGuiInited) {
         std::cout << "ImGui version: " << IMGUI_VERSION << std::endl;
