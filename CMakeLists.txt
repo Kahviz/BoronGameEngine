@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.10)
-project(EclipseEngine)
+project(BoronEngine)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -65,7 +65,7 @@ add_definitions(
 )
 
 #Executable
-add_executable(EclipseEngine
+add_executable(BoronEngine
     ${IMGUI_SOURCES}
     main.cpp
     Core/SetupPaths/MakeFiles.cpp
@@ -91,9 +91,11 @@ add_executable(EclipseEngine
     Core/Graphics/Texture/Texture.h 
     Core/Graphics/Texture/Texture.cpp 
     Core/Multiplatform/UntilitedPlatform.h
-    Core/EclipsePhysics/Gravity.h
-    Core/EclipsePhysics/Physics.h
-    Core/EclipsePhysics/Physics.cpp
+
+    Core/BoronPhysics/Gravity.h
+    Core/BoronPhysics/Physics.h
+    Core/BoronPhysics/Physics.cpp
+    
     #Editor
     Editor/Gui/MakeGui.cpp
     Editor/Camera/CameraControl.cpp
@@ -113,7 +115,7 @@ add_executable(EclipseEngine
     Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.cpp
 )
 
-target_include_directories(EclipseEngine PRIVATE
+target_include_directories(BoronEngine PRIVATE
     include
     Core
     Editor/
@@ -133,7 +135,7 @@ target_include_directories(EclipseEngine PRIVATE
     ${eclipsemathlibrary_SOURCE_DIR}
 )
 
-target_link_libraries(EclipseEngine PRIVATE
+target_link_libraries(BoronEngine PRIVATE
     ${CMAKE_SOURCE_DIR}/Libs/assimp-vc143-mt.lib
     ${CMAKE_SOURCE_DIR}/Libs/SDL3.lib
     Vulkan::Vulkan
@@ -141,7 +143,7 @@ target_link_libraries(EclipseEngine PRIVATE
 )
 
 if(WIN32)
-    target_link_options(EclipseEngine PRIVATE "/SUBSYSTEM:CONSOLE")
+    target_link_options(BoronEngine PRIVATE "/SUBSYSTEM:CONSOLE")
 endif()
 
 
@@ -152,10 +154,10 @@ if(WIN32)
     )
 
     foreach(dll ${DLLS})
-        add_custom_command(TARGET EclipseEngine POST_BUILD
+        add_custom_command(TARGET BoronEngine POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${dll}
-            $<TARGET_FILE_DIR:EclipseEngine>
+            $<TARGET_FILE_DIR:BoronEngine>
         )
     endforeach()
 endif()
@@ -178,10 +180,10 @@ set(SHADER_TYPES
 foreach(shader_file ${SHADER_FILES})
     set(source_file "${CMAKE_SOURCE_DIR}/Core/Shaders/${shader_file}")
     
-    add_custom_command(TARGET EclipseEngine POST_BUILD
+    add_custom_command(TARGET BoronEngine POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${source_file}
-        $<TARGET_FILE_DIR:EclipseEngine>
+        $<TARGET_FILE_DIR:BoronEngine>
         COMMENT "Copying ${shader_file}"
     )
 endforeach()
@@ -211,10 +213,10 @@ if(WIN32)
             
             list(APPEND GENERATED_SHADERS ${output_file})
             
-            add_custom_command(TARGET EclipseEngine POST_BUILD
+            add_custom_command(TARGET BoronEngine POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${output_file}
-                $<TARGET_FILE_DIR:EclipseEngine>
+                $<TARGET_FILE_DIR:BoronEngine>
                 COMMENT "Copying ${shader_name}.cso"
             )
         endif()
@@ -222,7 +224,7 @@ if(WIN32)
     
     if(GENERATED_SHADERS)
         add_custom_target(CompileShaders DEPENDS ${GENERATED_SHADERS})
-        add_dependencies(EclipseEngine CompileShaders)
+        add_dependencies(BoronEngine CompileShaders)
     endif()
 endif()
 

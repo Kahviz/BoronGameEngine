@@ -17,7 +17,7 @@
 #include "backends/imgui_impl_vulkan.h"
 
 Engine::Engine()
-    : window(1280, 800, "EclipseEngine")
+    : window(1280, 800, "BoronEngine")
 {
     if (!ImGuiInited) {
         std::cout << "ImGui version: " << IMGUI_VERSION << std::endl;

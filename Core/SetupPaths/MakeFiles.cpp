@@ -194,13 +194,13 @@ void MakeFiles::MakeAPPDATAFolders() {
 
     fs::path projectRoot = currentDir;
 
-    while (!fs::exists(projectRoot / "EclipseEngine") &&
+    while (!fs::exists(projectRoot / "BoronEngine") &&
         projectRoot.has_parent_path() &&
         projectRoot != projectRoot.root_path()) {
         projectRoot = projectRoot.parent_path();
     }
 
-    fs::path AssetTemplateFolder = projectRoot / "EclipseEngine";
+    fs::path AssetTemplateFolder = projectRoot / "BoronEngine";
 
 
 #ifdef _DEBUG

@@ -11,7 +11,7 @@
 
 #ifdef _DEBUG
 	template<typename T>
-	void UGE_ASSERT_PTR(T* ptr, const std::string& message,
+	void BGE_ASSERT_PTR(T* ptr, const std::string& message,
 		const std::source_location& location = std::source_location::current()) {
 		if (ptr == nullptr) {
 			std::string errorMsg = std::format("UGE_ASSERT failed: {} is nullptr!\nMessage: {}\nFile: {} (line: {})",
@@ -22,7 +22,7 @@
 	}
 
 	template<typename T>
-	void UGE_ASSERT_CONDITION(T&& condition, const std::string& message,
+	void BGE_ASSERT_CONDITION(T&& condition, const std::string& message,
 		const std::string& conditionStr,
 		const std::source_location& location = std::source_location::current()) {
 		if (!condition) {
@@ -35,7 +35,7 @@
 
 
 	template<typename Result>
-	void UGE_ASSERT_VKRESULT(Result result, const std::string& message,
+	void BGE_ASSERT_VKRESULT(Result result, const std::string& message,
 		const std::string& conditionStr = "",
 		const std::source_location& location = std::source_location::current()) {
 
@@ -70,7 +70,7 @@
 	}
 	
 	template<typename T>
-	void UGE_ASSERT_VK_HANDLE(T handle, const std::string& message,
+	void BGE_ASSERT_VK_HANDLE(T handle, const std::string& message,
 		const std::source_location& location = std::source_location::current()) {
 		#if VULKAN == 1
 				if (handle == VK_NULL_HANDLE) {
@@ -82,14 +82,14 @@
 		#endif
 	}
 
-	#define UGE_VK_ASSERT(handle, message) \
-		UGE_ASSERT_VK_HANDLE(handle, message)
+	#define BGE_VK_ASSERT(handle, message) \
+		BGE_ASSERT_VK_HANDLE(handle, message)
 
-	#define UGE_ASSERT(condition, message) \
-		UGE_ASSERT_CONDITION(condition, message, #condition)
+	#define BGE_ASSERT(condition, message) \
+		BGE_ASSERT_CONDITION(condition, message, #condition)
 
-	#define UGE_ASSERT_VKRESULT(VkResult, message) \
-		UGE_ASSERT_VKRESULT(VkResult, message, #VkResult)
+	#define BGE_ASSERT_VKRESULT(VkResult, message) \
+		BGE_ASSERT_VKRESULT(VkResult, message, #VkResult)
 	
 #else
 	#define UGE_ASSERT(condition, message) ((void)0)

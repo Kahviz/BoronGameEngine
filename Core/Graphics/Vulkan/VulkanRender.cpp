@@ -1006,7 +1006,7 @@ void VulkanRender::EndSingleTimeCommands(VkCommandBuffer commandBuffer) {
 //Shadows
 void VulkanRender::createShadowResources()
 {
-    UGE_VK_ASSERT(vkDevice.GetPhysicalDevice(), "Physical device is VK_NULL_HANDLE!");
+    BGE_VK_ASSERT(vkDevice.GetPhysicalDevice(), "Physical device is VK_NULL_HANDLE!");
 
     VkFormatProperties formatProps;
     vkGetPhysicalDeviceFormatProperties(vkDevice.GetPhysicalDevice(), VK_FORMAT_D32_SFLOAT, &formatProps);
@@ -1030,7 +1030,7 @@ void VulkanRender::createShadowResources()
     imageinfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageinfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    UGE_ASSERT_VKRESULT(vkCreateImage(vkDevice.GetDevice(), &imageinfo, nullptr, &shadowImage),"Failed to create shadowImage");
+    BGE_ASSERT_VKRESULT(vkCreateImage(vkDevice.GetDevice(), &imageinfo, nullptr, &shadowImage),"Failed to create shadowImage");
 
     if (shadowImage == VK_NULL_HANDLE) {
         MakeAError("shadowImage is NULL even though creation succeeded!");
@@ -1055,7 +1055,7 @@ void VulkanRender::createShadowResources()
         vkDevice.GetPhysicalDevice()
     );
 
-    UGE_ASSERT_VKRESULT(vkAllocateMemory(vkDevice.GetDevice(), &allocInfo, nullptr, &shadowImageMemory), "Failed to allocate memory for shadowImageMemory");
+    BGE_ASSERT_VKRESULT(vkAllocateMemory(vkDevice.GetDevice(), &allocInfo, nullptr, &shadowImageMemory), "Failed to allocate memory for shadowImageMemory");
 
     if (vkBindImageMemory(vkDevice.GetDevice(), shadowImage, shadowImageMemory, 0) != VK_SUCCESS) {
         MakeAError("Failed to bind memory for shadowImageMemory");
@@ -1074,7 +1074,7 @@ void VulkanRender::createShadowResources()
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    UGE_ASSERT_VKRESULT(vkCreateImageView(vkDevice.GetDevice(), &viewInfo, nullptr, &shadowImageView), "Failed to create shadowImageView");
+    BGE_ASSERT_VKRESULT(vkCreateImageView(vkDevice.GetDevice(), &viewInfo, nullptr, &shadowImageView), "Failed to create shadowImageView");
 
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -1101,7 +1101,7 @@ void VulkanRender::createShadowResources()
     framebufferInfo.height = SHADOW_MAP_SIZE;
     framebufferInfo.layers = 1;
     
-    UGE_ASSERT_VKRESULT(vkCreateFramebuffer(vkDevice.GetDevice(), &framebufferInfo, nullptr, &shadowFramebuffer), "Failed to create shadow framebuffer");
+    BGE_ASSERT_VKRESULT(vkCreateFramebuffer(vkDevice.GetDevice(), &framebufferInfo, nullptr, &shadowFramebuffer), "Failed to create shadow framebuffer");
 }
 void VulkanRender::createShadowRenderPass() {
     VkAttachmentDescription depthAttachment{};

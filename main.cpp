@@ -8,6 +8,8 @@
 #include "UntilitedMathLibrary.h"
 
 int main() {
+    MakeAInfo("BoronEngine started!");
+
     MakeFiles mf;
     mf.MakeAPPDATAFolders();
 

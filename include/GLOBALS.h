@@ -11,7 +11,8 @@ namespace fs = std::filesystem;
 #define VULKAN 1 //1 = True, 0 = False
 #define VALIDATIONLAYERS 1; //If in debug and VALIDATIONLAYERS = 1 then true else false
 
-#define DEBUGFILEMAKING 1 //1 = True, 0 = False
+#define DEBUGFILEMAKING 0 //1 = True, 0 = False
+
 #if INEDITOR == 1
 	#define PROFILER
 #endif

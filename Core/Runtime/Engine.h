@@ -6,12 +6,14 @@
 #include "imgui.h"
 #include "Window/Window.h"
 #include "GLOBALS.h"
+
 #if INEDITOR == 1
     #include "Gui/MakeGui.h"
 #endif
+
 #include "Debugging/Profiler/Profiler.h"
 #include "Instances/Instance.h"
-#include "EclipsePhysics/Physics.h"
+#include "BoronPhysics/Physics.h"
 
 class Instance;
 

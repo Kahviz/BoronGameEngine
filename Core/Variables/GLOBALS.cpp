@@ -53,10 +53,10 @@ fs::path GetAppDataDir() {
     char* appDataPath = nullptr;
     size_t sz = 0;
     if (_dupenv_s(&appDataPath, &sz, "APPDATA") == 0 && appDataPath != nullptr) {
-        fs::path appdatatarget = fs::path(appDataPath) / "EclipseEngine";
+        fs::path appdatatarget = fs::path(appDataPath) / "BoronEngine";
 
         #ifdef _DEBUG
-                std::cout << "APPDATA path found: " << appdatatarget << "\n";
+            std::cout << "APPDATA path found: " << appdatatarget << "\n";
         #endif // _DEBUG
 
         free(appDataPath);
