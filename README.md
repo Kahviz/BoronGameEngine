@@ -4,7 +4,7 @@
 
 **A game engine under development since 12.11.2025**
 
-**Status: Work in progress** – There can be bugs
+**Status: Work in progress** – There may be bugs
 
 ## Features
 - Two rendering backends: **Vulkan** and **DirectX 11**
@@ -15,17 +15,17 @@
 - STB Image for icon loading
 
 ## Libraries Used
-Assimp -- 3D model loading
-SDL3 -- Controller input / rumble
-ImGui -- Graphical user interface
-stb_image -- Image loading (icons, textures)
+- **Assimp** – 3D model loading  
+- **SDL3** – Controller input / rumble  
+- **ImGui** – Graphical user interface  
+- **stb_image** – Image loading (icons, textures)
 
 ## How to Switch Renderer
 
 1. Open `GLOBALS.h`
 2. Set `DIRECTX11` to `1` to enable (or `0` to disable)
 3. Set `VULKAN` to `1` to enable (or `0` to disable)
-4. 
+
 ## Building (Visual Studio Community 2026)
 
 1. Download or clone this repository
