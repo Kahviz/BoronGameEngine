@@ -14,6 +14,7 @@
 #include "Debugging/Profiler/Profiler.h"
 #include "Instances/Instance.h"
 #include "BoronPhysics/Physics.h"
+#include <CameraControl.h>
 
 class Instance;
 
@@ -38,8 +39,7 @@ private:
     std::vector<std::unique_ptr<Instance>> Drawables = {};
 
     bool InProject = false;
-
-    
+    CameraControl camC;
 
     int Index = 0;
     int screen_width = 1280;

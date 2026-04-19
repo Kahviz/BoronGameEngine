@@ -329,10 +329,9 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             wnd->GetGraphics().GetCamera().SetRotation(-0.615f, -2.356f, 0.0f);
             CubeB = true;
         }
-        Drawables[0]->Orientation.x() += 0.1f;
 
+        Drawables[0]->Orientation.x() += 0.01f; //Test
     }
-
 #if INEDITOR == 1
     if (InProject && ImGuiInited) {
         makeGui.MakeIMViewPort(*wnd);
@@ -387,15 +386,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 #if DIRECTX11 == 1
     wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
-#endif
-    if (ctrlPressed) {
-        //std::cout << "Position: " << wnd->GetGraphics().GetCamera().GetPositionVector3() << std::endl;
-        //std::cout << "View Matrix:\n" << wnd->GetGraphics().GetCamera().GetViewMatrix() << std::endl;
-    }
-
-    CameraControl camC;
-    
-
+#endif    
     if (!ctrlPressed && !Typing) {
         camC.MakeCameraControls(*wnd, deltatime);
     }
