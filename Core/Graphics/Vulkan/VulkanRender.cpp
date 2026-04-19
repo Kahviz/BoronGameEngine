@@ -831,19 +831,6 @@ bool VulkanRender::RenderAMesh(
 }
 
 void VulkanRender::PrintInfo() {
-    /*
-    VkImage shadowImage = VK_NULL_HANDLE;
-    VkImageView shadowImageView = VK_NULL_HANDLE;
-    VkDeviceMemory shadowImageMemory = VK_NULL_HANDLE;
-    VkSampler shadowSampler = VK_NULL_HANDLE;
-    VkRenderPass shadowRenderPass = VK_NULL_HANDLE;
-    VkPipeline shadowPipeline = VK_NULL_HANDLE;
-    VkPipelineLayout shadowPipelineLayout = VK_NULL_HANDLE;
-    VkFramebuffer shadowFramebuffer = VK_NULL_HANDLE;
-
-    VkCommandBuffer shadowCommandBuffer = VK_NULL_HANDLE;
-    */
-
     if (shadowImage == VK_NULL_HANDLE) {
         MakeAError("shadowImage is VK_NULL_HANDLE");
     }
@@ -1267,7 +1254,7 @@ void VulkanRender::createShadowPipeline() {
     pipelineInfo.renderPass = shadowRenderPass;
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-
+    
     if (vkCreateGraphicsPipelines(vkDevice.GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &shadowPipeline) != VK_SUCCESS) {
         MakeAError("Failed to create shadow pipeline!");
     }

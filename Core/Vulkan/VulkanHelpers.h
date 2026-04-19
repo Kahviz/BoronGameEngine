@@ -15,6 +15,7 @@ struct UniformBufferObject {
     Matrix4x4 proj;
     GPUVector3 color;
     float UsesTexture;
+    Matrix4x4 lightSpaceMatrix;
 };
 
 inline std::vector<char> ReadFile(const std::string& filename) {
