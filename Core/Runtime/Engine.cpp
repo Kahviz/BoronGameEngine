@@ -287,6 +287,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         cubes++;
     }
 
+
     if (ImGui::GetCurrentContext() == nullptr) {
         std::cerr << "ERROR: No ImGui context set!" << std::endl;
         return;
@@ -328,8 +329,9 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             wnd->GetGraphics().GetCamera().SetRotation(-0.615f, -2.356f, 0.0f);
             CubeB = true;
         }
-    }
+        Drawables[0]->Orientation.x() += 0.1f;
 
+    }
 
 #if INEDITOR == 1
     if (InProject && ImGuiInited) {

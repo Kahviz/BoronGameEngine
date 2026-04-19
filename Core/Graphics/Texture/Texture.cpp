@@ -413,7 +413,7 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, Dx11Renderer& dx11Rend
 
     ID3D11Texture2D* texture = nullptr;
 
-    UGE_ASSERT(dx11Renderer.GetDevice(), "Device Cant Be nullptr");
+    BGE_ASSERT(dx11Renderer.GetDevice(), "Device Cant Be nullptr");
     hr = dx11Renderer.GetDevice()->CreateTexture2D(&desc, &data, &texture);
 
     if (FAILED(hr) || !texture) {

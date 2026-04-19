@@ -749,6 +749,7 @@ Matrix4x4 VulkanRender::CreateVulkanPerspective(float fovY, float aspect, float 
 
     return result;
 }
+
 void VulkanRender::updateUniformBuffer(
     const Instance& inst,
     uint32_t objectIndex,
@@ -758,31 +759,65 @@ void VulkanRender::updateUniformBuffer(
     Int3 color
 )
 {
-    if (objectIndex >= m_CurrentObjectCount) {
-        uint32_t newSize = max(m_CurrentObjectCount * 2, objectIndex + 1);
+    if (objectIndex >= m_CurrentObjectCount)
+    {
+        uint32_t newSize = Max(m_CurrentObjectCount * 2, objectIndex + 1);
         ReallocateUniformBuffer(newSize);
-
         UpdateDescriptorSet(&inst);
     }
 
     UniformBufferObject ubo{};
 
-    float angle = Orientation.y();
-    float cosA = cosf(angle);
-    float sinA = sinf(angle);
+    float cx = cosf(Orientation.x());
+    float sx = sinf(Orientation.x());
+
+    float cy = cosf(Orientation.y());
+    float sy = sinf(Orientation.y());
+
+    float cz = cosf(Orientation.z());
+    float sz = sinf(Orientation.z());
+
+    Matrix4x4 rot;
+
+    rot(0, 0) = cy * cz;
+    rot(0, 1) = sx * sy * cz - cx * sz;
+    rot(0, 2) = cx * sy * cz + sx * sz;
+    rot(0, 3) = 0.0f;
+
+    rot(1, 0) = cy * sz;
+    rot(1, 1) = sx * sy * sz + cx * cz;
+    rot(1, 2) = cx * sy * sz - sx * cz;
+    rot(1, 3) = 0.0f;
+
+    rot(2, 0) = -sy;
+    rot(2, 1) = sx * cy;
+    rot(2, 2) = cx * cy;
+    rot(2, 3) = 0.0f;
+
+    rot(3, 0) = 0.0f;
+    rot(3, 1) = 0.0f;
+    rot(3, 2) = 0.0f;
+    rot(3, 3) = 1.0f;
 
     ubo.model.setIdentity();
-    ubo.model(0, 0) = cosA * scale.x();
-    ubo.model(0, 2) = sinA * scale.x();
-    ubo.model(1, 1) = scale.y();
-    ubo.model(2, 0) = -sinA * scale.z();
-    ubo.model(2, 2) = cosA * scale.z();
+
+    ubo.model(0, 0) = rot(0, 0) * scale.x();
+    ubo.model(0, 1) = rot(0, 1) * scale.x();
+    ubo.model(0, 2) = rot(0, 2) * scale.x();
+
+    ubo.model(1, 0) = rot(1, 0) * scale.y();
+    ubo.model(1, 1) = rot(1, 1) * scale.y();
+    ubo.model(1, 2) = rot(1, 2) * scale.y();
+
+    ubo.model(2, 0) = rot(2, 0) * scale.z();
+    ubo.model(2, 1) = rot(2, 1) * scale.z();
+    ubo.model(2, 2) = rot(2, 2) * scale.z();
+
     ubo.model(3, 0) = pos.x();
     ubo.model(3, 1) = pos.y();
     ubo.model(3, 2) = pos.z();
     ubo.model(3, 3) = 1.0f;
 
-    //Color
     ubo.color = GPUVector3(
         color.x() / 255.0f,
         color.y() / 255.0f,
@@ -790,22 +825,21 @@ void VulkanRender::updateUniformBuffer(
     );
 
     const Texture* tex = inst.GetConstTexture();
-
-    if (tex != nullptr && tex->IsLoadedConst()) {
-        ubo.UsesTexture = 1.0f;
-    }
-    else {
-        ubo.UsesTexture = 0.0f;
-    }
+    ubo.UsesTexture = (tex && tex->IsLoadedConst()) ? 1.0f : 0.0f;
 
     ubo.view = m_Camera.GetViewMatrix().transposed();
+
+    float aspect = (float)screen_width / (float)screen_height;
+    ubo.proj = CreateVulkanPerspective(
+        45.0f * PI / 180.0f,
+        aspect,
+        0.1f,
+        zFar
+    );
+
     ubo.lightSpaceMatrix = lightSpaceMatrix;
 
-    float fovY = 45.0f * PI / 180.0f;
-    float aspect = (float)screen_width / (float)screen_height;
-    ubo.proj = CreateVulkanPerspective(fovY, aspect, 0.1f, zFar);
-
-    uint8_t* dst = (uint8_t*)uniformBufferMapped + objectIndex * dynamicAlignment;
+    uint8_t* dst = (uint8_t*)uniformBufferMapped + (objectIndex * dynamicAlignment);
     memcpy(dst, &ubo, sizeof(ubo));
 }
 
@@ -822,7 +856,6 @@ bool VulkanRender::RenderAMesh(
     int Index
 )
 {
-    
 #if VULKAN == 1
     if (drawable == nullptr) {
         return false;
