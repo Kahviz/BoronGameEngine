@@ -727,10 +727,15 @@ void VulkanRender::createDescriptorSets(const Instance* inst) {
         descriptorWrites[1].pBufferInfo = nullptr;
         descriptorWrites[1].pTexelBufferView = nullptr;
 
-        vkUpdateDescriptorSets(vkDevice.GetDevice(), 2, descriptorWrites.data(), 0, nullptr); // 2 bindings
+        vkUpdateDescriptorSets(vkDevice.GetDevice(), 3, descriptorWrites.data(), 0, nullptr); // 2 bindings
     }
     else {
-        vkUpdateDescriptorSets(vkDevice.GetDevice(), 1, &descriptorWrites[0], 0, nullptr); //only 1 binding
+        if (inst != nullptr) {
+            vkUpdateDescriptorSets(vkDevice.GetDevice(), 2, &descriptorWrites[0], 0, nullptr); //only 1 binding
+        }
+        else {
+            MakeAError("inst is nullptr, if this happened at start dont worry!");
+        }
     }
 }
 
