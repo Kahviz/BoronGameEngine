@@ -5,11 +5,12 @@
 
 struct Vertex
 {
-    float brightness = 1.0f;
     GPUVector3 pos = { 0,0,0 };
     GPUVector3 color = { 0,0,0 };
     GPUVector3 normal = { 0,0,0 };
     GPUVector2 uv = { 0,0 };
+    float brightness = 1.0f;
+
     Vertex() = default;
 
     Vertex(float b, const GPUVector3& p, const GPUVector3& c, const GPUVector3& n)

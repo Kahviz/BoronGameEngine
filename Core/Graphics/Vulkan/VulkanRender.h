@@ -104,6 +104,7 @@ private:
     struct DrawCommand {
         const MeshVK* mesh;
         uint32_t objectIndex;
+        Matrix4x4 modelMatrix;
     };
 
     uint32_t CurrentimageIndex = -1;

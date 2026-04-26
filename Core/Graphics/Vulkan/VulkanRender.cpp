@@ -205,12 +205,13 @@ bool VulkanRender::Init(GLFWwindow* window)
     }
 
     createUniformBuffers();
-    createDescriptorPool();
-    createDescriptorSets(nullptr);
 
     createShadowRenderPass();
     createShadowResources();
     createShadowPipeline();
+
+    createDescriptorPool();
+    createDescriptorSets(nullptr);
 
     //InitEnd
     MakeASuccess("No Fatal Errors in Vulkan Initing :D-<");
@@ -644,7 +645,7 @@ void VulkanRender::createDescriptorPool() {
     poolSizes[0].descriptorCount = 1;
 
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = 1;
+    poolSizes[1].descriptorCount = 2;
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -847,6 +848,7 @@ void VulkanRender::updateUniformBuffer(
         zFar
     );
 
+    //uu
     ubo.lightSpaceMatrix = lightSpaceMatrix;
 
     uint8_t* dst = (uint8_t*)uniformBufferMapped + (objectIndex * dynamicAlignment);
@@ -878,12 +880,13 @@ bool VulkanRender::RenderAMesh(
     DrawCommand cmd;
     cmd.mesh = meshVK;
     cmd.objectIndex = Index;
+    cmd.modelMatrix = createModelMatrix(Orientation, size, pos);
     drawCommands.push_back(cmd);
 
     return true;
 #else
     return false;
-#endif // VULKAN == 1
+#endif
 }
 
 void VulkanRender::PrintInfo() {
@@ -919,11 +922,19 @@ void VulkanRender::PrintInfo() {
 
 void VulkanRender::RecordShadowCommandBuffer()
 {
+    // Tarkista ettei komentopuskuri ole tyhjä
+    if (shadowDrawCommands.empty()) {
+        return;  // Ei mitään piirrettävää
+    }
+
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    vkBeginCommandBuffer(shadowCommandBuffer, &beginInfo);
+    if (vkBeginCommandBuffer(shadowCommandBuffer, &beginInfo) != VK_SUCCESS) {
+        MakeAError("Failed to begin shadow command buffer");
+        return;
+    }
 
     VkClearValue clearValue{};
     clearValue.depthStencil = { 1.0f, 0 };
@@ -939,8 +950,10 @@ void VulkanRender::RecordShadowCommandBuffer()
     vkCmdBeginRenderPass(shadowCommandBuffer, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(shadowCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shadowPipeline);
 
-    // Dynamic viewport/scissor
+    // Aseta viewport ja scissor
     VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
     viewport.width = (float)SHADOW_MAP_SIZE;
     viewport.height = (float)SHADOW_MAP_SIZE;
     viewport.minDepth = 0.0f;
@@ -948,16 +961,13 @@ void VulkanRender::RecordShadowCommandBuffer()
     vkCmdSetViewport(shadowCommandBuffer, 0, 1, &viewport);
 
     VkRect2D scissor{};
+    scissor.offset = { 0, 0 };
     scissor.extent = { SHADOW_MAP_SIZE, SHADOW_MAP_SIZE };
     vkCmdSetScissor(shadowCommandBuffer, 0, 1, &scissor);
 
-    struct ShadowPushConstants {
-        Matrix4x4 lightSpaceMatrix;
-        Matrix4x4 model;
-    };
-
     for (const auto& cmd : shadowDrawCommands)
     {
+        //uu
         ShadowPushConstants pc{};
         pc.lightSpaceMatrix = lightSpaceMatrix;
         pc.model = cmd.modelMatrix;
@@ -973,7 +983,10 @@ void VulkanRender::RecordShadowCommandBuffer()
     }
 
     vkCmdEndRenderPass(shadowCommandBuffer);
-    vkEndCommandBuffer(shadowCommandBuffer);
+
+    if (vkEndCommandBuffer(shadowCommandBuffer) != VK_SUCCESS) {
+        MakeAError("Failed to end shadow command buffer");
+    }
 }
 
 inline Matrix4x4 CreateOrthographic(
@@ -984,10 +997,10 @@ inline Matrix4x4 CreateOrthographic(
     Matrix4x4 result(0.0f);
 
     result(0, 0) = 2.0f / (right - left);
-    result(1, 1) = 2.0f / (bottom - top);   // käänteinen Y Vulkanille
+    result(1, 1) = 2.0f / (top - bottom);
     result(2, 2) = 1.0f / (zFar - zNear);
     result(3, 0) = -(right + left) / (right - left);
-    result(3, 1) = -(bottom + top) / (bottom - top);
+    result(3, 1) = -(top + bottom) / (top - bottom);
     result(3, 2) = -zNear / (zFar - zNear);
     result(3, 3) = 1.0f;
 
@@ -1001,7 +1014,6 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
 
     if (frames == 500) {
         frames = 0;
-
         PrintInfo();
     }
 
@@ -1017,6 +1029,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         drawCommands.clear();
+        shadowDrawCommands.clear();
         RecreateSwapchain();
         return;
     }
@@ -1028,20 +1041,83 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
     Vector3 lightDir = Vector3(0.5f, -1.0f, 0.5f).normalized();
     Vector3 lightPos = lightDir * -50.0f;
 
-    Matrix4x4 lightView = Matrix4x4LookAtLH(lightPos, Vector3(0, 0, 0), Vector3(0, 1, 0));
-    Matrix4x4 lightProj = CreateOrthographic(-50, 50, -50, 50, 0.1f, 200.0f);
+    Vector3 center = Vector3(0, 0, 0);
+
+    Matrix4x4 lightView = Matrix4x4LookAtLH(
+        center - lightDir * 30.0f,
+        center,
+        Vector3(0, 1, 0)
+    );
+
+    Matrix4x4 lightProj = CreateOrthographic(
+        -20, 20,
+        -20, 20,
+        0.1, 80.0
+    );
     lightSpaceMatrix = lightProj * lightView;
 
+    shadowDrawCommands.clear();
+    for (const auto& cmd : drawCommands) {
+        ShadowDrawCommand shadowCmd;
+        shadowCmd.mesh = cmd.mesh;
+        shadowCmd.modelMatrix = cmd.modelMatrix; 
+        shadowDrawCommands.push_back(shadowCmd);
+    }
+
     RecordShadowCommandBuffer();
+
+    if (!shadowDrawCommands.empty()) {
+        VkSubmitInfo shadowSubmitInfo{};
+        shadowSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        shadowSubmitInfo.commandBufferCount = 1;
+        shadowSubmitInfo.pCommandBuffers = &shadowCommandBuffer;
+
+        vkQueueSubmit(vkDevice.GetGraphicsQueue(), 1, &shadowSubmitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(vkDevice.GetGraphicsQueue());
+
+        VkCommandBuffer transitionCmd = BeginSingleTimeCommands();
+
+        VkImageMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+        barrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        barrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+        barrier.image = shadowImage;
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        barrier.subresourceRange.baseMipLevel = 0;
+        barrier.subresourceRange.levelCount = 1;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = 1;
+
+        vkCmdPipelineBarrier(
+            transitionCmd,
+            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier
+        );
+
+        EndSingleTimeCommands(transitionCmd);
+    }
 
     if (framebufferResized) {
         framebufferResized = false;
         drawCommands.clear();
+        shadowDrawCommands.clear();
         RecreateSwapchain();
         return;
     }
-    bool RenderImGui = true;
 
+    bool RenderImGui = true;
     RecordCommandBuffer(imageIndex, RenderImGui);
 
     VkSubmitInfo submitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
@@ -1060,7 +1136,9 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    vkQueueSubmit(vkDevice.GetGraphicsQueue(), 1, &submitInfo, inFlightFence);
+    if (vkQueueSubmit(vkDevice.GetGraphicsQueue(), 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
+        MakeAError("Failed to submit draw command buffer");
+    }
 
     VkPresentInfoKHR presentInfo{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
     presentInfo.waitSemaphoreCount = 1;
@@ -1074,6 +1152,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
         framebufferResized = false;
         drawCommands.clear();
+        shadowDrawCommands.clear();
         RecreateSwapchain();
     }
     else if (result != VK_SUCCESS) {
@@ -1081,7 +1160,9 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
     }
 
     drawCommands.clear();
+    shadowDrawCommands.clear();
 }
+
 Camera& VulkanRender::GetCamera()
 {
     return m_Camera;
@@ -1144,6 +1225,7 @@ void VulkanRender::createShadowResources()
 
     if (!(formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)) {
         MakeAError("VK_FORMAT_D32_SFLOAT does not support depth attachment!");
+        return;
     }
 
     VkImageCreateInfo imageinfo{};
@@ -1190,6 +1272,7 @@ void VulkanRender::createShadowResources()
 
     if (vkBindImageMemory(vkDevice.GetDevice(), shadowImage, shadowImageMemory, 0) != VK_SUCCESS) {
         MakeAError("Failed to bind memory for shadowImageMemory");
+        return;
     }
 
     MakeASuccess("Allocated shadowImageMemory");
@@ -1215,12 +1298,17 @@ void VulkanRender::createShadowResources()
     samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     samplerInfo.compareEnable = VK_TRUE;
-    samplerInfo.compareOp = VK_COMPARE_OP_LESS;
+    samplerInfo.compareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     samplerInfo.anisotropyEnable = VK_FALSE;
     samplerInfo.unnormalizedCoordinates = VK_FALSE;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerInfo.minLod = 0.0f;
+    samplerInfo.maxLod = 1.0f;
+    samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 
     if (vkCreateSampler(vkDevice.GetDevice(), &samplerInfo, nullptr, &shadowSampler) != VK_SUCCESS) {
         MakeAError("Failed to create shadow sampler!");
+        return;
     }
 
     VkFramebufferCreateInfo framebufferInfo{};
@@ -1241,6 +1329,8 @@ void VulkanRender::createShadowResources()
     commandAllocInfo.commandBufferCount = 1;
 
     BGE_ASSERT_VKRESULT(vkAllocateCommandBuffers(vkDevice.GetDevice(), &commandAllocInfo, &shadowCommandBuffer), "Failed to allocate ShadowCommandBuffer");
+
+    MakeASuccess("Shadow resources created successfully!");
 }
 
 void VulkanRender::createShadowRenderPass() {
@@ -1264,12 +1354,22 @@ void VulkanRender::createShadowRenderPass() {
     subpass.pColorAttachments = nullptr;
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.attachmentCount = 1;
     renderPassInfo.pAttachments = &depthAttachment;
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
 
     if (vkCreateRenderPass(vkDevice.GetDevice(), &renderPassInfo, nullptr, &shadowRenderPass) != VK_SUCCESS) {
         MakeAError("Failed to create shadowRenderpass");
@@ -1354,11 +1454,9 @@ void VulkanRender::createShadowPipeline() {
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+    rasterizer.cullMode = VK_CULL_MODE_NONE;
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    rasterizer.depthBiasEnable = VK_TRUE;
-    rasterizer.depthBiasConstantFactor = 1.25f;
-    rasterizer.depthBiasSlopeFactor = 1.75f;
+    rasterizer.depthBiasEnable = VK_FALSE; //Added in the fragshader
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;

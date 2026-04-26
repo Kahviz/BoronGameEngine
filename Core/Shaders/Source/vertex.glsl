@@ -22,7 +22,7 @@ layout(location = 3) out vec4 fragPosLightSpace;  // lisätty
 void main() {
     fragColor = inColor;
     fragUV = inUV;
-    fragNormal = normalize(mat3(ubo.model) * inNormal);
+    fragNormal = normalize(transpose(inverse(mat3(ubo.model))) * inNormal);
     fragPosLightSpace = ubo.lightSpaceMatrix * ubo.model * vec4(inPos, 1.0);  // lisätty
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPos, 1.0);
-}
+}//
