@@ -4,7 +4,7 @@
 #include "ErrorHandling/ErrorMessage.h"
 #include "GLOBALS.h"
 #include "Releaser.h"
-#include "Debugging/Functions/UGE_ASSERTS.h"
+#include "Debugging/Functions/BGE_ASSERTS.h"
 
 #if DIRECTX11 == 1
     #include <d3d11.h>

@@ -1,0 +1,26 @@
+
+Version 1.1:
+ Added:
+	-Shadows
+	-TextureLoading
+	-SIMD-optimized mathlibrary
+	-Much more
+ Removed:
+
+ Changed:
+
+Version 1.0:
+ Added:
+	-Basic Rendering
+	-Basic instance system
+	-Basic gui
+	-Meshloading
+	-Basic lightining
+
+Template:
+Version 0.0:
+ Added:
+
+ Removed:
+
+ Changed:

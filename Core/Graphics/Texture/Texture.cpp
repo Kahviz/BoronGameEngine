@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <filesystem>
-#include "UGE_ASSERTS.h"
+#include "BGE_ASSERTS.h"
 
 #if VULKAN == 1
     #include <filesystem>
@@ -18,11 +18,8 @@
 #endif
 
 #include <Libs/STBIcons/stb_image.h>
-//VULKAN WHERE ARE YOU
 
 #if VULKAN == 1
-
-
 namespace fs = std::filesystem;
 
 bool Texture::LoadVK(const std::string& path, VulkanRender& vulkanrenderer)

@@ -5,7 +5,7 @@
 #include <Object.h>
 #include <GLOBALS.h>
 #include "../Editor/Camera/CameraControl.h"
-#include "UGE_ASSERTS.h"
+#include "BGE_ASSERTS.h"
 
 #ifdef _WIN32
     #define GLFW_EXPOSE_NATIVE_WIN32

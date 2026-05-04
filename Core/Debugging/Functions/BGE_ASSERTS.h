@@ -26,7 +26,7 @@
 		const std::string& conditionStr,
 		const std::source_location& location = std::source_location::current()) {
 		if (!condition) {
-			std::string errorMsg = std::format("UGE_ASSERT failed: {} is false!\nMessage: {}\nFile: {} (line: {})",
+			std::string errorMsg = std::format("BGE_ASSERT failed: {} is false!\nMessage: {}\nFile: {} (line: {})",
 				conditionStr, message,
 				location.file_name(), location.line());
 			MakeAError(errorMsg);
@@ -53,7 +53,7 @@
 					}
 
 					std::string errorMsg = std::format(
-						"UGE_ASSERT_VKRESULT failed: {}\n"
+						"BGE_ASSERT_VKRESULT failed: {}\n"
 						"Result: {}\n"
 						"Message: {}\n"
 						"Location: {} (line: {})",
@@ -74,7 +74,7 @@
 		const std::source_location& location = std::source_location::current()) {
 		#if VULKAN == 1
 				if (handle == VK_NULL_HANDLE) {
-					std::string errorMsg = std::format("UGE_ASSERT failed: Vulkan handle is VK_NULL_HANDLE!\nMessage: {}\nFile: {} (line: {})",
+					std::string errorMsg = std::format("BGE_ASSERT failed: Vulkan handle is VK_NULL_HANDLE!\nMessage: {}\nFile: {} (line: {})",
 						message,
 						location.file_name(), location.line());
 					MakeAError(errorMsg);

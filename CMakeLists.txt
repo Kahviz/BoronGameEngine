@@ -86,7 +86,7 @@ add_executable(BoronEngine
     Core/Graphics/Vulkan/VulkanRender.cpp
     Core/Graphics/Vulkan/ScoreCounter.cpp
     Core/Debugging/Profiler/Profiler.cpp
-    Core/Debugging/Functions/UGE_ASSERTS.h
+    "Core/Debugging/Functions/BGE_ASSERTS.h"
     Core/Libs/ImGui/imgui_demo.cpp
     Core/Graphics/Texture/Texture.h 
     Core/Graphics/Texture/Texture.cpp 
