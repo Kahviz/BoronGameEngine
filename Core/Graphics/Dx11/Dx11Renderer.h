@@ -10,7 +10,7 @@
 #include <Instances/Instance.h>
 #include "GLOBALS.h"
 #include "Graphics/Texture/Texture.h"
-#include "UGE_ASSERTS.h"
+#include "BGE_ASSERTS.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -18,7 +18,7 @@ using Microsoft::WRL::ComPtr;
 struct ConstantBuffer
 {
     XMMATRIX worldViewProj;  // world * view * proj
-    XMMATRIX world;          // Pelkkä world-matriisi
+    XMMATRIX world;
     XMFLOAT3 cubeColor;
     float padding;
 };
