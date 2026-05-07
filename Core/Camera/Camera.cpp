@@ -92,8 +92,8 @@ void Camera::AdjustRotation(float x, float y, float z)
 
 Vector3 Camera::GetForward() const
 {
-    float pitch = rot.x();  // X-akselin ympäri (ylös/alas)
-    float yaw = rot.y();    // Y-akselin ympäri (vasen/oikea)
+    float pitch = rot.x();  // X
+    float yaw = rot.y();    // Y
 
     Vector3 forward;
     forward.x() = sin(yaw) * cos(pitch);

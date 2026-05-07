@@ -587,7 +587,6 @@ void VulkanRender::CreateSwapchain() {
     vkSwapchain.GetSwapchainExtent() = extent;
     vkSwapchain.GetSwapchainImageFormat() = surfaceFormat.format;
 
-    // Hae swapchain kuvat
     uint32_t swapchainImageCount = 0;
     vkGetSwapchainImagesKHR(vkDevice.GetDevice(), vkSwapchain.GetSwapchain(), &swapchainImageCount, nullptr);
     vkSwapchain.GetSwapchainImages().resize(swapchainImageCount);
@@ -600,6 +599,8 @@ void VulkanRender::createUniformBuffers() {
 }
 
 void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount) {
+    vkDeviceWaitIdle(vkDevice.GetDevice());
+
     if (m_UniformBuffer != VK_NULL_HANDLE) {
         vkDestroyBuffer(vkDevice.GetDevice(), m_UniformBuffer, nullptr);
         vkFreeMemory(vkDevice.GetDevice(), m_UniformBufferMemory, nullptr);
@@ -659,6 +660,8 @@ void VulkanRender::createDescriptorPool() {
 }
 
 void VulkanRender::UpdateDescriptorSet(const Instance* inst) {
+    vkDeviceWaitIdle(vkDevice.GetDevice());
+
     if (descriptorPool != VK_NULL_HANDLE) {
         vkDestroyDescriptorPool(vkDevice.GetDevice(), descriptorPool, nullptr);
         descriptorPool = VK_NULL_HANDLE;
@@ -686,7 +689,7 @@ void VulkanRender::createDescriptorSets(const Instance* inst) {
     VkDescriptorBufferInfo bufferInfo{};
     bufferInfo.buffer = m_UniformBuffer;
     bufferInfo.offset = 0;
-    bufferInfo.range = dynamicAlignment;
+    bufferInfo.range = sizeof(UniformBufferObject);
 
     std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
 
@@ -848,7 +851,6 @@ void VulkanRender::updateUniformBuffer(
         zFar
     );
 
-    //uu
     ubo.lightSpaceMatrix = lightSpaceMatrix;
 
     uint8_t* dst = (uint8_t*)uniformBufferMapped + (objectIndex * dynamicAlignment);
@@ -922,9 +924,9 @@ void VulkanRender::PrintInfo() {
 
 void VulkanRender::RecordShadowCommandBuffer()
 {
-    // Tarkista ettei komentopuskuri ole tyhj‰
     if (shadowDrawCommands.empty()) {
-        return;  // Ei mit‰‰n piirrett‰v‰‰
+        MakeAWarning("Nothing to draw");
+        return;
     }
 
     VkCommandBufferBeginInfo beginInfo{};
@@ -950,7 +952,6 @@ void VulkanRender::RecordShadowCommandBuffer()
     vkCmdBeginRenderPass(shadowCommandBuffer, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(shadowCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shadowPipeline);
 
-    // Aseta viewport ja scissor
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -967,7 +968,6 @@ void VulkanRender::RecordShadowCommandBuffer()
 
     for (const auto& cmd : shadowDrawCommands)
     {
-        //uu
         ShadowPushConstants pc{};
         pc.lightSpaceMatrix = lightSpaceMatrix;
         pc.model = cmd.modelMatrix;
@@ -1503,6 +1503,7 @@ void VulkanRender::createShadowPipeline() {
     pipelineInfo.renderPass = shadowRenderPass;
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
 
     if (vkCreateGraphicsPipelines(vkDevice.GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &shadowPipeline) != VK_SUCCESS) {
         MakeAError("Failed to create shadow pipeline!");

@@ -93,7 +93,7 @@ void Dx11Renderer::CreateShadowResources()
     hr = pDevice->CreateDepthStencilView(pShadowMap.Get(), &dsvDesc, &pShadowDSV);
     if (FAILED(hr)) throw std::runtime_error("Failed to create shadow DSV");
 
-    // Luo SRV varjokartalle (shader-resource view)
+    //shaderresourceview
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
@@ -177,7 +177,7 @@ void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawa
     UINT numViewports = 1;
     pContext->RSGetViewports(&numViewports, oldViewports);
 
-    // Aseta varjorenderöinnin asetukset
+    //ShadowRendering Settings
     D3D11_VIEWPORT shadowVP = {};
     shadowVP.Width = static_cast<float>(SHADOW_MAP_SIZE);
     shadowVP.Height = static_cast<float>(SHADOW_MAP_SIZE);
@@ -189,7 +189,7 @@ void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawa
     pContext->OMSetRenderTargets(0, nullptr, pShadowDSV.Get());
     pContext->ClearDepthStencilView(pShadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-    pContext->VSSetShader(pVS.Get(), nullptr, 0);  // Käytä pVS:ää, ei pShadowVS:ää
+    pContext->VSSetShader(pVS.Get(), nullptr, 0);
     pContext->PSSetShader(nullptr, nullptr, 0);
 
     pContext->VSSetConstantBuffers(1, 1, pShadowCB.GetAddressOf());
