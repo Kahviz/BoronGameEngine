@@ -84,9 +84,9 @@ fs::path GetAppDataDir() {
 std::string ProjectName = "ProjectTest1";
 std::string appData = GetAppDataPath();
 
-std::string EclipseEnginePath = appData + "\\EclipseEngine";
-std::string assets = EclipseEnginePath + "\\Assets";
-std::string textures = EclipseEnginePath + "\\Textures";
-std::string fonts = EclipseEnginePath + "\\Fonts";
+std::string BoronEnginePath = appData + "\\BoronEngine";
+std::string assets = BoronEnginePath + "\\Assets";
+std::string textures = BoronEnginePath + "\\Textures";
+std::string fonts = BoronEnginePath + "\\Fonts";
 fs::path appDataTarget = GetAppDataDir();
 
