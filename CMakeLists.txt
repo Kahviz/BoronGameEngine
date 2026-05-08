@@ -140,8 +140,9 @@ set(SHADER_TYPES
 # DX11 SHADERS
 if(WIN32)
     list(LENGTH SHADER_FILES SHADER_COUNT)
+    math(EXPR SHADER_MAX "${SHADER_COUNT} - 1")
 
-    foreach(index RANGE 0 ${SHADER_COUNT}-1)
+    foreach(index RANGE 0 ${SHADER_MAX})
         list(GET SHADER_FILES ${index} shader_file)
         list(GET SHADER_TYPES ${index} shader_type)
 
