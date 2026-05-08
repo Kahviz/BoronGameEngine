@@ -12,7 +12,8 @@ namespace fs = std::filesystem;
 #define VALIDATIONLAYERS 1; //If in debug and VALIDATIONLAYERS = 1 then true else false
 #define BGE_VERSION 1.1;
 #define DEBUGFILEMAKING 0 //1 = True, 0 = False
-#define PRINTDEBUGINFO 1  //1 = True, 0 = False
+#define PRINTDEBUGINFO 0  //1 = True, 0 = False
+
 #if INEDITOR == 1
 	#define PROFILER
 #endif

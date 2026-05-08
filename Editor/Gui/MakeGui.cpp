@@ -1,5 +1,4 @@
 #include "MakeGui.h"
-#include <Windows.h>
 #include <algorithm>
 #include "imgui.h"
 #include <backends/imgui_impl_dx11.h>
