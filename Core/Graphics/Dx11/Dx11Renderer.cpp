@@ -200,12 +200,12 @@ void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawa
     for (auto& Instptr : Drawables) {
         Instance& inst = *Instptr.get();
         if (inst.CanDraw()) {
-            const Mesh& mesh = inst.OBJmesh;
+            const Mesh* mesh = inst.OBJmesh.get();
 
-            XMMATRIX scale = XMMatrixScaling(inst.Size.x(), inst.Size.y(), inst.Size.z());
+            XMMATRIX scale = XMMatrixScaling(inst.transform.Size.x(), inst.transform.Size.y(), inst.transform.Size.z());
             XMMATRIX rotation = XMMatrixRotationRollPitchYaw(
-                inst.Orientation.x(), inst.Orientation.y(), inst.Orientation.z());
-            XMMATRIX translation = XMMatrixTranslation(inst.pos.x(), inst.pos.y(), inst.pos.z());
+                inst.transform.Orientation.x(), inst.transform.Orientation.y(), inst.transform.Orientation.z());
+            XMMATRIX translation = XMMatrixTranslation(inst.transform.Position.x(), inst.transform.Position.y(), inst.transform.Position.z());
             XMMATRIX world = scale * rotation * translation;
 
             XMMATRIX lightViewProj = XMMatrixTranspose(world * lightView * lightProj);
@@ -224,7 +224,7 @@ void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawa
             pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
             pContext->VSSetConstantBuffers(1, 1, pShadowCB.GetAddressOf());
 
-            mesh.DrawForDX11(pContext.Get());
+            mesh->DrawForDX11(pContext.Get());
         }
     }
 
@@ -668,10 +668,10 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
         pContext->PSSetSamplers(0, 1, pSampler.GetAddressOf());
 
         if (inst.CanDraw()) {
-            const Mesh& mesh = inst.OBJmesh;
-            Vector3 Orientation = inst.Orientation;
-            Vector3& pos = inst.pos;
-            Vector3& size = inst.Size;
+            const Mesh* mesh = inst.OBJmesh.get();
+            Vector3 Orientation = inst.transform.Orientation;
+            Vector3& pos = inst.transform.Position;
+            Vector3& size = inst.transform.Size;
             Int3 color = inst.color;
             float Brightness = 1.0f;
 
@@ -744,7 +744,7 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             pContext->IASetInputLayout(pLayout.Get());
             pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-            mesh.DrawForDX11(pContext.Get());
+            mesh->DrawForDX11(pContext.Get());
         }
     }
 }

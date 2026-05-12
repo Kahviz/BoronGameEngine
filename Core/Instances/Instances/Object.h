@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Services/Raycasting.h"
-
 #include <vector>
 #include <string>
+
 #include "Instances/Instance.h"
 #include "BoronMathLibrary.h"
-#include <Instances/Vertex.h>
-#include <Instances/Instances/Mesh/Mesh.h>
+#include "Instances/Vertex.h"
+#include "Instances/Instances/Mesh/Mesh.h"
 #include "Graphics/Texture/Texture.h"
+#include "Services/Raycasting.h"
 
 inline Vector3 LoadWorldVertex(const Vertex& v, const Vector3& objPos, const Vector3& objSize) {
     return Vector3(
@@ -18,8 +18,6 @@ inline Vector3 LoadWorldVertex(const Vertex& v, const Vector3& objPos, const Vec
     );
 }
 
-class Raycasting;
-
 class Object : public Instance {
 public:
     std::string Path;
@@ -27,81 +25,74 @@ public:
     Texture texture;
 
     Object(
-        const std::string& name = "",
-        int instanceID = 1,
-        const Vector3& position = { 0.0f,0.0f,0.0f },
-        const Vector3& Size = { 1.0f,1.0f,1.0f },
-        const Int3& col = { 168, 160, 160 },
-        const Int3& ogcolor = { 168, 160, 160 },
-        const Vector3& VELOCITY = { 0.0f,0.0f,0.0f },
-        const Vector3& ORIENTATION = { 0.0f,0.0f,0.0f },
-        const bool Anchored = true,
-        Mesh OBJmesh = Mesh()
+        const std::string& name,
+        int instanceID,
+        const Int3& col,
+        const Int3& ogcol,
+        const Vector3& velocity,
+        const Transform& transform,
+        bool anchored,
+        std::shared_ptr<Mesh> mesh
     )
-        : Instance(name,
-            position,
-            Size,
+        : Instance(
+            name,
             col,
-            ogcolor,
-            ORIENTATION,
-            VELOCITY,
-            OBJmesh,
-            UniqueID,
+            ogcol,
+            velocity,
+            mesh,
+            0,
             instanceID,
             false,
             false,
             true,
-            Anchored,
-            "Decent"
+            transform,
+            anchored,
+            Boron::Enums::InstanceType::Object
         ),
         Path(""),
+        CodeTag(""),
         texture()
     {
-        
     }
 
-    Texture* GetTexture() override {
-        return &texture;
-    }
-
-    const Texture* GetConstTexture() const { 
-        return &texture; 
-    }
+    Texture* GetTexture() override { return &texture; }
+    const Texture* GetConstTexture() const { return &texture; }
 
     bool CanDraw() const override { return true; }
     bool HaveColor() const override { return true; }
     bool HaveSize() const override { return true; }
     bool HavePos() const override { return true; }
     bool HaveOrientation() const override { return true; }
-    bool ShowsInExplorer() const override { return true; };
-
+    bool ShowsInExplorer() const override { return true; }
     bool HaveVelocity() const override { return true; }
     bool HaveAnchored() const override { return true; }
     bool HaveOBJMesh() const override { return true; }
     bool HasTexture() const override { return true; }
 
     bool RayIntersects(const Vector3& rayOrigin, const Vector3& rayDir) override {
-        auto& Vertices = OBJmesh.GetVertices();
-        auto& Indices = OBJmesh.GetIndices();
+        if (!OBJmesh || OBJmesh->GetVertices().size() < 3)
+            return false;
 
-        const Vector3& objPos = this->pos;
-        const Vector3& objSize = this->Size;
+        const auto& vertices = OBJmesh->GetVertices();
+        const auto& indices = OBJmesh->GetIndices();
 
-        for (size_t i = 0; i < Indices.size(); i += 3) {
-            Vector3 v0 = LoadWorldVertex(Vertices[Indices[i]], objPos, objSize);
-            Vector3 v1 = LoadWorldVertex(Vertices[Indices[i + 1]], objPos, objSize);
-            Vector3 v2 = LoadWorldVertex(Vertices[Indices[i + 2]], objPos, objSize);
+        const Vector3& pos = transform.Position;
+        const Vector3& size = transform.Size;
+
+        static Raycasting ray;
+
+        for (size_t i = 0; i + 2 < indices.size(); i += 3) {
+            Vector3 v0 = LoadWorldVertex(vertices[indices[i]], pos, size);
+            Vector3 v1 = LoadWorldVertex(vertices[indices[i + 1]], pos, size);
+            Vector3 v2 = LoadWorldVertex(vertices[indices[i + 2]], pos, size);
 
             float t;
-            Raycasting ray;
             if (ray.RayIntersectsTriangle(rayOrigin, rayDir, v0, v1, v2, t))
                 return true;
         }
 
-        
         return false;
     }
-
 
     void Deselect() override {
         Selected = false;

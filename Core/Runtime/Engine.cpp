@@ -159,33 +159,41 @@ int Engine::EngineRun()
 Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     Vector3 pos, Vector3 Size, bool Selec)
 {
+    Transform transform;
+    transform.Position = pos;
+    transform.Size = Size;
+
     auto obj = std::make_unique<Object>(
         Name,
         1,
-        pos,
-        Size,
         Int3(
             static_cast<int>(Color3.x() * 255.0f),
             static_cast<int>(Color3.y() * 255.0f),
             static_cast<int>(Color3.z() * 255.0f)
-        )
+        ),
+        Int3(168, 160, 160),
+        Vector3(0, 0, 0),
+        transform,
+        true,
+        std::make_shared<Mesh>()
     );
+
     memcpy(obj->NameText, obj->Name.c_str(), sizeof(obj->NameText));
 
     obj->UniqueID = Index;
 
 #if DIRECTX11 == 1
-    obj->OBJmesh.DM.Load(assets + Path, window.GetGraphics().GetDevice());
+    obj->OBJmesh->DM.Load(assets + Path, window.GetGraphics().GetDevice());
 
     #ifdef _DEBUG
         std::cout << "DX11 Mesh loaded: " << assets + Path << std::endl;
-        std::cout << "Vertices: " << obj->OBJmesh.GetVertices().size() << std::endl;
-        std::cout << "Indices: " << obj->OBJmesh.GetIndices().size() << std::endl;
+        std::cout << "Vertices: " << obj->OBJmesh->GetVertices().size() << std::endl;
+        std::cout << "Indices: " << obj->OBJmesh->GetIndices().size() << std::endl;
     #endif
 #endif
 
 #if VULKAN == 1
-    obj.get()->OBJmesh.VM.Load(
+    obj.get()->OBJmesh->VM.Load(
         assets + Path,
         window.GetGraphics().GetDevice(),
         window.GetGraphics().GetPhysicalDevice(),
@@ -198,7 +206,7 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     std::cout << "Loading mesh: " << assets + Path << std::endl;
 
     #if VULKAN == 1
-        std::cout << "Vertices: " << obj.get()->OBJmesh.VM.GetVertices().size() << ", Indices: " << obj.get()->OBJmesh.VM.GetIndices().size() << std::endl;
+        std::cout << "Vertices: " << obj.get()->OBJmesh->VM.GetVertices().size() << ", Indices: " << obj.get()->OBJmesh->VM.GetIndices().size() << std::endl;
     #endif
 #endif
     obj->Selected = Selec;
@@ -330,7 +338,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             CubeB = true;
         }
 
-        Drawables[0]->Orientation.x() += 0.01f; //Test
+        Drawables[0]->transform.Orientation.x() += 0.01f; //Test
     }
 #if INEDITOR == 1
     if (InProject && ImGuiInited) {
@@ -361,9 +369,9 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             wnd->GetGraphics().RenderAMesh(
                 deltatime,
                 Drawable,
-                Drawable->Orientation,
-                Drawable->pos,
-                Drawable->Size,
+                Drawable->transform.Orientation,
+                Drawable->transform.Position,
+                Drawable->transform.Size,
                 Drawable->color,
                 Drawable->Velocity,
                 Drawable->Anchored,

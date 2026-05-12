@@ -60,13 +60,13 @@ namespace {
     {
         Vec3 v = makeVec3FromVertex(Vertex);
         Vec3 scaled = mul(v, mul(Vec3{
-            inst.Size.x(),
-            inst.Size.y(),
-            inst.Size.z()
+            inst.transform.Size.x(),
+            inst.transform.Size.y(),
+            inst.transform.Size.z()
             }, 1.001f));
 
         return add(
-            Vec3{ inst.pos.x(), inst.pos.y(), inst.pos.z() },
+            Vec3{ inst.transform.Position.x(), inst.transform.Position.y(), inst.transform.Position.z() },
             scaled
         );
     }
@@ -89,19 +89,19 @@ namespace {
 }
 
 bool Colission::AABBOverlap(const Instance& a, const Instance& b) {
-    float aMinX = a.pos.x();
-    float aMaxX = a.pos.x() + a.Size.x();
-    float aMinY = a.pos.y();
-    float aMaxY = a.pos.y() + a.Size.y();
-    float aMinZ = a.pos.z();
-    float aMaxZ = a.pos.z() + a.Size.z();
+    float aMinX = a.transform.Position.x();
+    float aMaxX = a.transform.Position.x() + a.transform.Size.x();
+    float aMinY = a.transform.Position.y();
+    float aMaxY = a.transform.Position.y() + a.transform.Size.y();
+    float aMinZ = a.transform.Position.z();
+    float aMaxZ = a.transform.Position.z() + a.transform.Size.z();
 
-    float bMinX = b.pos.x();
-    float bMaxX = b.pos.x() + b.Size.x();
-    float bMinY = b.pos.y();
-    float bMaxY = b.pos.y() + b.Size.y();
-    float bMinZ = b.pos.z();
-    float bMaxZ = b.pos.z() + b.Size.z();
+    float bMinX = b.transform.Position.x();
+    float bMaxX = b.transform.Position.x() + b.transform.Size.x();
+    float bMinY = b.transform.Position.y();
+    float bMaxY = b.transform.Position.y() + b.transform.Size.y();
+    float bMinZ = b.transform.Position.z();
+    float bMaxZ = b.transform.Position.z() + b.transform.Size.z();
 
     return (aMinX <= bMaxX && aMaxX >= bMinX) &&
         (aMinY <= bMaxY && aMaxY >= bMinY) &&
@@ -117,8 +117,8 @@ bool Colission::CheckColission(
     if (!AABBOverlap(inst, inst2))
         return false;
 
-    const auto& verts1 = inst.OBJmesh.GetVertices();
-    const auto& verts2 = inst2.OBJmesh.GetVertices();
+    const auto& verts1 = inst.OBJmesh->GetVertices();
+    const auto& verts2 = inst2.OBJmesh->GetVertices();
 
     if (verts1.empty() || verts2.empty())
         return false;

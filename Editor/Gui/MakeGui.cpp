@@ -138,7 +138,7 @@ void MakeGui::MakeIMGui(Window& wnd,
 
         world.Name = "World";
         world.Parent = nullptr;
-        world.CodeTag = "World";
+        world.InstanceType = Boron::Enums::InstanceType::World;
         strcpy_s(world.NameText, sizeof(world.NameText), "World");
     }
     
@@ -214,8 +214,7 @@ void MakeGui::MakeIMGui(Window& wnd,
             ImGui::InputText("##Name", inst.NameText, sizeof(inst.NameText));
             inst.Name = inst.NameText;
             //Pos
-            MakeFloat3Edit("Position", inst.pos);
-            
+            MakeFloat3Edit("Position", inst.transform.Position);
 
             //Anchored
             ImGui::Checkbox("Anchored: ", &inst.Anchored);

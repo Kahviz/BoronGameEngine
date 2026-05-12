@@ -86,7 +86,7 @@ add_executable(BoronEngine
     Core/Graphics/Vulkan/VulkanRender.cpp
     Core/Graphics/Vulkan/ScoreCounter.cpp
     Core/Debugging/Profiler/Profiler.cpp
-    "Core/Debugging/Functions/BGE_ASSERTS.h"
+    Core/Debugging/Functions/BGE_ASSERTS.h
     Core/Libs/ImGui/imgui_demo.cpp
     Core/Graphics/Texture/Texture.h 
     Core/Graphics/Texture/Texture.cpp 
@@ -113,6 +113,8 @@ add_executable(BoronEngine
     Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.cpp
     Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.h
     Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.cpp
+
+    Core/Variables/Enums.h
 )
 
 target_include_directories(BoronEngine PRIVATE
@@ -126,6 +128,7 @@ target_include_directories(BoronEngine PRIVATE
     Core/Libs/ImGui/backends
     Core/Instances/Instances/
     Core/Instances/
+    Core/Variables/
     Core/Debugging/Functions/
     Core/Graphics/Texture/
     Editor/Camera/

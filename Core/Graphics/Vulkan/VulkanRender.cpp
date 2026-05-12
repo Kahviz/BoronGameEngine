@@ -875,7 +875,7 @@ bool VulkanRender::RenderAMesh(
         return false;
     }
 
-    const MeshVK* meshVK = &drawable->OBJmesh.VM;
+    const MeshVK* meshVK = &drawable->OBJmesh->VM;
 
     updateUniformBuffer(*drawable, Index, size, Orientation, pos, color);
 
