@@ -178,7 +178,6 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
         std::make_shared<Mesh>()
     );
 
-    memcpy(obj->NameText, obj->Name.c_str(), sizeof(obj->NameText));
 
     obj->UniqueID = Index;
 

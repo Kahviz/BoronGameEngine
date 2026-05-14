@@ -13,32 +13,25 @@ class Texture;
 class Instance {
 public:
     std::shared_ptr<Mesh> OBJmesh;
-    Vector3 Velocity;
-    Transform transform;
-
-    bool Anchored = true;
+    std::string Name;
 
     Instance* Parent = nullptr;
     std::vector<Instance*> Children;
 
-    std::string Name;
-    char NameText[64] = "Instance";
-
-    char PosText[128] = "0,0,0";
-
-    Int3 color = { 0,0,0 };
-    Int3 originalColor = { 0,0,0 };
-
-    char SizeText[128] = "1,1,1";
-    char OrientationText[128] = "0,0,0";
-
-    int UniqueID = 0;
-    bool Selected = false;
-    bool Deleted = false;
+    Vector3 Velocity;
+    Transform transform;
 
     Boron::Enums::InstanceType InstanceType;
+
+    Int3 color;
+    Int3 originalColor;
+
+    int UniqueID = 0;
     int InstanceID = 0;
 
+    bool Anchored = true;
+    bool Selected = false;
+    bool Deleted = false;
     bool IsVisibleInExplorer = false;
 
     Instance(

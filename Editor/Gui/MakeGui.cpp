@@ -14,6 +14,20 @@ struct MeshButton
     const char* name;
 };
 
+static bool InputTextStd(const char* label, std::string& str)
+{
+    char buf[256];
+    strncpy(buf, str.c_str(), sizeof(buf));
+    buf[255] = '\0';
+
+    if (ImGui::InputText(label, buf, sizeof(buf)))
+    {
+        str = buf;
+        return true;
+    }
+    return false;
+}
+
 static MeshButton meshButtons[] =
 {
     { "Cube",     assets + "\\Cube.obj","Cube" },
@@ -139,7 +153,6 @@ void MakeGui::MakeIMGui(Window& wnd,
         world.Name = "World";
         world.Parent = nullptr;
         world.InstanceType = Boron::Enums::InstanceType::World;
-        strcpy_s(world.NameText, sizeof(world.NameText), "World");
     }
     
     ImGuiIO& io = ImGui::GetIO();
@@ -198,8 +211,7 @@ void MakeGui::MakeIMGui(Window& wnd,
 
         ImGui::Text("Name: ");
         ImGui::SameLine();
-        ImGui::InputText("##NameWORLD", world.NameText, sizeof(world.NameText));
-        world.Name = world.NameText;
+        InputTextStd("##NameWORLD", world.Name);
     }
 
     for (const auto& Drawable : Drawables) {
@@ -211,8 +223,8 @@ void MakeGui::MakeIMGui(Window& wnd,
             //Name
             ImGui::Text("Name: ");
             ImGui::SameLine();
-            ImGui::InputText("##Name", inst.NameText, sizeof(inst.NameText));
-            inst.Name = inst.NameText;
+            InputTextStd("##NameWORLD", world.Name);
+
             //Pos
             MakeFloat3Edit("Position", inst.transform.Position);
 

@@ -6,7 +6,7 @@ Version 1.2: -Coming
 
  Changed:
 	-Instance class is now cleaner
-
+	-Reduced Instances size (in bytes) from 728 to 240
 Version 1.1:
  Added:
 	-Shadows
