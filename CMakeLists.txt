@@ -90,7 +90,7 @@ add_executable(BoronEngine
     Core/Libs/ImGui/imgui_demo.cpp
     Core/Graphics/Texture/Texture.h 
     Core/Graphics/Texture/Texture.cpp 
-    Core/Multiplatform/UntilitedPlatform.h
+    Core/Multiplatform/BoronPlatform.h
 
     Core/BoronPhysics/Gravity.h
     Core/BoronPhysics/Physics.h
@@ -100,7 +100,7 @@ add_executable(BoronEngine
     Editor/Gui/MakeGui.cpp
     Editor/Camera/CameraControl.cpp
 
-    UntilitedGameEngine.h
+    BoronGameEngine.h
 
     #VulkanRenderer Subclasses
     Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.h

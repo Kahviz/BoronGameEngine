@@ -509,7 +509,15 @@ void Dx11Renderer::CompileShaders()
     pPS = pPSNoTexture;
 
     if (textureShaderExists) {
-
+        hr = pDevice->CreatePixelShader(
+            psTextureBlob->GetBufferPointer(),
+            psTextureBlob->GetBufferSize(),
+            nullptr,
+            &pPSTexture
+        );
+        if (FAILED(hr)) {
+            textureShaderExists = false;
+        }
     }
 
     D3D11_INPUT_ELEMENT_DESC ied[] = {
@@ -660,12 +668,14 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
         }
         else {
             ID3D11ShaderResourceView* nullSRV = nullptr;
-            pContext->PSSetShaderResources(1, 1, &nullSRV);
+            pContext->PSSetShaderResources(0, 1, &nullSRV);
         }
-
+        
         pContext->VSSetShader(pVS.Get(), nullptr, 0);
         pContext->PSSetShader(selectedPS, nullptr, 0);
-        pContext->PSSetSamplers(0, 1, pSampler.GetAddressOf());
+
+        ID3D11SamplerState* samplers[] = { pSampler.Get(), pShadowSampler.Get() };
+        pContext->PSSetSamplers(0, 2, samplers);
 
         if (inst.CanDraw()) {
             const Mesh* mesh = inst.OBJmesh.get();
@@ -738,6 +748,7 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             pContext->Unmap(pLightingBuffer.Get(), 0);
 
             pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
+            pContext->VSSetConstantBuffers(1, 1, pShadowCB.GetAddressOf());
             pContext->PSSetConstantBuffers(0, 1, pColorBuffer.GetAddressOf());
             pContext->PSSetConstantBuffers(1, 1, pLightingBuffer.GetAddressOf());
 

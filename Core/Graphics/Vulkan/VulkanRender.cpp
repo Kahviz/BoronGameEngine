@@ -925,7 +925,6 @@ void VulkanRender::PrintInfo() {
 void VulkanRender::RecordShadowCommandBuffer()
 {
     if (shadowDrawCommands.empty()) {
-        MakeAWarning("Nothing to draw");
         return;
     }
 

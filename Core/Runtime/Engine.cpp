@@ -182,17 +182,11 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     obj->UniqueID = Index;
 
 #if DIRECTX11 == 1
-    obj->OBJmesh->DM.Load(assets + Path, window.GetGraphics().GetDevice());
-
-    #ifdef _DEBUG
-        std::cout << "DX11 Mesh loaded: " << assets + Path << std::endl;
-        std::cout << "Vertices: " << obj->OBJmesh->GetVertices().size() << std::endl;
-        std::cout << "Indices: " << obj->OBJmesh->GetIndices().size() << std::endl;
-    #endif
+    obj->OBJmesh = Mesh::Load(assets + Path, window.GetGraphics().GetDevice());
 #endif
 
 #if VULKAN == 1
-    obj.get()->OBJmesh->VM.Load(
+    obj.get()->OBJmesh = Mesh::Load(
         assets + Path,
         window.GetGraphics().GetDevice(),
         window.GetGraphics().GetPhysicalDevice(),
@@ -201,22 +195,13 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     );
 #endif
 
-#ifdef _DEBUG
-    std::cout << "Loading mesh: " << assets + Path << std::endl;
-
-    #if VULKAN == 1
-        std::cout << "Vertices: " << obj.get()->OBJmesh->VM.GetVertices().size() << ", Indices: " << obj.get()->OBJmesh->VM.GetIndices().size() << std::endl;
-    #endif
-#endif
     obj->Selected = Selec;
 
     std::string fullPath = textures + "\\TestTexture.png";
     std::cout << fullPath << std::endl;
 
 #if DIRECTX11 == 1
-
-
-    //obj->texture.Load(fullPath, *window.GetGraphics().DR.get());
+    obj->texture.Load(fullPath, *window.GetGraphics().DR.get());
 #endif
 #if VULKAN == 1
     obj->texture.LoadVK(fullPath, *window.GetGraphics().VR.get());

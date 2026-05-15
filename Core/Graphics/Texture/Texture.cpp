@@ -278,115 +278,25 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, Dx11Renderer& dx11Rend
         return nullptr;
     }
 
-    std::filesystem::path fsPath(path);
-
     if (!std::filesystem::exists(path)) {
         MakeAError("Texture Doesnt Exist: " + path);
         return nullptr;
     }
 
-    std::string ext = fsPath.extension().string();
-    if (ext != ".png" && ext != ".jpg" && ext != ".jpeg" && ext != ".bmp" && ext != ".dds") {
-        MakeAError("Unsupported texture format: " + ext);
-        return nullptr;
-    }
+    int width, height, channels;
 
-    std::wstring wpath(path.begin(), path.end());
+    stbi_set_flip_vertically_on_load(true);
 
-    IWICImagingFactory* factory = nullptr;
-    HRESULT hr = CoCreateInstance(
-        CLSID_WICImagingFactory,
-        nullptr,
-        CLSCTX_INPROC_SERVER,
-        IID_PPV_ARGS(&factory)
+    unsigned char* data = stbi_load(
+        path.c_str(),
+        &width,
+        &height,
+        &channels,
+        4 // force RGBA
     );
 
-    if (FAILED(hr) || !factory) {
-        MakeAError("Failed to create WIC factory");
-        return nullptr;
-    }
-
-    IWICBitmapDecoder* decoder = nullptr;
-    hr = factory->CreateDecoderFromFilename(
-        wpath.c_str(),
-        nullptr,
-        GENERIC_READ,
-        WICDecodeMetadataCacheOnLoad,
-        &decoder
-    );
-
-    if (FAILED(hr) || !decoder) {
-        MakeAError("Failed to create decoder for: " + path);
-        factory->Release();
-        return nullptr;
-    }
-
-    IWICBitmapFrameDecode* frame = nullptr;
-    hr = decoder->GetFrame(0, &frame);
-
-    if (FAILED(hr) || !frame) {
-        MakeAError("Failed to get frame");
-        decoder->Release();
-        factory->Release();
-        return nullptr;
-    }
-
-    IWICFormatConverter* converter = nullptr;
-    hr = factory->CreateFormatConverter(&converter);
-
-    if (FAILED(hr) || !converter) {
-        MakeAError("Failed to create converter");
-        frame->Release();
-        decoder->Release();
-        factory->Release();
-        return nullptr;
-    }
-
-    hr = converter->Initialize(
-        frame,
-        GUID_WICPixelFormat32bppRGBA,
-        WICBitmapDitherTypeNone,
-        nullptr,
-        0.0,
-        WICBitmapPaletteTypeCustom
-    );
-
-    if (FAILED(hr)) {
-        MakeAError("Failed to initialize converter");
-        converter->Release();
-        frame->Release();
-        decoder->Release();
-        factory->Release();
-        return nullptr;
-    }
-
-    UINT width, height;
-    hr = frame->GetSize(&width, &height);
-
-    if (FAILED(hr) || width == 0 || height == 0) {
-        MakeAError("Invalid texture dimensions");
-        converter->Release();
-        frame->Release();
-        decoder->Release();
-        factory->Release();
-        return nullptr;
-    }
-
-    std::vector<BYTE> pixels(width * height * 4);
-
-    hr = converter->CopyPixels(
-        nullptr,
-        width * 4,
-        pixels.size(),
-        pixels.data()
-    );
-
-    if (FAILED(hr)) {
-        MakeAError("Failed to copy pixels");
-        converter->Release();
-        frame->Release();
-        decoder->Release();
-        factory->Release();
+    if (!data) {
+        MakeAError("stb_image failed to load: " + path);
         return nullptr;
     }
 
@@ -397,53 +307,42 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, Dx11Renderer& dx11Rend
     desc.ArraySize = 1;
     desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     desc.SampleDesc.Count = 1;
-    desc.SampleDesc.Quality = 0;
     desc.Usage = D3D11_USAGE_DEFAULT;
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    desc.CPUAccessFlags = 0;
-    desc.MiscFlags = 0;
 
-    D3D11_SUBRESOURCE_DATA data = {};
-    data.pSysMem = pixels.data();
-    data.SysMemPitch = width * 4;
-    data.SysMemSlicePitch = 0;
+    D3D11_SUBRESOURCE_DATA initData = {};
+    initData.pSysMem = data;
+    initData.SysMemPitch = width * 4;
 
     ID3D11Texture2D* texture = nullptr;
 
-    BGE_ASSERT(dx11Renderer.GetDevice(), "Device Cant Be nullptr");
-    hr = dx11Renderer.GetDevice()->CreateTexture2D(&desc, &data, &texture);
+    HRESULT hr = dx11Renderer.GetDevice()->CreateTexture2D(
+        &desc,
+        &initData,
+        &texture
+    );
 
-    if (FAILED(hr) || !texture) {
+    if (FAILED(hr)) {
         MakeAError("Failed to create texture");
-        converter->Release();
-        frame->Release();
-        decoder->Release();
-        factory->Release();
+        stbi_image_free(data);
         return nullptr;
     }
 
     ID3D11ShaderResourceView* srv = nullptr;
+
     hr = dx11Renderer.GetDevice()->CreateShaderResourceView(texture, nullptr, &srv);
 
     texture->Release();
+    stbi_image_free(data);
 
-    if (FAILED(hr) || !srv) {
-        MakeAError("Failed to create shader resource view");
-        converter->Release();
-        frame->Release();
-        decoder->Release();
-        factory->Release();
+    if (FAILED(hr)) {
+        MakeAError("Failed to create SRV");
         return nullptr;
     }
 
     pTexture = srv;
-
-    converter->Release();
-    frame->Release();
-    decoder->Release();
-    factory->Release();
-
     Loaded = true;
+
     return srv;
 }
 #endif

@@ -1,21 +1,21 @@
 
 Version 1.2: -Coming
  Added:
-	
+	-Mesh caching for reducing ram usage
  Removed:
 
  Changed:
+	-DX11 now loads textures with STB_IMAGE
 	-Instance class is now cleaner
 	-Reduced Instances size (in bytes) from 728 to 240
+ Patches:
+	-DX11 now shows the loaded textures right at the renderer
 Version 1.1:
  Added:
 	-Shadows
 	-TextureLoading
 	-SIMD-optimized mathlibrary
 	-Much more
- Removed:
-
- Changed:
 
 Version 1.0:
  Added:
@@ -32,3 +32,5 @@ Version 0.0:
  Removed:
 
  Changed:
+
+ Patches:
