@@ -2,6 +2,7 @@
 Version 1.2: -Coming
  Added:
 	-Mesh caching for reducing ram usage
+	-Project saving and loading
  Removed:
 
  Changed:

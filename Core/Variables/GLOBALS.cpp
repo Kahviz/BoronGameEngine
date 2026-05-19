@@ -85,8 +85,8 @@ std::string ProjectName = "ProjectTest1";
 std::string appData = GetAppDataPath();
 
 std::string BoronEnginePath = appData + "\\BoronEngine";
+std::string savings = BoronEnginePath + "\\Savings";
 std::string assets = BoronEnginePath + "\\Assets";
 std::string textures = BoronEnginePath + "\\Textures";
 std::string fonts = BoronEnginePath + "\\Fonts";
 fs::path appDataTarget = GetAppDataDir();
-

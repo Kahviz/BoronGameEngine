@@ -6,6 +6,7 @@
 #include "imgui.h"
 #include "Window/Window.h"
 #include "GLOBALS.h"
+#include "Misc/Saving/SaveProject.h"
 
 #if INEDITOR == 1
     #include "Gui/MakeGui.h"

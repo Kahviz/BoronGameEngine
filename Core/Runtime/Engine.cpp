@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "Engine.h"
 #include <stdexcept>
 #include "chrono"
 #include <iostream>
@@ -136,7 +137,7 @@ int Engine::EngineRun()
     #if INEDITOR == 0
         InProject = true;
     #endif
-
+    Drawables = SaveProject::Load();
     while (!glfwWindowShouldClose(glfwWND))
     {
         auto now = clock::now();
@@ -149,7 +150,7 @@ int Engine::EngineRun()
         glfwPollEvents();
     }
 
-    
+    SaveProject::Save(Drawables);
 
     profiler.PrintInformation();
 

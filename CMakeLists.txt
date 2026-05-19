@@ -115,7 +115,7 @@ add_executable(BoronEngine
     Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.cpp
 
     Core/Variables/Enums.h
-)
+ "Core/Misc/Saving/SaveProject.h" "Core/Misc/Saving/SaveProject.cpp")
 
 target_include_directories(BoronEngine PRIVATE
     include
