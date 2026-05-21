@@ -137,7 +137,7 @@ int Engine::EngineRun()
     #if INEDITOR == 0
         InProject = true;
     #endif
-    Drawables = SaveProject::Load();
+    Drawables = SaveProject::Load(window);
     while (!glfwWindowShouldClose(glfwWND))
     {
         auto now = clock::now();
@@ -313,7 +313,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     graphics.ClearBuffer(0.0f, 0.0f, 1.0f);
 
     if (InProject) {
-        if (!CubeB) {
+        if (!CubeB && Drawables.empty()) {
             std::cout << "Starting..." << std::endl;
             AddAMesh("\\Cube.obj", "Cube2", { 0,0,0 }, { 0.5,1,0.5 }, false);
             AddAMesh("\\Cube.obj", "Cube", { 0,-5,0 }, { 10,1,10 }, false);
