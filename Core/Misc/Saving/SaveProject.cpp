@@ -31,6 +31,7 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
         file << "Position: " << Drawable->transform.Position << "\n";
         file << "Color: " << Drawable->color << "\n";
         file << "CanDraw" << Drawable->CanDraw() << "\n";
+        file << "END\n";
     }
 
     file.close();
@@ -116,24 +117,73 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window)
     }
 
     std::string line;
-    Vector3 loadedPos(0, 0, 0);
 
+    std::string loadedName = "LoadedObject";
+    Vector3 loadedPos(0, 0, 0);
+    Vector3 loadedSize(1, 1, 1);
+    Vector3 loadedOrientation(0, 0, 0);
     while (std::getline(file, line))
     {
-        if (line.rfind("Position:", 0) == 0)
+        if (line == "-")
         {
-            std::stringstream ss(line.substr(10));
+            continue;
+        }
+
+        if (line.rfind("Name:", 0) == 0)
+        {
+            loadedName = line.substr(6);
+        }
+
+        else if (line.rfind("Position:", 0) == 0)
+        {
+            std::string data = line.substr(10);
+
+            std::replace(data.begin(), data.end(), ',', ' ');
+
+            std::stringstream ss(data);
 
             ss >> loadedPos.x()
                 >> loadedPos.y()
                 >> loadedPos.z();
+        }
 
+        else if (line.rfind("Size:", 0) == 0)
+        {
+            std::string data = line.substr(6);
 
+            std::replace(data.begin(), data.end(), ',', ' ');
+
+            std::stringstream ss(data);
+
+            ss >> loadedSize.x()
+                >> loadedSize.y()
+                >> loadedSize.z();
+            std::cout << loadedSize << std::endl;
+        }
+        else if (line.rfind("Orientation:", 0) == 0)
+        {
+            std::string data = line.substr(13);
+
+            std::replace(data.begin(), data.end(), ',', ' ');
+
+            std::stringstream ss(data);
+
+            loadedOrientation = Vector3(
+                0, 0, 0
+            );
+
+            ss >> loadedOrientation.x()
+                >> loadedOrientation.y()
+                >> loadedOrientation.z();
+        }
+
+        else if (line == "END")
+        {
             AddAMesh(
                 "\\Cube.obj",
-                "LoadedObject", 
+                loadedName,
                 loadedPos,
-                Vector3(1, 1, 1),
+                loadedSize,
                 false,
                 window,
                 Loaded
