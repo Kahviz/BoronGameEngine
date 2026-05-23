@@ -8,6 +8,9 @@
 #include "Instances/Instance.h"
 #include "GLFW/glfw3.h"
 #include "Window/Window.h"
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 class MakeGui
 {

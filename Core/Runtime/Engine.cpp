@@ -17,6 +17,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_dx11.h"
 #include "backends/imgui_impl_vulkan.h"
+#include <random>
 
 Engine::Engine()
     : window(1280, 800, "BoronEngine")
@@ -137,7 +138,7 @@ int Engine::EngineRun()
     #if INEDITOR == 0
         InProject = true;
     #endif
-    Drawables = SaveProject::Load(window);
+    
     while (!glfwWindowShouldClose(glfwWND))
     {
         auto now = clock::now();
@@ -249,7 +250,7 @@ void ScreenResizerDetector(Window* wnd) {
     );
 }
 
-#include <random>
+
 
 float GetRandomFloat(float min, float max) { //Mathlib
     static std::random_device rd;
@@ -314,8 +315,11 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     if (InProject) {
         if (!CubeB) {
+            Drawables = SaveProject::Load(window);
             if (Drawables.empty())
             { 
+                SaveProject::Save(Drawables);
+
                 AddAMesh("\\Cube.obj", "Cube2", { 0,0,0 }, { 0.5,1,0.5 }, false);
                 AddAMesh("\\Cube.obj", "Cube", { 0,-5,0 }, { 10,1,10 }, false);
             }

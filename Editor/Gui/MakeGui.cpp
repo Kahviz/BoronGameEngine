@@ -346,7 +346,9 @@ void MakeGui::MakeIMViewPort(Window& wnd)
 
 bool MakeGui::MakeDashBoard()
 {
+    bool openProject = false;
     static bool showConfigWindow = false;
+    static bool showProjectsWindow = false;
 
     MakeStyle();
     ImGui::SetNextWindowSize(ImVec2(screen_width, screen_height), ImGuiCond_Always);
@@ -408,12 +410,87 @@ bool MakeGui::MakeDashBoard()
         ImGuiWindowFlags_NoCollapse |
         ImGuiWindowFlags_NoDocking
     );
+
     if (ImGui::Button("Config Style")) {
         showConfigWindow = !showConfigWindow;
+
+        if (showConfigWindow)
+            showProjectsWindow = false;
+    }
+
+    if (ImGui::Button("Projects")) {
+        showProjectsWindow = !showProjectsWindow;
+    }
+
+    if (showProjectsWindow)
+    {
+        showConfigWindow = false;
+
+        float discoverWidth = sw / 5.0f;
+
+        ImGui::SetNextWindowPos(ImVec2(discoverWidth, 0), ImGuiCond_Always);
+
+        ImGui::SetNextWindowSize(
+            ImVec2(sw - discoverWidth, sh),
+            ImGuiCond_Always
+        );
+
+        ImGui::PushStyleColor(
+            ImGuiCol_WindowBg,
+            ImVec4(0.0f, 0.0f, 0.0f, 1.0f)
+        );
+
+        ImGui::Begin(
+            "Projects##Page",
+            nullptr,
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoDocking
+        );
+
+        float buttonSize = 100.0f;
+        float padding = 10.0f;
+
+        float windowVisibleX = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+
+        for (const auto& entry : fs::directory_iterator(savings + "\\"))
+        {
+            if (!entry.is_directory())
+                continue;
+
+            std::string folderName =
+                entry.path().filename().string();
+
+            ImGui::PushID(folderName.c_str());
+
+            if (ImGui::Button(folderName.c_str(),
+                ImVec2(buttonSize, buttonSize)))
+            {
+                ProjectName = folderName;
+                openProject = true;
+            }
+
+            ImGui::PopID();
+
+            float lastButtonX =
+                ImGui::GetItemRectMax().x;
+
+            float nextButtonX =
+                lastButtonX + padding + buttonSize;
+
+            if (nextButtonX < windowVisibleX)
+                ImGui::SameLine();
+        }
+
+        ImGui::PopStyleColor();
+        ImGui::End();
     }
     ImGui::End();
 
+    
     if (showConfigWindow) {
+        showProjectsWindow = false;
         ImGui::SetNextWindowSize(ImVec2(sw / 2, sh), ImGuiCond_Always);
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f)); //Color
 
@@ -483,5 +560,5 @@ bool MakeGui::MakeDashBoard()
 
     ImGui::End();
 
-    return false;
+    return openProject;
 }
