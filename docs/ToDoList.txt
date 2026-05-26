@@ -1,2 +1,3 @@
-1. FIX vulkan Shadow acne
-2. Make loading system load mesh paths
+FIX vulkan Shadow acne -Done
+Make loading system load mesh paths
+Pointlights to vulkan and dx11
