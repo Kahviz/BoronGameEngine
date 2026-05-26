@@ -1457,8 +1457,8 @@ void VulkanRender::createShadowPipeline() {
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_TRUE; //Added in the fragshader
     rasterizer.depthBiasSlopeFactor = 1.25f;
-    rasterizer.depthBiasConstantFactor = 1.25f;
-
+    rasterizer.depthBiasConstantFactor = 1.0f;
+    rasterizer.depthBiasClamp = 0.0001f;
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
