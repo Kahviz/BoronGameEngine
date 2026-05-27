@@ -144,7 +144,7 @@ bool Texture::LoadVK(const std::string& path, VulkanRender& vulkanrenderer)
     }
 
     Loaded = true;
-    std::cout << "Texture loaded successfully!" << std::endl;
+
     return true;
 }
 

@@ -22,11 +22,17 @@ public:
         auto it = Cache.find(file);
         if (it != Cache.end())
         {
-            MakeAError("Caching...");
+            MakeAError("Caching..");
+
+            it->second->GetIsCached() = true;
             return it->second;
         }
 
         auto mesh = std::make_shared<Mesh>();
+
+        std::string name = std::filesystem::path(file).filename().string();
+
+        mesh->GetMeshFileName() = name;
 
         mesh->DM.Load(file, device);
 
@@ -55,11 +61,17 @@ public:
         auto it = Cache.find(file);
         if (it != Cache.end())
         {
-            MakeAError("Caching...");
+            MakeAError("Caching..");
+
+            it->second->GetIsCached() = true;
             return it->second;
         }
 
         auto mesh = std::make_shared<Mesh>();
+
+        std::string name = std::filesystem::path(file).filename().string();
+
+        mesh->GetMeshFileName() = name;
 
         mesh->VM.Load(file, device, phyDevice, cmdPool, gfxQueue);
 
@@ -99,4 +111,15 @@ public:
     #if DIRECTX11 == 1
         MeshDX11 DM;
     #endif
+
+    std::string& GetMeshFileName() {
+        return MeshFileName;
+    }
+
+    bool& GetIsCached() {
+        return cached;
+    }
+private:
+    std::string MeshFileName = "NULL";
+    bool cached = false;
 };

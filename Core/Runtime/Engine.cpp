@@ -180,7 +180,6 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
         std::make_shared<Mesh>()
     );
 
-
     obj->UniqueID = Index;
 
 #if DIRECTX11 == 1
@@ -208,17 +207,10 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
 #if VULKAN == 1
     obj->texture.LoadVK(fullPath, *window.GetGraphics().VR.get());
     window.GetGraphics().VR->UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
-
-    /*
-    if (Name != "Cube2") {
-        
-    }
-    else {
-        MakeAError("Making so Cube2 doesnt have texture for showcase! This is a remainder for me! 1F1G");
-    }
-    */
-
 #endif
+
+    std::cout << "MeshName: " <<  obj->OBJmesh->GetMeshFileName() << std::endl;
+
     Instance* objPtr = obj.get();
     Drawables.push_back(std::move(obj));
 
@@ -275,8 +267,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     if (ctrlPressed) {
         AddAMesh("\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false);
-        std::cout << "Cubes: "<< cubes << std::endl;
-        std::cout << "FPS: " << 1.0f / deltatime << std::endl;
 
         cubes++;
     }
