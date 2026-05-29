@@ -209,8 +209,6 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     window.GetGraphics().VR->UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
 #endif
 
-    std::cout << "MeshName: " <<  obj->OBJmesh->GetMeshFileName() << std::endl;
-
     Instance* objPtr = obj.get();
     Drawables.push_back(std::move(obj));
 
@@ -256,6 +254,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     //If InEditor == 1 InProject = true
     bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
+    bool RctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
 
     static int frames = 0;
     static int cubes = 0;
@@ -266,7 +265,13 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 
     if (ctrlPressed) {
+        
         AddAMesh("\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false);
+
+        cubes++;
+    }
+    if (RctrlPressed) {
+        AddAMesh("\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false);
 
         cubes++;
     }

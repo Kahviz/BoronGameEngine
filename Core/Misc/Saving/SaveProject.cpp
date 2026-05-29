@@ -6,23 +6,36 @@
 #include <iostream>
 #include <Object.h>
 #include <Graphics/Graphics.h>
+#include <filesystem>
 
 namespace fs = std::filesystem;
 
 void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
 {
     std::string path = savings + "\\" + ProjectName;
+    std::string meshFilesPath = savings + "\\" + ProjectName + "\\MeshFiles";
 
     if (fs::exists(path))
     {
         fs::remove_all(path);
     }
 
-    fs::create_directories(path);
+
+    fs::create_directories(meshFilesPath);
 
     std::ofstream file(path + "\\save.BGEproject");
 
     for (auto& Drawable : Drawables) {
+        fs::path from = Drawable->OBJmesh->GetMeshPath();
+
+        std::string newName = std::to_string(Drawable->UniqueID);
+
+        fs::path to =
+            fs::path(meshFilesPath) /
+            (newName + from.extension().string());
+
+        fs::copy(from, to, fs::copy_options::overwrite_existing);
+
         file << "-\n";
         file << "Name: " << Drawable->Name << "\n";
         file << "Anchored: " << Drawable->Anchored << "\n";
@@ -30,14 +43,16 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
         file << "Orientation: " << Drawable->transform.Orientation << "\n";
         file << "Position: " << Drawable->transform.Position << "\n";
         file << "Color: " << Drawable->color << "\n";
-        file << "CanDraw" << Drawable->CanDraw() << "\n";
+        file << "CanDraw: " << Drawable->CanDraw() << "\n";
+        file << "UniqueID: " << Drawable->UniqueID << "\n";
+        file << "MeshFile: " << to.filename().string() << "\n";
         file << "END\n";
     }
 
     file.close();
 }
 
-Instance& AddAMesh(const std::string& Path, const std::string& Name,
+Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string& Name,
     Vector3 pos, Vector3 Size, bool Selec, Window& window, std::vector<std::unique_ptr<Instance>>& Drawables)
 {
     Transform transform;
@@ -60,15 +75,36 @@ Instance& AddAMesh(const std::string& Path, const std::string& Name,
     );
 
 
-    obj->UniqueID = Index;
+    obj->UniqueID = UniqueID;
 
 #if DIRECTX11 == 1
-    obj->OBJmesh = Mesh::Load(assets + Path, window.GetGraphics().GetDevice());
+    std::string finalPath;
+
+    if (fs::path(Path).is_absolute())
+    {
+        finalPath = Path;
+    }
+    else
+    {
+        finalPath = assets + Path;
+    }
+    obj->OBJmesh = Mesh::Load(finalPath, window.GetGraphics().GetDevice());
 #endif
 
 #if VULKAN == 1
+    std::string finalPath;
+
+    if (fs::path(Path).is_absolute())
+    {
+        finalPath = Path;
+    }
+    else
+    {
+        finalPath = assets + Path;
+    }
+
     obj.get()->OBJmesh = Mesh::Load(
-        assets + Path,
+        finalPath,
         window.GetGraphics().GetDevice(),
         window.GetGraphics().GetPhysicalDevice(),
         window.GetGraphics().VR.get()->GetCommandPool(),
@@ -122,6 +158,9 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window)
     Vector3 loadedPos(0, 0, 0);
     Vector3 loadedSize(1, 1, 1);
     Vector3 loadedOrientation(0, 0, 0);
+    std::string loadedMeshFile = "";
+    std::string loadedUniqueID = "0";
+
     while (std::getline(file, line))
     {
         if (line == "-")
@@ -176,11 +215,25 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window)
                 >> loadedOrientation.y()
                 >> loadedOrientation.z();
         }
-
+        else if (line.rfind("MeshFile:", 0) == 0)
+        {
+            loadedMeshFile = line.substr(10);
+        }
+        else if (line.rfind("UniqueID:", 0) == 0)
+        {
+            loadedUniqueID = line.substr(10);
+        }
         else if (line == "END")
         {
+            std::string meshPath =
+                savings + "\\" +
+                ProjectName +
+                "\\MeshFiles\\" +
+                loadedMeshFile;
+
             AddAMesh(
-                "\\Cube.obj",
+                meshPath,
+                std::stoi(loadedUniqueID),
                 loadedName,
                 loadedPos,
                 loadedSize,

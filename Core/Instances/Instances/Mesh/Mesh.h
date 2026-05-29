@@ -29,6 +29,7 @@ public:
         }
 
         auto mesh = std::make_shared<Mesh>();
+        mesh->GetMeshPath() = file;
 
         std::string name = std::filesystem::path(file).filename().string();
 
@@ -68,6 +69,7 @@ public:
         }
 
         auto mesh = std::make_shared<Mesh>();
+        mesh->GetMeshPath() = file;
 
         std::string name = std::filesystem::path(file).filename().string();
 
@@ -116,10 +118,15 @@ public:
         return MeshFileName;
     }
 
+    std::string& GetMeshPath() {
+        return MeshPath;
+    }
+
     bool& GetIsCached() {
         return cached;
     }
 private:
+    std::string MeshPath = "NULL";
     std::string MeshFileName = "NULL";
     bool cached = false;
 };

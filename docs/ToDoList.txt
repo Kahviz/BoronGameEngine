@@ -1,3 +1,6 @@
 FIX vulkan Shadow acne -Done
-Make loading system load mesh paths -- Working (Estimated when done : Tomorrow)
+Make loading system load mesh paths -Done
+
+FIX the random bug when press ctrl the starting cubes dissapear
 Pointlights to vulkan and dx11
+Make sceneloading cached with same objects
