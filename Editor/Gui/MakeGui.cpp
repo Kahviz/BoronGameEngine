@@ -349,6 +349,7 @@ bool MakeGui::MakeDashBoard()
     bool openProject = false;
     static bool showConfigWindow = false;
     static bool showProjectsWindow = false;
+    static bool showNewProjectWindow = false;
 
     MakeStyle();
     ImGui::SetNextWindowSize(ImVec2(screen_width, screen_height), ImGuiCond_Always);
@@ -388,12 +389,54 @@ bool MakeGui::MakeDashBoard()
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.076f, 0.669f, 0.112f,1.0f));
 
     if (ImGui::Button("New Project", NewProjectSize)) {
-        ImGui::PopStyleVar();
-        ImGui::PopStyleColor(3);
-        ImGui::End();
-        return true;
+        showNewProjectWindow = true;
+
+        showProjectsWindow = false;
+        showConfigWindow = false;
     }
 
+    if (showNewProjectWindow) {
+        ImGui::SetNextWindowSize(ImVec2(sw / 3, sh / 2), ImGuiCond_Once);
+        ImGui::SetNextWindowPos(ImVec2(sw / 2, sh / 2), ImGuiCond_Once);
+
+        ImGui::Begin("New Project ##Frame");
+
+        static char projectname[30] = "";
+
+        ImGui::Text("ProjectName: ");
+        ImGui::SameLine();
+        ImGui::InputTextWithHint(
+            "##ProjectName",
+            "e.g. MyAwesomeGame",
+            projectname,
+            sizeof(projectname)
+        );
+
+        static int value = 0;
+
+        const char* templates[] = { "Void", "Baseplate", "Ducks" };
+
+        ImGui::Text("Template (Not made yet): ");
+        ImGui::SameLine();
+        ImGui::Combo("##TemplateCombo", &value, templates, IM_ARRAYSIZE(templates));
+
+        ImVec2 buttonSize(sw / 20, sh / 20);
+
+        ImGui::SetCursorPos(
+            ImVec2(
+                ImGui::GetWindowSize().x - buttonSize.x - 10,
+                ImGui::GetWindowSize().y - buttonSize.y - 10
+            )
+        );
+
+        if (ImGui::Button("Create", buttonSize))
+        {
+            ProjectName = projectname;
+
+            openProject = true;
+        }
+        ImGui::End();
+    }
     ImGui::PopStyleVar();
     ImGui::PopStyleColor(3);
 
@@ -414,12 +457,19 @@ bool MakeGui::MakeDashBoard()
     if (ImGui::Button("Config Style")) {
         showConfigWindow = !showConfigWindow;
 
-        if (showConfigWindow)
+        if (showConfigWindow) {
             showProjectsWindow = false;
+            showNewProjectWindow = false;
+        } 
     }
 
     if (ImGui::Button("Projects")) {
         showProjectsWindow = !showProjectsWindow;
+
+        if (showProjectsWindow) {
+            showNewProjectWindow = false;
+            showConfigWindow = false;
+        }
     }
 
     if (showProjectsWindow)

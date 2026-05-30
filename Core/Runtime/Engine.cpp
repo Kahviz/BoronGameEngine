@@ -310,8 +310,11 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     if (InProject) {
         if (!CubeB) {
+            Drawables.reserve(10000); //Reallocate some memory
+
             Drawables = SaveProject::Load(window);
-            if (Drawables.empty())
+
+            if (Drawables.empty()) //If empty make the starting cubes
             { 
                 SaveProject::Save(Drawables);
 
@@ -343,6 +346,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
     else {
         if (makeGui.MakeDashBoard()) {
+            MakeAInfo("Opened a project");
             InProject = true;
         }
     }
