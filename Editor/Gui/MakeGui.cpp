@@ -431,9 +431,15 @@ bool MakeGui::MakeDashBoard()
 
         if (ImGui::Button("Create", buttonSize))
         {
-            ProjectName = projectname;
+            if (projectname[0] != '\0')
+            {
+                ProjectName = projectname;
 
-            openProject = true;
+                openProject = true;
+            }
+            else {
+                MakeAError("ProjectName cannot be empty!");
+            }
         }
         ImGui::End();
     }
