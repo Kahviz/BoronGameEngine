@@ -1,10 +1,10 @@
 FIX vulkan Shadow acne -Done
 Make loading system load mesh paths -Done
 FIX the random bug when press ctrl the starting cubes dissapear  -Done
+Make Dx11 and vulkan headers so its easier to include them -Done
 
 Make so you can create multiple projects with in the editor without going to file explorer
 Making Mathlib more clear and easy to use
-Make Dx11 and vulkan headers so its easier to include them
 Pointlights to vulkan and dx11
 Make sceneloading cached with same objects
 Make Template system

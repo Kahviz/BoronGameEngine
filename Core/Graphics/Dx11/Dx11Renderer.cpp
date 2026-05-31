@@ -1,15 +1,12 @@
 #include "GLOBALS.h"
 
 #if DIRECTX11 == 1
-#include "Dx11Renderer.h"
+#include "GraphicsBackends.h"
 #include "Releaser.h"
-#include <d3dcompiler.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <stdexcept>
-#include <wrl/client.h>
-#include <wincodec.h>
 #include <Instances/Instance.h>
 
 #pragma comment(lib,"d3d11.lib")

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GraphicsBackends.h"
 #include <memory>
 #include <string>
 #include "Camera/Camera.h"
@@ -8,15 +9,7 @@
 #include "BoronMathLibrary.h"
 class Window;
 
-#if DIRECTX11 == 1
-    #include <d3d11.h>
-    #include <DirectXMath.h>
-    #include <wrl/client.h>
-    #include "Dx11/Dx11Renderer.h"
-#endif
-#if VULKAN == 1
-    #include "Vulkan/VulkanRender.h"
-#endif
+#include "GraphicsBackends.h"
 #include "ErrorHandling/ErrorMessage.h"
 
 #include <vector>

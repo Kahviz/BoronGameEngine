@@ -14,6 +14,10 @@ namespace fs = std::filesystem;
 #define DEBUGFILEMAKING 0 //1 = True, 0 = False
 #define PRINTDEBUGINFO 1  //1 = True, 0 = False
 
+#if !defined(_DEBUG)
+	#undef VALIDATIONLAYERS
+#endif
+
 #if INEDITOR == 1
 	#define PROFILER
 #endif

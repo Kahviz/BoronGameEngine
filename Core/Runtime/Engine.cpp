@@ -15,8 +15,8 @@
 #include <GLFW/glfw3native.h>
 
 #include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_dx11.h"
-#include "backends/imgui_impl_vulkan.h"
+#include "GraphicsBackends.h"
+
 #include <random>
 
 Engine::Engine()

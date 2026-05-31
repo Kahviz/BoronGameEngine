@@ -1,12 +1,10 @@
 #include "Graphics.h"
 #include "Releaser.h"
-#include <d3dcompiler.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <stdexcept>
 #include "GLOBALS.h"
-#include <wrl/client.h>
 #include "Window/Window.h"
 
 #if DIRECTX11 == 1 
@@ -14,10 +12,6 @@
 #endif
 
 #include <GLFW/glfw3native.h>
-
-#pragma comment(lib,"d3d11.lib")
-#pragma comment(lib,"d3dcompiler.lib")
-
 
 bool Graphics::InitGraphics(GLFWwindow* window)
 {
