@@ -3,18 +3,21 @@
 #include <vector>
 #include <filesystem>
 #include "BGE_ASSERTS.h"
+#include "IRenderer.h"
 
 #if VULKAN == 1
     #include <filesystem>
     #include <stdexcept>
     #include "Vulkan/VulkanHelpers.h"
     #include <Libs/STBIcons/stb_image.h>
+    #include "VulkanAdapter.h"
 #endif
 
 #if DIRECTX11 == 1
     #include "Graphics/Dx11/Dx11Renderer.h"
     #include <wincodec.h>
     #include <combaseapi.h>
+    #include <Dx11Adapter.h>
 #endif
 
 #include <Libs/STBIcons/stb_image.h>
@@ -22,10 +25,13 @@
 #if VULKAN == 1
 namespace fs = std::filesystem;
 
-bool Texture::LoadVK(const std::string& path, VulkanRender& vulkanrenderer)
+bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
 {
-    VkDevice device = vulkanrenderer.GetDevice();
-    VkPhysicalDevice physicalDevice = vulkanrenderer.GetPhysicalDevice();
+    auto& vk = static_cast<VulkanAdapter&>(renderer);
+
+    VkDevice device = vk.GetDevice();
+
+    VkPhysicalDevice physicalDevice = vk.GetPhysicalDevice();
     BGE_VK_ASSERT(device, "Device Can't Be VK_NULL_HANDLE");
     if (!fs::exists(path)) {
         MakeAError("Texture Doesn't Exist! Path: " + path);
@@ -85,8 +91,8 @@ bool Texture::LoadVK(const std::string& path, VulkanRender& vulkanrenderer)
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
     );
 
-    VkCommandPool commandPool = vulkanrenderer.GetCommandPool();
-    VkQueue graphicsQueue = vulkanrenderer.GetGraphicsQueue();
+    VkCommandPool commandPool = vk.GetCommandPool();
+    VkQueue graphicsQueue = vk.GetGraphicsQueue();
 
     VkCommandBuffer commandBuffer = BeginSingleTimeCommands(commandPool,device);
 
@@ -266,14 +272,17 @@ void Texture::Cleanup(VkDevice device)
 }
 #endif
 #if DIRECTX11 == 1
-ID3D11ShaderResourceView* Texture::Load(std::string path, Dx11Renderer& dx11Renderer)
+ID3D11ShaderResourceView* Texture::Load(std::string path, IRenderer& renderer)
 {
+    auto& dx = static_cast<Dx11Adapter&>(renderer);
+    Dx11Renderer* dx11Renderer = dx.GetRenderer();
+
     if (path.empty()) {
         MakeAError("Texture path is empty!");
         return nullptr;
     }
 
-    if (!dx11Renderer.GetDevice()) {
+    if (!dx11Renderer->GetDevice()) {
         MakeAError("Device is null!");
         return nullptr;
     }
@@ -316,7 +325,7 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, Dx11Renderer& dx11Rend
 
     ID3D11Texture2D* texture = nullptr;
 
-    HRESULT hr = dx11Renderer.GetDevice()->CreateTexture2D(
+    HRESULT hr = dx11Renderer->GetDevice()->CreateTexture2D(
         &desc,
         &initData,
         &texture
@@ -330,7 +339,7 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, Dx11Renderer& dx11Rend
 
     ID3D11ShaderResourceView* srv = nullptr;
 
-    hr = dx11Renderer.GetDevice()->CreateShaderResourceView(texture, nullptr, &srv);
+    hr = dx11Renderer->GetDevice()->CreateShaderResourceView(texture, nullptr, &srv);
 
     texture->Release();
     stbi_image_free(data);

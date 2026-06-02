@@ -858,16 +858,7 @@ void VulkanRender::updateUniformBuffer(
 }
 
 bool VulkanRender::RenderAMesh(
-    const Instance* drawable,
-    Vector3 Orientation,
-    Vector3& pos,
-    Vector3& size,
-    Int3 color,
-    Vector3& Velocity,
-    bool Anchored,
-    float Roughness,
-    float Brightness,
-    int Index
+    const Instance* drawable
 )
 {
 #if VULKAN == 1
@@ -875,13 +866,19 @@ bool VulkanRender::RenderAMesh(
         return false;
     }
 
+    Vector3 size = drawable->transform.Size;
+    Vector3 Orientation = drawable->transform.Orientation;
+    Vector3 pos = drawable->transform.Position;
+    Int3 color = drawable->color;
+    int pIndex = drawable->UniqueID;
+
     const MeshVK* meshVK = &drawable->OBJmesh->VM;
 
-    updateUniformBuffer(*drawable, Index, size, Orientation, pos, color);
+    updateUniformBuffer(*drawable, pIndex, size, Orientation, pos, color);
 
     DrawCommand cmd;
     cmd.mesh = meshVK;
-    cmd.objectIndex = Index;
+    cmd.objectIndex = pIndex;
     cmd.modelMatrix = createModelMatrix(Orientation, size, pos);
     drawCommands.push_back(cmd);
 

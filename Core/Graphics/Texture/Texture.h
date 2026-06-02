@@ -19,6 +19,7 @@
     #include "Vulkan/vulkan.h"
     #include "Graphics/Vulkan/VulkanRender.h"
 #endif
+class IRenderer;
 
 class Texture {
 public:
@@ -28,7 +29,7 @@ public:
 #if DIRECTX11 == 1
     Texture() : pTexture(nullptr) {}
 
-    ID3D11ShaderResourceView* Load(std::string path, Dx11Renderer& dx11Renderer);
+    ID3D11ShaderResourceView* Load(std::string path, IRenderer& renderer);
 
     ID3D11ShaderResourceView* GetSRV() const {
         return pTexture.Get();
@@ -51,7 +52,7 @@ public:
     VkImageView GetImageView() const { return m_imageView; }
     VkSampler GetSampler() const { return m_sampler; }
 
-    bool LoadVK(const std::string& path, VulkanRender& vulkanrenderer);
+    bool LoadVK(const std::string& path, IRenderer& renderer);
     void CreateImage(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
     void TransitionImageLayout(VkCommandBuffer cmd, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     void CopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, uint32_t width, uint32_t height);

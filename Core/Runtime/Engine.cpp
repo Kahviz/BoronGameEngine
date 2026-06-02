@@ -48,24 +48,25 @@ Engine::Engine()
         else {
             ImGuiInited = true;
         }
-#else  // VULKAN
-        VulkanRender* vr = window.GetGraphics().VR.get();
+#endif
+#if VULKAN == 1
+        auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
 
-        VkRenderPass renderPass = vr->GetRenderPass();
+        VkRenderPass renderPass = vk.GetRenderPass();
         if (renderPass == VK_NULL_HANDLE) {
             throw std::runtime_error("Render pass is null!");
         }
 
         ImGui_ImplVulkan_InitInfo init_info = {};
         init_info.ApiVersion = VK_API_VERSION_1_2;
-        init_info.Instance = vr->GetInstance();
-        init_info.PhysicalDevice = vr->GetPhysicalDevice();
-        init_info.Device = vr->GetDevice();
-        init_info.QueueFamily = vr->GetGraphicsFamilyIndex();
-        init_info.Queue = vr->GetGraphicsQueue();
-        init_info.DescriptorPool = vr->GetImGuiPool();
+        init_info.Instance = vk.GetInstance();
+        init_info.PhysicalDevice = vk.GetPhysicalDevice();
+        init_info.Device = vk.GetDevice();
+        init_info.QueueFamily = vk.GetGraphicsFamilyIndex();
+        init_info.Queue = vk.GetGraphicsQueue();
+        init_info.DescriptorPool = vk.GetImGuiPool();
         init_info.MinImageCount = 2;
-        init_info.ImageCount = static_cast<uint32_t>(vr->GetSwapChainImageViews().size());
+        init_info.ImageCount = static_cast<uint32_t>(vk.GetSwapChainImageViews().size());
         init_info.PipelineCache = VK_NULL_HANDLE;
 
         init_info.PipelineInfoMain.RenderPass = renderPass;
@@ -114,12 +115,15 @@ Engine::~Engine()
         #endif //Vulkan Does it in CleanUp
 
         #if VULKAN == 1
+            auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
+
             for (auto& Drawable : Drawables) {
                 if (Drawable->GetTexture()->IsLoaded()) {
-                    Drawable->GetTexture()->Cleanup(window.GetGraphics().GetDevice());
+                    Drawable->GetTexture()->Cleanup(vk.GetDevice());
                 }
             }
-            window.GetGraphics().VR->Cleanup();
+
+            window.GetGraphics().GetRenderer().CleanUp();
         #endif
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
@@ -187,12 +191,14 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
 #endif
 
 #if VULKAN == 1
+    auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
+
     obj.get()->OBJmesh = Mesh::Load(
         assets + Path,
-        window.GetGraphics().GetDevice(),
-        window.GetGraphics().GetPhysicalDevice(),
-        window.GetGraphics().VR.get()->GetCommandPool(),
-        window.GetGraphics().VR.get()->GetGraphicsQueue()
+        vk.GetDevice(),
+        vk.GetPhysicalDevice(),
+        vk.GetCommandPool(),
+        vk.GetGraphicsQueue()
     );
 #endif
 
@@ -202,11 +208,11 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     std::cout << fullPath << std::endl;
 
 #if DIRECTX11 == 1
-    obj->texture.Load(fullPath, *window.GetGraphics().DR.get());
+    obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
 #endif
 #if VULKAN == 1
-    obj->texture.LoadVK(fullPath, *window.GetGraphics().VR.get());
-    window.GetGraphics().VR->UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
+    obj->texture.LoadVK(fullPath, vk);
+    vk.UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
 #endif
 
     Instance* objPtr = obj.get();
@@ -286,9 +292,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     Graphics& graphics = wnd->GetGraphics();
 
-#if VULKAN == 1
-    VulkanRender* vr = graphics.VR.get();
-#endif
     ScreenResizerDetector(wnd);
 
 #if INEDITOR == 1
@@ -358,16 +361,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         if (Drawable->CanDraw()) {
             wnd->GetGraphics().RenderAMesh(
                 deltatime,
-                Drawable,
-                Drawable->transform.Orientation,
-                Drawable->transform.Position,
-                Drawable->transform.Size,
-                Drawable->color,
-                Drawable->Velocity,
-                Drawable->Anchored,
-                1.0f,
-                1.0f,
-                Drawable->UniqueID
+                Drawable
             );
         }
     }

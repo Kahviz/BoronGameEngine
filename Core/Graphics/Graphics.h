@@ -14,6 +14,8 @@ class Window;
 
 #include <vector>
 #include "Instances/Instance.h"
+#include <IRenderer.h>
+#include <VulkanAdapter.h>
 
 class Graphics
 {
@@ -26,7 +28,9 @@ public:
 
     bool InitGraphics(GLFWwindow* window);
     void SetRenderTargetToScene();
-    void RenderAMesh(float Deltatime, const Instance* drawable, Vector3 Orientation, Vector3& pos, Vector3& size, Int3 color, Vector3& Velocity, bool Anchored, float Roughness, float Brightness, int Index);
+    void RenderAMesh(float Deltatime,
+        const Instance* drawable
+    );
     void SetRenderTargetToBackBuffer();
 
     Camera& GetCamera();
@@ -46,7 +50,7 @@ public:
 
     ID3D11Device* GetDevice() noexcept;
     ID3D11DeviceContext* GetpContext() noexcept;
-
+    
     ID3D11ShaderResourceView* GetSceneSRV();
 
     ID3D11RenderTargetView* GetBackBufferRTV();
@@ -54,39 +58,10 @@ public:
     ID3D11RenderTargetView* GetMainTarget();
 #endif
     
-
-    //Getters
-
-#if VULKAN == 1
-    VkPhysicalDevice GetPhysicalDevice() const {
-        return VR.get()->GetPhysicalDevice();
+    IRenderer& GetRenderer()
+    {
+        return *Renderer;
     }
-
-    VkDevice GetDevice() const {
-        VkDevice device = VR.get()->GetDevice();
-
-        if (device == VK_NULL_HANDLE) {
-            MakeAError("Logical device not initialized!");
-        }
-
-        return device;
-    }
-
-    auto GetCmdPool() {
-        return this->VR.get()->GetCommandPool();
-    }
-
-    auto GetGfxQueue() {
-        return this->VR.get()->GetGraphicsQueue();
-    }
-#endif
-#if VULKAN == 1
-    std::unique_ptr<VulkanRender> VR;
-#endif
-
-#if DIRECTX11 == 1
-    std::unique_ptr<Dx11Renderer> DR;
-#endif
 private:
-
+    std::unique_ptr<IRenderer> Renderer;
 };

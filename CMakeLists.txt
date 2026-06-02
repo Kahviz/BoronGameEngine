@@ -115,7 +115,7 @@ add_executable(BoronEngine
     Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.cpp
 
     Core/Variables/Enums.h
- "Core/Misc/Saving/SaveProject.h" "Core/Misc/Saving/SaveProject.cpp"   "Core/Graphics/GraphicsBackends.h")
+ "Core/Misc/Saving/SaveProject.h" "Core/Misc/Saving/SaveProject.cpp"   "Core/Graphics/GraphicsBackends.h" "Core/Graphics/Dx11/Dx11Adapter.h" "Core/Graphics/Vulkan/VulkanAdapter.h" "Core/Graphics/Dx11/Dx11Adapter.cpp" "Core/Graphics/Vulkan/VulkanAdapter.cpp")
 
 target_include_directories(BoronEngine PRIVATE
     include

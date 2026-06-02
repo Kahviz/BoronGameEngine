@@ -8,161 +8,116 @@
 #include "Window/Window.h"
 
 #if DIRECTX11 == 1 
+    #include <Dx11Adapter.h>
     #define GLFW_EXPOSE_NATIVE_WIN32
+#endif
+
+#if VULKAN == 1
+    #include "VulkanAdapter.h"
+    #include "VulkanRender.h"
 #endif
 
 #include <GLFW/glfw3native.h>
 
 bool Graphics::InitGraphics(GLFWwindow* window)
 {
-    #if DIRECTX11 == 1
-        MakeASuccess("Inited DX11 Graphics!");
-
-        HWND hwnd = glfwGetWin32Window(window);
-
-        DR = std::make_unique<Dx11Renderer>();
-        DR.get()->InitDx11Renderer(hwnd);
-
-        return true;
-    #endif
     #if VULKAN == 1
-        MakeASuccess("Inited Vulkan Graphics!");
-        VR = std::make_unique<VulkanRender>();
-        return VR.get()->Init(window);
+        Renderer = std::make_unique<VulkanAdapter>();
+    #elif DIRECTX11 == 1
+        Renderer = std::make_unique<Dx11Adapter>();
     #endif
+
+    return Renderer->Init(window);
 }
 
 void Graphics::SetRenderTargetToScene() {
-    #if DIRECTX11 == 1
-        DR.get()->SetRenderTargetToScene();
-    #else
-
-    #endif
+    Renderer->SetRenderTargetToScene();
 }
 
 void Graphics::RenderAMesh(
     float Deltatime,
-    const Instance* drawable,
-    Vector3 Orientation,
-    Vector3& pos,
-    Vector3& size,
-    Int3 color,
-    Vector3& Velocity,
-    bool Anchored,
-    float Roughness,
-    float Brightness,
-    int Index
+    const Instance* drawable
 ) 
 {
     #if VULKAN == 1
-        VR.get()->RenderAMesh(drawable, Orientation, pos, size, color, Velocity, Anchored, Roughness, Brightness, Index);
+        auto& vk = static_cast<VulkanAdapter&>(*Renderer.get());
+        vk.RenderAMesh(drawable);
     #endif
 
     #if DIRECTX11 == 1
     #endif
 }
 void Graphics::SetRenderTargetToBackBuffer() {
-    #if DIRECTX11 == 1
-        DR.get()->SetRenderTargetToBackBuffer();
-    #else
-
-    #endif
+    Renderer->SetRenderTargetToBackBuffer();
 }
 
 
 void Graphics::ReSizeWindow(int width, int height, Window* wnd)
 {
-    #if DIRECTX11 == 1
-        HWND hwnd = glfwGetWin32Window(wnd->GetWindow());
-
-        DR.get()->ReSizeWindow(width, height, hwnd);
-    #else
-        VR.get()->RecreateSwapchain();
-
-    #endif
+    Renderer->ReSizeWindow(width, height, wnd);
 }
 
 void Graphics::CreateSceneResources(int width, int height) {
-    #if DIRECTX11 == 1
-        DR.get()->CreateSceneResources(width, height);
-    #else
-
-    #endif
+    Renderer->CreateSceneResources(width, height);
 }
 
 #if DIRECTX11 == 1
     ID3D11DepthStencilView* Graphics::GetDepthStencil()
     {
-        return DR.get()->GetDepthStencil();
+        auto* dx = static_cast<Dx11Adapter*>(Renderer.get());
+        return dx->GetDepthStencil();
     }
 
     ID3D11Device* Graphics::GetDevice() noexcept
     {
-        ID3D11Device* ddevice = DR.get()->GetDevice();
-        return ddevice;
+        auto* dx = static_cast<Dx11Adapter*>(Renderer.get());
+        return dx->GetDevice();
     }
 
     ID3D11DeviceContext* Graphics::GetpContext() noexcept
     {
-        ID3D11DeviceContext* Context = DR.get()->GetpContext();
-        return Context;
+        auto* dx = static_cast<Dx11Adapter*>(Renderer.get());
+        return dx->GetContext();
     }
 
     ID3D11ShaderResourceView* Graphics::GetSceneSRV() {
-        return DR.get()->GetSceneSRV();
+        auto* dx = static_cast<Dx11Adapter*>(Renderer.get());
+        return dx->GetSceneSRV();
     }
 
     ID3D11RenderTargetView* Graphics::GetBackBufferRTV()
     {
-        return DR.get()->GetBackBufferRTV();
+        auto* dx = static_cast<Dx11Adapter*>(Renderer.get());
+        return dx->GetBackBufferRTV();
     }
 
     ID3D11RenderTargetView* Graphics::GetMainTarget()
     {
-        ID3D11RenderTargetView* mT = DR.get()->GetMainTarget();
-        return mT;
+        auto* dx = static_cast<Dx11Adapter*>(Renderer.get());
+        return dx->GetMainTarget();
     }
 #endif
 
-
 Camera& Graphics::GetCamera()
 {
-    #if DIRECTX11 == 1
-        return DR.get()->GetCamera();
-    #else
-        return VR.get()->GetCamera();
-    #endif
+    return Renderer->GetCamera();
 }
 
 void Graphics::EndFrame()
 {
-    #if DIRECTX11 == 1
-        DR.get()->EndFrame();
-    #endif
+    Renderer->EndFrame();
 }
 
 void Graphics::DrawAFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables) {
-    #if DIRECTX11 == 1
-        DR.get()->DrawAFrame(DELTATIME, Drawables);
-    #else
-        VR.get()->DrawFrame(DELTATIME,Drawables);
-    #endif
+    Renderer->DrawFrame(DELTATIME, Drawables);
 }
 
 void Graphics::ClearBuffer(float r, float g, float b)
 {
-    #if DIRECTX11 == 1
-        DR.get()->ClearBuffer(r, g, b);
-    #else
-        
-    #endif
+    Renderer->ClearBuffer(r,g,b);
 }
 
 void Graphics::ClearSceneBuffer(float r, float g, float b)
 {
-    #if DIRECTX11 == 1
-        DR.get()->ClearSceneBuffer(r, g, b);
-    #else
-
-    #endif
+    Renderer->ClearSceneBuffer(r, g, b);
 }

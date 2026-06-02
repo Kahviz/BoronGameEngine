@@ -103,12 +103,15 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
         finalPath = assets + Path;
     }
 
+    auto& gfx = window.GetGraphics();
+    auto& vk = static_cast<VulkanAdapter&>(gfx.GetRenderer());
+
     obj.get()->OBJmesh = Mesh::Load(
         finalPath,
-        window.GetGraphics().GetDevice(),
-        window.GetGraphics().GetPhysicalDevice(),
-        window.GetGraphics().VR.get()->GetCommandPool(),
-        window.GetGraphics().VR.get()->GetGraphicsQueue()
+        vk.GetDevice(),
+        vk.GetPhysicalDevice(),
+        vk.GetCommandPool(),
+        vk.GetGraphicsQueue()
     );
 #endif
 
@@ -118,11 +121,11 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
     std::cout << fullPath << std::endl;
 
 #if DIRECTX11 == 1
-    obj->texture.Load(fullPath, *window.GetGraphics().DR.get());
+    obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
 #endif
 #if VULKAN == 1
-    obj->texture.LoadVK(fullPath, *window.GetGraphics().VR.get());
-    window.GetGraphics().VR->UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
+    obj->texture.LoadVK(fullPath, vk);
+    vk.UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
 
     /*
     if (Name != "Cube2") {
