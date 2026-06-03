@@ -1,15 +1,20 @@
 // Globals.cpp
 #include "Globals.h"
-#include <cstdlib>
 #include <string>
 #include <iostream>
 #include "ErrorHandling/ErrorMessage.h"
+
+std::string EngineName = "BoronEngine";
 
 int screen_width = 800;
 int screen_height = 400;
 float zFar = 1000.0f;
 extern int viewport_width = 400;
 extern int viewport_height = 200;
+
+#ifdef _WIN32
+    #include <cstdlib>
+#endif
 
 bool vSync = true;
 bool Running = true;
@@ -22,6 +27,8 @@ std::string GetAppDataPath() {
     char* buffer = nullptr;
     size_t size = 0;
     #ifdef _WIN32
+        
+
         if (_dupenv_s(&buffer, &size, "APPDATA") == 0 && buffer != nullptr) {
             MakeASuccess("AppData Found!");
             std::string path(buffer);
@@ -35,8 +42,8 @@ std::string GetAppDataPath() {
     #else
         const char* homeDir = getenv("HOME");
         if (!homeDir) {
-            std::cerr << "Failed to get HOME directory\n";
-            return;
+            MakeAError("Failed to get HOME directory");
+            return "";
         }
         fs::path appDataTarget = fs::path(homeDir) / ".config" / "UntilitedGameEngine";
 
@@ -70,7 +77,7 @@ fs::path GetAppDataDir() {
 #else
     const char* homeDir = getenv("HOME");
     if (homeDir) {
-        fs::path appdatatarget = fs::path(homeDir) / ".config" / "UntilitedGameEngine";
+        fs::path appdatatarget = fs::path(homeDir) / ".config" / "BoronEngine";
         std::cout << "HOME directory found: " << appdatatarget << "\n";
         return appdatatarget;
     }

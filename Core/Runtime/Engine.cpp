@@ -330,7 +330,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             CubeB = true;
         }
 
-        Drawables[0]->transform.Orientation.x() += 0.01f; //Test
+        Drawables[0]->transform.Orientation.x() += deltatime;
     }
 #if INEDITOR == 1
     if (InProject && ImGuiInited) {
@@ -389,8 +389,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         #if DIRECTX11 == 1
             ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         #endif
-
-        //Vulkan Does it in the renderer
     }
 #endif
     float fps = 1.0f / deltatime;
@@ -399,6 +397,15 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 #if VULKAN == 1
     wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
 #endif
+
+    static int framess = 0;
+    framess++;
+
+    if (framess % 1000 == 0)
+    {
+        std::cout << "FPS: " << (1.0f / deltatime) << '\n';
+        std::cout << "Cubes: " << (cubes) << '\n';
+    }
 
     wnd->GetGraphics().EndFrame();
 }

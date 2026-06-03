@@ -389,11 +389,6 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui)
     scissor.extent = { (uint32_t)screen_width, (uint32_t)screen_height };
     vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-    std::array<VkClearValue, 2> clearValues{};
-    clearValues[0].color = { {0.208f, 0.51f, 0.741f, 1.0f} };
-    clearValues[1].depthStencil = { 1.0f, 0 };
-
-
     VkRenderPassBeginInfo rp{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
     rp.renderPass = renderPass;
     rp.framebuffer = vkSwapchain.GetSwapchainFramebuffers()[imageIndex];
@@ -1002,8 +997,12 @@ inline Matrix4x4 CreateOrthographic(
 
     return result;
 }
-///fill ~-100 ~-100 ~-100 ~100 ~100 ~100 minecraft:enchanting_table destroy
-///fill ~-1000 ~-1000 ~-1000 ~1000 ~1000 ~1000 minecraft:enchanting_table destroy
+
+void VulkanRender::ClearBuffer(float r,float b,float g) {
+    clearValues[0].color = { {r,b,g} };
+    clearValues[1].depthStencil = { 1.0f, 0 };
+}
+
 void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables)
 {
     static int frames = 0;
@@ -1501,4 +1500,5 @@ void VulkanRender::createShadowPipeline() {
 
     MakeASuccess("Shadow pipeline created!");
 }
+
 #endif

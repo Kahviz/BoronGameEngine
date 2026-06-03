@@ -57,6 +57,8 @@ public:
 
     void EndFrame();
 
+    void ClearBuffer(float r, float b, float g);
+
     void DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables);
     Camera& GetCamera();
     VkCommandBuffer BeginSingleTimeCommands();
@@ -83,6 +85,8 @@ public:
     VkCommandPool GetCommandPool() { return vkCommandBuffer.GetCommandPool(); }
     VkQueue GetGraphicsQueue() { return vkDevice.GetGraphicsQueue(); }
 private:
+    std::array<VkClearValue, 2> clearValues{};
+
     struct ShadowPushConstants {
         Matrix4x4 lightSpaceMatrix;
         Matrix4x4 model;

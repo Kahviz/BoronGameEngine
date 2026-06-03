@@ -39,6 +39,7 @@ extern int viewport_width;
 extern int viewport_height;
 
 extern std::string appData;
+extern std::string EngineName;
 extern std::string fonts;
 extern std::string assets;
 extern std::string textures;

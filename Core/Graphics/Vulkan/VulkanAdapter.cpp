@@ -18,7 +18,7 @@ void VulkanAdapter::DrawFrame(
 
 void VulkanAdapter::ClearBuffer(float r, float g, float b)
 {
-    //renderer->ClearBuffer(r, g, b); @Implement
+    renderer->ClearBuffer(r, g, b);
 }
 
 Camera& VulkanAdapter::GetCamera()
