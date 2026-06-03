@@ -62,7 +62,7 @@ VkQueue VulkanAdapter::GetGraphicsQueue() const
 
 void VulkanAdapter::EndFrame()
 {
-    // renderer->EndFrame();
+    renderer->EndFrame();
 }
 
 void VulkanAdapter::CreateSceneResources(int width, int height)

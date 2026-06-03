@@ -55,6 +55,8 @@ public:
 
     void RecordShadowCommandBuffer();
 
+    void EndFrame();
+
     void DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables);
     Camera& GetCamera();
     VkCommandBuffer BeginSingleTimeCommands();

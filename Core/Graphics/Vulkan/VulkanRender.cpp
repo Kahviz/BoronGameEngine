@@ -1002,7 +1002,8 @@ inline Matrix4x4 CreateOrthographic(
 
     return result;
 }
-
+///fill ~-100 ~-100 ~-100 ~100 ~100 ~100 minecraft:enchanting_table destroy
+///fill ~-1000 ~-1000 ~-1000 ~1000 ~1000 ~1000 minecraft:enchanting_table destroy
 void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables)
 {
     static int frames = 0;
@@ -1012,9 +1013,6 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         frames = 0;
         PrintInfo();
     }
-
-    vkWaitForFences(vkDevice.GetDevice(), 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-    vkResetFences(vkDevice.GetDevice(), 1, &inFlightFence);
 
     VkResult result = vkAcquireNextImageKHR(
         vkDevice.GetDevice(), vkSwapchain.GetSwapchain(), UINT64_MAX,
@@ -1035,28 +1033,20 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
     }
 
     Vector3 lightDir = Vector3(0.5f, -1.0f, 0.5f).normalized();
-    Vector3 lightPos = lightDir * -50.0f;
-
     Vector3 center = Vector3(0, 0, 0);
-
     Matrix4x4 lightView = Matrix4x4LookAtLH(
         center - lightDir * 30.0f,
         center,
         Vector3(0, 1, 0)
     );
-
-    Matrix4x4 lightProj = CreateOrthographic(
-        -20, 20,
-        -20, 20,
-        0.1, 80.0
-    );
+    Matrix4x4 lightProj = CreateOrthographic(-20, 20, -20, 20, 0.1, 80.0);
     lightSpaceMatrix = lightProj * lightView;
 
     shadowDrawCommands.clear();
     for (const auto& cmd : drawCommands) {
         ShadowDrawCommand shadowCmd;
         shadowCmd.mesh = cmd.mesh;
-        shadowCmd.modelMatrix = cmd.modelMatrix; 
+        shadowCmd.modelMatrix = cmd.modelMatrix;
         shadowDrawCommands.push_back(shadowCmd);
     }
 
@@ -1075,16 +1065,12 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
 
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-
         barrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
         barrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
         barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-
         barrier.image = shadowImage;
         barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         barrier.subresourceRange.baseMipLevel = 0;
@@ -1115,6 +1101,11 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
 
     bool RenderImGui = true;
     RecordCommandBuffer(imageIndex, RenderImGui);
+}
+
+void VulkanRender::EndFrame() {
+    vkWaitForFences(vkDevice.GetDevice(), 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+    vkResetFences(vkDevice.GetDevice(), 1, &inFlightFence);
 
     VkSubmitInfo submitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
     VkSemaphore waitSemaphores[] = { imageAvailableSemaphore };
@@ -1134,6 +1125,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
 
     if (vkQueueSubmit(vkDevice.GetGraphicsQueue(), 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
         MakeAError("Failed to submit draw command buffer");
+        return;
     }
 
     VkPresentInfoKHR presentInfo{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
@@ -1143,7 +1135,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
     presentInfo.pSwapchains = &vkSwapchain.GetSwapchain();
     presentInfo.pImageIndices = &imageIndex;
 
-    result = vkQueuePresentKHR(vkDevice.GetGraphicsQueue(), &presentInfo);
+    VkResult result = vkQueuePresentKHR(vkDevice.GetGraphicsQueue(), &presentInfo);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
         framebufferResized = false;
