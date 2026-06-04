@@ -117,7 +117,7 @@ private:
     ComPtr<ID3D11SamplerState> pShadowSampler;
     ComPtr<ID3D11Buffer> pShadowCB;
 
-    const UINT SHADOW_MAP_SIZE = 2048;
+    const UINT SHADOW_MAP_SIZE = 4096;
 
     struct ShadowCB
     {
@@ -129,5 +129,7 @@ private:
     //Light Setting
     float lightAngle = 0.0f;
     float radius = 10.0f;
+
+    XMFLOAT3 lightpos = { 5,5,10 };
 };
 #endif

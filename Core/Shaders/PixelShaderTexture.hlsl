@@ -37,23 +37,44 @@ float4 main(PS_INPUT input) : SV_TARGET
     
     float diffuse = max(0.3f, dot(normal, lightDir));
     
-    float shadowFactor = 1.0f;
-    
+    float shadowFactor = 0.0f;
+
     float4 shadowCoord = input.lightSpacePos;
     shadowCoord.xyz /= shadowCoord.w;
     shadowCoord.x = shadowCoord.x * 0.5f + 0.5f;
     shadowCoord.y = -shadowCoord.y * 0.5f + 0.5f;
-    
+
     if (shadowCoord.x > 0.0f && shadowCoord.x < 1.0f &&
-        shadowCoord.y > 0.0f && shadowCoord.y < 1.0f &&
-        shadowCoord.z > 0.0f && shadowCoord.z < 1.0f)
+    shadowCoord.y > 0.0f && shadowCoord.y < 1.0f &&
+    shadowCoord.z > 0.0f && shadowCoord.z < 1.0f)
     {
         float bias = 0.005f;
-        shadowFactor = shadowMap.SampleCmpLevelZero(
-            shadowSampler,
-            shadowCoord.xy,
-            shadowCoord.z - bias
-        );
+
+        uint width, height;
+        shadowMap.GetDimensions(width, height);
+
+        
+        float2 texelSize = 1.0f / float2(width, height);
+
+    [unroll]
+        for (int y = -4; y <= 4; y++)
+        {
+        [unroll]
+            for (int x = -4; x <= 4; x++)
+            {
+                shadowFactor += shadowMap.SampleCmpLevelZero(
+                shadowSampler,
+                shadowCoord.xy + float2(x, y) * texelSize,
+                shadowCoord.z - bias
+            );
+            }
+        }
+
+        shadowFactor /= 81.0f;
+    }
+    else
+    {
+        shadowFactor = 1.0f;
     }
     
     float3 finalColor = baseColor * diffuse * shadowFactor;

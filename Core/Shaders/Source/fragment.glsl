@@ -21,46 +21,56 @@ layout(binding = 0) uniform UBO {
 layout(binding = 1) uniform sampler2D texSampler;
 layout(binding = 2) uniform sampler2DShadow shadowMap;
 
-float ShadowCalculation(vec4 fragPosLightSpace)
+#define AMBIENT 0.2
+
+float ShadowCalculation(vec4 shadowCoord)
 {
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    vec3 projCoords = shadowCoord.xyz / shadowCoord.w;
     projCoords = projCoords * 0.5 + 0.5;
 
-    if(projCoords.z > 1.0 ||
-       projCoords.x < 0.0 || projCoords.x > 1.0 ||
-       projCoords.y < 0.0 || projCoords.y > 1.0)
+    if (projCoords.z > 1.0 ||
+        projCoords.x < 0.0 || projCoords.x > 1.0 ||
+        projCoords.y < 0.0 || projCoords.y > 1.0)
         return 1.0;
 
-    float currentDepth = projCoords.z;
+    float ndotl = dot(normalize(fragNormal), normalize(-lightDir));
 
-    float bias = max(0.005 * (1.0 - dot(normalize(fragNormal), -lightDir)), 0.52);
+    // VERY SMALL bias only (debug mode)
+    float bias = 0.0015 + (1.0 - ndotl) * 0.002;
 
     float shadow = 0.0;
+
     vec2 texelSize = 1.0 / vec2(2048.0);
 
-    for(int x = -1; x <= 1; x++)
-    for(int y = -1; y <= 1; y++)
+    for (int x = -1; x <= 1; x++)
+    for (int y = -1; y <= 1; y++)
     {
         vec2 offset = vec2(x, y) * texelSize;
-        shadow += texture(shadowMap, vec3(projCoords.xy + offset, currentDepth - bias));
+
+        shadow += texture(
+            shadowMap,
+            vec3(projCoords.xy + offset, projCoords.z - bias)
+        );
     }
 
     shadow /= 9.0;
 
-    return mix(0.3, 1.0, shadow);
+    return shadow;
 }
 
 void main()
 {
-    float diff = max(dot(normalize(fragNormal), -lightDir), 0.0);
+    float diff = max(dot(normalize(fragNormal), normalize(-lightDir)), 0.0);
 
-    float ambient = 0.2;
+    float ambient = AMBIENT;
     float lighting = ambient + (1.0 - ambient) * diff;
 
     float shadow = ShadowCalculation(fragPosLightSpace);
+
     lighting *= shadow;
 
     vec4 baseColor;
+
     if (ubo.usesTexture > 0.5)
         baseColor = texture(texSampler, fragUV);
     else

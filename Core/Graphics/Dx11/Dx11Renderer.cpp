@@ -52,7 +52,7 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd)
 
     // Shadow sampler
     D3D11_SAMPLER_DESC shadowSamp = {};
-    shadowSamp.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+    shadowSamp.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
     shadowSamp.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
     shadowSamp.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
     shadowSamp.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
@@ -131,14 +131,18 @@ void Dx11Renderer::SetShadowMapToShader()
 
 void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawables)
 {
-    XMFLOAT3 lightPos(radius * cosf(lightAngle), 5.0f, radius * sinf(lightAngle));
-
-    XMVECTOR lightPosition = XMLoadFloat3(&lightPos);
+    XMVECTOR lightPosition = XMLoadFloat3(&lightpos);
     XMVECTOR lightTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
     XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
     XMMATRIX lightView = XMMatrixLookAtLH(lightPosition, lightTarget, up);
-    XMMATRIX lightProj = XMMatrixPerspectiveFovLH(XM_PIDIV4, 1.0f, 1.0f, 50.0f);
+    XMMATRIX lightProj = XMMatrixOrthographicLH(
+        40.0f,
+        40.0f,
+        0.1f,
+        70.0f
+    );
+
     XMMATRIX lightViewProj = lightView * lightProj;
 
     ShadowCB scb = {};
@@ -640,11 +644,6 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
     const float lightSpeed = 0.1f;
     lightAngle += lightSpeed * deltatime;
     if (lightAngle >= DOUBLE_PI) lightAngle -= DOUBLE_PI;
-
-    XMFLOAT3 lightpos;
-    lightpos.x = radius * cosf(lightAngle);
-    lightpos.z = radius * sinf(lightAngle);
-    lightpos.y = 5.0f;
 
     LightingCB lcb = {};
     lcb.lightpos = Vector3(lightpos.x, lightpos.y, lightpos.z);
