@@ -35,8 +35,7 @@ float ShadowCalculation(vec4 shadowCoord)
 
     float ndotl = dot(normalize(fragNormal), normalize(-lightDir));
 
-    // VERY SMALL bias only (debug mode)
-    float bias = 0.0015 + (1.0 - ndotl) * 0.002;
+    float bias = 0.52 + (1.0 - ndotl) * 0.002;
 
     float shadow = 0.0;
 
