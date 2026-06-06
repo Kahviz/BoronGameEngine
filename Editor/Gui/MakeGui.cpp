@@ -63,7 +63,7 @@ void MakeChildrenNodes(Instance* inst) {
     }
 }
 
-Vector3 MakeVec3TextEdit(Instance* inst,
+BML::Vector3 MakeVec3TextEdit(Instance* inst,
     const std::string& name,
     const std::string& VecType)
 {
@@ -102,7 +102,7 @@ void MakeGui::MakeStyle() {
     style.GrabRounding = GrabRounding;
 }
 
-void MakeFloat3Edit(const char* Name, Vector3& vec) {
+void MakeFloat3Edit(const char* Name, BML::Vector3& vec) {
     char label[128];
     static int Times = 0;
     Times += 1;
@@ -128,8 +128,8 @@ void MakeGui::MakeIMGui(Window& wnd,
     (
         const std::string&,
         const std::string&,
-        Vector3,
-        Vector3,
+        BML::Vector3,
+        BML::Vector3,
         bool
         )>
     AddAMesh,

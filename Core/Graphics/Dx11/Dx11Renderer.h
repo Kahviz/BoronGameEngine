@@ -8,7 +8,6 @@
 #include "Camera/Camera.h"
 #include <wrl/client.h>
 #include <Instances/Instance.h>
-#include "GLOBALS.h"
 #include "Graphics/Texture/Texture.h"
 #include "BGE_ASSERTS.h"
 

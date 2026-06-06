@@ -10,12 +10,12 @@
 #include "ErrorHandling/ErrorMessage.h"
 
 struct UniformBufferObject {
-    Matrix4x4 model;
-    Matrix4x4 view;
-    Matrix4x4 proj;
+    BML::Matrix4x4 model;
+    BML::Matrix4x4 view;
+    BML::Matrix4x4 proj;
     GPUVector3 color;
     float UsesTexture;
-    Matrix4x4 lightSpaceMatrix;
+    BML::Matrix4x4 lightSpaceMatrix;
 };
 
 inline std::vector<char> ReadFile(const std::string& filename) {

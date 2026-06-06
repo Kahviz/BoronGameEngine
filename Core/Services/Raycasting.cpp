@@ -1,17 +1,17 @@
 #include "Raycasting.h"
 #include "Mesh/Mesh.h"
 
-bool Raycasting::IsClicked(Instance* inst, const Vector3& rayOrigin, const Vector3& rayDir)
+bool Raycasting::IsClicked(Instance* inst, const BML::Vector3& rayOrigin, const BML::Vector3& rayDir)
 {
     return inst->RayIntersects(rayOrigin, rayDir);
 }
 
 bool Raycasting::RayIntersectsTriangle(
-    const Vector3& rayOrigin,
-    const Vector3& rayDir,
-    const Vector3& v0,
-    const Vector3& v1,
-    const Vector3& v2,
+    const BML::Vector3& rayOrigin,
+    const BML::Vector3& rayDir,
+    const BML::Vector3& v0,
+    const BML::Vector3& v1,
+    const BML::Vector3& v2,
     float& tOut
 ) {
     /*

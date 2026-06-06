@@ -2,9 +2,7 @@
 #include <string>
 #include "GLOBALS.h"
 
-#include "CameraControl.h"
 #include <GLFW/glfw3.h>
-#include "GLOBALS.h"
 
 void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
 {
@@ -12,8 +10,8 @@ void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
     float sensitivity = 0.002f;
 
     Camera& Cam = wnd.GetGraphics().GetCamera();
-    Vector3 forward = Cam.GetForward();
-    Vector3 right = Cam.GetRight();
+    BML::Vector3 forward = Cam.GetForward();
+    BML::Vector3 right = Cam.GetRight();
 
     GLFWwindow* glfwWND = wnd.GetWindow();
 
@@ -67,12 +65,12 @@ void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
 
 }
 
-Matrix4x4 CameraControl::GetViewMatrix(const Camera& cam)
+BML::Matrix4x4 CameraControl::GetViewMatrix(const Camera& cam)
 {
     return cam.GetViewMatrix();
 }
 
-Matrix4x4 CameraControl::GetProjectionMatrix(const Camera& cam, float aspectRatio)
+BML::Matrix4x4 CameraControl::GetProjectionMatrix(const Camera& cam, float aspectRatio)
 {
     return cam.GetProjectionMatrix();
 }

@@ -9,7 +9,7 @@ class CameraControl
 {
 public:
 	void MakeCameraControls(Window& wnd, float deltaTime);
-	Matrix4x4 GetViewMatrix(const Camera& cam);
-	Matrix4x4 GetProjectionMatrix(const Camera& cam, float aspectRatio);
+	BML::Matrix4x4 GetViewMatrix(const Camera& cam);
+	BML::Matrix4x4 GetProjectionMatrix(const Camera& cam, float aspectRatio);
 private:
 };

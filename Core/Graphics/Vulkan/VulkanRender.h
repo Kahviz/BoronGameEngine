@@ -46,9 +46,9 @@ public:
     void createDescriptorPool();
     void UpdateDescriptorSet(const Instance* inst);
     void createDescriptorSets(const Instance* inst = nullptr);
-    Matrix4x4 CreateVulkanPerspective(float fovY, float aspect, float zNear, float zFar);
-    Matrix4x4 createModelMatrix(Vector3 orientation, Vector3 scale, Vector3 pos);
-    void updateUniformBuffer(const Instance& inst, uint32_t objectIndex, Vector3 scale, Vector3 Orientation, Vector3 pos, Int3 color);
+    BML::Matrix4x4 CreateVulkanPerspective(float fovY, float aspect, float zNear, float zFar);
+    BML::Matrix4x4 createModelMatrix(BML::Vector3 orientation, BML::Vector3 scale, BML::Vector3 pos);
+    void updateUniformBuffer(const Instance& inst, uint32_t objectIndex, BML::Vector3 scale, BML::Vector3 Orientation, BML::Vector3 pos, BML::Int3 color);
     bool RenderAMesh(const Instance* drawable);
 
     void PrintInfo();
@@ -88,14 +88,14 @@ private:
     std::array<VkClearValue, 2> clearValues{};
 
     struct ShadowPushConstants {
-        Matrix4x4 lightSpaceMatrix;
-        Matrix4x4 model;
+        BML::Matrix4x4 lightSpaceMatrix;
+        BML::Matrix4x4 model;
     };
     struct ShadowDrawCommand {
         const MeshVK* mesh;
-        Matrix4x4 modelMatrix;
+        BML::Matrix4x4 modelMatrix;
     };
-    Matrix4x4 lightSpaceMatrix;
+    BML::Matrix4x4 lightSpaceMatrix;
 
     std::vector<ShadowDrawCommand> shadowDrawCommands;
 
@@ -110,7 +110,7 @@ private:
     struct DrawCommand {
         const MeshVK* mesh;
         uint32_t objectIndex;
-        Matrix4x4 modelMatrix;
+        BML::Matrix4x4 modelMatrix;
     };
 
     uint32_t CurrentimageIndex = -1;

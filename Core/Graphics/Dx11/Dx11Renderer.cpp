@@ -17,9 +17,9 @@ using Microsoft::WRL::ComPtr;
 
 struct LightingCB
 {
-    Vector3 lightpos;     // 12
+    BML::Vector3 lightpos;     // 12
     float Brightness;      // 4
-    Vector3 WorldPos;     // 12
+    BML::Vector3 WorldPos;     // 12
     float lightRange;      // 4
 };
 
@@ -646,7 +646,7 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
     if (lightAngle >= DOUBLE_PI) lightAngle -= DOUBLE_PI;
 
     LightingCB lcb = {};
-    lcb.lightpos = Vector3(lightpos.x, lightpos.y, lightpos.z);
+    lcb.lightpos = BML::Vector3(lightpos.x, lightpos.y, lightpos.z);
     lcb.lightRange = 20.0f;
 
     for (auto& Instptr : Drawables) {
@@ -675,10 +675,10 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
 
         if (inst.CanDraw()) {
             const Mesh* mesh = inst.OBJmesh.get();
-            Vector3 Orientation = inst.transform.Orientation;
-            Vector3& pos = inst.transform.Position;
-            Vector3& size = inst.transform.Size;
-            Int3 color = inst.color;
+            BML::Vector3 Orientation = inst.transform.Orientation;
+            BML::Vector3& pos = inst.transform.Position;
+            BML::Vector3& size = inst.transform.Size;
+            BML::Int3 color = inst.color;
             float Brightness = 1.0f;
 
             // Matrix
@@ -688,8 +688,8 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             XMMATRIX world = scale * rotation * translation;
 
             // Camera Matrix
-            Matrix4x4 mat = camera.GetViewMatrix();
-            Matrix4x4 projMat = camera.GetProjectionMatrix();
+            BML::Matrix4x4 mat = camera.GetViewMatrix();
+            BML::Matrix4x4 projMat = camera.GetProjectionMatrix();
 
             XMMATRIX proj = XMMATRIX(
                 XMVectorSet(projMat(0, 0), projMat(0, 1), projMat(0, 2), projMat(0, 3)),
@@ -734,7 +734,7 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             pContext->Unmap(pColorBuffer.Get(), 0);
 
             LightingCB lcbPerMesh = lcb;
-            lcbPerMesh.WorldPos = Vector3(pos.x(), pos.y(), pos.z());
+            lcbPerMesh.WorldPos = BML::Vector3(pos.x(), pos.y(), pos.z());
             lcbPerMesh.Brightness = Brightness;
 
             D3D11_MAPPED_SUBRESOURCE msrLighting;

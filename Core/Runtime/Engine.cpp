@@ -24,6 +24,7 @@ Engine::Engine()
 {
     if (!ImGuiInited) {
         std::cout << "ImGui version: " << IMGUI_VERSION << std::endl;
+        std::cout << "BoronMathVersion: " << BORONMATHversion << std::endl;
         IMGUI_CHECKVERSION();
         ImGuiContext* context = ImGui::CreateContext();
 
@@ -163,7 +164,7 @@ int Engine::EngineRun()
 }
 
 Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
-    Vector3 pos, Vector3 Size, bool Selec)
+    BML::Vector3 pos, BML::Vector3 Size, bool Selec)
 {
     Transform transform;
     transform.Position = pos;
@@ -172,13 +173,13 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     auto obj = std::make_unique<Object>(
         Name,
         1,
-        Int3(
+        BML::Int3(
             static_cast<int>(Color3.x() * 255.0f),
             static_cast<int>(Color3.y() * 255.0f),
             static_cast<int>(Color3.z() * 255.0f)
         ),
-        Int3(168, 160, 160),
-        Vector3(0, 0, 0),
+        BML::Int3(168, 160, 160),
+        BML::Vector3(0, 0, 0),
         transform,
         true,
         std::make_shared<Mesh>()
@@ -321,8 +322,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             { 
                 SaveProject::Save(Drawables);
 
-                AddAMesh("\\Cube.obj", "Cube2", { 0,0,0 }, { 0.5,1,0.5 }, false);
-                AddAMesh("\\Cube.obj", "Cube", { 0,-5,0 }, { 10,1,10 }, false);
+                AddAMesh("\\Cube.obj", "Cube2", BML::Vec3{ 0,0,0 }, BML::Vec3{ 0.5,1,0.5 }, false);
+                AddAMesh("\\Cube.obj", "Cube", BML::Vec3{ 0,-5,0 }, BML::Vec3{ 10,1,10 }, false);
             }
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);
@@ -339,7 +340,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             *wnd,
             Drawables,
             [this](const std::string& path, const std::string& name,
-                Vector3 pos, Vector3 size, bool Selec) -> Instance*
+                BML::Vector3 pos, BML::Vector3 size, bool Selec) -> Instance*
             {
                 return &AddAMesh(path, name, pos, size, Selec);
             },

@@ -4,8 +4,8 @@
 bool Physics::ApplyGravity(Instance& inst, float Deltatime)
 {
     if (Running) {
-        Vector3 pos = inst.transform.Position;
-        Vector3 vel = inst.Velocity;
+        BML::Vector3 pos = inst.transform.Position;
+        BML::Vector3 vel = inst.Velocity;
 
         vel.y() -= GRAVITY * Deltatime;
         pos.y() += vel.y() * Deltatime;

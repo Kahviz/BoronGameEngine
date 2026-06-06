@@ -738,8 +738,8 @@ void VulkanRender::createDescriptorSets(const Instance* inst) {
     }
 }
 
-Matrix4x4 VulkanRender::CreateVulkanPerspective(float fovY, float aspect, float zNear, float zFar) {
-    Matrix4x4 result(0.0f);
+BML::Matrix4x4 VulkanRender::CreateVulkanPerspective(float fovY, float aspect, float zNear, float zFar) {
+    BML::Matrix4x4 result(0.0f);
     float f = 1.0f / tanf(fovY * 0.5f);
     float rangeInv = 1.0f / (zFar - zNear);
 
@@ -752,8 +752,8 @@ Matrix4x4 VulkanRender::CreateVulkanPerspective(float fovY, float aspect, float 
     return result;
 }
 
-Matrix4x4 VulkanRender::createModelMatrix(Vector3 orientation, Vector3 scale, Vector3 pos) { //Add to mathlib
-    Matrix4x4 model;
+BML::Matrix4x4 VulkanRender::createModelMatrix(BML::Vector3 orientation, BML::Vector3 scale, BML::Vector3 pos) { //Add to mathlib
+    BML::Matrix4x4 model;
 
     float cx = cosf(orientation.x());
     float sx = sinf(orientation.x());
@@ -762,7 +762,7 @@ Matrix4x4 VulkanRender::createModelMatrix(Vector3 orientation, Vector3 scale, Ve
     float cz = cosf(orientation.z());
     float sz = sinf(orientation.z());
 
-    Matrix4x4 rot;
+    BML::Matrix4x4 rot;
 
     rot(0, 0) = cy * cz;
     rot(0, 1) = sx * sy * cz - cx * sz;
@@ -810,10 +810,10 @@ Matrix4x4 VulkanRender::createModelMatrix(Vector3 orientation, Vector3 scale, Ve
 void VulkanRender::updateUniformBuffer(
     const Instance& inst,
     uint32_t objectIndex,
-    Vector3 scale,
-    Vector3 Orientation,
-    Vector3 pos,
-    Int3 color
+    BML::Vector3 scale,
+    BML::Vector3 Orientation,
+    BML::Vector3 pos,
+    BML::Int3 color
 )
 {
     if (objectIndex >= m_CurrentObjectCount)
@@ -861,10 +861,10 @@ bool VulkanRender::RenderAMesh(
         return false;
     }
 
-    Vector3 size = drawable->transform.Size;
-    Vector3 Orientation = drawable->transform.Orientation;
-    Vector3 pos = drawable->transform.Position;
-    Int3 color = drawable->color;
+    BML::Vector3 size = drawable->transform.Size;
+    BML::Vector3 Orientation = drawable->transform.Orientation;
+    BML::Vector3 pos = drawable->transform.Position;
+    BML::Int3 color = drawable->color;
     int pIndex = drawable->UniqueID;
 
     const MeshVK* meshVK = &drawable->OBJmesh->VM;
@@ -980,16 +980,17 @@ void VulkanRender::RecordShadowCommandBuffer()
     }
 }
 
-inline Matrix4x4 CreateOrthographic(
+inline BML::Matrix4x4 CreateOrthographic(
     float left, float right,
     float bottom, float top,
     float zNear, float zFar)
 {
-    Matrix4x4 result(0.0f);
+    BML::Matrix4x4 result(0.0f);
 
     result(0, 0) = 2.0f / (right - left);
     result(1, 1) = 2.0f / (top - bottom);
     result(2, 2) = 1.0f / (zFar - zNear);
+
     result(3, 0) = -(right + left) / (right - left);
     result(3, 1) = -(top + bottom) / (top - bottom);
     result(3, 2) = -zNear / (zFar - zNear);
@@ -1031,14 +1032,14 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         return;
     }
 
-    Vector3 lightDir = Vector3(0.5f, -1.0f, 0.5f).normalized();
-    Vector3 center = Vector3(0, 0, 0);
-    Matrix4x4 lightView = Matrix4x4LookAtLH(
+    BML::Vector3 lightDir = BML::Vector3(0.5f, -1.0f, 0.5f).normalized();
+    BML::Vector3 center = BML::Vector3(0, 0, 0);
+    BML::Matrix4x4 lightView = Matrix4x4LookAtLH(
         center - lightDir * 30.0f,
         center,
-        Vector3(0, 1, 0)
+        BML::Vector3(0, 1, 0)
     );
-    Matrix4x4 lightProj = CreateOrthographic(-20, 20, -20, 20, 0.1, 80.0);
+    BML::Matrix4x4 lightProj = CreateOrthographic(-20, 20, -20, 20, 0.1, 80.0);
     lightSpaceMatrix = lightProj * lightView;
 
     shadowDrawCommands.clear();

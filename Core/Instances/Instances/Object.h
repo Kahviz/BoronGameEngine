@@ -10,8 +10,8 @@
 #include "Graphics/Texture/Texture.h"
 #include "Services/Raycasting.h"
 
-inline Vector3 LoadWorldVertex(const Vertex& v, const Vector3& objPos, const Vector3& objSize) {
-    return Vector3(
+inline BML::Vector3 LoadWorldVertex(const Vertex& v, const BML::Vector3& objPos, const BML::Vector3& objSize) {
+    return BML::Vector3(
         v.pos.x * objSize.x() + objPos.x(),
         v.pos.y * objSize.y() + objPos.y(),
         v.pos.z * objSize.z() + objPos.z()
@@ -27,9 +27,9 @@ public:
     Object(
         const std::string& name,
         int instanceID,
-        const Int3& col,
-        const Int3& ogcol,
-        const Vector3& velocity,
+        const BML::Int3& col,
+        const BML::Int3& ogcol,
+        const BML::Vector3& velocity,
         const Transform& transform,
         bool anchored,
         std::shared_ptr<Mesh> mesh
@@ -69,22 +69,22 @@ public:
     bool HaveOBJMesh() const override { return true; }
     bool HasTexture() const override { return true; }
 
-    bool RayIntersects(const Vector3& rayOrigin, const Vector3& rayDir) override {
+    bool RayIntersects(const BML::Vector3& rayOrigin, const BML::Vector3& rayDir) override {
         if (!OBJmesh || OBJmesh->GetVertices().size() < 3)
             return false;
 
         const auto& vertices = OBJmesh->GetVertices();
         const auto& indices = OBJmesh->GetIndices();
 
-        const Vector3& pos = transform.Position;
-        const Vector3& size = transform.Size;
+        const BML::Vector3& pos = transform.Position;
+        const BML::Vector3& size = transform.Size;
 
         static Raycasting ray;
 
         for (size_t i = 0; i + 2 < indices.size(); i += 3) {
-            Vector3 v0 = LoadWorldVertex(vertices[indices[i]], pos, size);
-            Vector3 v1 = LoadWorldVertex(vertices[indices[i + 1]], pos, size);
-            Vector3 v2 = LoadWorldVertex(vertices[indices[i + 2]], pos, size);
+            BML::Vector3 v0 = LoadWorldVertex(vertices[indices[i]], pos, size);
+            BML::Vector3 v1 = LoadWorldVertex(vertices[indices[i + 1]], pos, size);
+            BML::Vector3 v2 = LoadWorldVertex(vertices[indices[i + 2]], pos, size);
 
             float t;
             if (ray.RayIntersectsTriangle(rayOrigin, rayDir, v0, v1, v2, t))

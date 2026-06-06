@@ -18,13 +18,13 @@ public:
     Instance* Parent = nullptr;
     std::vector<Instance*> Children;
 
-    Vector3 Velocity;
+    BML::Vector3 Velocity;
     Transform transform;
 
     Boron::Enums::InstanceType InstanceType;
 
-    Int3 color;
-    Int3 originalColor;
+    BML::Int3 color;
+    BML::Int3 originalColor;
 
     int UniqueID = 0;
     int InstanceID = 0;
@@ -36,9 +36,9 @@ public:
 
     Instance(
         const std::string& name = "Instance",
-        const Int3& COLOR = { 0, 0, 0 },
-        const Int3& OGCOLOR = { 0, 0, 0 },
-        const Vector3& VELOCITY = { 0, 0, 0 },
+        const BML::Int3& COLOR = { 0, 0, 0 },
+        const BML::Int3& OGCOLOR = { 0, 0, 0 },
+        const BML::Vector3& VELOCITY = { 0, 0, 0 },
         const std::shared_ptr<Mesh>& MESH = std::make_shared<Mesh>(),
         int uniqueID = 0,
         int instanceID = 0,
@@ -82,7 +82,7 @@ public:
     virtual bool HaveAnchored() const { return false; }
     virtual bool HaveOBJMesh() const { return false; }
 
-    virtual bool RayIntersects(const Vector3& rayOrigin, const Vector3& rayDir) { return false; }
+    virtual bool RayIntersects(const BML::Vector3& rayOrigin, const BML::Vector3& rayDir) { return false; }
 
     virtual const std::vector<Instance*>& GetChildren() const {
         return Children;

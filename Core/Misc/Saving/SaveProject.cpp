@@ -53,7 +53,7 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
 }
 
 Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string& Name,
-    Vector3 pos, Vector3 Size, bool Selec, Window& window, std::vector<std::unique_ptr<Instance>>& Drawables)
+    BML::Vector3 pos, BML::Vector3 Size, bool Selec, Window& window, std::vector<std::unique_ptr<Instance>>& Drawables)
 {
     Transform transform;
     transform.Position = pos;
@@ -62,13 +62,13 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
     auto obj = std::make_unique<Object>(
         Name,
         1,
-        Int3(
+        BML::Int3(
             static_cast<int>(160),
             static_cast<int>(160),
             static_cast<int>(160)
         ),
-        Int3(168, 160, 160),
-        Vector3(0, 0, 0),
+        BML::Int3(168, 160, 160),
+        BML::Vector3(0, 0, 0),
         transform,
         true,
         std::make_shared<Mesh>()
@@ -158,9 +158,9 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window)
     std::string line;
 
     std::string loadedName = "LoadedObject";
-    Vector3 loadedPos(0, 0, 0);
-    Vector3 loadedSize(1, 1, 1);
-    Vector3 loadedOrientation(0, 0, 0);
+    BML::Vector3 loadedPos(0, 0, 0);
+    BML::Vector3 loadedSize(1, 1, 1);
+    BML::Vector3 loadedOrientation(0, 0, 0);
     std::string loadedMeshFile = "";
     std::string loadedUniqueID = "0";
 
@@ -210,7 +210,7 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window)
 
             std::stringstream ss(data);
 
-            loadedOrientation = Vector3(
+            loadedOrientation = BML::Vector3(
                 0, 0, 0
             );
 

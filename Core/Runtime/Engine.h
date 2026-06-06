@@ -25,7 +25,7 @@ public:
     ~Engine();
 
     int EngineRun();
-    Instance& AddAMesh(const std::string& Path, const std::string& Name, Vector3 pos, Vector3 Size, bool Selec);
+    Instance& AddAMesh(const std::string& Path, const std::string& Name, BML::Vector3 pos, BML::Vector3 Size, bool Selec);
     
 private:
     void EngineDoFrame(Window* wnd, float deltatime);
@@ -46,5 +46,5 @@ private:
     int screen_width = 1280;
     int screen_height = 800;
 
-    Vector3 Color3 = { 0.0f, 0.0f, 1.0f };
+    BML::Vec3 Color3 = { 0.0f, 0.0f, 1.0f };
 };
