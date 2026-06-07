@@ -19,7 +19,7 @@
 - **SDL3** – Controller input / rumble  
 - **ImGui** – Graphical user interface  
 - **stb_image** – Image loading (icons, textures)
-
+- **BoronMathLibrary ( BML )** -simd-Math and non simd-math
 ## How to Switch Renderer
 
 1. Open `GLOBALS.h`
