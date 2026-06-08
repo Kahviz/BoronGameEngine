@@ -1340,7 +1340,7 @@ void VulkanRender::createShadowRenderPass() {
     subpass.colorAttachmentCount = 0;
     subpass.pColorAttachments = nullptr;
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
+     
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
