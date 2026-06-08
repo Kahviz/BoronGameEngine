@@ -1057,9 +1057,8 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         shadowSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         shadowSubmitInfo.commandBufferCount = 1;
         shadowSubmitInfo.pCommandBuffers = &shadowCommandBuffer;
-
-        vkQueueSubmit(vkDevice.GetGraphicsQueue(), 1, &shadowSubmitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(vkDevice.GetGraphicsQueue());
+        BGE_ASSERT_VKRESULT(vkQueueSubmit(vkDevice.GetGraphicsQueue(), 1, &shadowSubmitInfo, VK_NULL_HANDLE), "Failed to submit shadow");
+        BGE_ASSERT_VKRESULT(vkQueueWaitIdle(vkDevice.GetGraphicsQueue()), "Failed to wait");
 
         VkCommandBuffer transitionCmd = BeginSingleTimeCommands();
 
