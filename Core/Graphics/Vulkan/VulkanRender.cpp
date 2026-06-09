@@ -986,16 +986,13 @@ inline BML::Matrix4x4 CreateOrthographic(
     float zNear, float zFar)
 {
     BML::Matrix4x4 result(0.0f);
-
     result(0, 0) = 2.0f / (right - left);
-    result(1, 1) = 2.0f / (top - bottom);
-    result(2, 2) = 1.0f / (zFar - zNear);
-
+    result(1, 1) = 2.0f / (bottom - top);  // Käänteinen Y:lle
+    result(2, 2) = 1.0f / (zFar - zNear);  // Vulkan: [0, 1]
     result(3, 0) = -(right + left) / (right - left);
-    result(3, 1) = -(top + bottom) / (top - bottom);
+    result(3, 1) = -(bottom + top) / (bottom - top);
     result(3, 2) = -zNear / (zFar - zNear);
     result(3, 3) = 1.0f;
-
     return result;
 }
 
@@ -1441,12 +1438,12 @@ void VulkanRender::createShadowPipeline() {
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_NONE;
+    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    rasterizer.depthBiasEnable = VK_TRUE; //Added in the fragshader
-    rasterizer.depthBiasSlopeFactor = 1.25f;
-    rasterizer.depthBiasConstantFactor = 1.0f;
-    rasterizer.depthBiasClamp = 0.0001f;
+    rasterizer.depthBiasEnable = VK_TRUE;
+    rasterizer.depthBiasConstantFactor = 4.0f;
+    rasterizer.depthBiasSlopeFactor = 1.75f;
+    rasterizer.depthBiasClamp = 0.0f;
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -1490,7 +1487,6 @@ void VulkanRender::createShadowPipeline() {
     pipelineInfo.renderPass = shadowRenderPass;
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-
 
     if (vkCreateGraphicsPipelines(vkDevice.GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &shadowPipeline) != VK_SUCCESS) {
         MakeAError("Failed to create shadow pipeline!");

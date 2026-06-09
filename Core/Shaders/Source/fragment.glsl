@@ -26,7 +26,7 @@ layout(binding = 2) uniform sampler2DShadow shadowMap;
 float ShadowCalculation(vec4 shadowCoord)
 {
     vec3 projCoords = shadowCoord.xyz / shadowCoord.w;
-    projCoords = projCoords * 0.5 + 0.5;
+    projCoords.xy = projCoords.xy * 0.5 + 0.5;
 
     if (projCoords.z > 1.0 ||
         projCoords.x < 0.0 || projCoords.x > 1.0 ||
@@ -34,18 +34,15 @@ float ShadowCalculation(vec4 shadowCoord)
         return 1.0;
 
     float ndotl = dot(normalize(fragNormal), normalize(-lightDir));
-
-    float bias = 0.52 + (1.0 - ndotl) * 0.002;
+    float bias = max(0.001, 0.002 * (1.0 - ndotl));
 
     float shadow = 0.0;
-
     vec2 texelSize = 1.0 / vec2(2048.0);
 
     for (int x = -1; x <= 1; x++)
     for (int y = -1; y <= 1; y++)
     {
         vec2 offset = vec2(x, y) * texelSize;
-
         shadow += texture(
             shadowMap,
             vec3(projCoords.xy + offset, projCoords.z - bias)
@@ -53,7 +50,6 @@ float ShadowCalculation(vec4 shadowCoord)
     }
 
     shadow /= 9.0;
-
     return shadow;
 }
 

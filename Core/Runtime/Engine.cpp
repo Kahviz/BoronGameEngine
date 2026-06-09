@@ -331,7 +331,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             CubeB = true;
         }
 
-        Drawables[0]->transform.Orientation.x() += deltatime;
+        //Drawables[0]->transform.Orientation.x() += deltatime;
     }
 #if INEDITOR == 1
     if (InProject && ImGuiInited) {
