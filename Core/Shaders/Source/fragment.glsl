@@ -26,50 +26,43 @@ layout(binding = 2) uniform sampler2DShadow shadowMap;
 float ShadowCalculation(vec4 shadowCoord)
 {
     vec3 projCoords = shadowCoord.xyz / shadowCoord.w;
+    
     projCoords.xy = projCoords.xy * 0.5 + 0.5;
-
+    
     if (projCoords.z > 1.0 ||
         projCoords.x < 0.0 || projCoords.x > 1.0 ||
         projCoords.y < 0.0 || projCoords.y > 1.0)
         return 1.0;
-
-    float ndotl = dot(normalize(fragNormal), normalize(-lightDir));
-    float bias = max(0.001, 0.002 * (1.0 - ndotl));
-
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / vec2(2048.0);
-
-    for (int x = -1; x <= 1; x++)
-    for (int y = -1; y <= 1; y++)
-    {
-        vec2 offset = vec2(x, y) * texelSize;
-        shadow += texture(
-            shadowMap,
-            vec3(projCoords.xy + offset, projCoords.z - bias)
-        );
-    }
-
-    shadow /= 9.0;
+    
+    float bias = 0.0001;
+    
+    float shadow = texture(
+        shadowMap,
+        vec3(projCoords.xy, projCoords.z - bias)
+    );
+    
     return shadow;
 }
-
 void main()
 {
-    float diff = max(dot(normalize(fragNormal), normalize(-lightDir)), 0.0);
-
+    vec3 normalizedNormal = normalize(fragNormal);
+    vec3 normalizedLightDir = normalize(-lightDir);
+    
+    float diff = max(dot(normalizedNormal, normalizedLightDir), 0.0);
+    
     float ambient = AMBIENT;
     float lighting = ambient + (1.0 - ambient) * diff;
-
+    
     float shadow = ShadowCalculation(fragPosLightSpace);
-
-    lighting *= shadow;
-
+    
+    lighting = ambient + (1.0 - ambient) * diff * shadow;
+    
     vec4 baseColor;
-
+    
     if (ubo.usesTexture > 0.5)
         baseColor = texture(texSampler, fragUV);
     else
         baseColor = vec4(ubo.color, 1.0);
-
+    
     outColor = vec4(baseColor.rgb * lighting, baseColor.a);
 }

@@ -35,8 +35,8 @@ namespace fs = std::filesystem;
 extern int screen_width;
 extern int screen_height;
 extern float zFar;
-extern int viewport_width;
-extern int viewport_height;
+extern float viewport_width;
+extern float viewport_height;
 
 extern std::string appData;
 extern std::string EngineName;

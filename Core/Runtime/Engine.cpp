@@ -393,7 +393,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 #endif
     float fps = 1.0f / deltatime;
-    profiler.AddFPS(static_cast<int>(fps));
+    profiler.AddFPS(fps);
 
 #if VULKAN == 1
     wnd->GetGraphics().DrawAFrame(deltatime, Drawables);

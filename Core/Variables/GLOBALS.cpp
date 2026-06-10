@@ -9,8 +9,8 @@ std::string EngineName = "BoronEngine";
 int screen_width = 800;
 int screen_height = 400;
 float zFar = 1000.0f;
-extern int viewport_width = 400;
-extern int viewport_height = 200;
+extern float viewport_width = 400.0f;
+extern float viewport_height = 200.0f;
 
 #ifdef _WIN32
     #include <cstdlib>

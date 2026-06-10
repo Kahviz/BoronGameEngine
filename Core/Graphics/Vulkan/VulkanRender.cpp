@@ -1,5 +1,5 @@
-#include "GLOBALS.h"
 #include "VulkanRender.h"
+#include "GLOBALS.h"
 
 #if VULKAN == 1
 #include <cstdint>
@@ -165,9 +165,9 @@ bool VulkanRender::Init(GLFWwindow* window)
     VkPhysicalDeviceProperties props{};
     vkGetPhysicalDeviceProperties(vkDevice.GetPhysicalDevice(), &props);
 
-    size_t minAlignment = props.limits.minUniformBufferOffsetAlignment;
+    uint32_t minAlignment = props.limits.minUniformBufferOffsetAlignment;
 
-    size_t alignedUBOSize =
+    uint32_t alignedUBOSize =
         sizeof(UniformBufferObject);
 
     if (minAlignment > 0) {
@@ -1036,7 +1036,8 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         center,
         BML::Vector3(0, 1, 0)
     );
-    BML::Matrix4x4 lightProj = CreateOrthographic(-20, 20, -20, 20, 0.1, 80.0);
+    int OrthoSize = 20;
+    BML::Matrix4x4 lightProj = CreateOrthographic(-OrthoSize, OrthoSize, -OrthoSize, OrthoSize, 0.1, 80.0);
     lightSpaceMatrix = lightProj * lightView;
 
     shadowDrawCommands.clear();
@@ -1441,8 +1442,8 @@ void VulkanRender::createShadowPipeline() {
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_TRUE;
-    rasterizer.depthBiasConstantFactor = 4.0f;
-    rasterizer.depthBiasSlopeFactor = 1.75f;
+    rasterizer.depthBiasConstantFactor = 1.15f;
+    rasterizer.depthBiasSlopeFactor = 1.5f;
     rasterizer.depthBiasClamp = 0.0f;
 
     VkPipelineMultisampleStateCreateInfo multisampling{};

@@ -52,8 +52,8 @@ void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
         firstmouse = false;
     }
 
-    float deltaX = mouseX - lastX;
-    float deltaY = mouseY - lastY;
+    double deltaX = mouseX - lastX;
+    double deltaY = mouseY - lastY;
 
     lastX = mouseX;
     lastY = mouseY;

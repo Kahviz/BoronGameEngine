@@ -40,7 +40,7 @@ Window::Window(int Width, int Height, std::string Name)
 
 
 void Window::SetWindowIcon(GLFWwindow* window) {
-    GLFWimage images[1];
+    GLFWimage images[1]{};
     int width, height, channels;
 
     std::string fullPath = appData + "/BoronEngine/Icons/BoronEngineIcon.png";

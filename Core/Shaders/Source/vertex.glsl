@@ -6,7 +6,7 @@ layout(binding = 0) uniform UBO {
     mat4 proj;
     vec3 color;
     float usesTexture;
-    mat4 lightSpaceMatrix;  // lisätty
+    mat4 lightSpaceMatrix;
 } ubo;
 
 layout(location = 0) in vec3 inPos;
@@ -17,12 +17,12 @@ layout(location = 3) in vec2 inUV;
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragUV;
 layout(location = 2) out vec3 fragNormal;
-layout(location = 3) out vec4 fragPosLightSpace;  // lisätty
+layout(location = 3) out vec4 fragPosLightSpace;
 
 void main() {
     fragColor = inColor;
     fragUV = inUV;
     fragNormal = normalize(transpose(inverse(mat3(ubo.model))) * inNormal);
-    fragPosLightSpace = ubo.lightSpaceMatrix * ubo.model * vec4(inPos, 1.0);  // lisätty
+    fragPosLightSpace = ubo.lightSpaceMatrix * ubo.model * vec4(inPos, 1.0);
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPos, 1.0);
 }

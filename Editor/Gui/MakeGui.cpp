@@ -17,7 +17,7 @@ struct MeshButton
 static bool InputTextStd(const char* label, std::string& str)
 {
     char buf[256];
-    strncpy(buf, str.c_str(), sizeof(buf));
+    strncpy_s(buf, str.c_str(), sizeof(buf));
     buf[255] = '\0';
 
     if (ImGui::InputText(label, buf, sizeof(buf)))

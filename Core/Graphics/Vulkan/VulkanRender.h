@@ -108,9 +108,9 @@ private:
     Camera m_Camera;
 
     struct DrawCommand {
-        const MeshVK* mesh;
-        uint32_t objectIndex;
-        BML::Matrix4x4 modelMatrix;
+        const MeshVK* mesh = nullptr;
+        uint32_t objectIndex = -1;
+        BML::Matrix4x4 modelMatrix = {};
     };
 
     uint32_t CurrentimageIndex = -1;
@@ -122,12 +122,12 @@ private:
     VkBuffer m_UniformBuffer = VK_NULL_HANDLE;
     VkDeviceMemory m_UniformBufferMemory = VK_NULL_HANDLE;
 
-    size_t m_UniformBufferSize = 0;
+    uint32_t m_UniformBufferSize = 0;
     uint32_t m_CurrentObjectCount = 0;
 
     uint32_t imageIndex = -1;
-    size_t maxInstances = 100;
-    size_t dynamicAlignment = -1;
+    uint32_t maxInstances = 100;
+    uint32_t dynamicAlignment = -1;
 
     VkViewport viewport{};
     VkRect2D scissor = {};
