@@ -15,12 +15,6 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
     std::string path = savings + "\\" + ProjectName;
     std::string meshFilesPath = savings + "\\" + ProjectName + "\\MeshFiles";
 
-    if (fs::exists(path))
-    {
-        fs::remove_all(path);
-    }
-
-
     fs::create_directories(meshFilesPath);
 
     std::ofstream file(path + "\\save.BGEproject");
@@ -34,7 +28,14 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
             fs::path(meshFilesPath) /
             (newName + from.extension().string());
 
-        fs::copy(from, to, fs::copy_options::overwrite_existing);
+        if (from.lexically_normal() != to.lexically_normal())
+        {
+            fs::copy_file(
+                from,
+                to,
+                fs::copy_options::overwrite_existing
+            );
+        }
 
         file << "-\n";
         file << "Name: " << Drawable->Name << "\n";
