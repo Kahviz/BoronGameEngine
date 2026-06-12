@@ -6,6 +6,7 @@
 #include "GLOBALS.h"
 #include "Graphics/Graphics.h"
 #include <imgui_internal.h>
+#include "Runtime/Engine.h"
 
 struct MeshButton
 {
@@ -121,7 +122,6 @@ void MakeFloat3Edit(const char* Name, BML::Vector3& vec) {
     ImGui::InputFloat("##z", &vec.z(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
 }
 
-
 void MakeGui::MakeIMGui(Window& wnd,
     std::vector<std::unique_ptr<Instance>>& Drawables,
     std::function<Instance*
@@ -134,7 +134,8 @@ void MakeGui::MakeIMGui(Window& wnd,
         )>
     AddAMesh,
     float* Color3,
-    bool Selec
+    bool Selec,
+    Engine* engine
 )
 { 
     MakeStyle();
@@ -311,11 +312,35 @@ void MakeGui::MakeIMGui(Window& wnd,
 
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     }
+    static bool openFileBrowser = false;
+    static bool Downloads = false;
+    static fs::path currentPath = fs::current_path();
+
+    if (Downloads == false)
+    {
+        #ifdef _WIN32
+                const char* userProfile = std::getenv("USERPROFILE");
+
+                if (userProfile)
+                    currentPath = fs::path(userProfile) / "Downloads";
+                else
+                    currentPath = fs::current_path();
+        #else
+                const char* home = std::getenv("HOME");
+
+                if (home)
+                    currentPath = fs::path(home) / "Downloads";
+                else
+                    currentPath = fs::current_path();
+        #endif
+
+        Downloads = true;
+    }
 
     if (ImGui::Begin("BoronEngine", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize)) {
         if (ImGui::BeginTabBar("##TABS")) {
             if (ImGui::BeginTabItem("Home")) {
-                if (ImGui::Button("Move",ImVec2(screen_w / 10,screen_h / 10))) {
+                if (ImGui::Button("Move",ImVec2(screen_w / 15,screen_h / 10))) {
                     for (auto& DrawablePTR : Drawables) {
                         if (DrawablePTR.get()->Selected) {
                             Instance* inst = DrawablePTR.get();
@@ -329,10 +354,80 @@ void MakeGui::MakeIMGui(Window& wnd,
 
                 ImGui::EndTabItem();
             }
-
+            
+            if (ImGui::BeginTabItem("Import")) {
+                if (ImGui::Button("Import From path", ImVec2(screen_w / 15, screen_h / 10))) {
+                    openFileBrowser = true;
+                }
+                ImGui::EndTabItem();
+            }
             ImGui::EndTabBar();
-
         }
+    }
+    if (openFileBrowser)
+    {
+        ImGui::Begin("Select File", &openFileBrowser);
+
+        ImGui::Text("%s", currentPath.string().c_str());
+
+        if (currentPath.has_parent_path())
+        {
+            if (ImGui::Button(".."))
+            {
+                currentPath = currentPath.parent_path();
+            }
+        }
+
+        for (const auto& entry : fs::directory_iterator(currentPath))
+        {
+            std::string name = entry.path().filename().string();
+
+            if (entry.is_directory())
+            {
+                if (ImGui::Selectable((name + "/").c_str()))
+                {
+                    currentPath = entry.path();
+                }
+            }
+            else
+            {
+                std::string ext = entry.path().extension().string();
+
+                std::transform(
+                    ext.begin(),
+                    ext.end(),
+                    ext.begin(),
+                    [](unsigned char c) { return std::tolower(c); }
+                );
+
+                if (ext != ".obj" &&
+                    ext != ".fbx" &&
+                    ext != ".gltf" &&
+                    ext != ".glb" &&
+                    ext != ".dae" &&
+                    ext != ".3ds" &&
+                    ext != ".blend")
+                {
+                    continue;
+                }
+
+                if (ImGui::Selectable(name.c_str()))
+                {
+                    std::string selectedFile = entry.path().string();
+
+                    std::cout << "Selected: " << selectedFile << '\n';
+
+                    openFileBrowser = false;
+
+                    std::string path = selectedFile;
+                    std::string name = fs::path(selectedFile).stem().string();
+
+                    engine->AddAMesh(path, name, { 0,5,0 }, { 10,10,10 }, false, true);
+                }
+            }
+        }
+
+        ImGui::End();
     }
 
     ImGui::End();

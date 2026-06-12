@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Engine.h"
 #include <stdexcept>
 #include "chrono"
 #include <iostream>
@@ -164,7 +163,7 @@ int Engine::EngineRun()
 }
 
 Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
-    BML::Vector3 pos, BML::Vector3 Size, bool Selec)
+    BML::Vector3 pos, BML::Vector3 Size, bool Selec,bool LiteralPath)
 {
     Transform transform;
     transform.Position = pos;
@@ -188,19 +187,35 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     obj->UniqueID = Index;
 
 #if DIRECTX11 == 1
-    obj->OBJmesh = Mesh::Load(assets + Path, window.GetGraphics().GetDevice());
+    if (!LiteralPath) {
+        obj->OBJmesh = Mesh::Load(assets + Path, window.GetGraphics().GetDevice());
+    }
+    else {
+        obj->OBJmesh = Mesh::Load(Path, window.GetGraphics().GetDevice());
+    }
 #endif
 
 #if VULKAN == 1
     auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
-
-    obj.get()->OBJmesh = Mesh::Load(
-        assets + Path,
-        vk.GetDevice(),
-        vk.GetPhysicalDevice(),
-        vk.GetCommandPool(),
-        vk.GetGraphicsQueue()
-    );
+    if (!LiteralPath) {
+        obj.get()->OBJmesh = Mesh::Load(
+            assets + Path,
+            vk.GetDevice(),
+            vk.GetPhysicalDevice(),
+            vk.GetCommandPool(),
+            vk.GetGraphicsQueue()
+        );
+    }
+    else {
+        obj.get()->OBJmesh = Mesh::Load(
+            Path,
+            vk.GetDevice(),
+            vk.GetPhysicalDevice(),
+            vk.GetCommandPool(),
+            vk.GetGraphicsQueue()
+        );
+    }
+    
 #endif
 
     obj->Selected = Selec;
@@ -273,12 +288,12 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     if (ctrlPressed) {
         
-        AddAMesh("\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false);
+        AddAMesh("\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false,false);
 
         cubes++;
     }
     if (RctrlPressed) {
-        AddAMesh("\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false);
+        AddAMesh("\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false);
 
         cubes++;
     }
@@ -322,8 +337,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             { 
                 SaveProject::Save(Drawables);
 
-                AddAMesh("\\Cube.obj", "Cube2", BML::Vec3{ 0,0,0 }, BML::Vec3{ 0.5,1,0.5 }, false);
-                AddAMesh("\\Cube.obj", "Cube", BML::Vec3{ 0,-5,0 }, BML::Vec3{ 10,1,10 }, false);
+                AddAMesh("\\Cube.obj", "Cube2", BML::Vec3{ 0,0,0 }, BML::Vec3{ 0.5,1,0.5 }, false,false);
+                AddAMesh("\\Cube.obj", "Cube", BML::Vec3{ 0,-5,0 }, BML::Vec3{ 10,1,10 }, false, false);
             }
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);
@@ -339,13 +354,17 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         makeGui.MakeIMGui(
             *wnd,
             Drawables,
-            [this](const std::string& path, const std::string& name,
-                BML::Vector3 pos, BML::Vector3 size, bool Selec) -> Instance*
+            [this](const std::string& path,
+                const std::string& name,
+                BML::Vector3 pos,
+                BML::Vector3 size,
+                bool selec) -> Instance*
             {
-                return &AddAMesh(path, name, pos, size, Selec);
+                return &AddAMesh(path, name, pos, size, selec, false);
             },
             reinterpret_cast<float*>(&Color3),
-            false
+            false,
+            this
         );
     }
     else {
