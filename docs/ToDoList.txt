@@ -6,6 +6,7 @@ Renderer class IRenderer -Done
 Make so you can create multiple projects with in the editor without going to file explorer -Done
 FIX saving
 
+Fix so you cannot have multiple same named objects
 Create a graphics setting file
 Image Loading in imgui
 Make Error and Warning popups with imgui
