@@ -72,8 +72,6 @@ add_executable(BoronEngine
 
     Core/SetupPaths/MakeFiles.cpp
 
-    Core/Gui/ImGuiManager.cpp
-    
     Core/Variables/GLOBALS.cpp
     Core/Services/Raycasting.cpp
 
