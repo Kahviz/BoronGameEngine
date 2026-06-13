@@ -36,7 +36,7 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
-    EclipseMathLibrary
+    BoronMathLibrary
     GIT_REPOSITORY https://github.com/Kahviz/BoronMathLibrary
     GIT_TAG master
 )
@@ -46,7 +46,7 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glfw)
-FetchContent_MakeAvailable(EclipseMathLibrary)
+FetchContent_MakeAvailable(BoronMathLibrary)
 
 #ImGui
 set(IMGUI_SOURCES
@@ -67,40 +67,41 @@ add_definitions(
 #Executable
 add_executable(BoronEngine
     ${IMGUI_SOURCES}
-    main.cpp
+    main.cpp #Entrypoint
+    BoronGameEngine.h
+
     Core/SetupPaths/MakeFiles.cpp
-    Core/Camera/Camera.cpp
-    Core/ErrorHandling/Expectation/Expection.cpp
-    Core/Graphics/Graphics.cpp
-    Core/Instances/Instances/Mesh/DX11/MeshDX11.cpp
-    Core/Instances/Instances/Mesh/Vulkan/MeshVulkan.cpp
+
     Core/Gui/ImGuiManager.cpp
-    Core/Misc/Colission/Colission.cpp
-    Core/Misc/Controller/Controller.cpp
-    Core/Misc/Timer/Timer.cpp
+    
     Core/Variables/GLOBALS.cpp
     Core/Services/Raycasting.cpp
+
+    #Runtime
     Core/Runtime/Engine.cpp
+
+    #Window
     Core/Window/Window.cpp
-    Core/Graphics/Dx11/Dx11Renderer.cpp
-    Core/Graphics/Vulkan/VulkanRender.cpp
-    Core/Graphics/Vulkan/ScoreCounter.cpp
+
+    #Debugging
     Core/Debugging/Profiler/Profiler.cpp
     Core/Debugging/Functions/BGE_ASSERTS.h
-    Core/Libs/ImGui/imgui_demo.cpp
-    Core/Graphics/Texture/Texture.h 
-    Core/Graphics/Texture/Texture.cpp 
     Core/Multiplatform/BoronPlatform.h
 
+    #Physics
     Core/BoronPhysics/Gravity.h
     Core/BoronPhysics/Physics.h
     Core/BoronPhysics/Physics.cpp
     
     #Editor
     Editor/Gui/MakeGui.cpp
+    Editor/Gui/Style.h
+    Editor/Gui/Style.cpp
+
+    #Camera
+    Core/Camera/Camera.cpp
     Editor/Camera/CameraControl.cpp
 
-    BoronGameEngine.h
 
     #VulkanRenderer Subclasses
     Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.h
@@ -113,9 +114,40 @@ add_executable(BoronEngine
     Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.cpp
     Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.h
     Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.cpp
+    Core/Graphics/Vulkan/ScoreCounter.cpp
 
+    #Adapters
+    Core/Graphics/Dx11/Dx11Adapter.h
+    Core/Graphics/Vulkan/VulkanAdapter.h
+    Core/Graphics/Dx11/Dx11Adapter.cpp
+    Core/Graphics/Vulkan/VulkanAdapter.cpp
+
+    #Graphics
+    Core/Graphics/Graphics.cpp
+    Core/Graphics/GraphicsBackends.h
+
+    #Texture
+    Core/Graphics/Texture/Texture.h 
+    Core/Graphics/Texture/Texture.cpp 
+
+    #Mesh
+    Core/Instances/Instances/Mesh/DX11/MeshDX11.cpp
+    Core/Instances/Instances/Mesh/Vulkan/MeshVulkan.cpp
+
+    #Renderers
+    Core/Graphics/Dx11/Dx11Renderer.cpp
+    Core/Graphics/Vulkan/VulkanRender.cpp
+
+    #Saving
+    Core/Misc/Saving/SaveProject.h 
+    Core/Misc/Saving/SaveProject.cpp
+
+    #Misc
+    Core/Misc/Colission/Colission.cpp
+    Core/Misc/Controller/Controller.cpp
+    Core/Misc/Timer/Timer.cpp
     Core/Variables/Enums.h
- "Core/Misc/Saving/SaveProject.h" "Core/Misc/Saving/SaveProject.cpp"   "Core/Graphics/GraphicsBackends.h" "Core/Graphics/Dx11/Dx11Adapter.h" "Core/Graphics/Vulkan/VulkanAdapter.h" "Core/Graphics/Dx11/Dx11Adapter.cpp" "Core/Graphics/Vulkan/VulkanAdapter.cpp")
+)
 
 target_include_directories(BoronEngine PRIVATE
     include
@@ -140,7 +172,7 @@ target_include_directories(BoronEngine PRIVATE
     Core/Services/
     Libs/STBIcons/
     ${Vulkan_INCLUDE_DIRS}
-    ${eclipsemathlibrary_SOURCE_DIR}
+    ${boronmathlibrary_SOURCE_DIR}
 )
 
 target_link_libraries(BoronEngine PRIVATE

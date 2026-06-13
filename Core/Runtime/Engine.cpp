@@ -273,8 +273,6 @@ float GetRandomFloat(float min, float max) { //Mathlib
 
 void Engine::EngineDoFrame(Window* wnd, float deltatime)
 {
-
-    //If InEditor == 1 InProject = true
     bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
     bool RctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
 
@@ -304,7 +302,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         return;
     }
 
-    static bool CubeB = false;
+    static bool Init = false;
 
     Graphics& graphics = wnd->GetGraphics();
 
@@ -328,8 +326,12 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     graphics.ClearBuffer(0.0f, 0.0f, 1.0f);
 
     if (InProject) {
-        if (!CubeB) {
-            Drawables.reserve(10000); //Reallocate some memory
+        if (!Init) {
+            world.Name = "World";
+            world.Parent = nullptr;
+            world.InstanceType = Boron::Enums::InstanceType::World;
+
+            Drawables.reserve(5000);
 
             Drawables = SaveProject::Load(window);
 
@@ -343,10 +345,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);
             wnd->GetGraphics().GetCamera().SetRotation(-0.615f, -2.356f, 0.0f);
-            CubeB = true;
+            Init = true;
         }
-
-        //Drawables[0]->transform.Orientation.x() += deltatime;
     }
 #if INEDITOR == 1
     if (InProject && ImGuiInited) {
@@ -364,7 +364,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             },
             reinterpret_cast<float*>(&Color3),
             false,
-            this
+            this,
+            world
         );
     }
     else {

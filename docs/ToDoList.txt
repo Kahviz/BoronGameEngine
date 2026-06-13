@@ -8,7 +8,7 @@ FIX saving
 
 Fix so you cannot have multiple same named objects
 Create a graphics setting file
-Image Loading in imgui
+Image Loading in imgui --
 Make Error and Warning popups with imgui
 Making Mathlib more clear and easy to use
 Pointlights to vulkan and dx11

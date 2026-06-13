@@ -36,6 +36,8 @@ private:
     MakeGui makeGui;
 #endif
     Window window;
+    Instance world;
+
     std::vector<std::unique_ptr<Instance>> Drawables = {};
 
     bool InProject = false;

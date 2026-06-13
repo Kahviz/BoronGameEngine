@@ -72,35 +72,7 @@ BML::Vector3 MakeVec3TextEdit(Instance* inst,
 }
 
 void MakeGui::MakeStyle() {
-    ImGuiStyle& style = ImGui::GetStyle();
-    ImVec4* colors = style.Colors;
-
-    static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    /*
-    ImGui::Begin("Color Picker");
-
-    ImGui::ColorEdit3("Clear Color", (float*)&clear_color);
-
-    ImGui::ColorEdit4("Clear Color with Alpha", (float*)&clear_color);
-
-    ImGui::End();
-    */
-
-    colors[ImGuiCol_ButtonHovered] = ImVec4(0.065f, 0.065f, 0.065f, 1.0f);
-    colors[ImGuiCol_Button] = ImVec4(0.055f, 0.055f, 0.055f, 1.0f);
-    colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.06f, 0.05f, 1.0f);
-    colors[ImGuiCol_WindowBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.0f);
-    colors[ImGuiCol_Border] = ImVec4(0.07f, 0.07f, 0.07f, 1.0f);
-    colors[ImGuiCol_DockingPreview] = ImVec4(0.015f, 0.015f, 0.015f, 1.0f);
-    colors[ImGuiCol_TitleBg] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
-    colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.08f, 0.08f, 1.0f);
-
-    style.FrameRounding = FrameRounding;
-    style.WindowRounding = WindowRounding;
-    style.ChildRounding = ChildRounding;
-    style.PopupRounding = PopupRounding;
-    style.GrabRounding = GrabRounding;
+    style.CreateImGuiStyle(Boron::Editor::ThemeType::Classic);
 }
 
 void MakeFloat3Edit(const char* Name, BML::Vector3& vec) {
@@ -135,7 +107,8 @@ void MakeGui::MakeIMGui(Window& wnd,
     AddAMesh,
     float* Color3,
     bool Selec,
-    Engine* engine
+    Engine* engine,
+    Instance& world
 )
 { 
     MakeStyle();
@@ -145,15 +118,6 @@ void MakeGui::MakeIMGui(Window& wnd,
     }
     else {
         Typing = false;
-    }
-
-    static bool firstTime = true;
-    if (firstTime) {
-        firstTime = false;
-
-        world.Name = "World";
-        world.Parent = nullptr;
-        world.InstanceType = Boron::Enums::InstanceType::World;
     }
     
     ImGuiIO& io = ImGui::GetIO();
@@ -189,7 +153,7 @@ void MakeGui::MakeIMGui(Window& wnd,
     float window_h = screen_h / 2.0f;
 
     if (CanChange) {
-        ImGui::SetNextWindowSize(ImVec2(window_w * 1.5f, window_h / 1.7f), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(window_w * 1.5f, window_h / 1.7f));
 
         float desiredX = screen_w - window_w * 1.5f;
         float desiredY = screen_h - screen_h / 3.45f;
@@ -197,7 +161,7 @@ void MakeGui::MakeIMGui(Window& wnd,
         float finalX = ImClamp(desiredX, 0.0f, screen_w - window_w * 1.5f);
         float finalY = ImClamp(desiredY, 0.0f, screen_h - window_h / 2.0f);
 
-        ImGui::SetNextWindowPos(ImVec2(finalX, finalY), ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(finalX, finalY));
     }
 
     ImGui::Begin("Properties", nullptr,
@@ -238,11 +202,12 @@ void MakeGui::MakeIMGui(Window& wnd,
 
     ImGui::End();
 
-    if (!CanChange) {
+    if (CanChange) {
+        MakeAInfo("Changing");
         float windowWidth = window_w * 1.5f;
         float windowHeight = window_h / 1.0868f;
 
-        ImGui::SetNextWindowSize(ImVec2(windowWidth, windowHeight), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(windowWidth, windowHeight));
 
         float desiredX = screen_w - window_w / 1.006f;
         float desiredY = screen_h / 4.0f;
@@ -250,7 +215,7 @@ void MakeGui::MakeIMGui(Window& wnd,
         float finalX = ImClamp(desiredX, 0.0f, screen_w - windowWidth);
         float finalY = ImClamp(desiredY, 0.0f, screen_h - windowHeight);
 
-        ImGui::SetNextWindowPos(ImVec2(finalX, finalY), ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(finalX, finalY));
     }
 
     ImGui::Begin("Explorer", nullptr,
@@ -337,7 +302,7 @@ void MakeGui::MakeIMGui(Window& wnd,
         Downloads = true;
     }
 
-    if (ImGui::Begin("BoronEngine", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize)) {
+    if (ImGui::Begin("BoronEngine", nullptr)) {
         if (ImGui::BeginTabBar("##TABS")) {
             if (ImGui::BeginTabItem("Home")) {
                 if (ImGui::Button("Move",ImVec2(screen_w / 15,screen_h / 10))) {
@@ -677,36 +642,7 @@ bool MakeGui::MakeDashBoard()
         }
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 
-        ImGui::SliderFloat("FrameRounding##Slider", &FrameRounding, 0.0f, 100.0f, "%.2f");
-        ImGui::InputFloat("FrameRounding##Input", &FrameRounding);
-
-        if (ImGui::Button("Reset ##1")) {
-            FrameRounding = Default_FrameRounding;
-        }
-
-        ImGui::SliderFloat("WindowRounding##Slider", &WindowRounding, 0.0f, 100.0f, "%.2f");
-        ImGui::InputFloat("WindowRounding##Input", &WindowRounding);
-        
-        if (ImGui::Button("Reset ##2")) {
-            WindowRounding = Default_WindowRounding;
-        }
-
-        ImGui::SliderFloat("ChildRounding##Slider", &ChildRounding, 0.0f, 100.0f, "%.2f");
-        ImGui::InputFloat("ChildRounding##Input", &ChildRounding);
-
-        if (ImGui::Button("Reset ##3")) {
-            ChildRounding = Default_ChildRounding;
-        }
-
-        ImGui::SliderFloat("GrabRounding##Slider", &GrabRounding, 0.0f, 100.0f, "%.2f");
-        ImGui::InputFloat("GrabRounding##Input", &GrabRounding);
-
-        if (ImGui::Button("Reset ##4")) {
-            GrabRounding = Default_GrabRounding;
-        }
-
-        ImGui::PopStyleColor();
-        ImGui::End();
+        style.CreateImGuiCustomization();
     }
 
     ImGui::End();

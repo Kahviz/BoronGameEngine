@@ -71,6 +71,24 @@ void Camera::SetRotation(float x, float y, float z)
     this->rotVector = Vector3ToVector4(this->rot);
     this->UpdateViewMatrix();
 }
+void Camera::SetRotationX(float x)
+{
+    this->rot.x() = x;
+    this->rotVector = Vector3ToVector4(this->rot);
+    this->UpdateViewMatrix();
+}
+void Camera::SetRotationY(float y)
+{
+    this->rot.y() = y;
+    this->rotVector = Vector3ToVector4(this->rot);
+    this->UpdateViewMatrix();
+}
+void Camera::SetRotationZ(float z)
+{
+    this->rot.z() = z;
+    this->rotVector = Vector3ToVector4(this->rot);
+    this->UpdateViewMatrix();
+}
 
 void Camera::AdjustRotation(const BML::Vector4& rot)
 {

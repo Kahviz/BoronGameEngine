@@ -21,6 +21,9 @@ public:
     void AdjustPosition(float x, float y, float z);
     void SetRotation(const BML::Vector4& rot);
     void SetRotation(float x, float y, float z);
+    void SetRotationX(float x);
+    void SetRotationY(float y);
+    void SetRotationZ(float z);
     void AdjustRotation(const BML::Vector4& rot);
     void AdjustRotation(float x, float y, float z);
 

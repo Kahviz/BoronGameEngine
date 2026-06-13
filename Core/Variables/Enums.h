@@ -11,4 +11,12 @@ namespace Boron {
 			World
 		};
 	}
+	namespace Editor {
+		enum class ThemeType : uint8_t {
+			None = 0,
+			Classic,
+			Dark,
+			Light
+		};
+	}
 }
