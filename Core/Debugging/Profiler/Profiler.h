@@ -7,7 +7,7 @@ public:
     Profiler() {
         TotalFrames = 0.0f;
         TotalFPS = 0.0f;
-        MakeASuccess("Profiler created!");
+        CreateSuccess("Profiler created!");
     }
 
     void AddFPS(float FPS);

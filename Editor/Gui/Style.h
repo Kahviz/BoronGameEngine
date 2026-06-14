@@ -3,7 +3,7 @@
 
 class Style {
 public:
-	void CreateImGuiStyle(Boron::Editor::ThemeType theme = Boron::Editor::ThemeType::Classic);
+    void CreateImGuiStyle();
     void CreateImGuiCustomization();
 private:
     //Rounding
@@ -21,4 +21,7 @@ private:
 
     float GrabRounding = 3.0f;
     float Default_GrabRounding = 3.0f;
+
+    //Theme
+    Boron::Editor::ThemeType theme = Boron::Editor::ThemeType::Dark;
 };

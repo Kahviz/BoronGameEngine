@@ -1,4 +1,5 @@
 #include "VulkanSwapchain.h"
+#include "BGE_ASSERTS.h"
 
 #if VULKAN == 1
 bool VulkanSwapchain::Init(VkDevice& device,VkPhysicalDevice& physicalDevice, VkSurfaceKHR& surface)
@@ -63,7 +64,7 @@ bool VulkanSwapchain::Init(VkDevice& device,VkPhysicalDevice& physicalDevice, Vk
     swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
     if (vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain) != VK_SUCCESS) {
-        MakeAError("Failed to create swapchain");
+        CreateError("Failed to create swapchain");
         return false;
     }
 
@@ -89,11 +90,7 @@ bool VulkanSwapchain::Init(VkDevice& device,VkPhysicalDevice& physicalDevice, Vk
         viewInfo.subresourceRange.levelCount = 1;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
-
-        if (vkCreateImageView(device, &viewInfo, nullptr, &swapchainImageViews[i]) != VK_SUCCESS) {
-            MakeAError("Failed to create image views");
-            return false;
-        }
+        BGE_ASSERT_VKRESULT(vkCreateImageView(device, &viewInfo, nullptr, &swapchainImageViews[i]), "Failed to create image views");
     }
 	return true;
 }

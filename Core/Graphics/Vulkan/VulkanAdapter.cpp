@@ -50,7 +50,7 @@ VkDevice VulkanAdapter::GetDevice() const
     VkDevice device = renderer->GetDevice();
 
     if (device == VK_NULL_HANDLE)
-        MakeAError("Logical device not initialized!");
+        CreateError("Logical device not initialized!");
 
     return device;
 }

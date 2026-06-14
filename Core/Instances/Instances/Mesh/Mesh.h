@@ -22,8 +22,6 @@ public:
         auto it = Cache.find(file);
         if (it != Cache.end())
         {
-            MakeAError("Caching..");
-
             it->second->GetIsCached() = true;
             return it->second;
         }
@@ -36,8 +34,6 @@ public:
         mesh->GetMeshFileName() = name;
 
         mesh->DM.Load(file, device);
-
-        MakeAError("Not using Caching...");
 
         Cache.emplace(file, mesh);
 
@@ -62,8 +58,6 @@ public:
         auto it = Cache.find(file);
         if (it != Cache.end())
         {
-            MakeAError("Caching..");
-
             it->second->GetIsCached() = true;
             return it->second;
         }
@@ -76,8 +70,6 @@ public:
         mesh->GetMeshFileName() = name;
 
         mesh->VM.Load(file, device, phyDevice, cmdPool, gfxQueue);
-
-        MakeAError("Not using Caching...");
 
         Cache.emplace(file, mesh);
 

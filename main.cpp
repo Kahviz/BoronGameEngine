@@ -8,7 +8,7 @@
 #include "BoronMathLibrary.h"
 
 int main() {
-    MakeAInfo("BoronEngine started!");
+    CreateInfo("BoronEngine started!");
 
     MakeFiles mf;
     mf.MakeAPPDATAFolders();
@@ -40,10 +40,10 @@ int main() {
 
     std::string WaitTimeString = std::format("Waiting For {} second(s) before closing!", WaitTime);
 
-    MakeASuccess(WaitTimeString);
+    CreateSuccess(WaitTimeString);
     std::this_thread::sleep_for(std::chrono::seconds(WaitTime));
 
-    MakeASuccess("This is the end...");
+    CreateSuccess("This is the end...");
 
     return 0;
 }

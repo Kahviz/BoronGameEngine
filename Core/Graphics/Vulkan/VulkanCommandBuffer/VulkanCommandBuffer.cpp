@@ -8,11 +8,11 @@ bool VulkanCommandBuffer::CreateCommandPool(VkDevice device, uint32_t graphicsFa
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
     if (vkCreateCommandPool(device, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS) {
-        MakeAError("Failed to create command pool!");
+        CreateError("Failed to create command pool!");
         return false;
     }
 
-    MakeASuccess("Command pool created");
+    CreateSuccess("Command pool created");
     return true;
 }
 bool VulkanCommandBuffer::AllocateCommandBuffers(VkDevice device, uint32_t count) {
@@ -25,11 +25,11 @@ bool VulkanCommandBuffer::AllocateCommandBuffers(VkDevice device, uint32_t count
     allocInfo.commandBufferCount = count;
 
     if (vkAllocateCommandBuffers(device, &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
-        MakeAError("Failed to allocate command buffers!");
+        CreateError("Failed to allocate command buffers!");
         return false;
     }
 
-    MakeASuccess("Command buffers allocated");
+    CreateSuccess("Command buffers allocated");
     return true;
 }
 

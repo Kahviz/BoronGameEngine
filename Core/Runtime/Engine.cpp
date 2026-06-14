@@ -92,19 +92,18 @@ Engine::Engine()
         ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f);
 
         if (font == nullptr) {
-            std::cout << "Could not load font, using default font" << std::endl;
+            CreateError("Could not load font, using default font");
             io.Fonts->AddFontDefault();
         }
 
         #ifdef _DEBUG
-            std::cout << "ImGui initialized successfully!" << std::endl;
+        CreateSuccess("ImGui initialized successfully!");
         #endif
 
         window.SetWindowIcon(window.GetWindow());
         ImGuiIO& IO = ImGui::GetIO();
         IO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         IO.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleFonts;
-
     }
 }
 Engine::~Engine()
@@ -136,18 +135,21 @@ int Engine::EngineRun()
     GLFWwindow* glfwWND = window.GetWindow();
 
     using clock = std::chrono::high_resolution_clock;
-    auto lastFrameTime = clock::now();
     ImGuiIO& IO = ImGui::GetIO();
 
     #if INEDITOR == 0
         InProject = true;
     #endif
     
+    auto lastFrameTime = clock::now();
+
     while (!glfwWindowShouldClose(glfwWND))
     {
         auto now = clock::now();
-        std::chrono::duration<float> delta = now - lastFrameTime;
-        float deltaTime = delta.count();
+
+        float deltaTime =
+            std::chrono::duration<float>(now - lastFrameTime).count();
+
         lastFrameTime = now;
 
         EngineDoFrame(&window, deltaTime);
@@ -221,7 +223,6 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     obj->Selected = Selec;
 
     std::string fullPath = textures + "\\TestTexture.png";
-    std::cout << fullPath << std::endl;
 
 #if DIRECTX11 == 1
     obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
@@ -273,6 +274,19 @@ float GetRandomFloat(float min, float max) { //Mathlib
 
 void Engine::EngineDoFrame(Window* wnd, float deltatime)
 {
+    static float timer = 0.0f;
+    static int framesd = 0;
+
+    timer += deltatime;
+    framesd++;
+
+    if (timer >= 1.0f)
+    {
+        std::cout << "FPS: " << framesd << '\n';
+        timer = 0.0f;
+        framesd = 0;
+    }
+
     bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
     bool RctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
 
@@ -327,6 +341,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     if (InProject) {
         if (!Init) {
+            CreateSuccess("Initing drawables");
+
             world.Name = "World";
             world.Parent = nullptr;
             world.InstanceType = Boron::Enums::InstanceType::World;
@@ -370,7 +386,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
     else {
         if (makeGui.MakeDashBoard()) {
-            MakeAInfo("Opened a project");
+            CreateInfo("Opened a project");
             InProject = true;
         }
     }

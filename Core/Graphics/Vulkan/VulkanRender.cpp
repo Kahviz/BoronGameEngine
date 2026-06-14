@@ -31,17 +31,17 @@ bool VulkanRender::Init(GLFWwindow* window)
 #endif
 
     if (!vkInstance.Init()) {
-        MakeAError("A Unexpected error happened on vkInstance.Init");
+        CreateError("A Unexpected error happened on vkInstance.Init");
         return false;
     }
 
     if (!vkDevice.Init(window, vkInstance.GetInstance())) {
-        MakeAError("A Unexpected error happened on vkDevice.Init");
+        CreateError("A Unexpected error happened on vkDevice.Init");
         return false;
     }
 
     if (!vkCommandBuffer.CreateCommandPool(vkDevice.GetDevice(), vkDevice.GetFamilyIndex())) {
-        MakeAError("A Unexpected error happened on vkDevice.CreateCommandPool");
+        CreateError("A Unexpected error happened on vkDevice.CreateCommandPool");
         return false;
     }
 
@@ -69,7 +69,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     }
 
     if (!vkSwapchain.Init(vkDevice.GetDevice(), vkDevice.GetPhysicalDevice(), vkDevice.GetSurface())) {
-        MakeAError("A Unexpected error happened on vkSwapchain.Init");
+        CreateError("A Unexpected error happened on vkSwapchain.Init");
     }
 
     std::array<VkAttachmentDescription, 2> attachments = {};
@@ -123,18 +123,18 @@ bool VulkanRender::Init(GLFWwindow* window)
     renderPassInfo.pSubpasses = &subpass;
 
     if (vkCreateRenderPass(vkDevice.GetDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
-        MakeAError("Failed to create render pass");
+        CreateError("Failed to create render pass");
         return false;
     }
-    MakeASuccess("Render pass created");
+    CreateSuccess("Render pass created");
 
     depthFormat = FindDepthFormat(vkDevice.GetPhysicalDevice());
 
     if (!vkPipeline.Init(vkDevice.GetDevice(), renderPass)) {
-        MakeAError("A Unexpected error happened on vkPipeline.Init");
+        CreateError("A Unexpected error happened on vkPipeline.Init");
     }
 
-    MakeASuccess("Framebuffers created");
+    CreateSuccess("Framebuffers created");
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -146,16 +146,16 @@ bool VulkanRender::Init(GLFWwindow* window)
     if (vkCreateSemaphore(vkDevice.GetDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
         vkCreateSemaphore(vkDevice.GetDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
         vkCreateFence(vkDevice.GetDevice(), &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
-        MakeAError("Failed to create synchronization objects!");
+        CreateError("Failed to create synchronization objects!");
         return false;
     }
 
-    MakeASuccess("Synchronization objects created");
+    CreateSuccess("Synchronization objects created");
 
     uint32_t framebufferCount = static_cast<uint32_t>(vkSwapchain.GetSwapchainFramebuffers().size());
 
     if (!vkCommandBuffer.AllocateCommandBuffers(vkDevice.GetDevice(), framebufferCount)) {
-        MakeAError("Failed to allocate command buffers!");
+        CreateError("Failed to allocate command buffers!");
         return false;
     }
 
@@ -214,7 +214,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     createDescriptorSets(nullptr);
 
     //InitEnd
-    MakeASuccess("No Fatal Errors in Vulkan Initing :D-<");
+    CreateSuccess("No Fatal Errors in Vulkan Initing :D-<");
     return true;
 }
 
@@ -281,7 +281,7 @@ void VulkanRender::CreateDepthResources(uint32_t width, uint32_t height) {
 
 void VulkanRender::Cleanup()
 {
-    MakeAInfo("Starting Vulkan Cleanup");
+    CreateInfo("Starting Vulkan Cleanup");
 
     if (vkDevice.GetDevice() != VK_NULL_HANDLE) {
         vkDeviceWaitIdle(vkDevice.GetDevice());
@@ -316,7 +316,7 @@ void VulkanRender::Cleanup()
         shadowImageMemory = VK_NULL_HANDLE;
     }
     if (!vkSwapchain.CleanupSwapchain(vkDevice.GetDevice(), vkCommandBuffer.GetCommandPool(), vkCommandBuffer.GetCommandBuffers())) {
-        MakeAError("A Error happened in vkSwapchain.CleanupSwapchain");
+        CreateError("A Error happened in vkSwapchain.CleanupSwapchain");
     }
 
     if (indexBuffer != VK_NULL_HANDLE) {
@@ -359,7 +359,7 @@ void VulkanRender::Cleanup()
     if (vkInstance.GetInstance() != VK_NULL_HANDLE) {
         vkDestroyInstance(vkInstance.GetInstance(), nullptr);
     }
-    MakeAInfo("Cleaned up successfully!");
+    CreateInfo("Cleaned up successfully!");
 }
 
 uint32_t VulkanRender::GetImageIndex() {
@@ -433,7 +433,7 @@ void VulkanRender::RecreateSwapchain() {
     uint32_t framebufferCount = static_cast<uint32_t>(vkSwapchain.GetSwapchainFramebuffers().size());
 
     if (!vkCommandBuffer.AllocateCommandBuffers(vkDevice.GetDevice(), framebufferCount)) {
-        MakeAError("Failed to allocate command buffers at RecreateSwapchain!");
+        CreateError("Failed to allocate command buffers at RecreateSwapchain!");
     }
 
     for (size_t i = 0; i < vkCommandBuffer.GetCommandBuffers().size(); i++) {
@@ -460,7 +460,7 @@ void VulkanRender::CreateFramebuffers() {
         framebufferInfo.layers = 1;
 
         if (vkCreateFramebuffer(vkDevice.GetDevice(), &framebufferInfo, nullptr, &vkSwapchain.GetSwapchainFramebuffers()[i]) != VK_SUCCESS) {
-            MakeAError("Failed to create framebuffer!");
+            CreateError("Failed to create framebuffer!");
         }
     }
 }
@@ -733,7 +733,7 @@ void VulkanRender::createDescriptorSets(const Instance* inst) {
             vkUpdateDescriptorSets(vkDevice.GetDevice(), 2, &descriptorWrites[0], 0, nullptr); //only 1 binding
         }
         else {
-            MakeAError("inst is nullptr, if this happened at start dont worry!");
+            CreateError("inst is nullptr, if this happened at start dont worry!");
         }
     }
 }
@@ -885,33 +885,33 @@ bool VulkanRender::RenderAMesh(
 
 void VulkanRender::PrintInfo() {
     if (shadowImage == VK_NULL_HANDLE) {
-        MakeAError("shadowImage is VK_NULL_HANDLE");
+        CreateError("shadowImage is VK_NULL_HANDLE");
     }
     if (shadowImageView == VK_NULL_HANDLE) {
-        MakeAError("shadowImageView is VK_NULL_HANDLE");
+        CreateError("shadowImageView is VK_NULL_HANDLE");
     }
     if (shadowImageMemory == VK_NULL_HANDLE) {
-        MakeAError("shadowImageMemory is VK_NULL_HANDLE");
+        CreateError("shadowImageMemory is VK_NULL_HANDLE");
     }
     if (shadowSampler == VK_NULL_HANDLE) {
-        MakeAError("shadowSampler is VK_NULL_HANDLE");
+        CreateError("shadowSampler is VK_NULL_HANDLE");
     }
     if (shadowRenderPass == VK_NULL_HANDLE) {
-        MakeAError("shadowRenderPass is VK_NULL_HANDLE");
+        CreateError("shadowRenderPass is VK_NULL_HANDLE");
     }
     if (shadowPipeline == VK_NULL_HANDLE) {
-        MakeAError("shadowPipeline is VK_NULL_HANDLE");
+        CreateError("shadowPipeline is VK_NULL_HANDLE");
     }
     if (shadowPipelineLayout == VK_NULL_HANDLE) {
-        MakeAError("shadowPipelineLayout is VK_NULL_HANDLE");
+        CreateError("shadowPipelineLayout is VK_NULL_HANDLE");
     }
     if (shadowFramebuffer == VK_NULL_HANDLE) {
-        MakeAError("shadowFramebuffer is VK_NULL_HANDLE");
+        CreateError("shadowFramebuffer is VK_NULL_HANDLE");
     }
     if (shadowCommandBuffer == VK_NULL_HANDLE) {
-        MakeAError("shadowCommandBuffer is VK_NULL_HANDLE");
+        CreateError("shadowCommandBuffer is VK_NULL_HANDLE");
     }
-    MakeAInfo("Checked all the shadowResources");
+    CreateInfo("Checked all the shadowResources");
 }
 
 void VulkanRender::RecordShadowCommandBuffer()
@@ -925,7 +925,7 @@ void VulkanRender::RecordShadowCommandBuffer()
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
     if (vkBeginCommandBuffer(shadowCommandBuffer, &beginInfo) != VK_SUCCESS) {
-        MakeAError("Failed to begin shadow command buffer");
+        CreateError("Failed to begin shadow command buffer");
         return;
     }
 
@@ -976,7 +976,7 @@ void VulkanRender::RecordShadowCommandBuffer()
     vkCmdEndRenderPass(shadowCommandBuffer);
 
     if (vkEndCommandBuffer(shadowCommandBuffer) != VK_SUCCESS) {
-        MakeAError("Failed to end shadow command buffer");
+        CreateError("Failed to end shadow command buffer");
     }
 }
 
@@ -1025,7 +1025,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         return;
     }
     else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-        MakeAError("Failed to acquire swapchain image");
+        CreateError("Failed to acquire swapchain image");
         return;
     }
 
@@ -1121,7 +1121,7 @@ void VulkanRender::EndFrame() {
     submitInfo.pSignalSemaphores = signalSemaphores;
 
     if (vkQueueSubmit(vkDevice.GetGraphicsQueue(), 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
-        MakeAError("Failed to submit draw command buffer");
+        CreateError("Failed to submit draw command buffer");
         return;
     }
 
@@ -1141,7 +1141,7 @@ void VulkanRender::EndFrame() {
         RecreateSwapchain();
     }
     else if (result != VK_SUCCESS) {
-        MakeAError("Failed to present swapchain image");
+        CreateError("Failed to present swapchain image");
     }
 
     drawCommands.clear();
@@ -1162,7 +1162,7 @@ VkCommandBuffer VulkanRender::BeginSingleTimeCommands() {
 
     VkCommandBuffer commandBuffer;
     if (vkAllocateCommandBuffers(vkDevice.GetDevice(), &allocInfo, &commandBuffer) != VK_SUCCESS) {
-        MakeAError("Failed to allocate command buffer for single time commands");
+        CreateError("Failed to allocate command buffer for single time commands");
         return VK_NULL_HANDLE;
     }
 
@@ -1171,7 +1171,7 @@ VkCommandBuffer VulkanRender::BeginSingleTimeCommands() {
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
     if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
-        MakeAError("Failed to begin command buffer");
+        CreateError("Failed to begin command buffer");
         return VK_NULL_HANDLE;
     }
 
@@ -1182,7 +1182,7 @@ void VulkanRender::EndSingleTimeCommands(VkCommandBuffer commandBuffer) {
     if (commandBuffer == VK_NULL_HANDLE) return;
 
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-        MakeAError("Failed to end command buffer");
+        CreateError("Failed to end command buffer");
         return;
     }
 
@@ -1192,7 +1192,7 @@ void VulkanRender::EndSingleTimeCommands(VkCommandBuffer commandBuffer) {
     submitInfo.pCommandBuffers = &commandBuffer;
 
     if (vkQueueSubmit(vkDevice.GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
-        MakeAError("Failed to submit command buffer");
+        CreateError("Failed to submit command buffer");
     }
 
     vkQueueWaitIdle(vkDevice.GetGraphicsQueue());
@@ -1209,7 +1209,7 @@ void VulkanRender::createShadowResources()
     vkGetPhysicalDeviceFormatProperties(vkDevice.GetPhysicalDevice(), VK_FORMAT_D32_SFLOAT, &formatProps);
 
     if (!(formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)) {
-        MakeAError("VK_FORMAT_D32_SFLOAT does not support depth attachment!");
+        CreateError("VK_FORMAT_D32_SFLOAT does not support depth attachment!");
         return;
     }
 
@@ -1231,7 +1231,7 @@ void VulkanRender::createShadowResources()
     BGE_ASSERT_VKRESULT(vkCreateImage(vkDevice.GetDevice(), &imageinfo, nullptr, &shadowImage), "Failed to create shadowImage");
 
     if (shadowImage == VK_NULL_HANDLE) {
-        MakeAError("shadowImage is NULL even though creation succeeded!");
+        CreateError("shadowImage is NULL even though creation succeeded!");
         return;
     }
 
@@ -1239,8 +1239,8 @@ void VulkanRender::createShadowResources()
     vkGetImageMemoryRequirements(vkDevice.GetDevice(), shadowImage, &memRequirements);
 
     if (memRequirements.size == 0) {
-        MakeAError("Memory size is 0");
-        MakeAError("This suggests a driver bug or invalid image parameters");
+        CreateError("Memory size is 0");
+        CreateError("This suggests a driver bug or invalid image parameters");
         return;
     }
 
@@ -1256,11 +1256,11 @@ void VulkanRender::createShadowResources()
     BGE_ASSERT_VKRESULT(vkAllocateMemory(vkDevice.GetDevice(), &allocInfo, nullptr, &shadowImageMemory), "Failed to allocate memory for shadowImageMemory");
 
     if (vkBindImageMemory(vkDevice.GetDevice(), shadowImage, shadowImageMemory, 0) != VK_SUCCESS) {
-        MakeAError("Failed to bind memory for shadowImageMemory");
+        CreateError("Failed to bind memory for shadowImageMemory");
         return;
     }
 
-    MakeASuccess("Allocated shadowImageMemory");
+    CreateSuccess("Allocated shadowImageMemory");
 
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1292,7 +1292,7 @@ void VulkanRender::createShadowResources()
     samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 
     if (vkCreateSampler(vkDevice.GetDevice(), &samplerInfo, nullptr, &shadowSampler) != VK_SUCCESS) {
-        MakeAError("Failed to create shadow sampler!");
+        CreateError("Failed to create shadow sampler!");
         return;
     }
 
@@ -1315,7 +1315,7 @@ void VulkanRender::createShadowResources()
 
     BGE_ASSERT_VKRESULT(vkAllocateCommandBuffers(vkDevice.GetDevice(), &commandAllocInfo, &shadowCommandBuffer), "Failed to allocate ShadowCommandBuffer");
 
-    MakeASuccess("Shadow resources created successfully!");
+    CreateSuccess("Shadow resources created successfully!");
 }
 
 void VulkanRender::createShadowRenderPass() {
@@ -1357,10 +1357,10 @@ void VulkanRender::createShadowRenderPass() {
     renderPassInfo.pDependencies = &dependency;
 
     if (vkCreateRenderPass(vkDevice.GetDevice(), &renderPassInfo, nullptr, &shadowRenderPass) != VK_SUCCESS) {
-        MakeAError("Failed to create shadowRenderpass");
+        CreateError("Failed to create shadowRenderpass");
     }
     else {
-        MakeAInfo("shadowRenderpass created!");
+        CreateInfo("shadowRenderpass created!");
     }
 }
 
@@ -1387,7 +1387,7 @@ void VulkanRender::createShadowPipeline() {
     pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
     if (vkCreatePipelineLayout(vkDevice.GetDevice(), &pipelineLayoutInfo, nullptr, &shadowPipelineLayout) != VK_SUCCESS) {
-        MakeAError("Failed to create shadow pipeline layout!");
+        CreateError("Failed to create shadow pipeline layout!");
         return;
     }
 
@@ -1490,12 +1490,12 @@ void VulkanRender::createShadowPipeline() {
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
     if (vkCreateGraphicsPipelines(vkDevice.GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &shadowPipeline) != VK_SUCCESS) {
-        MakeAError("Failed to create shadow pipeline!");
+        CreateError("Failed to create shadow pipeline!");
     }
-
+    
     vkDestroyShaderModule(vkDevice.GetDevice(), vertShaderModule, nullptr);
 
-    MakeASuccess("Shadow pipeline created!");
+    CreateSuccess("Shadow pipeline created!");
 }
 
 #endif

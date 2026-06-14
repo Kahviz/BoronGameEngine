@@ -34,7 +34,7 @@ bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
     VkPhysicalDevice physicalDevice = vk.GetPhysicalDevice();
     BGE_VK_ASSERT(device, "Device Can't Be VK_NULL_HANDLE");
     if (!fs::exists(path)) {
-        MakeAError("Texture Doesn't Exist! Path: " + path);
+        CreateError("Texture Doesn't Exist! Path: " + path);
         return false;
     }
 
@@ -42,7 +42,7 @@ bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
     stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
     if (!pixels) {
-        MakeAError("Failed to load texture file: " + path);
+        CreateError("Failed to load texture file: " + path);
         return false;
     }
 
@@ -50,8 +50,6 @@ bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
     m_height = texHeight;
 
     VkDeviceSize imageSize = texWidth * texHeight * 4;
-
-    std::cout << "Loading texture: " << path << " (" << texWidth << "x" << texHeight << ")" << std::endl;
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingMemory;
@@ -70,7 +68,7 @@ bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
     VkResult result = vkMapMemory(device, stagingMemory, 0, imageSize, 0, &data);
 
     if (result != VK_SUCCESS || !data) {
-        MakeAError("Failed to map staging memory!");
+        CreateError("Failed to map staging memory!");
         stbi_image_free(pixels);
         vkDestroyBuffer(device, stagingBuffer, nullptr);
         vkFreeMemory(device, stagingMemory, nullptr);
@@ -123,7 +121,7 @@ bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
     viewInfo.subresourceRange.layerCount = 1;
 
     if (vkCreateImageView(device, &viewInfo, nullptr, &m_imageView) != VK_SUCCESS) {
-        MakeAError("Failed to create image view!");
+        CreateError("Failed to create image view!");
         Cleanup(device);
         return false;
     }
@@ -144,7 +142,7 @@ bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
     if (vkCreateSampler(device, &samplerInfo, nullptr, &m_sampler) != VK_SUCCESS) {
-        MakeAError("Failed to create sampler!");
+        CreateError("Failed to create sampler!");
         Cleanup(device);
         return false;
     }
@@ -278,17 +276,17 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, IRenderer& renderer)
     Dx11Renderer* dx11Renderer = dx.GetRenderer();
 
     if (path.empty()) {
-        MakeAError("Texture path is empty!");
+        CreateError("Texture path is empty!");
         return nullptr;
     }
 
     if (!dx11Renderer->GetDevice()) {
-        MakeAError("Device is null!");
+        CreateError("Device is null!");
         return nullptr;
     }
 
     if (!std::filesystem::exists(path)) {
-        MakeAError("Texture Doesnt Exist: " + path);
+        CreateError("Texture Doesnt Exist: " + path);
         return nullptr;
     }
 
@@ -305,7 +303,7 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, IRenderer& renderer)
     );
 
     if (!data) {
-        MakeAError("stb_image failed to load: " + path);
+        CreateError("stb_image failed to load: " + path);
         return nullptr;
     }
 
@@ -332,7 +330,7 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, IRenderer& renderer)
     );
 
     if (FAILED(hr)) {
-        MakeAError("Failed to create texture");
+        CreateError("Failed to create texture");
         stbi_image_free(data);
         return nullptr;
     }
@@ -345,7 +343,7 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, IRenderer& renderer)
     stbi_image_free(data);
 
     if (FAILED(hr)) {
-        MakeAError("Failed to create SRV");
+        CreateError("Failed to create SRV");
         return nullptr;
     }
 

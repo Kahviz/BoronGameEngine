@@ -3,38 +3,38 @@
 #include <iostream>
 #include "GLOBALS.h"
 
-inline void MakeAError(const std::string& text) {
+inline void CreateError(const std::string& text) {
     #if PRINTDEBUGINFO == 1
-        std::cout << "\033[31m" << text << "\033[0m" << std::endl; // red
+        std::cout << "\033[31m" << text << "\033[0m" << "\n"; // red
     #endif
 }
 
-inline void MakeAWarning(const std::string& text) {
+inline void CreateWarning(const std::string& text) {
     #if PRINTDEBUGINFO == 1
-        std::cout << "\033[33m" << text << "\033[0m" << std::endl; // yellow
+        std::cout << "\033[33m" << text << "\033[0m" << "\n"; // yellow
     #endif
 }
 
-inline void MakeAProblem(const std::string& text) {
+inline void CreateProblem(const std::string& text) {
     #if PRINTDEBUGINFO == 1
-        std::cout << "\033[36m" << text << "\033[0m" << std::endl; // cyan
+        std::cout << "\033[36m" << text << "\033[0m" << "\n"; // cyan
     #endif
 }
 
-inline void MakeASuccess(const std::string& text) {
+inline void CreateSuccess(const std::string& text) {
     #if PRINTDEBUGINFO == 1
-        std::cout << "\033[32mSuccess: " << text << "\033[0m" << std::endl; //green
+        std::cout << "\033[32mSuccess: " << text << "\033[0m" << "\n"; //green
     #endif
 }
 
-inline void MakeAInfo(const std::string& text) {
+inline void CreateInfo(const std::string& text) {
     #if PRINTDEBUGINFO == 1
-        std::cout << "\033[1;30mInfo: " << text << "\033[0m" << std::endl;
+        std::cout << "\033[1;30mInfo: " << text << "\033[0m" << "\n";
     #endif
 }
 
 inline void ProfilerInformation(const std::string& text) {
     #ifdef _DEBUG
-        std::cout << "\033[1;32m" << text << "\033[0m" << std::endl;
+        std::cout << "\033[1;32m" << text << "\033[0m" << "\n";
     #endif
 }

@@ -64,7 +64,7 @@ void MeshVK::Load(
         }
         else
         {
-            MakeAError("No uv");
+            CreateError("No uv");
             verts[i].uv = { 0.0f, 0.0f };
         }
     }

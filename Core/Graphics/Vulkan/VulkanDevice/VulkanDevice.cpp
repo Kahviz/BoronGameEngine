@@ -8,7 +8,7 @@ bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)
     vkEnumeratePhysicalDevices(instance, &gpuCount, nullptr);
 
     if (gpuCount == 0) {
-        MakeAError("No Vulkan GPU found");
+        CreateError("No Vulkan GPU found");
         return false;
     }
 
@@ -34,15 +34,15 @@ bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)
         }
     }
     if (physicalDevice == VK_NULL_HANDLE) {
-        MakeAError("No suitable GPU found");
+        CreateError("No suitable GPU found");
         return false;
     }
     if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
-        MakeAError("Surface creation failed");
+        CreateError("Surface creation failed");
         return false;
     }
 
-    MakeASuccess("Surface Created");
+    CreateSuccess("Surface Created");
 
 
     uint32_t queueFamilyCount = 0;
@@ -66,7 +66,7 @@ bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)
     }
 
     if (graphicsFamilyIndex == -1) {
-        MakeAError("graphicsFamilyIndex == -1");
+        CreateError("graphicsFamilyIndex == -1");
         return false;
     }
 
@@ -86,13 +86,13 @@ bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)
         deviceCreateInfo.enabledExtensionCount = extensions.size();
         deviceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
-        MakeAInfo("Using VulkanValidationLayers");
+        CreateInfo("Using VulkanValidationLayers");
     #else
         deviceCreateInfo.enabledLayerCount = 0;
         deviceCreateInfo.enabledExtensionCount = extensions.size();
         deviceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
-        MakeAInfo("Not Using VulkanValidationLayers");
+        CreateInfo("Not Using VulkanValidationLayers");
     #endif
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceCreateInfo.queueCreateInfoCount = 1;
@@ -103,7 +103,7 @@ bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)
     deviceCreateInfo.pEnabledFeatures = nullptr;
 
     if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device) != VK_SUCCESS) {
-        MakeAError("Can't Create a VkDevice");
+        CreateError("Can't Create a VkDevice");
         return false;
     }
 

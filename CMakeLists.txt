@@ -87,7 +87,7 @@ add_executable(BoronEngine
     Core/Multiplatform/BoronPlatform.h
 
     #Physics
-    Core/BoronPhysics/Gravity.h
+    
     Core/BoronPhysics/Physics.h
     Core/BoronPhysics/Physics.cpp
     

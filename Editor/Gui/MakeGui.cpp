@@ -72,7 +72,7 @@ BML::Vector3 MakeVec3TextEdit(Instance* inst,
 }
 
 void MakeGui::MakeStyle() {
-    style.CreateImGuiStyle(Boron::Editor::ThemeType::Classic);
+    style.CreateImGuiStyle();
 }
 
 void MakeFloat3Edit(const char* Name, BML::Vector3& vec) {
@@ -203,7 +203,7 @@ void MakeGui::MakeIMGui(Window& wnd,
     ImGui::End();
 
     if (CanChange) {
-        MakeAInfo("Changing");
+        CreateInfo("Changing");
         float windowWidth = window_w * 1.5f;
         float windowHeight = window_h / 1.0868f;
 
@@ -498,7 +498,7 @@ bool MakeGui::MakeDashBoard()
                 openProject = true;
             }
             else {
-                MakeAError("ProjectName cannot be empty!");
+                CreateError("ProjectName cannot be empty!");
             }
         }
         ImGui::End();

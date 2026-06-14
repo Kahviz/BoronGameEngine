@@ -29,7 +29,7 @@
 			std::string errorMsg = std::format("BGE_ASSERT failed: {} is false!\nMessage: {}\nFile: {} (line: {})",
 				conditionStr, message,
 				location.file_name(), location.line());
-			MakeAError(errorMsg);
+			CreateError(errorMsg);
 		}
 	}
 
@@ -64,7 +64,7 @@
 						location.line()
 					);
 
-					MakeAError(errorMsg);
+					CreateError(errorMsg);
 				}
 		#endif
 	}
@@ -77,7 +77,7 @@
 					std::string errorMsg = std::format("BGE_ASSERT failed: Vulkan handle is VK_NULL_HANDLE!\nMessage: {}\nFile: {} (line: {})",
 						message,
 						location.file_name(), location.line());
-					MakeAError(errorMsg);
+					CreateError(errorMsg);
 				}
 		#endif
 	}

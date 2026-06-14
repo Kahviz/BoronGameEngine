@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Instances/Instance.h"
-#include "Gravity.h"
 
 class Physics {
 public:
-	bool ApplyGravity(Instance& inst,float Deltatime);
+	bool ApplyGravity(Instance& inst,float deltatime);
 private:
 };

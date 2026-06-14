@@ -32,7 +32,7 @@ Window::Window(int Width, int Height, std::string Name)
     pGfx = std::make_unique<Graphics>();
 
     if (!pGfx.get()->InitGraphics(m_window)) {
-        MakeAError("Graphics Initing Error!");
+        CreateError("Graphics Initing Error!");
 
         throw std::runtime_error("Failed to initialize graphics!");
     }
@@ -57,7 +57,7 @@ void Window::SetWindowIcon(GLFWwindow* window) {
         stbi_image_free(pixels);
     }
     else {
-        MakeAError("Failed to load: " + fullPath);
+        CreateError("Failed to load: " + fullPath);
     }
 }
 

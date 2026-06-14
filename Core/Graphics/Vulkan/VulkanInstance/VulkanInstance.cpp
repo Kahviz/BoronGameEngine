@@ -22,11 +22,11 @@ bool VulkanInstance::Init() {
     instInfo.enabledLayerCount = 0;
 
     if (vkCreateInstance(&instInfo, nullptr, &instance) != VK_SUCCESS) {
-        MakeAError("Vulkan instance creation failed!");
+        CreateError("Vulkan instance creation failed!");
         return false;
     }
 
-    MakeASuccess("Vulkan instance created");
+    CreateError("Vulkan instance created");
 
     return true;
 }

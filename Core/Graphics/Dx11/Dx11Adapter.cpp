@@ -14,7 +14,7 @@
 
 bool Dx11Adapter::Init(GLFWwindow* window)
 {
-    MakeASuccess("Inited DX11 Graphics!");
+    CreateSuccess("Inited DX11 Graphics!");
 
     HWND hwnd = glfwGetWin32Window(window);
 

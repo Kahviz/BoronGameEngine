@@ -30,13 +30,13 @@ std::string GetAppDataPath() {
         
 
         if (_dupenv_s(&buffer, &size, "APPDATA") == 0 && buffer != nullptr) {
-            MakeASuccess("AppData Found!");
+            CreateSuccess("AppData Found!");
             std::string path(buffer);
             free(buffer);
             return path;
         }
         else {
-            MakeAError("AppData Not Found in GLOBALS.h with _WIN32");
+            CreateError("AppData Not Found in GLOBALS.h with _WIN32");
             std::exit(10);
         }
     #else
@@ -70,7 +70,7 @@ fs::path GetAppDataDir() {
         return appdatatarget;
     }
     else {
-        MakeAError("Failed to get APPDATA path");
+        CreateError("Failed to get APPDATA path");
         if (appDataPath) free(appDataPath);
         return fs::path();
     }
