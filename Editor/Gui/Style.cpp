@@ -27,11 +27,9 @@ void Style::CreateImGuiStyle() {
         colors[ImGuiCol_DockingPreview] = ImVec4(0.015f, 0.015f, 0.015f, 1.0f);
         colors[ImGuiCol_TitleBg] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
         colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.08f, 0.08f, 1.0f);
-
         colors[ImGuiCol_Tab] = ImVec4(0.12f, 0.12f, 0.12f, 1.0f);
         colors[ImGuiCol_TabHovered] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
         colors[ImGuiCol_TabActive] = ImVec4(0.22f, 0.22f, 0.22f, 1.0f);
-
         colors[ImGuiCol_FrameBg] = ImVec4(0.055f, 0.055f, 0.055f, 1.0f);
         colors[ImGuiCol_FrameBgHovered] = ImVec4(0.065f, 0.065f, 0.065f, 1.0f);
         colors[ImGuiCol_FrameBgActive] = ImVec4(0.075f, 0.075f, 0.075f, 1.0f);
@@ -40,22 +38,22 @@ void Style::CreateImGuiStyle() {
         colors[ImGuiCol_ButtonHovered] = ImVec4(0.45f, 0.45f, 0.45f, 1.0f);
         colors[ImGuiCol_Button] = ImVec4(0.50f, 0.50f, 0.50f, 1.0f);
         colors[ImGuiCol_ButtonActive] = ImVec4(0.40f, 0.40f, 0.40f, 1.0f);
-
         colors[ImGuiCol_WindowBg] = ImVec4(0.58f, 0.58f, 0.58f, 1.0f);
         colors[ImGuiCol_Border] = ImVec4(0.40f, 0.40f, 0.40f, 1.0f);
-
         colors[ImGuiCol_DockingPreview] = ImVec4(0.30f, 0.30f, 0.30f, 0.4f);
-
         colors[ImGuiCol_TitleBg] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
         colors[ImGuiCol_TitleBgActive] = ImVec4(0.45f, 0.45f, 0.45f, 1.0f);
-
         colors[ImGuiCol_Tab] = ImVec4(0.48f, 0.48f, 0.48f, 1.0f);
         colors[ImGuiCol_TabHovered] = ImVec4(0.40f, 0.40f, 0.40f, 1.0f);
         colors[ImGuiCol_TabActive] = ImVec4(0.35f, 0.35f, 0.35f, 1.0f);
-
         colors[ImGuiCol_FrameBg] = ImVec4(0.54f, 0.54f, 0.54f, 1.0f);
         colors[ImGuiCol_FrameBgHovered] = ImVec4(0.48f, 0.48f, 0.48f, 1.0f);
         colors[ImGuiCol_FrameBgActive] = ImVec4(0.42f, 0.42f, 0.42f, 1.0f);
+
+        colors[ImGuiCol_PopupBg] = ImVec4(0.65f, 0.65f, 0.65f, 1.0f);
+        colors[ImGuiCol_Header] = ImVec4(0.60f, 0.60f, 0.60f, 1.0f);
+        colors[ImGuiCol_HeaderHovered] = ImVec4(0.55f, 0.55f, 0.55f, 1.0f);
+        colors[ImGuiCol_HeaderActive] = ImVec4(0.50f, 0.50f, 0.50f, 1.0f);
     }
 
     style.FrameRounding = FrameRounding;
@@ -92,6 +90,7 @@ void Style::CreateImGuiCustomization()
     }
 
     static const char* ThemeNames[] = {
+        "None",
         "Dark",
         "Light"
     };
