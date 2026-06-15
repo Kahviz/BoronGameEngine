@@ -17,6 +17,9 @@ namespace fs = std::filesystem;
 #if !defined(_DEBUG)
 	#undef VALIDATIONLAYERS
 #endif
+#if VULKAN == 0
+	#undef VALIDATIONLAYERS
+#endif
 
 #if INEDITOR == 1
 	#define PROFILER

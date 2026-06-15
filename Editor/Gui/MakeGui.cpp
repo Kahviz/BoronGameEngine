@@ -284,25 +284,25 @@ void MakeGui::MakeIMGui(Window& wnd,
     if (Downloads == false)
     {
         #ifdef _WIN32
-                char* userProfile = nullptr;
-                size_t len = 0;
+            char* userProfile = nullptr;
+            size_t len = 0;
 
-                if (_dupenv_s(&userProfile, &len, "USERPROFILE") == 0 && userProfile)
-                {
-                    currentPath = fs::path(userProfile) / "Downloads";
-                    free(userProfile);
-                }
-                else
-                {
-                    currentPath = fs::current_path();
-                }
+            if (_dupenv_s(&userProfile, &len, "USERPROFILE") == 0 && userProfile)
+            {
+                currentPath = fs::path(userProfile) / "Downloads";
+                free(userProfile);
+            }
+            else
+            {
+                currentPath = fs::current_path();
+            }
         #else
-                const char* home = std::getenv("HOME");
+            const char* home = std::getenv("HOME");
 
-                if (home)
-                    currentPath = fs::path(home) / "Downloads";
-                else
-                    currentPath = fs::current_path();
+            if (home)
+                currentPath = fs::path(home) / "Downloads";
+            else
+                currentPath = fs::current_path();
         #endif
 
         Downloads = true;
@@ -410,7 +410,7 @@ void MakeGui::MakeIMViewPort(Window& wnd)
 {
 }
 
-bool MakeGui::MakeDashBoard()
+bool MakeGui::MakeDashBoard(IRenderer* renderer)
 {
     bool openProject = false;
     static bool showConfigWindow = false;
@@ -456,10 +456,27 @@ bool MakeGui::MakeDashBoard()
 
     if (ImGui::Button("New Project", NewProjectSize)) {
         showNewProjectWindow = true;
-
+        
         showProjectsWindow = false;
         showConfigWindow = false;
     }
+
+    static Image2d image2d;
+    static bool Load = false;
+    if (!Load) {
+        Load = true;
+        std::string fullPath = textures + "\\TestTexture.png";
+
+        image2d.LoadImGuiImage(renderer, fullPath);
+    }
+    ImGui::Begin("Test##Frame");
+
+    ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
+
+    image2d.Draw(ImVec2(200, 200));
+
+    ImGui::End();
+    
 
     if (showNewProjectWindow) {
         ImGui::SetNextWindowSize(ImVec2(sw / 3, sh / 2), ImGuiCond_Once);

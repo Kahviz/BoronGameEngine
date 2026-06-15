@@ -10,6 +10,8 @@
 #include "Window/Window.h"
 #include <filesystem>
 #include "Style.h"
+#include "IRenderer.h"
+#include "Image2d.h"
 
 class Engine;
 
@@ -21,7 +23,7 @@ public:
     void MakeStyle();
     void MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Drawables, std::function<Instance* (const std::string&, const std::string&, BML::Vector3, BML::Vector3, bool)> AddAMesh, float* Color3, bool Selec, Engine* engine, Instance& world);
     void MakeIMViewPort(Window& wnd);
-    bool MakeDashBoard();
+    bool MakeDashBoard(IRenderer* renderer);
 private:
     Style style;
 };

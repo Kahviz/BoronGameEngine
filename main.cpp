@@ -6,22 +6,36 @@
 #include "ErrorHandling/ErrorMessage.h"
 #include <format>
 #include "BoronMathLibrary.h"
-
+#include "GLOBALS.h"
 int main() {
     CreateInfo("BoronEngine started!");
+
+    #if VULKAN == 1
+        #if DIRECTX11 == 1
+            CreateError("Cannot have multiple graphicsbackends at once");
+            return -1;
+        #endif
+    #endif
+
+#if VULKAN == 0
+    #if DIRECTX11 == 0
+        CreateError("You have to have one graphics backend");
+        return -1;
+    #endif
+#endif
 
     MakeFiles mf;
     mf.MakeAPPDATAFolders();
 
-    const int WaitTime = 4;
+    const int WaitTime = 1;
 
-#if INEDITOR == 0
-#ifdef NDEBUG
-    std::cout << "\033[1;33m[INFO]\033[0m You are in release mode and InEditor Flag is 0." << std::endl;
-    std::cout << "\033[1;33m[INFO]\033[0m If you want Editor Gui, set InEditor = 1 in GLOBALS and use Debug mode." << std::endl;
-    std::cout << "\033[1;33m[INFO]\033[0m This makes it harder to make cheats!" << std::endl;
-#endif
-#endif
+    #if INEDITOR == 0
+        #ifdef NDEBUG
+            std::cout << "\033[1;33m[INFO]\033[0m You are in release mode and InEditor Flag is 0." << std::endl;
+            std::cout << "\033[1;33m[INFO]\033[0m If you want Editor Gui, set InEditor = 1 in GLOBALS and use Debug mode." << std::endl;
+            std::cout << "\033[1;33m[INFO]\033[0m This makes it harder to make cheats!" << std::endl;
+        #endif
+    #endif
 
     try {
         Engine engine;

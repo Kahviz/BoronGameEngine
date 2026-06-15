@@ -77,8 +77,6 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
 
 
     obj->UniqueID = UniqueID;
-
-#if DIRECTX11 == 1
     std::string finalPath;
 
     if (fs::path(Path).is_absolute())
@@ -89,21 +87,12 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
     {
         finalPath = assets + Path;
     }
+
+#if DIRECTX11 == 1
     obj->OBJmesh = Mesh::Load(finalPath, window.GetGraphics().GetDevice());
 #endif
 
 #if VULKAN == 1
-    std::string finalPath;
-
-    if (fs::path(Path).is_absolute())
-    {
-        finalPath = Path;
-    }
-    else
-    {
-        finalPath = assets + Path;
-    }
-
     auto& gfx = window.GetGraphics();
     auto& vk = static_cast<VulkanAdapter&>(gfx.GetRenderer());
 

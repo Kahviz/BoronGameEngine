@@ -86,7 +86,9 @@ public:
     const std::vector<uint32_t>& GetIndices() const {
         #if VULKAN == 1
             return VM.GetIndices();
-        #else
+        #endif
+
+        #if DIRECTX11 == 1
             return DM.GetIndices();
         #endif
     }
@@ -94,7 +96,9 @@ public:
     const std::vector<Vertex>& GetVertices() const {
         #if VULKAN == 1
             return VM.GetVertices();
-        #else
+        #endif
+
+        #if DIRECTX11 == 1
             return DM.GetVertices();
         #endif
     }

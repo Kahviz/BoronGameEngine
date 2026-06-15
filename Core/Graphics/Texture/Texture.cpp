@@ -39,6 +39,9 @@ bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
     }
 
     int texWidth, texHeight, texChannels;
+
+    stbi_set_flip_vertically_on_load(true);
+
     stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
     if (!pixels) {

@@ -385,7 +385,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         );
     }
     else {
-        if (makeGui.MakeDashBoard()) {
+        if (makeGui.MakeDashBoard(&graphics.GetRenderer())) {
             CreateInfo("Opened a project");
             InProject = true;
         }

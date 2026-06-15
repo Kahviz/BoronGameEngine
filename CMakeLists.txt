@@ -145,7 +145,7 @@ add_executable(BoronEngine
     Core/Misc/Controller/Controller.cpp
     Core/Misc/Timer/Timer.cpp
     Core/Variables/Enums.h
-)
+ "Editor/Gui/Image2d.h" "Editor/Gui/Image2d.cpp")
 
 target_include_directories(BoronEngine PRIVATE
     include
