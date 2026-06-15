@@ -92,8 +92,8 @@ private:
         BML::Matrix4x4 model;
     };
     struct ShadowDrawCommand {
-        const MeshVK* mesh;
-        BML::Matrix4x4 modelMatrix;
+        const MeshVK* mesh = nullptr;
+        BML::Matrix4x4 modelMatrix{};
     };
     BML::Matrix4x4 lightSpaceMatrix;
 
@@ -127,7 +127,7 @@ private:
 
     uint32_t imageIndex = -1;
     uint32_t maxInstances = 100;
-    uint32_t dynamicAlignment = -1;
+    VkDeviceSize dynamicAlignment = -1;
 
     VkViewport viewport{};
     VkRect2D scissor = {};

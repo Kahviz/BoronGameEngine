@@ -284,12 +284,18 @@ void MakeGui::MakeIMGui(Window& wnd,
     if (Downloads == false)
     {
         #ifdef _WIN32
-                const char* userProfile = std::getenv("USERPROFILE");
+                char* userProfile = nullptr;
+                size_t len = 0;
 
-                if (userProfile)
+                if (_dupenv_s(&userProfile, &len, "USERPROFILE") == 0 && userProfile)
+                {
                     currentPath = fs::path(userProfile) / "Downloads";
+                    free(userProfile);
+                }
                 else
+                {
                     currentPath = fs::current_path();
+                }
         #else
                 const char* home = std::getenv("HOME");
 
