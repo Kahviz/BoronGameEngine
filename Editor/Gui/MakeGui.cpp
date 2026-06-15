@@ -410,6 +410,18 @@ void MakeGui::MakeIMViewPort(Window& wnd)
 {
 }
 
+void MakeGui::CreateErrorPopUp(IRenderer* renderer, Image2d& image2d, const std::string& errormsg, const float duration) {
+    std::string fullPath = textures + "\\ErrorIcon.png";
+
+    image2d.LoadImGuiImage(renderer, fullPath);
+
+    Image image;
+    image.image2d = image2d;
+    image.duration = duration;
+    image.reason = errormsg;
+    images.push_back(image);
+}
+
 bool MakeGui::MakeDashBoard(IRenderer* renderer)
 {
     bool openProject = false;
@@ -461,23 +473,6 @@ bool MakeGui::MakeDashBoard(IRenderer* renderer)
         showConfigWindow = false;
     }
 
-    static Image2d image2d;
-    static bool Load = false;
-    if (!Load) {
-        Load = true;
-        std::string fullPath = textures + "\\TestTexture.png";
-
-        image2d.LoadImGuiImage(renderer, fullPath);
-    }
-    ImGui::Begin("Test##Frame");
-
-    ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
-
-    image2d.Draw(ImVec2(200, 200));
-
-    ImGui::End();
-    
-
     if (showNewProjectWindow) {
         ImGui::SetNextWindowSize(ImVec2(sw / 3, sh / 2), ImGuiCond_Once);
         ImGui::SetNextWindowPos(ImVec2(sw / 2, sh / 2), ImGuiCond_Once);
@@ -521,6 +516,8 @@ bool MakeGui::MakeDashBoard(IRenderer* renderer)
                 openProject = true;
             }
             else {
+                Image2d errorPopUp;
+                CreateErrorPopUp(renderer, errorPopUp, "ProjectName cannot be empty!", 2.0f);
                 CreateError("ProjectName cannot be empty!");
             }
         }
@@ -671,4 +668,64 @@ bool MakeGui::MakeDashBoard(IRenderer* renderer)
     ImGui::End();
 
     return openProject;
+}
+
+void MakeGui::RenderPopUps(float deltatime)
+{
+    int renderIndex = 0;
+
+    for (auto it = images.begin(); it != images.end();)
+    {
+        std::string windowName = "##Popup" + std::to_string(renderIndex);
+
+        float popupWidth = screen_width / 4.0f;
+        float popupHeight = screen_height / 5.0f;
+
+        ImGui::SetNextWindowSize(ImVec2(popupWidth, popupHeight));
+
+        float overlapOffset = 15.0f;
+
+        ImGui::SetNextWindowPos(
+            ImVec2(
+                screen_width * 0.5f,
+                50.0f + renderIndex * overlapOffset
+            ),
+            ImGuiCond_Always,
+            ImVec2(0.5f, 0.0f)
+        );
+
+        ImGui::Begin(
+            windowName.c_str(),
+            nullptr,
+            ImGuiWindowFlags_NoDecoration |
+            ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_NoMove
+        );
+
+        ImVec2 windowSize = ImGui::GetWindowSize();
+
+        float aspect = screen_width / screen_height;
+        float size = aspect * 100.0f;
+
+        ImGui::SetCursorPos(ImVec2(
+            screen_width / 30,
+            (windowSize.y - size) * 0.5f
+        ));
+
+        it->image2d.Draw(ImVec2(size, size));
+
+        ImGui::SameLine();
+
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", it->reason.c_str());
+        ImGui::End();
+
+        it->duration -= deltatime;
+
+        if (it->duration <= 0.0f)
+            it = images.erase(it);
+        else
+            ++it;
+
+        renderIndex++;
+    }
 }

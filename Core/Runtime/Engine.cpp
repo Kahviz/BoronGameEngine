@@ -383,6 +383,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             this,
             world
         );
+        
     }
     else {
         if (makeGui.MakeDashBoard(&graphics.GetRenderer())) {
@@ -390,6 +391,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             InProject = true;
         }
     }
+    makeGui.RenderPopUps(deltatime); //Here last so thay be rendered always and on top of everything
 #endif
 
 #if VULKAN == 1

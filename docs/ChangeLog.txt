@@ -6,6 +6,7 @@ Version 1.2: -Coming
 	-Scene Creating
 	-ImGui image loading
 	-More accurate shadows
+	-Error,warning,info popups
  Removed:
 
  Changed:
