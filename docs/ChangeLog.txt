@@ -1,10 +1,11 @@
-
 Version 1.2: -Coming
  Added:
 	-Mesh caching for reducing ram usage
 	-Project saving and loading
 	-Sceneloading
 	-Scene Creating
+	-ImGui image loading
+	-More accurate shadows
  Removed:
 
  Changed:

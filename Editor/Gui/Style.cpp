@@ -33,6 +33,11 @@ void Style::CreateImGuiStyle() {
         colors[ImGuiCol_FrameBg] = ImVec4(0.055f, 0.055f, 0.055f, 1.0f);
         colors[ImGuiCol_FrameBgHovered] = ImVec4(0.065f, 0.065f, 0.065f, 1.0f);
         colors[ImGuiCol_FrameBgActive] = ImVec4(0.075f, 0.075f, 0.075f, 1.0f);
+
+        colors[ImGuiCol_PopupBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.0f);
+        colors[ImGuiCol_Header] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
+        colors[ImGuiCol_HeaderHovered] = ImVec4(0.08f, 0.08f, 0.08f, 1.0f);
+        colors[ImGuiCol_HeaderActive] = ImVec4(0.10f, 0.10f, 0.10f, 1.0f);
     }
     if (theme == Boron::Editor::ThemeType::Light) { //Impostor Theme
         colors[ImGuiCol_ButtonHovered] = ImVec4(0.45f, 0.45f, 0.45f, 1.0f);
