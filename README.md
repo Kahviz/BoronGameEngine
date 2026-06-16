@@ -50,6 +50,8 @@ You can also join the BoronEngine Discord server through the website.
 ## Support the Project
 
 **Star** this repository – it helps a lot!  
-**Watch** for updates
+**Watch** for updates!
+
 **Join BoronCommunity** https://discord.gg/6jkx4fgth6
+
 Questions or ideas? Feel free to reach out.
