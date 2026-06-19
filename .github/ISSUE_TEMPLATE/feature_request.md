@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for UntilitedGameEngine
+about: Suggest an idea for BoronEngine
 title: ''
 labels: enhancement
 assignees: ''
