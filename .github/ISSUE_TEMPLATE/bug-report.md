@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug in UntilitedGameEngine
+about: Report a bug in BoronEngine 
 title: ''
 labels: bug
 assignees: Kahviz
