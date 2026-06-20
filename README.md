@@ -7,7 +7,7 @@
 **Status: Work in progress** – There may be bugs
 
 ## Features
-- Two rendering backends: **Vulkan** and **DirectX 11**
+- Two rendering backends: **Vulkan** and **DirectX11**
 - Windows support (Linux coming soon)
 - Asset loading via Assimp
 - Controller input with SDL3 (rumble support)
