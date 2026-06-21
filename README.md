@@ -12,7 +12,7 @@
 - Asset loading via Assimp
 - Controller input with SDL3 (rumble support)
 - ImGui for debugging / tools
-- STB Image for icon loading
+- STB Image for icon and texture loading
 
 ## Libraries Used
 - **Assimp** – 3D model loading  
