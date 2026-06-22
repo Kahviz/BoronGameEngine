@@ -4,7 +4,7 @@
 
 **A game engine under development since 12.11.2025**
 
-**Status: Work in progress** – There may be bugs
+**Status: Work in progress** – There may be **bugs**
 
 ## Features
 - Two rendering backends: **Vulkan** and **DirectX11**
