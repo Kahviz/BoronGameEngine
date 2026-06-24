@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 #define DIRECTX11 0 //1 = True, 0 = False
 #define VULKAN 1 //1 = True, 0 = False
 #define VALIDATIONLAYERS 0; //If in debug and VALIDATIONLAYERS = 1 then true else false
-#define BGE_VERSION 1.1; //BoronGameEngine Version
+#define BGE_VERSION 1.2; //BoronGameEngine Version
 #define DEBUGFILEMAKING 0 //1 = True, 0 = False
 #define PRINTDEBUGINFO 1  //1 = True, 0 = False
 

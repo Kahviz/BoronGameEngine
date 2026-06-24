@@ -1,10 +1,11 @@
-Version 1.2: -Coming
+Version 1.2:
  Added:
 	-Mesh caching for reducing ram usage
 	-Project saving and loading
 	-Sceneloading
 	-Scene Creating
 	-ImGui image loading
+	-Scene hierarcy fix
 	-More accurate shadows
 	-Error,warning,info popups
  Removed:
@@ -15,6 +16,8 @@ Version 1.2: -Coming
 	-Reduced Instances size (in bytes) from 728 to 240
  Patches:
 	-DX11 now shows the loaded textures right at the renderer
+
+
 Version 1.1:
  Added:
 	-Shadows
