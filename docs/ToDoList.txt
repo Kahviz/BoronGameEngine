@@ -1,3 +1,12 @@
+Create viewport
+Create a graphics setting file
+Make Error and Warning popups with imgui
+Making Mathlib more clear and easy to use
+Pointlights to vulkan and dx11
+Make sceneloading cached with same objects
+Make Template system
+
+Image Loading in imgui - Done
 FIX vulkan Shadow acne -Done
 Make loading system load mesh paths -Done
 FIX the random bug when press ctrl the starting cubes dissapear  -Done
@@ -5,13 +14,3 @@ Make Dx11 and vulkan headers so its easier to include them -Done
 Renderer class IRenderer -Done
 Make so you can create multiple projects with in the editor without going to file explorer -Done
 FIX saving
-
-Add object adding menu
-Fix so you cannot have multiple same named objects
-Create a graphics setting file
-Image Loading in imgui --
-Make Error and Warning popups with imgui
-Making Mathlib more clear and easy to use
-Pointlights to vulkan and dx11
-Make sceneloading cached with same objects
-Make Template system

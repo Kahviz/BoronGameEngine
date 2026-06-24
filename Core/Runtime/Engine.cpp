@@ -309,6 +309,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         AddAMesh("\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false);
 
         cubes++;
+        std::cout << "FPS: " << (1.0f / deltatime) << '\n';
+        std::cout << "Cubes: " << (cubes) << '\n';
     }
 
 
@@ -430,15 +432,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 #if VULKAN == 1
     wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
 #endif
-
-    static int framess = 0;
-    framess++;
-
-    if (framess % 1000 == 0)
-    {
-        std::cout << "FPS: " << (1.0f / deltatime) << '\n';
-        std::cout << "Cubes: " << (cubes) << '\n';
-    }
 
     wnd->GetGraphics().EndFrame();
 }

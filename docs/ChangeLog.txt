@@ -1,3 +1,13 @@
+Version 1.3:
+ Added:
+
+ Removed:
+
+ Changed:
+
+ Patches:
+
+
 Version 1.2:
  Added:
 	-Mesh caching for reducing ram usage

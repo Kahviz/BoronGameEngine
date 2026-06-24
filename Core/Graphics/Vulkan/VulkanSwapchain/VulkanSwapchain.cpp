@@ -69,9 +69,10 @@ bool VulkanSwapchain::Init(VkDevice& device,VkPhysicalDevice& physicalDevice, Vk
     }
 
     uint32_t swapchainImageCount = 0;
-    vkGetSwapchainImagesKHR(device, swapchain, &swapchainImageCount, nullptr);
-    std::vector<VkImage> swapchainImages(swapchainImageCount);
-    vkGetSwapchainImagesKHR(device, swapchain, &swapchainImageCount, swapchainImages.data());
+    std::vector<VkImage> tempImages(swapchainImageCount);
+    vkGetSwapchainImagesKHR(device, swapchain, &swapchainImageCount, tempImages.data());
+
+    swapchainImages = std::move(tempImages);
 
     swapchainImageViews.resize(swapchainImageCount);
 

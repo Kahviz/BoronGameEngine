@@ -1,5 +1,5 @@
-// Globals.h
 #pragma once
+
 #include <string>
 #include <filesystem>
 
