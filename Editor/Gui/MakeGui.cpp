@@ -283,24 +283,28 @@ void MakeGui::MakeIMGui(Window& wnd,
                 }
 
                 if (inst->Selected) {
-                    ImVec2 windowSize = ImGui::GetWindowSize();
-                    ImGui::SameLine(0.0f, windowSize.x / 1.5f);
-
-                    std::string id = "##plusbutton" + std::to_string(inst->UniqueID);
-
                     float aspect = screen_w / screen_h;
                     float size = aspect * 8;
+                    float padding = ImGui::GetStyle().WindowPadding.x;
+                    float scrollbarSize = ImGui::GetStyle().ScrollbarSize;
 
-                    ImVec2 pos = ImGui::GetCursorScreenPos();
+                    ImVec2 savedCursor = ImGui::GetCursorPos();
+                    float itemTopY = ImGui::GetItemRectMin().y - ImGui::GetWindowPos().y + ImGui::GetScrollY();
 
-                    pos.x += size * 0.25f;
-                    pos.y += size * 0.25f;
+                    ImGui::SetCursorPos(ImVec2(
+                        ImGui::GetWindowWidth() - size - scrollbarSize - padding,
+                        itemTopY
+                    ));
+
+                    std::string id = "##plusbutton" + std::to_string(inst->UniqueID);
 
                     if (ImGui::ImageButton(id.c_str(), plusbutton.GetTexture(), ImVec2(size, size))) {
                         plusGuiOpen = true;
                         selectedInst = inst;
                     }
-                    
+
+                    ImGui::SetCursorPos(savedCursor);
+                    ImGui::Dummy(ImVec2(0.0f, 0.0f));
                 }
             }
         }
