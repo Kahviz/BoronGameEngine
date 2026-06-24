@@ -32,7 +32,7 @@ int main() {
     #if INEDITOR == 0
         #ifdef NDEBUG
             std::cout << "\033[1;33m[INFO]\033[0m You are in release mode and InEditor Flag is 0." << std::endl;
-            std::cout << "\033[1;33m[INFO]\033[0m If you want Editor Gui, set InEditor = 1 in GLOBALS and use Debug mode." << std::endl;
+            std::cout << "\033[1;33m[INFO]\033[0m If you want Editor Gui, set InEditor = 1 in GLOBALS." << std::endl;
             std::cout << "\033[1;33m[INFO]\033[0m This makes it harder to make cheats!" << std::endl;
         #endif
     #endif

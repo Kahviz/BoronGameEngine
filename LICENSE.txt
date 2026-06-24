@@ -1,19 +1,11 @@
 Copyright (c) 2026 Kahviz_ (Github)
 
-Permission is hereby granted to use, copy, and modify this software
-for non-commercial purposes only.
+All rights reserved.
 
-Selling, sublicensing, distributing for profit, or including this software
-in any commercial product or service is strictly prohibited without
-prior written permission from the copyright holder.
+Permission is granted to use and modify this Software for personal, non-commercial purposes only.
 
-The above copyright notice shall be included in all copies or substantial
-portions of the Software.
+Redistribution, republication, sublicensing, sale, sharing, or distribution of this Software, in whole or in part, whether modified or unmodified, is strictly prohibited without prior written permission from the copyright holder.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+The above copyright notice and this permission notice shall be included in all copies used under this license.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH, THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
