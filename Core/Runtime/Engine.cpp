@@ -164,7 +164,7 @@ int Engine::EngineRun()
     return 0;
 }
 
-Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
+Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
     BML::Vector3 pos, BML::Vector3 Size, bool Selec,bool LiteralPath)
 {
     Transform transform;
@@ -231,12 +231,13 @@ Instance& Engine::AddAMesh(const std::string& Path, const std::string& Name,
     obj->texture.LoadVK(fullPath, vk);
     vk.UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
 #endif
+    obj->Parent = &world;
 
     Instance* objPtr = obj.get();
     Drawables.push_back(std::move(obj));
 
     Index++;
-    return *objPtr;
+    return objPtr;
 }
 
 void ScreenResizerDetector(Window* wnd) {
@@ -351,8 +352,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
             Drawables = SaveProject::Load(window);
 
-            if (Drawables.empty()) //If empty make the starting cubes
-            { 
+            if (Drawables.empty()) { 
                 SaveProject::Save(Drawables);
 
                 AddAMesh("\\Cube.obj", "Cube2", BML::Vec3{ 0,0,0 }, BML::Vec3{ 0.5,1,0.5 }, false,false);
@@ -370,18 +370,11 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         makeGui.MakeIMGui(
             *wnd,
             Drawables,
-            [this](const std::string& path,
-                const std::string& name,
-                BML::Vector3 pos,
-                BML::Vector3 size,
-                bool selec) -> Instance*
-            {
-                return &AddAMesh(path, name, pos, size, selec, false);
-            },
             reinterpret_cast<float*>(&Color3),
             false,
             this,
-            world
+            world,
+            &graphics.GetRenderer()
         );
         
     }
@@ -391,6 +384,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             InProject = true;
         }
     }
+
     makeGui.RenderPopUps(deltatime); //Here last so thay be rendered always and on top of everything
 #endif
 

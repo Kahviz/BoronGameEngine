@@ -4,7 +4,7 @@
 
 namespace Boron {
 	namespace Enums {
-		enum class InstanceType : uint8_t {
+		extern enum class InstanceType : uint8_t {
 			None = 0,
 			Object,
 			Instance,
@@ -12,7 +12,7 @@ namespace Boron {
 		};
 	}
 	namespace Editor {
-		enum class ThemeType : uint8_t {
+		extern enum class ThemeType : uint8_t {
 			None = 0,
 			Dark,
 			Light

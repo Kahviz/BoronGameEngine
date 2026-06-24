@@ -25,7 +25,7 @@ public:
     ~Engine();
 
     int EngineRun();
-    Instance& AddAMesh(const std::string& Path, const std::string& Name, BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath);    
+    Instance* AddAMesh(const std::string& Path, const std::string& Name, BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath);    
 private:
     void EngineDoFrame(Window* wnd, float deltatime);
     bool ImGuiInited = false;
@@ -43,7 +43,6 @@ private:
     bool InProject = false;
     CameraControl camC;
 
-    int Index = 0;
     int screen_width = 1280;
     int screen_height = 800;
 

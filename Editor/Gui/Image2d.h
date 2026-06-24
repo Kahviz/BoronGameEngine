@@ -12,14 +12,17 @@ public:
 	bool LoadImGuiImage(IRenderer* renderer, const std::string& path);
 
 	#if VULKAN == 1
-		VkDescriptorSet& GetDescriptorSet() { return m_descriptorSet; };
+		VkDescriptorSet& GetTexture() { return m_descriptorSet; };
 	#endif
 	#if DIRECTX11 == 1
-		ID3D11ShaderResourceView* GetSRV() { return srv.Get(); };
+		ID3D11ShaderResourceView* GetTexture() { return srv.Get(); };
 	#endif
+	bool IsLoaded() {
+		return m_isLoaded;
+	}
 private:
 	Texture m_texture;
-
+	bool m_isLoaded = false;
 	#if VULKAN == 1
 		VkDescriptorSet m_descriptorSet = VK_NULL_HANDLE;
 	#endif

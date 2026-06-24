@@ -21,7 +21,7 @@ class MakeGui
 {
 public:
     void MakeStyle();
-    void MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Drawables, std::function<Instance* (const std::string&, const std::string&, BML::Vector3, BML::Vector3, bool)> AddAMesh, float* Color3, bool Selec, Engine* engine, Instance& world);
+    void MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Drawables, float* Color3, bool Selec, Engine* engine, Instance& world, IRenderer* renderer);
     void MakeIMViewPort(Window& wnd);
     void CreateErrorPopUp(IRenderer* renderer, Image2d& image2d, const std::string& errormsg, const float duration);
     bool MakeDashBoard(IRenderer* renderer);

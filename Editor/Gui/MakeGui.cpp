@@ -36,34 +36,62 @@ static MeshButton meshButtons[] =
     { "Cylinder", assets + "\\Cylinder.obj", "Cylinder"}
 };
 
-void MakeChildrenNodes(Instance* inst) {
+void MakeChildrenNodes(Instance* inst,
+    std::vector<std::unique_ptr<Instance>>& Drawables,
+    Instance& world)
+{
     if (!inst) return;
 
     std::vector<Instance*> children = inst->GetChildren();
     for (auto& child : children) {
-        if (!child)
-            continue;
+        if (!child) continue;
 
         std::vector<Instance*> grandChildren = child->GetChildren();
+
         if (grandChildren.empty())
         {
-            ImGui::TreeNodeEx((void*)child,
-                ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen,
-                "%s",
-                child->Name.c_str()
-            );
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf |
+                ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
+            if (child->Selected) {
+                flags |= ImGuiTreeNodeFlags_Selected;
+            }
+
+            bool open = ImGui::TreeNodeEx((void*)child, flags, "%s", child->Name.c_str());
+
+            if (ImGui::IsItemClicked()) {
+                for (auto& i : Drawables) {
+                    i->Deselect();
+                }
+
+                child->Select();
+                CreateError("Selected child");
+                world.Selected = false;
+            }
         }
         else
         {
-            if (ImGui::TreeNodeEx((void*)child, ImGuiTreeNodeFlags_OpenOnArrow, "%s", child->Name.c_str()))
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+
+            if (child->Selected) flags |= ImGuiTreeNodeFlags_Selected;
+
+            bool open = ImGui::TreeNodeEx((void*)child, flags, "%s", child->Name.c_str());
+
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
             {
-                MakeChildrenNodes(child);
+                for (auto& i : Drawables)
+                    i->Deselect();
+
+                child->Select();
+                world.Selected = false;
+            }
+            if (open) {
+                MakeChildrenNodes(child, Drawables, world);
                 ImGui::TreePop();
             }
         }
     }
 }
-
 BML::Vector3 MakeVec3TextEdit(Instance* inst,
     const std::string& name,
     const std::string& VecType)
@@ -96,19 +124,11 @@ void MakeFloat3Edit(const char* Name, BML::Vector3& vec) {
 
 void MakeGui::MakeIMGui(Window& wnd,
     std::vector<std::unique_ptr<Instance>>& Drawables,
-    std::function<Instance*
-    (
-        const std::string&,
-        const std::string&,
-        BML::Vector3,
-        BML::Vector3,
-        bool
-        )>
-    AddAMesh,
     float* Color3,
     bool Selec,
     Engine* engine,
-    Instance& world
+    Instance& world,
+    IRenderer* renderer
 )
 { 
     MakeStyle();
@@ -169,39 +189,35 @@ void MakeGui::MakeIMGui(Window& wnd,
         ImGuiWindowFlags_AlwaysVerticalScrollbar
     );
     
-    if (world.Selected) {
-        for (const auto& Drawable : Drawables) {
-            Drawable.get()->Selected = false;
-        }
+    bool anyDrawableSelected = false;
 
+    for (const auto& Drawable : Drawables) {
+        if (Drawable.get()->Selected) {
+            world.Selected = false;
+            anyDrawableSelected = true;
+
+            Instance& inst = *Drawable.get();
+
+            // Name
+            ImGui::Text("Name: ");
+            ImGui::SameLine();
+            InputTextStd("##Name", inst.Name);
+
+            // Pos
+            MakeFloat3Edit("Position", inst.transform.Position);
+
+            // Anchored
+            ImGui::Checkbox("Anchored: ", &inst.Anchored);
+        }
+    }
+
+    if (!anyDrawableSelected && world.Selected) {
         ImGui::Text("Name: ");
         ImGui::SameLine();
         InputTextStd("##NameWORLD", world.Name);
     }
 
-    for (const auto& Drawable : Drawables) {
-        if (Drawable.get()->Selected) {
-            world.Selected = false;
-
-            Instance& inst = *Drawable.get();
-
-            //Name
-            ImGui::Text("Name: ");
-            ImGui::SameLine();
-            InputTextStd("##NameWORLD", world.Name);
-
-            //Pos
-            MakeFloat3Edit("Position", inst.transform.Position);
-
-            //Anchored
-            ImGui::Checkbox("Anchored: ", &inst.Anchored);
-            //Size
-            //MakeFloat3Edit("Size", inst.Size); UNIQUE ID
-        }
-    }
-
     ImGui::End();
-
     if (CanChange) {
         CreateInfo("Changing");
         float windowWidth = window_w * 1.5f;
@@ -217,7 +233,6 @@ void MakeGui::MakeIMGui(Window& wnd,
 
         ImGui::SetNextWindowPos(ImVec2(finalX, finalY));
     }
-
     ImGui::Begin("Explorer", nullptr,
         ImGuiWindowFlags_AlwaysHorizontalScrollbar |
         ImGuiWindowFlags_AlwaysVerticalScrollbar
@@ -234,42 +249,82 @@ void MakeGui::MakeIMGui(Window& wnd,
         world.Selected = true;
     }
 
+    Image2d plusbutton;
+    plusbutton.LoadImGuiImage(renderer, textures + "\\PlusIcon.png");
+    static bool plusGuiOpen = false;
+    static Instance* selectedInst = nullptr;
     if (worldNodeOpen)
     {
         for (auto& instPtr : Drawables)
         {
             Instance* inst = instPtr.get();
-            inst->Parent = &world;
 
             if (!inst || inst->Parent != &world)
                 continue;
 
+            ImGuiTreeNodeFlags flags =
+                ImGuiTreeNodeFlags_OpenOnArrow;
+
             if (inst->IsVisibleInExplorer) {
-                if (ImGui::TreeNodeEx(
-                    (void*)inst,
-                    ImGuiTreeNodeFlags_OpenOnArrow,
-                    "%s",
-                    inst->Name.c_str()))
+                bool nodeOpen = ImGui::TreeNodeEx((void*)inst, flags, "%s", inst->Name.c_str());
+                bool clicked = ImGui::IsItemClicked();
+
+                if (nodeOpen)
                 {
-                    MakeChildrenNodes(inst);
+                    MakeChildrenNodes(inst, Drawables, world);
                     ImGui::TreePop();
                 }
-            }
 
-            if (ImGui::IsItemClicked())
-            {
-                for (auto& i : Drawables)
-                    i->Deselect();
+                if (clicked)
+                {
+                    for (auto& i : Drawables) i->Deselect();
+                    inst->Select();
+                    world.Selected = false;
+                }
 
-                inst->Select();
-                world.Selected = false;
+                if (inst->Selected) {
+                    ImVec2 windowSize = ImGui::GetWindowSize();
+                    ImGui::SameLine(0.0f, windowSize.x / 1.5f);
+
+                    std::string id = "##plusbutton" + std::to_string(inst->UniqueID);
+
+                    float aspect = screen_w / screen_h;
+                    float size = aspect * 8;
+
+                    ImVec2 pos = ImGui::GetCursorScreenPos();
+
+                    pos.x += size * 0.25f;
+                    pos.y += size * 0.25f;
+
+                    if (ImGui::ImageButton(id.c_str(), plusbutton.GetTexture(), ImVec2(size, size))) {
+                        plusGuiOpen = true;
+                        selectedInst = inst;
+                    }
+                    
+                }
             }
         }
 
         ImGui::TreePop();
     }
-
     ImGui::End();
+    if (plusGuiOpen && selectedInst) {
+        ImGui::SetNextWindowSize(ImVec2(200, 300), ImGuiCond_Once);
+        ImGui::Begin("Add a instance", &plusGuiOpen);
+
+        if (ImGui::Selectable("Object")) {
+            Instance* inst = engine->AddAMesh(
+                "\\Cube.obj", "Object", { 0,5,0 }, { 2,2,2 }, false, false
+            );
+            if (selectedInst && inst) {
+                selectedInst->Children.push_back(inst);
+                inst->Parent = selectedInst;
+            }
+            plusGuiOpen = false;
+        }
+
+        ImGui::End();
+    }
 
     if (CanChange) {
 
