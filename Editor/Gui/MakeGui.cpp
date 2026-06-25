@@ -1,8 +1,7 @@
 #include "MakeGui.h"
 #include <algorithm>
 #include "imgui.h"
-#include <backends/imgui_impl_dx11.h>
-#include <backends/imgui_impl_win32.h>
+#include "GraphicsBackends.h"
 #include "GLOBALS.h"
 #include "Graphics/Graphics.h"
 #include <imgui_internal.h>
@@ -204,10 +203,20 @@ void MakeGui::MakeIMGui(Window& wnd,
             InputTextStd("##Name", inst.Name);
 
             // Pos
-            MakeFloat3Edit("Position", inst.transform.Position);
+            if (ImGui::TreeNode("Transform")) {
+                MakeFloat3Edit("Position", inst.transform.Position);
+                MakeFloat3Edit("Orientation", inst.transform.Orientation);
+                MakeFloat3Edit("Size", inst.transform.Size);
+
+                ImGui::TreePop();
+            }
 
             // Anchored
-            ImGui::Checkbox("Anchored: ", &inst.Anchored);
+            if (ImGui::TreeNode("Physics")) {
+                ImGui::Checkbox("Anchored: ", &inst.Anchored);
+
+                ImGui::TreePop();
+            }
         }
     }
 
