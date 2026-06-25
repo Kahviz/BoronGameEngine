@@ -102,23 +102,21 @@ void MakeGui::MakeStyle() {
     style.CreateImGuiStyle();
 }
 
-void MakeFloat3Edit(const char* Name, BML::Vector3& vec) {
+void MakeFloat3Edit(const Instance& inst,std::string Name, BML::Vector3& vec) {
     char label[128];
-    static int Times = 0;
-    Times += 1;
 
-    snprintf(label, sizeof(label), "%s: ", Name);
+    snprintf(label, sizeof(label), "%s:", (Name).c_str());
 
     ImGui::Text("%s", label);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(80);
-    ImGui::InputFloat("##x", &vec.x(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
+    ImGui::InputFloat(("##x" + Name + std::to_string(inst.UniqueID)).c_str(), &vec.x(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(80);
-    ImGui::InputFloat("##y", &vec.y(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
+    ImGui::InputFloat(("##y" + Name + std::to_string(inst.UniqueID)).c_str(), &vec.y(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(80);
-    ImGui::InputFloat("##z", &vec.z(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
+    ImGui::InputFloat(("##z" + Name + std::to_string(inst.UniqueID)).c_str(), &vec.z(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
 }
 
 void MakeGui::MakeIMGui(Window& wnd,
@@ -204,9 +202,9 @@ void MakeGui::MakeIMGui(Window& wnd,
 
             // Pos
             if (ImGui::TreeNode("Transform")) {
-                MakeFloat3Edit("Position", inst.transform.Position);
-                MakeFloat3Edit("Orientation", inst.transform.Orientation);
-                MakeFloat3Edit("Size", inst.transform.Size);
+                MakeFloat3Edit(inst,"Position", inst.transform.Position);
+                MakeFloat3Edit(inst,"Orientation", inst.transform.Orientation);
+                MakeFloat3Edit(inst,"Size", inst.transform.Size);
 
                 ImGui::TreePop();
             }
