@@ -4,8 +4,6 @@
 #include <iostream>
 #include "ErrorHandling/ErrorMessage.h"
 
-std::string EngineName = "BoronEngine";
-
 int screen_width = 800;
 int screen_height = 400;
 float zFar = 1000.0f;
@@ -88,7 +86,7 @@ fs::path GetAppDataDir() {
 #endif
 }
 
-std::string ProjectName = "ProjectTest1";
+std::string g_projectName = "ProjectTest1";
 std::string appData = GetAppDataPath();
 
 std::string BoronEnginePath = appData + "\\BoronEngine";

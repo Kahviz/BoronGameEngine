@@ -577,7 +577,7 @@ bool MakeGui::MakeDashBoard(IRenderer* renderer)
         {
             if (projectname[0] != '\0')
             {
-                ProjectName = projectname;
+                g_projectName = projectname;
 
                 openProject = true;
             }
@@ -669,7 +669,7 @@ bool MakeGui::MakeDashBoard(IRenderer* renderer)
             if (ImGui::Button(folderName.c_str(),
                 ImVec2(buttonSize, buttonSize)))
             {
-                ProjectName = folderName;
+                g_projectName = folderName;
                 openProject = true;
             }
 

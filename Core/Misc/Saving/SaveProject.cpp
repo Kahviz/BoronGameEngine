@@ -12,8 +12,8 @@ namespace fs = std::filesystem;
 
 void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
 {
-    std::string path = savings + "\\" + ProjectName;
-    std::string meshFilesPath = savings + "\\" + ProjectName + "\\MeshFiles";
+    std::string path = savings + "\\" + g_projectName;
+    std::string meshFilesPath = savings + "\\" + g_projectName + "\\MeshFiles";
 
     fs::create_directories(meshFilesPath);
 
@@ -138,7 +138,7 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
 std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window)
 {
     std::vector<std::unique_ptr<Instance>> Loaded;
-    std::ifstream file(savings + "\\" + ProjectName + "\\save.BGEproject");
+    std::ifstream file(savings + "\\" + g_projectName + "\\save.BGEproject");
 
     if (!file.is_open()) {
         std::cout << "File not found\n";
@@ -220,7 +220,7 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window)
         {
             std::string meshPath =
                 savings + "\\" +
-                ProjectName +
+                g_projectName +
                 "\\MeshFiles\\" +
                 loadedMeshFile;
 

@@ -1,11 +1,12 @@
+Parent loading
 Create viewport
-Create a graphics setting file
 Make Error and Warning popups with imgui
 Making Mathlib more clear and easy to use
 Pointlights to vulkan and dx11
 Make sceneloading cached with same objects
 Make Template system
 
+Create a graphics setting file
 Image Loading in imgui - Done
 FIX vulkan Shadow acne -Done
 Make loading system load mesh paths -Done

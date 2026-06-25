@@ -1,7 +1,9 @@
-#include "GLOBALS.h"
-
-#if DIRECTX11 == 1
 #pragma once
+
+#include "GLOBALS.h"
+#if DIRECTX11 == 1
+#include "GraphicsSettings.h"
+
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <string>
@@ -115,8 +117,6 @@ private:
     ComPtr<ID3D11RasterizerState> pShadowRasterizer;
     ComPtr<ID3D11SamplerState> pShadowSampler;
     ComPtr<ID3D11Buffer> pShadowCB;
-
-    const UINT SHADOW_MAP_SIZE = 4096;
 
     struct ShadowCB
     {

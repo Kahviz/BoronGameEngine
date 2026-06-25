@@ -2,6 +2,8 @@
 
 #if VULKAN == 1
 #pragma once
+#include "GraphicsSettings.h"
+
 #include <vector>
 #include <array>
 #include <stdexcept>
@@ -171,7 +173,5 @@ private:
     VkPipeline shadowPipeline = VK_NULL_HANDLE;
     VkPipelineLayout shadowPipelineLayout = VK_NULL_HANDLE;
     VkFramebuffer shadowFramebuffer = VK_NULL_HANDLE;
-
-    const uint32_t SHADOW_MAP_SIZE = 2048;
 };
 #endif

@@ -42,12 +42,11 @@ extern float viewport_width;
 extern float viewport_height;
 
 extern std::string appData;
-extern std::string EngineName;
 extern std::string fonts;
 extern std::string assets;
 extern std::string textures;
 extern std::string savings;
-extern std::string ProjectName;
+extern std::string g_projectName;
 
 extern fs::path appDataTarget;
 

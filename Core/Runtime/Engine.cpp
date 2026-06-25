@@ -353,7 +353,10 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             Drawables.reserve(5000);
 
             Drawables = SaveProject::Load(window);
-
+            CreateError("Using this no children saving thing for now");
+            for (auto& Drawable : Drawables) {
+                Drawable->Parent = &world;
+            }
             if (Drawables.empty()) { 
                 SaveProject::Save(Drawables);
 
