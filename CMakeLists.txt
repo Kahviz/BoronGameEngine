@@ -15,7 +15,7 @@ if(MSVC)
 endif()
 
 find_package(Vulkan REQUIRED)
-½
+
 if(NOT Vulkan_FOUND)
     message(FATAL_ERROR "Vulkan SDK not found.\nInstall it from https://vulkan.lunarg.com/")
 endif()
