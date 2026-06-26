@@ -1,6 +1,6 @@
 #pragma once
-#include "../../Libs/SDL3/SDL.h"
-#include "../../Libs/SDL3/SDL_timer.h"
+#include "SDL3/SDL.h"
+#include "SDL3/SDL_timer.h"
 
 class ControllerEffects {
 

@@ -1,4 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.10)
+cmake_policy(SET CMP0175 NEW)
 project(BoronEngine)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -25,39 +26,52 @@ message(STATUS "Using Vulkan SDK at: ${Vulkan_INCLUDE_DIRS}")
 ##Fetch
 include(FetchContent)
 
-# GLFW
+#GLFW
 FetchContent_Declare(
     glfw
     GIT_REPOSITORY https://github.com/glfw/glfw.git
     GIT_TAG 3.4
 )
 
-# BoronMathLibrary
+#BoronMathLibrary
 FetchContent_Declare(
     BoronMathLibrary
     GIT_REPOSITORY https://github.com/Kahviz/BoronMathLibrary
     GIT_TAG master
 )
 
-# Assimp
+#Assimp
 FetchContent_Declare(
     assimp
     GIT_REPOSITORY https://github.com/assimp/assimp.git
     GIT_TAG v5.4.3
 )
 
+#SDL3
+FetchContent_Declare(
+    SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG release-3.2.16
+)
+#GLFW
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+#ASSIMP
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+
+#SDL3
+set(SDL_SHARED ON CACHE BOOL "" FORCE)
+set(SDL_STATIC OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(glfw)
 FetchContent_MakeAvailable(BoronMathLibrary)
 FetchContent_MakeAvailable(assimp)
+FetchContent_MakeAvailable(SDL3)
 
 set(IMGUI_SOURCES
     Core/Libs/ImGui/imgui.cpp
@@ -84,31 +98,24 @@ add_executable(BoronEngine
     Core/Variables/GLOBALS.cpp
     Core/Services/Raycasting.cpp
 
-    # Runtime
     Core/Runtime/Engine.cpp
 
-    # Window
     Core/Window/Window.cpp
 
-    # Debugging
     Core/Debugging/Profiler/Profiler.cpp
     Core/Debugging/Functions/BGE_ASSERTS.h
     Core/Multiplatform/BoronPlatform.h
 
-    # Physics
     Core/BoronPhysics/Physics.h
     Core/BoronPhysics/Physics.cpp
 
-    # Editor
     Editor/Gui/MakeGui.cpp
     Editor/Gui/Style.h
     Editor/Gui/Style.cpp
 
-    # Camera
     Core/Camera/Camera.cpp
     Editor/Camera/CameraControl.cpp
 
-    # VulkanRenderer Subclasses
     Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.h
     Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.cpp
     Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.h
@@ -121,33 +128,26 @@ add_executable(BoronEngine
     Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.cpp
     Core/Graphics/Vulkan/ScoreCounter.cpp
 
-    # Adapters
     Core/Graphics/Dx11/Dx11Adapter.h
     Core/Graphics/Vulkan/VulkanAdapter.h
     Core/Graphics/Dx11/Dx11Adapter.cpp
     Core/Graphics/Vulkan/VulkanAdapter.cpp
 
-    # Graphics
     Core/Graphics/Graphics.cpp
     Core/Graphics/GraphicsBackends.h
 
-    # Texture
     Core/Graphics/Texture/Texture.h
     Core/Graphics/Texture/Texture.cpp
 
-    # Mesh
     Core/Instances/Instances/Mesh/DX11/MeshDX11.cpp
     Core/Instances/Instances/Mesh/Vulkan/MeshVulkan.cpp
 
-    # Renderers
     Core/Graphics/Dx11/Dx11Renderer.cpp
     Core/Graphics/Vulkan/VulkanRender.cpp
 
-    # Saving
     Core/Misc/Saving/SaveProject.h
     Core/Misc/Saving/SaveProject.cpp
 
-    # Misc
     Core/Misc/Colission/Colission.cpp
     Core/Misc/Controller/Controller.cpp
     Core/Misc/Timer/Timer.cpp
@@ -167,18 +167,15 @@ target_include_directories(BoronEngine PRIVATE
     Editor/
     ../Editor/
 
-    # Assimp
+    #Assimp
     ${assimp_SOURCE_DIR}/include
     ${assimp_BINARY_DIR}/include
 
-    # SDL
-    Core/Libs/SDL3
-
-    # ImGui
+    #ImGui
     Core/Libs/ImGui
     Core/Libs/ImGui/backends
 
-    # Engine
+    #Engine
     Core/Instances/Instances/
     Core/Instances/
     Core/Variables/
@@ -194,37 +191,37 @@ target_include_directories(BoronEngine PRIVATE
 
     Libs/STBIcons/
 
-    # Vulkan
+    #Vulkan
     ${Vulkan_INCLUDE_DIRS}
 
-    # BoronMathLibrary
+    #BoronMathLibrary
     ${boronmathlibrary_SOURCE_DIR}
 )
 
-#Link Libraries
+#Link
 target_link_libraries(BoronEngine PRIVATE
     assimp
-    ${CMAKE_SOURCE_DIR}/Libs/SDL3.lib
     Vulkan::Vulkan
     glfw
+    SDL3::SDL3
 )
 
 if(WIN32)
-    target_link_options(BoronEngine PRIVATE "/SUBSYSTEM:CONSOLE")
-endif()
 
-if(WIN32)
-    set(DLLS
-        ${CMAKE_SOURCE_DIR}/Libs/SDL3.dll
+    add_custom_command(
+        TARGET BoronEngine
+        POST_BUILD
+
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_RUNTIME_DLLS:BoronEngine>
+            $<TARGET_FILE_DIR:BoronEngine>
+
+        COMMAND_EXPAND_LISTS
     )
 
-    foreach(dll ${DLLS})
-        add_custom_command(TARGET BoronEngine POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${dll}
-            $<TARGET_FILE_DIR:BoronEngine>
-        )
-    endforeach()
+endif()
+if(WIN32)
+    target_link_options(BoronEngine PRIVATE "/SUBSYSTEM:CONSOLE")
 endif()
 
 #Shaders
