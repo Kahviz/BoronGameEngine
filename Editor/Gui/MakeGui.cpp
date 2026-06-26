@@ -271,24 +271,12 @@ void MakeGui::MakeIMGui(Window& wnd,
 
             ImGuiTreeNodeFlags flags =
                 ImGuiTreeNodeFlags_OpenOnArrow;
-
+            
             if (inst->IsVisibleInExplorer) {
                 bool nodeOpen = ImGui::TreeNodeEx((void*)inst, flags, "%s", inst->Name.c_str());
                 bool clicked = ImGui::IsItemClicked();
 
-                if (nodeOpen)
-                {
-                    MakeChildrenNodes(inst, Drawables, world);
-                    ImGui::TreePop();
-                }
-
-                if (clicked)
-                {
-                    for (auto& i : Drawables) i->Deselect();
-                    inst->Select();
-                    world.Selected = false;
-                }
-
+                //Plusbutton
                 if (inst->Selected) {
                     float aspect = screen_w / screen_h;
                     float size = aspect * 8;
@@ -299,7 +287,7 @@ void MakeGui::MakeIMGui(Window& wnd,
                     float itemTopY = ImGui::GetItemRectMin().y - ImGui::GetWindowPos().y + ImGui::GetScrollY();
 
                     ImGui::SetCursorPos(ImVec2(
-                        ImGui::GetWindowWidth() - size - scrollbarSize - padding,
+                        ImGui::GetWindowWidth() - size - scrollbarSize - padding * 2.0f,
                         itemTopY
                     ));
 
@@ -312,6 +300,19 @@ void MakeGui::MakeIMGui(Window& wnd,
 
                     ImGui::SetCursorPos(savedCursor);
                     ImGui::Dummy(ImVec2(0.0f, 0.0f));
+                }
+
+                if (nodeOpen)
+                {
+                    MakeChildrenNodes(inst, Drawables, world);
+                    ImGui::TreePop();
+                }
+
+                if (clicked)
+                {
+                    for (auto& i : Drawables) i->Deselect();
+                    inst->Select();
+                    world.Selected = false;
                 }
             }
         }
