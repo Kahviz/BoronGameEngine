@@ -8,7 +8,7 @@ class Instance;
 class SaveProject {
 public:
 	static void Save(const std::vector<std::unique_ptr<Instance>>& Drawables);
-	static std::vector<std::unique_ptr<Instance>> Load(Window& window);
+	static std::vector<std::unique_ptr<Instance>> Load(Window& window, Instance& world);
 private:
 
 };

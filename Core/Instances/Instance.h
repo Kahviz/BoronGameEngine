@@ -87,7 +87,13 @@ public:
     virtual const std::vector<Instance*>& GetChildren() const {
         return Children;
     }
-
+    virtual const Instance& GetParent() {
+        return *Parent;
+    }
+    virtual void AddChild(Instance* child) {
+        Children.push_back(child);
+        child->Parent = this;
+    }
     virtual void Select() { Selected = true; }
     virtual void Deselect() { Selected = false; }
 

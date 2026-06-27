@@ -350,18 +350,19 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             world.Parent = nullptr;
             world.InstanceType = Boron::Enums::InstanceType::World;
 
-            Drawables.reserve(5000);
+            Drawables = SaveProject::Load(window,world);
 
-            Drawables = SaveProject::Load(window);
-            CreateError("Using this no children saving thing for now");
             for (auto& Drawable : Drawables) {
-                Drawable->Parent = &world;
+                if (Drawable->Parent == nullptr) {
+                    world.AddChild(Drawable.get());
+                }
             }
             if (Drawables.empty()) { 
                 SaveProject::Save(Drawables);
 
-                AddAMesh("\\Cube.obj", "Cube2", BML::Vec3{ 0,0,0 }, BML::Vec3{ 0.5,1,0.5 }, false,false);
-                AddAMesh("\\Cube.obj", "Cube", BML::Vec3{ 0,-5,0 }, BML::Vec3{ 10,1,10 }, false, false);
+                Instance* inst = AddAMesh("\\Cube.obj", "Cube2", BML::Vec3{ 0,0,0 }, BML::Vec3{ 0.5,1,0.5 }, false,false);
+                Instance* inst2 = AddAMesh("\\Cube.obj", "Cube", BML::Vec3{ 0,-5,0 }, BML::Vec3{ 10,1,10 }, false, false);
+                inst->AddChild(inst2);
             }
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);

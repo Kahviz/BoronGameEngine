@@ -46,6 +46,7 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
         file << "Color: " << Drawable->color << "\n";
         file << "CanDraw: " << Drawable->CanDraw() << "\n";
         file << "UniqueID: " << Drawable->UniqueID << "\n";
+        file << "ParentID: " << Drawable->Parent->UniqueID << "\n";
         file << "MeshFile: " << to.filename().string() << "\n";
         file << "END\n";
     }
@@ -135,7 +136,7 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
     return *objPtr;
 }
 
-std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window)
+std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance& world)
 {
     std::vector<std::unique_ptr<Instance>> Loaded;
     std::ifstream file(savings + "\\" + g_projectName + "\\save.BGEproject");

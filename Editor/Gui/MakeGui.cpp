@@ -13,7 +13,45 @@ struct MeshButton
     std::string path;
     const char* name;
 };
+void CreatePlusButton(
+    Instance* target,
+    Instance*& selectedInst,
+    Image2d& plusbutton,
+    bool& plusGuiOpen,
+    float screen_w,
+    float screen_h
+) 
+{
+    float aspect = screen_w / screen_h;
+    float size = aspect * 8.0f;
+    float padding = ImGui::GetStyle().WindowPadding.x;
+    float scrollbarSize = ImGui::GetStyle().ScrollbarSize;
 
+    ImVec2 savedCursor = ImGui::GetCursorPos();
+
+    float itemTopY =
+        ImGui::GetItemRectMin().y -
+        ImGui::GetWindowPos().y +
+        ImGui::GetScrollY();
+
+    ImGui::SetCursorPos(ImVec2(
+        ImGui::GetWindowWidth() - size - scrollbarSize - padding * 2.0f,
+        itemTopY
+    ));
+
+    std::string id = "##plusbutton" + std::to_string(target->UniqueID);
+
+    if (ImGui::ImageButton(id.c_str(),
+        plusbutton.GetTexture(),
+        ImVec2(size, size)))
+    {
+        plusGuiOpen = true;
+        selectedInst = target;
+    }
+
+    ImGui::SetCursorPos(savedCursor);
+    ImGui::Dummy(ImVec2(0.0f, 0.0f));
+}
 static bool InputTextStd(const char* label, std::string& str)
 {
     char buf[256];
@@ -200,20 +238,17 @@ void MakeGui::MakeIMGui(Window& wnd,
             ImGui::SameLine();
             InputTextStd("##Name", inst.Name);
 
-            // Pos
-            if (ImGui::TreeNode("Transform")) {
-                MakeFloat3Edit(inst,"Position", inst.transform.Position);
-                MakeFloat3Edit(inst,"Orientation", inst.transform.Orientation);
-                MakeFloat3Edit(inst,"Size", inst.transform.Size);
+            // Transform
+            if (ImGui::CollapsingHeader("Transform")) {
 
-                ImGui::TreePop();
+                MakeFloat3Edit(inst, "Position", inst.transform.Position);
+                MakeFloat3Edit(inst, "Orientation", inst.transform.Orientation);
+                MakeFloat3Edit(inst, "Size", inst.transform.Size);
             }
 
             // Anchored
-            if (ImGui::TreeNode("Physics")) {
+            if (ImGui::CollapsingHeader("Transform")) {
                 ImGui::Checkbox("Anchored: ", &inst.Anchored);
-
-                ImGui::TreePop();
             }
         }
     }
@@ -245,21 +280,32 @@ void MakeGui::MakeIMGui(Window& wnd,
         ImGuiWindowFlags_AlwaysVerticalScrollbar
     );
 
+    Image2d plusbutton;
+    plusbutton.LoadImGuiImage(renderer, textures + "\\PlusIcon.png");
+
+    static bool plusGuiOpen = false;
+    static Instance* selectedInst = nullptr;
+
     std::string WorldName = world.Name + " ##world";
 
-    bool worldNodeOpen = ImGui::TreeNodeEx(WorldName.c_str(), ImGuiTreeNodeFlags_OpenOnArrow);
+    bool worldNodeOpen = ImGui::TreeNodeEx(
+        WorldName.c_str(),
+        ImGuiTreeNodeFlags_OpenOnArrow
+    );
 
-    if (ImGui::IsItemClicked()) {
-        for (auto& i : Drawables) {
+    if (ImGui::IsItemClicked())
+    {
+        for (auto& i : Drawables)
             i->Deselect();
-        }
+
         world.Selected = true;
     }
 
-    Image2d plusbutton;
-    plusbutton.LoadImGuiImage(renderer, textures + "\\PlusIcon.png");
-    static bool plusGuiOpen = false;
-    static Instance* selectedInst = nullptr;
+    if (world.Selected)
+    {
+        CreatePlusButton(&world, selectedInst, plusbutton, plusGuiOpen, screen_w, screen_h);
+    }
+
     if (worldNodeOpen)
     {
         for (auto& instPtr : Drawables)
@@ -278,28 +324,7 @@ void MakeGui::MakeIMGui(Window& wnd,
 
                 //Plusbutton
                 if (inst->Selected) {
-                    float aspect = screen_w / screen_h;
-                    float size = aspect * 8;
-                    float padding = ImGui::GetStyle().WindowPadding.x;
-                    float scrollbarSize = ImGui::GetStyle().ScrollbarSize;
-
-                    ImVec2 savedCursor = ImGui::GetCursorPos();
-                    float itemTopY = ImGui::GetItemRectMin().y - ImGui::GetWindowPos().y + ImGui::GetScrollY();
-
-                    ImGui::SetCursorPos(ImVec2(
-                        ImGui::GetWindowWidth() - size - scrollbarSize - padding * 2.0f,
-                        itemTopY
-                    ));
-
-                    std::string id = "##plusbutton" + std::to_string(inst->UniqueID);
-
-                    if (ImGui::ImageButton(id.c_str(), plusbutton.GetTexture(), ImVec2(size, size))) {
-                        plusGuiOpen = true;
-                        selectedInst = inst;
-                    }
-
-                    ImGui::SetCursorPos(savedCursor);
-                    ImGui::Dummy(ImVec2(0.0f, 0.0f));
+                    CreatePlusButton(inst, selectedInst, plusbutton, plusGuiOpen, screen_w, screen_h);
                 }
 
                 if (nodeOpen)

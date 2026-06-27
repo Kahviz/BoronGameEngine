@@ -53,6 +53,12 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG release-3.2.16
 )
+#ImGui
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui.git
+    GIT_TAG docking
+)
 #GLFW
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -72,24 +78,13 @@ FetchContent_MakeAvailable(glfw)
 FetchContent_MakeAvailable(BoronMathLibrary)
 FetchContent_MakeAvailable(assimp)
 FetchContent_MakeAvailable(SDL3)
-
-set(IMGUI_SOURCES
-    Core/Libs/ImGui/imgui.cpp
-    Core/Libs/ImGui/imgui_draw.cpp
-    Core/Libs/ImGui/imgui_tables.cpp
-    Core/Libs/ImGui/imgui_widgets.cpp
-    Core/Libs/ImGui/backends/imgui_impl_glfw.cpp
-    Core/Libs/ImGui/backends/imgui_impl_dx11.cpp
-    Core/Libs/ImGui/backends/imgui_impl_vulkan.cpp
-)
+FetchContent_MakeAvailable(imgui)
 
 add_definitions(
     -DPROJECT_DIR="${CMAKE_SOURCE_DIR}/"
 )
 
 add_executable(BoronEngine
-    ${IMGUI_SOURCES}
-
     main.cpp
     BoronGameEngine.h
 
@@ -160,6 +155,8 @@ add_executable(BoronEngine
     Core/Graphics/GraphicsSettings.h
 )
 
+target_compile_options(BoronEngine PRIVATE /W4)
+
 #Include Directories
 target_include_directories(BoronEngine PRIVATE
     include
@@ -170,10 +167,6 @@ target_include_directories(BoronEngine PRIVATE
     #Assimp
     ${assimp_SOURCE_DIR}/include
     ${assimp_BINARY_DIR}/include
-
-    #ImGui
-    Core/Libs/ImGui
-    Core/Libs/ImGui/backends
 
     #Engine
     Core/Instances/Instances/
@@ -198,12 +191,31 @@ target_include_directories(BoronEngine PRIVATE
     ${boronmathlibrary_SOURCE_DIR}
 )
 
+add_library(imgui
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
+)
+
+target_include_directories(imgui PUBLIC
+    ${imgui_SOURCE_DIR}
+    ${imgui_SOURCE_DIR}/backends
+)
+target_link_libraries(imgui PUBLIC
+    glfw
+    Vulkan::Vulkan
+)
 #Link
 target_link_libraries(BoronEngine PRIVATE
     assimp
     Vulkan::Vulkan
     glfw
     SDL3::SDL3
+    imgui
 )
 
 if(WIN32)
