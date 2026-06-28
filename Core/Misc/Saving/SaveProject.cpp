@@ -153,7 +153,9 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
     BML::Vector3 loadedSize(1, 1, 1);
     BML::Vector3 loadedOrientation(0, 0, 0);
     std::string loadedMeshFile = "";
-    std::string loadedUniqueID = "0";
+    std::string loadedUniqueID = "-1";
+    std::string loadedParentID = "-1";
+    std::unordered_map<int, int> parentIDs;
 
     while (std::getline(file, line))
     {
@@ -217,6 +219,10 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
         {
             loadedUniqueID = line.substr(10);
         }
+        else if (line.rfind("ParentID:", 0) == 0)
+        {
+            loadedParentID = line.substr(10);
+        }
         else if (line == "END")
         {
             std::string meshPath =
@@ -225,7 +231,7 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
                 "\\MeshFiles\\" +
                 loadedMeshFile;
 
-            AddAMesh(
+            Instance& inst = AddAMesh(
                 meshPath,
                 std::stoi(loadedUniqueID),
                 loadedName,
@@ -235,8 +241,33 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
                 window,
                 Loaded
             );
+
+            int parentID = std::stoi(loadedParentID);
+
+            if (parentID == -1)
+            {
+                world.AddChild(&inst);
+            }
+            else
+            {
+                parentIDs[inst.UniqueID] = parentID;
+            }
         }
     }
 
+    for(const auto& [childID, parentID] : parentIDs)
+    {
+        std::cout << childID << " -> " << parentID << '\n';
+
+        for (auto& Child : Loaded) {
+            if (Child->UniqueID == childID) {
+                for (auto& Parent : Loaded) {
+                    if (Parent->UniqueID == parentID) {
+                        Parent->AddChild(Child.get());
+                    }
+                }
+            }
+        }
+    }
     return Loaded;
 }

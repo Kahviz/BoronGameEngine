@@ -349,7 +349,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             world.Name = "World";
             world.Parent = nullptr;
             world.InstanceType = Boron::Enums::InstanceType::World;
-
+            world.UniqueID = -1;
             Drawables = SaveProject::Load(window,world);
 
             for (auto& Drawable : Drawables) {

@@ -247,7 +247,7 @@ void MakeGui::MakeIMGui(Window& wnd,
             }
 
             // Anchored
-            if (ImGui::CollapsingHeader("Transform")) {
+            if (ImGui::CollapsingHeader("Physics")) {
                 ImGui::Checkbox("Anchored: ", &inst.Anchored);
             }
         }
