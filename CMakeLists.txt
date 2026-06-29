@@ -153,6 +153,9 @@ add_executable(BoronEngine
     Editor/Gui/Image2d.cpp
 
     Core/Graphics/GraphicsSettings.h
+    Core/Input/Keyboard/Keyboard.h
+    Core/Input/Keyboard/Keyboard.cpp
+
 )
 
 target_compile_options(BoronEngine PRIVATE /W4)
@@ -184,6 +187,8 @@ target_include_directories(BoronEngine PRIVATE
 
     Libs/STBIcons/
 
+    Core/Input/
+
     #Vulkan
     ${Vulkan_INCLUDE_DIRS}
 
@@ -191,15 +196,22 @@ target_include_directories(BoronEngine PRIVATE
     ${boronmathlibrary_SOURCE_DIR}
 )
 
-add_library(imgui
+set(IMGUI_SOURCES
     ${imgui_SOURCE_DIR}/imgui.cpp
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
     ${imgui_SOURCE_DIR}/imgui_tables.cpp
     ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-
     ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
 )
+
+if (WIN32)
+    list(APPEND IMGUI_SOURCES
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_win32.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_dx11.cpp
+    )
+endif()
+
+add_library(imgui STATIC ${IMGUI_SOURCES})
 
 target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}

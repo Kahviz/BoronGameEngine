@@ -288,8 +288,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         framesd = 0;
     }
 
-    bool ctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
-    bool RctrlPressed = (glfwGetKey(wnd->GetWindow(), GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
+    bool ctrlPressed = Keyboard::isHeld(window.GetWindow(), Boron::Keys::LeftCtrl);
+    bool RctrlPressed = Keyboard::isHeld(window.GetWindow(), Boron::Keys::RightCtrl);
 
     static int frames = 0;
     static int cubes = 0;

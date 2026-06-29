@@ -3,6 +3,7 @@
 #include "GLOBALS.h"
 
 #include <GLFW/glfw3.h>
+#include "Keyboard/Keyboard.h"
 
 void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
 {
@@ -15,27 +16,26 @@ void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
 
     GLFWwindow* glfwWND = wnd.GetWindow();
 
-    if (glfwGetKey(glfwWND, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    if (Keyboard::isHeld(glfwWND, Boron::Keys::LeftShift))
     {
         speed = 100.0f * deltaTime;
     }
 
-    if (glfwGetKey(glfwWND, GLFW_KEY_A) == GLFW_PRESS)
+    if (Keyboard::isHeld(glfwWND,Boron::Keys::A))
         Cam.AdjustPosition(-right.x() * speed, -right.y() * speed, -right.z() * speed);
     
-    if (glfwGetKey(glfwWND, GLFW_KEY_D) == GLFW_PRESS)
+    if (Keyboard::isHeld(glfwWND, Boron::Keys::D))
         Cam.AdjustPosition(right.x() * speed, right.y() * speed, right.z() * speed);
-
-    if (glfwGetKey(glfwWND, GLFW_KEY_S) == GLFW_PRESS)
+    if (Keyboard::isHeld(glfwWND, Boron::Keys::S))
         Cam.AdjustPosition(-forward.x() * speed, -forward.y() * speed, -forward.z() * speed);
 
-    if (glfwGetKey(glfwWND, GLFW_KEY_W) == GLFW_PRESS)
+    if (Keyboard::isHeld(glfwWND, Boron::Keys::W))
         Cam.AdjustPosition(forward.x() * speed, forward.y() * speed, forward.z() * speed);
 
-    if (glfwGetKey(glfwWND, GLFW_KEY_Q) == GLFW_PRESS)
+    if (Keyboard::isHeld(glfwWND, Boron::Keys::Q))
         Cam.AdjustPosition(0.0f, -speed, 0.0f);
 
-    if (glfwGetKey(glfwWND, GLFW_KEY_E) == GLFW_PRESS)
+    if (Keyboard::isHeld(glfwWND, Boron::Keys::E))
         Cam.AdjustPosition(0.0f, speed, 0.0f);
 
     static double mouseX, mouseY;
