@@ -5,9 +5,11 @@
 #include <source_location>
 #include "GLOBALS.h"
 
-#if VULKAN == 1
-#include "Vulkan/vulkan.h"
+#if DIRECTX11 == 1
+	#include <comdef.h>
 #endif
+
+#include "GraphicsBackends.h"
 
 #ifdef _DEBUG
 	template<typename T>
@@ -22,7 +24,7 @@
 	}
 
 	template<typename T>
-	void BGE_ASSERT_CONDITION(T&& condition, const std::string& message,
+	void BGE_ASSERT_CONDITION_IMPL(T&& condition, const std::string& message,
 		const std::string& conditionStr,
 		const std::source_location& location = std::source_location::current()) {
 		if (!condition) {
@@ -35,7 +37,7 @@
 
 
 	template<typename Result>
-	void BGE_ASSERT_VKRESULT(Result result, const std::string& message,
+	void BGE_ASSERT_VKRESULT_IMPL(Result result, const std::string& message,
 		const std::string& conditionStr = "",
 		const std::source_location& location = std::source_location::current()) {
 
@@ -68,9 +70,40 @@
 				}
 		#endif
 	}
-	
+
+	template<typename HResult>
+	void BGE_ASSERT_HRESULT_IMPL(
+		HResult result,
+		const std::string& message,
+		const std::string& conditionStr = "",
+		const std::source_location& location = std::source_location::current())
+	{
+		#if DIRECTX11 == 1
+
+			if (FAILED(result))
+			{
+				_com_error err(result);
+				std::string errorName = err.ErrorMessage();
+
+				std::string errorMsg = std::format(
+					"BGE_ASSERT_HRESULT failed: {}\n"
+					"Result: {}\n"
+					"Message: {}\n"
+					"Location: {} (line: {})",
+					conditionStr.empty() ? errorName : conditionStr,
+					errorName,
+					message,
+					location.file_name(),
+					location.line()
+				);
+
+				CreateError(errorMsg);
+			}
+
+		#endif
+	}
 	template<typename T>
-	void BGE_ASSERT_VK_HANDLE(T handle, const std::string& message,
+	void BGE_ASSERT_VK_HANDLE_IMPL(T handle, const std::string& message,
 		const std::source_location& location = std::source_location::current()) {
 		#if VULKAN == 1
 				if (handle == VK_NULL_HANDLE) {
@@ -83,16 +116,20 @@
 	}
 
 	#define BGE_VK_ASSERT(handle, message) \
-		BGE_ASSERT_VK_HANDLE(handle, message)
+		BGE_ASSERT_VK_HANDLE_IMPL(handle, message)
 
 	#define BGE_ASSERT(condition, message) \
-		BGE_ASSERT_CONDITION(condition, message, #condition)
+		BGE_ASSERT_CONDITION_IMPL(condition, message, #condition)
 
 	#define BGE_ASSERT_VKRESULT(VkResult, message) \
-		BGE_ASSERT_VKRESULT(VkResult, message, #VkResult)
+		BGE_ASSERT_VKRESULT_IMPL(VkResult, message, #VkResult)
+
+	#define BGE_ASSERT_HRESULT(HResult, message) \
+		BGE_ASSERT_HRESULT_IMPL(HResult, message, #HResult)
 	
 #else
 	#define BGE_ASSERT_VKRESULT(VkResult, message) (VkResult)
 	#define BGE_VK_ASSERT(handle, message) ((void)(handle))
 	#define BGE_ASSERT(condition, message) ((void)0)
+	#define BGE_ASSERT_HRESULT(expr, message) ((void)(expr))
 #endif

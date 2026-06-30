@@ -109,7 +109,7 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
     obj->Selected = Selec;
 
     std::string fullPath = textures + "\\TestTexture.png";
-    std::cout << fullPath << std::endl;
+    //std::cout << fullPath << std::endl;
 
 #if DIRECTX11 == 1
     obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
@@ -168,7 +168,6 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
         {
             loadedName = line.substr(6);
         }
-
         else if (line.rfind("Position:", 0) == 0)
         {
             std::string data = line.substr(10);
@@ -181,7 +180,6 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
                 >> loadedPos.y()
                 >> loadedPos.z();
         }
-
         else if (line.rfind("Size:", 0) == 0)
         {
             std::string data = line.substr(6);
@@ -203,9 +201,7 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
 
             std::stringstream ss(data);
 
-            loadedOrientation = BML::Vector3(
-                0, 0, 0
-            );
+            loadedOrientation = BML::Vector3(0, 0, 0);
 
             ss >> loadedOrientation.x()
                 >> loadedOrientation.y()
@@ -257,7 +253,7 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
 
     for(const auto& [childID, parentID] : parentIDs)
     {
-        std::cout << childID << " -> " << parentID << '\n';
+        //std::cout << childID << " -> " << parentID << '\n';
 
         for (auto& Child : Loaded) {
             if (Child->UniqueID == childID) {

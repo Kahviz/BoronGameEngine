@@ -63,8 +63,7 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd)
     shadowSamp.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
     shadowSamp.MaxLOD = D3D11_FLOAT32_MAX;
 
-    HRESULT hr = pDevice->CreateSamplerState(&shadowSamp, &pShadowSampler);
-    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow sampler");
+    BGE_ASSERT_HRESULT(pDevice->CreateSamplerState(&shadowSamp, &pShadowSampler), "Failed to create Samplerstate");
 }
 
 void Dx11Renderer::CreateShadowResources()
@@ -79,25 +78,21 @@ void Dx11Renderer::CreateShadowResources()
     shadowDesc.Usage = D3D11_USAGE_DEFAULT;
     shadowDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
-    HRESULT hr = pDevice->CreateTexture2D(&shadowDesc, nullptr, &pShadowMap);
-    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow map texture");
+    BGE_ASSERT_HRESULT(pDevice->CreateTexture2D(&shadowDesc, nullptr, &pShadowMap),"Failed to create shadowmap texture");
 
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
     dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
     dsvDesc.Texture2D.MipSlice = 0;
 
-    hr = pDevice->CreateDepthStencilView(pShadowMap.Get(), &dsvDesc, &pShadowDSV);
-    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow DSV");
+    BGE_ASSERT_HRESULT(pDevice->CreateDepthStencilView(pShadowMap.Get(), &dsvDesc, &pShadowDSV),"");
 
-    //shaderresourceview
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Texture2D.MipLevels = 1;
 
-    hr = pDevice->CreateShaderResourceView(pShadowMap.Get(), &srvDesc, &pShadowSRV);
-    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow SRV");
+    BGE_ASSERT_HRESULT(pDevice->CreateShaderResourceView(pShadowMap.Get(), &srvDesc, &pShadowSRV), "");
 
     D3D11_RASTERIZER_DESC rasterDesc = {};
     rasterDesc.FillMode = D3D11_FILL_SOLID;
@@ -107,8 +102,7 @@ void Dx11Renderer::CreateShadowResources()
     rasterDesc.SlopeScaledDepthBias = 1.0f;
     rasterDesc.DepthClipEnable = TRUE;
 
-    hr = pDevice->CreateRasterizerState(&rasterDesc, &pShadowRasterizer);
-    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow rasterizer");
+    BGE_ASSERT_HRESULT(pDevice->CreateRasterizerState(&rasterDesc, &pShadowRasterizer), "Failed to create shadow rasterizer");
 
     D3D11_BUFFER_DESC cbd = {};
     cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -116,8 +110,7 @@ void Dx11Renderer::CreateShadowResources()
     cbd.Usage = D3D11_USAGE_DYNAMIC;
     cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    hr = pDevice->CreateBuffer(&cbd, nullptr, &pShadowCB);
-    if (FAILED(hr)) throw std::runtime_error("Failed to create shadow constant buffer");
+    BGE_ASSERT_HRESULT(pDevice->CreateBuffer(&cbd, nullptr, &pShadowCB), "Failed to create shadow constant buffer");
 }
 
 void Dx11Renderer::SetShadowMapToShader()
