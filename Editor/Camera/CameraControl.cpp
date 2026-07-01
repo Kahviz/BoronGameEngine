@@ -3,7 +3,9 @@
 #include "GLOBALS.h"
 
 #include <GLFW/glfw3.h>
+
 #include "Keyboard/Keyboard.h"
+#include "Mouse/Mouse.h"
 
 void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
 {
@@ -38,30 +40,10 @@ void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
     if (Keyboard::isHeld(glfwWND, Boron::Keys::E))
         Cam.AdjustPosition(0.0f, speed, 0.0f);
 
-    static double mouseX, mouseY;
-    static double lastX, lastY;
-    static bool firstmouse = true;
-
-
-    glfwGetCursorPos(glfwWND, &mouseX, &mouseY);
-
-    if (firstmouse)
-    {
-        lastX = mouseX;
-        lastY = mouseY;
-        firstmouse = false;
-    }
-
-    double deltaX = mouseX - lastX;
-    double deltaY = mouseY - lastY;
-
-    lastX = mouseX;
-    lastY = mouseY;
-
     if (glfwGetMouseButton(glfwWND, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
     {
-        float x = -deltaY * sensitivity;
-        float y = deltaX * sensitivity;
+        float x = -Mouse::GetDeltaY() * sensitivity;
+        float y = Mouse::GetDeltaX() * sensitivity;
 
         Cam.SetRotationX(std::clamp(Cam.GetRotationVector().x() + x, DegreesToRadians(-89.9f), DegreesToRadians(89.9f)));
         Cam.AdjustRotation(0.0f, y, 0.0f);

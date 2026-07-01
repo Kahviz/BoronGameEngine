@@ -7,7 +7,9 @@
 #include "Window/Window.h"
 #include "GLOBALS.h"
 #include "Misc/Saving/SaveProject.h"
+
 #include "Keyboard/Keyboard.h"
+#include "Mouse/Mouse.h"
 
 #if INEDITOR == 1
     #include "Gui/MakeGui.h"

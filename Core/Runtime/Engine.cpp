@@ -1,10 +1,10 @@
 #include "Engine.h"
 #include <stdexcept>
-#include "chrono"
+#include <chrono>
 #include <iostream>
-#include <Object.h>
-#include <GLOBALS.h>
-#include "../Editor/Camera/CameraControl.h"
+#include "Object.h"
+#include "GLOBALS.h"
+#include "Camera/CameraControl.h"
 #include "BGE_ASSERTS.h"
 
 #ifdef _WIN32
@@ -275,6 +275,8 @@ float GetRandomFloat(float min, float max) { //Mathlib
 
 void Engine::EngineDoFrame(Window* wnd, float deltatime)
 {
+    Mouse::updateMouse(wnd);
+
     static float timer = 0.0f;
     static int framesd = 0;
 
