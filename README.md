@@ -13,6 +13,7 @@
 - Controller input with SDL3 (rumble support)
 - ImGui for debugging / tools
 - STB Image for icon and texture loading
+- Input system
 
 ## Libraries Used
 - **Assimp** – 3D model loading  
