@@ -158,6 +158,8 @@ add_executable(BoronEngine
 
     Core/Input/Mouse/Mouse.h
     Core/Input/Mouse/Mouse.cpp
+
+    Core/Instances/Instances/Script.h
 )
 
 target_compile_options(BoronEngine PRIVATE /W4)
@@ -214,7 +216,7 @@ if (WIN32)
     )
 endif()
 
-add_library(imgui STATIC ${IMGUI_SOURCES} "Core/Input/Mouse/Mouse.h")
+add_library(imgui STATIC ${IMGUI_SOURCES})
 
 target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}

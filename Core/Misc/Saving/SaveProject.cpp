@@ -20,35 +20,42 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
     std::ofstream file(path + "\\save.BGEproject");
 
     for (auto& Drawable : Drawables) {
-        fs::path from = Drawable->OBJmesh->GetMeshPath();
+        if (Drawable->InstanceType == Boron::Enums::InstanceType::Object) {
+            fs::path from = Drawable->OBJmesh->GetMeshPath();
 
-        std::string newName = std::to_string(Drawable->UniqueID);
+            std::string newName = std::to_string(Drawable->UniqueID);
 
-        fs::path to =
-            fs::path(meshFilesPath) /
-            (newName + from.extension().string());
+            fs::path to =
+                fs::path(meshFilesPath) /
+                (newName + from.extension().string());
 
-        if (from.lexically_normal() != to.lexically_normal())
-        {
-            fs::copy_file(
-                from,
-                to,
-                fs::copy_options::overwrite_existing
-            );
+            if (from.lexically_normal() != to.lexically_normal())
+            {
+                fs::copy_file(
+                    from,
+                    to,
+                    fs::copy_options::overwrite_existing
+                );
+            }
+
+            file << "-\n";
+            file << "Name: " << Drawable->Name << "\n";
+            file << "Anchored: " << Drawable->Anchored << "\n";
+            file << "Size: " << Drawable->transform.Size << "\n";
+            file << "Orientation: " << Drawable->transform.Orientation << "\n";
+            file << "Position: " << Drawable->transform.Position << "\n";
+            file << "Color: " << Drawable->color << "\n";
+            file << "CanDraw: " << Drawable->CanDraw() << "\n";
+            file << "UniqueID: " << Drawable->UniqueID << "\n";
+
+            file << "ParentID: " << Drawable->Parent->UniqueID << "\n";
+
+            file << "MeshFile: " << to.filename().string() << "\n";
+            file << "END\n";
         }
-
-        file << "-\n";
-        file << "Name: " << Drawable->Name << "\n";
-        file << "Anchored: " << Drawable->Anchored << "\n";
-        file << "Size: " << Drawable->transform.Size << "\n";
-        file << "Orientation: " << Drawable->transform.Orientation << "\n";
-        file << "Position: " << Drawable->transform.Position << "\n";
-        file << "Color: " << Drawable->color << "\n";
-        file << "CanDraw: " << Drawable->CanDraw() << "\n";
-        file << "UniqueID: " << Drawable->UniqueID << "\n";
-        file << "ParentID: " << Drawable->Parent->UniqueID << "\n";
-        file << "MeshFile: " << to.filename().string() << "\n";
-        file << "END\n";
+        else if (Drawable->InstanceType == Boron::Enums::InstanceType::Script) {
+            CreateWarning("Skippin because script");
+        }
     }
 
     file.close();

@@ -62,7 +62,9 @@ public:
         return Loaded;
     }
     bool IsLoaded() {
-        return Loaded;
+        if (this != nullptr) {
+            return Loaded;
+        }
     }
 private:
     bool Loaded = false;

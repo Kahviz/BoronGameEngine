@@ -6,6 +6,7 @@
 #include "Graphics/Graphics.h"
 #include <imgui_internal.h>
 #include "Runtime/Engine.h"
+#include <Script.h>
 
 struct MeshButton
 {
@@ -357,6 +358,24 @@ void MakeGui::MakeIMGui(Window& wnd,
                 selectedInst->Children.push_back(inst);
                 inst->Parent = selectedInst;
             }
+            plusGuiOpen = false;
+        }
+        if (ImGui::Selectable("Script")) {
+            Script* script = new Script(
+                "Script",
+                Index,
+                { 255, 255, 255 },                // color
+                { 255, 255, 255 },                // original color
+                { 0, 0, 0 },                      // velocity
+                Transform{},                    // default transform
+                false,                          // anchored
+                nullptr                         // mesh
+            );
+
+            Drawables.push_back(std::unique_ptr<Instance>(script));
+
+            Index++;
+            world.AddChild(script);
             plusGuiOpen = false;
         }
 

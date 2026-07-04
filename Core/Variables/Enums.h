@@ -9,7 +9,8 @@ namespace Boron {
 			None = 0,
 			Object,
 			Instance,
-			World
+			World,
+			Script
 		};
 	}
     
