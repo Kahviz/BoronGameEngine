@@ -275,6 +275,7 @@ float GetRandomFloat(float min, float max) { //Mathlib
 
 void Engine::EngineDoFrame(Window* wnd, float deltatime)
 {
+    Keyboard::Init(wnd->GetWindow());
     Mouse::updateMouse(wnd);
 
     static float timer = 0.0f;
