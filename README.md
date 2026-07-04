@@ -4,7 +4,7 @@
 
 **A game engine under development since 12.11.2025**
 
-**Status: Work in progress** – There may be **bugs**
+**Status: Work in progress** – There may be **bugs** and you can help by telling them to me
 
 ## Features
 - Two rendering backends: **Vulkan** and **DirectX11**
@@ -13,6 +13,7 @@
 - Controller input with SDL3 (rumble support)
 - ImGui for debugging / tools
 - STB Image for icon and texture loading
+- Input system
 
 ## Libraries Used
 - **Assimp** – 3D model loading  
