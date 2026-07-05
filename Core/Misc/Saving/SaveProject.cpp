@@ -50,7 +50,11 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
 
             file << "ParentID: " << Drawable->Parent->UniqueID << "\n";
 
-            file << "MeshFile: " << to.filename().string() << "\n";
+            //file << "MeshFile: " << to.filename().string() << "\n";
+            file << "InstanceType: " << static_cast<int>(Drawable->InstanceType) << '\n';
+            std::cout << "Saving InstanceType = "
+                << static_cast<int>(Drawable->InstanceType)
+                << '\n';
             file << "END\n";
         }
         else if (Drawable->InstanceType == Boron::Enums::InstanceType::Script) {
@@ -163,6 +167,8 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
     std::string loadedUniqueID = "-1";
     std::string loadedParentID = "-1";
     std::unordered_map<int, int> parentIDs;
+    Boron::Enums::InstanceType loadedInstanceType =
+        Boron::Enums::InstanceType::Instance;
 
     while (std::getline(file, line))
     {
@@ -226,6 +232,14 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
         {
             loadedParentID = line.substr(10);
         }
+        else if (line.rfind("InstanceType:", 0) == 0)
+        {
+            std::cout << "[" << line << "]\n";
+            std::cout << "[" << line.substr(14) << "]\n";
+
+            int value = std::stoi(line.substr(14));
+            loadedInstanceType = static_cast<Boron::Enums::InstanceType>(value);
+        }
         else if (line == "END")
         {
             std::string meshPath =
@@ -244,7 +258,8 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
                 window,
                 Loaded
             );
-
+            inst.InstanceType = loadedInstanceType;
+            std::cout << static_cast<int>(loadedInstanceType) << '\n';
             int parentID = std::stoi(loadedParentID);
 
             if (parentID == -1)

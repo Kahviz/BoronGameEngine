@@ -7,10 +7,10 @@ namespace Boron {
 	namespace Enums {
 		enum class InstanceType : uint8_t {
 			None = 0,
-			Object,
-			Instance,
-			World,
-			Script
+			Object = 1,
+			Instance = 2,
+			World = 3,
+			Script = 4
 		};
 	}
     
