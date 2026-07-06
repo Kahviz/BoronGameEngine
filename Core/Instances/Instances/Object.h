@@ -40,7 +40,6 @@ public:
             ogcol,
             velocity,
             mesh,
-            0,
             instanceID,
             false,
             false,

@@ -6,7 +6,7 @@
 #include <iostream>
 #include <Object.h>
 #include <Graphics/Graphics.h>
-#include <filesystem>
+#include <Script.h>
 
 namespace fs = std::filesystem;
 
@@ -48,7 +48,10 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
             file << "CanDraw: " << Drawable->CanDraw() << "\n";
             file << "UniqueID: " << Drawable->UniqueID << "\n";
 
-            file << "ParentID: " << Drawable->Parent->UniqueID << "\n";
+            if (Drawable->Parent)
+                file << "ParentID: " << Drawable->Parent->UniqueID << "\n";
+            else
+                file << "ParentID: -1\n";
 
             file << "MeshFile: " << to.filename().string() << "\n";
             file << "InstanceType: " << static_cast<int>(Drawable->InstanceType) << '\n';
@@ -58,7 +61,17 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
             file << "END\n";
         }
         else if (Drawable->InstanceType == Boron::Enums::InstanceType::Script) {
-            CreateWarning("Skippin because script");
+            file << "-\n";
+            file << "Name: " << Drawable->Name << "\n";
+            file << "UniqueID: " << Drawable->UniqueID << "\n";
+            if (Drawable->Parent)
+                file << "ParentID: " << Drawable->Parent->UniqueID << "\n";
+            else
+                file << "ParentID: -1\n";
+
+            file << "InstanceType: " << static_cast<int>(Drawable->InstanceType) << '\n';
+            file << "END\n";
+
         }
     }
 
@@ -108,7 +121,7 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
     auto& gfx = window.GetGraphics();
     auto& vk = static_cast<VulkanAdapter&>(gfx.GetRenderer());
 
-    obj.get()->OBJmesh = Mesh::Load(
+    obj->OBJmesh = Mesh::Load(
         finalPath,
         vk.GetDevice(),
         vk.GetPhysicalDevice(),
@@ -120,24 +133,13 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
     obj->Selected = Selec;
 
     std::string fullPath = textures + "\\TestTexture.png";
-    //std::cout << fullPath << std::endl;
 
 #if DIRECTX11 == 1
     obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
 #endif
 #if VULKAN == 1
     obj->texture.LoadVK(fullPath, vk);
-    vk.UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
-
-    /*
-    if (Name != "Cube2") {
-
-    }
-    else {
-        MakeAError("Making so Cube2 doesnt have texture for showcase! This is a remainder for me! 1F1G");
-    }
-    */
-
+    vk.UpdateDescriptorSet(obj.get());
 #endif
     Instance* objPtr = obj.get();
 
@@ -248,27 +250,64 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
                 "\\MeshFiles\\" +
                 loadedMeshFile;
 
-            Instance& inst = AddAMesh(
-                meshPath,
-                std::stoi(loadedUniqueID),
-                loadedName,
-                loadedPos,
-                loadedSize,
-                false,
-                window,
-                Loaded
-            );
-            inst.InstanceType = loadedInstanceType;
+            Instance* inst = nullptr;
+
+            switch (loadedInstanceType)
+            {
+            case Boron::Enums::InstanceType::Object:
+                inst = &AddAMesh(
+                    meshPath,
+                    std::stoi(loadedUniqueID),
+                    loadedName,
+                    loadedPos,
+                    loadedSize,
+                    false,
+                    window,
+                    Loaded
+                );
+                break;
+
+            case Boron::Enums::InstanceType::Script:
+            {
+                auto script = std::make_unique<Script>(
+                    loadedName,
+                    std::stoi(loadedUniqueID),
+                    BML::Int3{ 255,255,255 },
+                    BML::Int3{ 255,255,255 },
+                    BML::Vector3{ 0,0,0 },
+                    Transform{},
+                    false,
+                    nullptr
+                );
+
+                inst = script.get();
+                Loaded.push_back(std::move(script));
+                break;
+            }
+
+            default:
+                std::cerr << "Unknown InstanceType: "
+                    << static_cast<int>(loadedInstanceType)
+                    << '\n';
+                break;
+            }
+
+            if (!inst)
+            {
+                continue;
+            }
+
+            inst->InstanceType = loadedInstanceType;
             std::cout << static_cast<int>(loadedInstanceType) << '\n';
             int parentID = std::stoi(loadedParentID);
 
             if (parentID == -1)
             {
-                world.AddChild(&inst);
+                world.AddChild(inst);
             }
             else
             {
-                parentIDs[inst.UniqueID] = parentID;
+                parentIDs[inst->UniqueID] = parentID;
             }
         }
     }

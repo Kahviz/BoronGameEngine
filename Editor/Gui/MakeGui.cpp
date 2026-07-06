@@ -373,7 +373,7 @@ void MakeGui::MakeIMGui(Window& wnd,
             );
 
             Drawables.push_back(std::unique_ptr<Instance>(script));
-
+            script->UniqueID = Index;
             Index++;
             world.AddChild(script);
             plusGuiOpen = false;

@@ -27,7 +27,6 @@ public:
     BML::Int3 originalColor;
 
     int UniqueID = 0;
-    int InstanceID = 0;
 
     bool Anchored = true;
     bool Selected = false;
@@ -40,7 +39,6 @@ public:
         const BML::Int3& OGCOLOR = { 0, 0, 0 },
         const BML::Vector3& VELOCITY = { 0, 0, 0 },
         const std::shared_ptr<Mesh>& MESH = std::make_shared<Mesh>(),
-        int uniqueID = 0,
         int instanceID = 0,
         bool selected = false,
         bool deleted = false,
@@ -56,8 +54,7 @@ public:
         Name(name),
         color(COLOR),
         originalColor(OGCOLOR),
-        UniqueID(uniqueID),
-        InstanceID(instanceID),
+        UniqueID(instanceID),
         Selected(selected),
         Deleted(deleted),
         IsVisibleInExplorer(isvisibleinexplorer),
