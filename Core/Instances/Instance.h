@@ -33,6 +33,10 @@ public:
     bool Deleted = false;
     bool IsVisibleInExplorer = false;
 
+    #if VULKAN == 1
+        VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+    #endif
+
     Instance(
         const std::string& name = "Instance",
         const BML::Int3& COLOR = { 0, 0, 0 },
@@ -66,6 +70,12 @@ public:
 
     virtual Texture* GetTexture() { return nullptr; }
     virtual const Texture* GetConstTexture() const { return nullptr; }
+
+    #if VULKAN == 1    
+        virtual VkDescriptorSet& GetDescriptorSet() {
+            return descriptorSet;
+        }
+    #endif
 
     virtual bool CanDraw() const { return false; }
     virtual bool HasTexture() const { return false; }

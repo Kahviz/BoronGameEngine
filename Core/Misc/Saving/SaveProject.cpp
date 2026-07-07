@@ -47,6 +47,7 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
             file << "Color: " << Drawable->color << "\n";
             file << "CanDraw: " << Drawable->CanDraw() << "\n";
             file << "UniqueID: " << Drawable->UniqueID << "\n";
+            file << "Color: " << Drawable->color << "\n";
 
             if (Drawable->Parent)
                 file << "ParentID: " << Drawable->Parent->UniqueID << "\n";
@@ -79,7 +80,7 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
 }
 
 Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string& Name,
-    BML::Vector3 pos, BML::Vector3 Size, bool Selec, Window& window, std::vector<std::unique_ptr<Instance>>& Drawables)
+    BML::Vector3 pos, BML::Vector3 Size,BML::Int3 color, bool Selec, Window& window, std::vector<std::unique_ptr<Instance>>& Drawables)
 {
     Transform transform;
     transform.Position = pos;
@@ -88,12 +89,8 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
     auto obj = std::make_unique<Object>(
         Name,
         1,
-        BML::Int3(
-            static_cast<int>(160),
-            static_cast<int>(160),
-            static_cast<int>(160)
-        ),
-        BML::Int3(168, 160, 160),
+        color,
+        color,
         BML::Vector3(0, 0, 0),
         transform,
         true,
@@ -141,6 +138,7 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
     obj->texture.LoadVK(fullPath, vk);
     vk.UpdateDescriptorSet(obj.get());
 #endif
+
     Instance* objPtr = obj.get();
 
     Drawables.push_back(std::move(obj));
@@ -167,6 +165,7 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
     BML::Vector3 loadedOrientation(0, 0, 0);
     std::string loadedMeshFile = "";
     std::string loadedUniqueID = "-1";
+    BML::Int3 loadedColor(0,0,0);
     std::string loadedParentID = "-1";
     std::unordered_map<int, int> parentIDs;
     Boron::Enums::InstanceType loadedInstanceType =
@@ -230,6 +229,22 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
         {
             loadedUniqueID = line.substr(10);
         }
+        else if (line.rfind("Color:", 0) == 0)
+        {
+            std::string data = line.substr(6);
+
+            std::replace(data.begin(), data.end(), ',', ' ');
+
+            std::stringstream ss(data);
+
+            loadedColor = BML::Int3(0, 0, 0);
+
+            int r, g, b;
+
+            ss >> r >> g >> b;
+
+            loadedColor = BML::Int3(r, g, b);
+        }
         else if (line.rfind("ParentID:", 0) == 0)
         {
             loadedParentID = line.substr(10);
@@ -261,6 +276,7 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
                     loadedName,
                     loadedPos,
                     loadedSize,
+                    loadedColor,
                     false,
                     window,
                     Loaded
