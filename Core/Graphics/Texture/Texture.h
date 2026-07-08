@@ -10,14 +10,13 @@
     #include <d3d11.h>
     #include <wrl/client.h>
 
-    class Dx11Renderer;
-
     using namespace Microsoft::WRL;
 #endif
 
 #if VULKAN == 1
     #include "Vulkan/vulkan.h"
-    #include "Graphics/Vulkan/VulkanRender.h"
+
+    class VulkanRender;
 #endif
 class IRenderer;
 

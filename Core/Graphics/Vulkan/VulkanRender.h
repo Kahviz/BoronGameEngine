@@ -22,6 +22,7 @@
 #include <Camera/Camera.h>
 #include <minmax.h>
 #include <algorithm>
+#include "Texture.h"
 
 //SubClasses
 #include "VulkanDevice/VulkanDevice.h"
@@ -29,6 +30,7 @@
 #include "VulkanSwapchain/VulkanSwapchain.h"
 #include "VulkanCommandBuffer/VulkanCommandBuffer.h"
 #include "VulkanPipeline/VulkanPipeline.h"
+
 class Texture;
 
 class VulkanRender {
@@ -86,6 +88,10 @@ public:
     VkCommandBuffer GetCurrentFrameCommandBuffer() { return vkCommandBuffer.GetCommandBuffers()[currentFrame]; };
     VkCommandPool GetCommandPool() { return vkCommandBuffer.GetCommandPool(); }
     VkQueue GetGraphicsQueue() { return vkDevice.GetGraphicsQueue(); }
+
+    Texture* GetDefaultTexture() {
+        return defaultTexture.get();
+    }
 private:
     std::array<VkClearValue, 2> clearValues{};
 
@@ -173,5 +179,7 @@ private:
     VkPipeline shadowPipeline = VK_NULL_HANDLE;
     VkPipelineLayout shadowPipelineLayout = VK_NULL_HANDLE;
     VkFramebuffer shadowFramebuffer = VK_NULL_HANDLE;
+
+    std::unique_ptr<Texture> defaultTexture;
 };
 #endif

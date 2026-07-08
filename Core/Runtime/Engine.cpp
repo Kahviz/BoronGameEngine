@@ -136,7 +136,8 @@ int Engine::EngineRun()
 
     using clock = std::chrono::high_resolution_clock;
     ImGuiIO& IO = ImGui::GetIO();
-
+#if VULKAN == 1
+#endif
     #if INEDITOR == 0
         InProject = true;
     #endif
