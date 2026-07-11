@@ -1,4 +1,4 @@
-<img width="320" height="320" alt="BoronEngine Icon" src="https://github.com/user-attachments/assets/7474a87c-c063-4231-ac28-19a865d87842" />
+<img width="155" height="155" alt="BoronEngine Icon" src="https://github.com/user-attachments/assets/7474a87c-c063-4231-ac28-19a865d87842" />
 
 # BoronEngine
 
