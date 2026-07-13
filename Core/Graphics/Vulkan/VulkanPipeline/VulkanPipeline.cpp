@@ -8,9 +8,11 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
     std::string Shaders = std::string(PROJECT_DIR) + "Core/Shaders/";
     auto vertShaderCode = ReadFile(Shaders + "vertex.spv");
     auto fragShaderCode = ReadFile(Shaders + "fragment.spv");
+    auto texFragShaderCode = ReadFile(Shaders + "texture_fragment.spv");
 
     vertShaderModule = CreateShaderModule(device, vertShaderCode);
     fragShaderModule = CreateShaderModule(device, fragShaderCode);
+    texFragShaderModule = CreateShaderModule(device, texFragShaderCode);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -115,8 +117,30 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
     pipelineInfo.renderPass = renderPass;
     pipelineInfo.subpass = 0;
 
-    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+    shaderStages[1].module = fragShaderModule;
+
+    if (vkCreateGraphicsPipelines(
+        device,
+        VK_NULL_HANDLE,
+        1,
+        &pipelineInfo,
+        nullptr,
+        &graphicsPipeline) != VK_SUCCESS)
+    {
         throw std::runtime_error("Failed to create graphics pipeline!");
+    }
+
+    shaderStages[1].module = texFragShaderModule;
+
+    if (vkCreateGraphicsPipelines(
+        device,
+        VK_NULL_HANDLE,
+        1,
+        &pipelineInfo,
+        nullptr,
+        &textureGraphicsPipeline) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create texture graphics pipeline!");
     }
 
     return true;

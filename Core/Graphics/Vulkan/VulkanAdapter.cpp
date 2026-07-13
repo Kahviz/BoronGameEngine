@@ -104,11 +104,6 @@ VkRenderPass VulkanAdapter::GetRenderPass() const
     return renderer->GetRenderPass();
 }
 
-Texture* VulkanAdapter::GetDefaultTexture()
-{
-    return renderer->GetDefaultTexture();
-}
-
 void VulkanAdapter::UpdateDescriptorSet(const Instance* inst)
 {
     renderer->UpdateDescriptorSet(inst);

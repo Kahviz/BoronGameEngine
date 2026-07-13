@@ -353,7 +353,7 @@ uint32_t VulkanRender::GetImageIndex() {
     return CurrentimageIndex;
 }
 
-void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui)
+void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bool usesTexture)
 {
     CurrentimageIndex = imageIndex;
     VkCommandBuffer cmd = vkCommandBuffer.GetCommandBuffers()[imageIndex];
@@ -389,14 +389,38 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui)
 
     for (const auto& drawCmd : drawCommands)
     {
+        bool hasTexture = drawCmd.usesTexture;
+
+        if (hasTexture)
+        {
+            vkCmdBindPipeline(
+                cmd,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                vkPipeline.GetTextureGraphicsPipeline()
+            );
+        }
+        else
+        {
+            vkCmdBindPipeline(
+                cmd,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                vkPipeline.GetGraphicsPipeline()
+            );
+        }
+
         uint32_t dynamicOffset = drawCmd.objectIndex * dynamicAlignment;
+
         vkCmdBindDescriptorSets(
             cmd,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
             vkPipeline.GetPipelineLayout(),
-            0, 1, &descriptorSet,
-            1, &dynamicOffset
+            0,
+            1,
+            &descriptorSet,
+            1,
+            &dynamicOffset
         );
+
         drawCmd.mesh->Draw(cmd);
     }
 
@@ -424,7 +448,7 @@ void VulkanRender::RecreateSwapchain() {
     }
 
     for (size_t i = 0; i < vkCommandBuffer.GetCommandBuffers().size(); i++) {
-        RecordCommandBuffer(static_cast<uint32_t>(i), false);
+        RecordCommandBuffer(static_cast<uint32_t>(i), false,false);
     }
 }
 
@@ -826,35 +850,38 @@ void VulkanRender::updateUniformBuffer(
     memcpy(dst, &ubo, sizeof(ubo));
 }
 
-bool VulkanRender::RenderAMesh(
-    const Instance* drawable
-)
+bool VulkanRender::RenderAMesh(const Instance* drawable)
 {
-#if VULKAN == 1
-    if (drawable == nullptr) {
+    if (drawable == nullptr)
         return false;
-    }
 
     BML::Vector3 size = drawable->transform.Size;
     BML::Vector3 Orientation = drawable->transform.Orientation;
     BML::Vector3 pos = drawable->transform.Position;
     BML::Int3 color = drawable->color;
+
     int pIndex = drawable->UniqueID;
 
-    const MeshVK* meshVK = &drawable->OBJmesh->VM;
-
-    updateUniformBuffer(*drawable, pIndex, size, Orientation, pos, color);
+    updateUniformBuffer(
+        *drawable,
+        pIndex,
+        size,
+        Orientation,
+        pos,
+        color
+    );
 
     DrawCommand cmd;
-    cmd.mesh = meshVK;
+    cmd.mesh = &drawable->OBJmesh->VM;
     cmd.objectIndex = pIndex;
     cmd.modelMatrix = createModelMatrix(Orientation, size, pos);
+
+    const Texture* tex = drawable->GetConstTexture();
+    cmd.usesTexture = tex && tex->IsLoadedConst();
+
     drawCommands.push_back(cmd);
 
     return true;
-#else
-    return false;
-#endif
 }
 
 void VulkanRender::PrintInfo() {
@@ -1065,7 +1092,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
     }
 
     bool RenderImGui = true;
-    RecordCommandBuffer(imageIndex, RenderImGui);
+    RecordCommandBuffer(imageIndex, RenderImGui,false);
 }
 
 void VulkanRender::EndFrame() {

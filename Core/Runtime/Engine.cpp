@@ -225,13 +225,15 @@ Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
 
     std::string fullPath = textures + "\\TestTexture.png";
 
-#if DIRECTX11 == 1
-    obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
-#endif
-#if VULKAN == 1
-    obj->texture.LoadVK(fullPath, vk);
-    vk.UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
-#endif
+    #if 0
+        #if DIRECTX11 == 1
+            obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
+        #endif
+        #if VULKAN == 1
+            obj->texture.LoadVK(fullPath, vk);
+            vk.UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
+        #endif
+    #endif
     obj->Parent = &world;
 
     Instance* objPtr = obj.get();

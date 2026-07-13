@@ -32,7 +32,6 @@ public:
     uint32_t GetGraphicsFamilyIndex() const;
     VkDescriptorPool& GetImGuiPool() const;
     VkRenderPass GetRenderPass() const;
-    Texture* GetDefaultTexture();
     void UpdateDescriptorSet(const Instance* inst);
     void RenderAMesh(const Instance* drawable);
 

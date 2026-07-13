@@ -18,6 +18,9 @@ public:
     //Getters
     VkPipeline& GetGraphicsPipeline() { return graphicsPipeline; }
     const VkPipeline& GetGraphicsPipeline() const { return graphicsPipeline; }
+    
+    VkPipeline& GetTextureGraphicsPipeline() { return textureGraphicsPipeline; }
+    const VkPipeline& GetTextureGraphicsPipeline() const { return textureGraphicsPipeline; }
 
     VkPipelineLayout& GetPipelineLayout() { return pipelineLayout; }
     const VkPipelineLayout& GetPipelineLayout() const { return pipelineLayout; }
@@ -32,9 +35,14 @@ public:
     const VkDescriptorSetLayout& GetDescriptorSetLayout() const { return descriptorSetLayout; }
 private:
     VkPipeline graphicsPipeline = VK_NULL_HANDLE;
+    VkPipeline textureGraphicsPipeline = VK_NULL_HANDLE;
+
     VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+    VkPipelineLayout texturePipelineLayout = VK_NULL_HANDLE;
+
     VkShaderModule vertShaderModule = VK_NULL_HANDLE;
     VkShaderModule fragShaderModule = VK_NULL_HANDLE;
+    VkShaderModule texFragShaderModule = VK_NULL_HANDLE;
     VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
 };
 #endif

@@ -40,7 +40,7 @@ public:
     bool Init(GLFWwindow* window);
     void Cleanup();
     uint32_t GetImageIndex();
-    void RecordCommandBuffer(uint32_t imageIndex, bool renderImGui);
+    void RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bool usesTexture);
     void RecreateSwapchain();
     void CreateFramebuffers();
     void CreateImageViews();
@@ -88,10 +88,6 @@ public:
     VkCommandBuffer GetCurrentFrameCommandBuffer() { return vkCommandBuffer.GetCommandBuffers()[currentFrame]; };
     VkCommandPool GetCommandPool() { return vkCommandBuffer.GetCommandPool(); }
     VkQueue GetGraphicsQueue() { return vkDevice.GetGraphicsQueue(); }
-
-    Texture* GetDefaultTexture() {
-        return defaultTexture.get();
-    }
 private:
     std::array<VkClearValue, 2> clearValues{};
 
@@ -117,6 +113,7 @@ private:
 
     struct DrawCommand {
         const MeshVK* mesh = nullptr;
+        bool usesTexture = false;
         uint32_t objectIndex = -1;
         BML::Matrix4x4 modelMatrix = {};
     };
@@ -179,7 +176,5 @@ private:
     VkPipeline shadowPipeline = VK_NULL_HANDLE;
     VkPipelineLayout shadowPipelineLayout = VK_NULL_HANDLE;
     VkFramebuffer shadowFramebuffer = VK_NULL_HANDLE;
-
-    std::unique_ptr<Texture> defaultTexture;
 };
 #endif

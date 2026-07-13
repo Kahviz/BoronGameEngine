@@ -20,6 +20,8 @@ layout(binding = 0) uniform UBO {
 } ubo;
 
 
+layout(binding = 1) uniform sampler2D texSampler;
+
 layout(binding = 2) uniform sampler2DShadow shadowMap;
 
 
@@ -38,10 +40,12 @@ float ShadowCalculation(vec4 shadowCoord)
         return 1.0;
     }
 
+
     float bias = 0.0003;
 
     float shadow = 0.0;
     vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+
 
     for(int x = -1; x <= 1; x++)
     {
@@ -57,6 +61,7 @@ float ShadowCalculation(vec4 shadowCoord)
         }
     }
 
+
     return shadow / 9.0;
 }
 
@@ -67,19 +72,16 @@ void main()
     vec3 light = normalize(-lightDir);
 
     float diff = max(dot(normal, light), 0.0);
-
     float shadow = ShadowCalculation(fragPosLightSpace);
-
     float lighting =
         AMBIENT +
         (1.0 - AMBIENT) * diff * shadow;
 
-
-    vec3 baseColor = ubo.color;
-
+    vec4 baseColor =
+        texture(texSampler, fragUV);
 
     outColor = vec4(
-        baseColor * lighting,
-        1.0
+        baseColor.rgb * lighting,
+        baseColor.a
     );
 }

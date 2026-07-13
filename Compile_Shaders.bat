@@ -24,6 +24,17 @@ if exist "Core\Shaders\Source\fragment.glsl" (
     )
 )
 
+REM texture fragment
+if exist "Core\Shaders\Source\texture_fragment.glsl" (
+    echo Compiling texture_fragment.glsl...
+    "C:\VulkanSDK\1.4.335.0\Bin\glslangValidator.exe" -V "Core\Shaders\Source\texture_fragment.glsl" -o "Core\Shaders\texture_fragment.spv" --target-env vulkan1.2 -S frag
+    if errorlevel 1 (
+        echo ERROR: Failed to compile texture_fragment.glsl
+        pause
+        exit /b 1
+    )
+)
+
 REM shadowvertex shader
 if exist "Core\Shaders\Source\shadow_vertex.glsl" (
     echo Compiling shadow_vertex.glsl...
