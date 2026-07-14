@@ -54,7 +54,7 @@ Engine::Engine()
 
         VkRenderPass renderPass = vk.GetRenderPass();
         if (renderPass == VK_NULL_HANDLE) {
-            throw std::runtime_error("Render pass is null!");
+            CreateError("Render pass is null!");
         }
 
         ImGui_ImplVulkan_InitInfo init_info = {};
@@ -124,6 +124,7 @@ Engine::~Engine()
 
             window.GetGraphics().GetRenderer().CleanUp();
         #endif
+
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
         ImGuiInited = false;
@@ -136,8 +137,6 @@ int Engine::EngineRun()
 
     using clock = std::chrono::high_resolution_clock;
     ImGuiIO& IO = ImGui::GetIO();
-#if VULKAN == 1
-#endif
     #if INEDITOR == 0
         InProject = true;
     #endif
