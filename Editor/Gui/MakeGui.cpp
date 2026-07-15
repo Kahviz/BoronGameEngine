@@ -261,6 +261,11 @@ void MakeGui::MakeIMGui(Window& wnd,
     }
 
     ImGui::End();
+
+    ImGui::Begin("Viewport");
+    //Here
+    ImGui::End();
+
     if (CanChange) {
         CreateInfo("Changing");
         float windowWidth = window_w * 1.5f;
