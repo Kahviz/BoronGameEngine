@@ -1,3 +1,4 @@
+#include "Dx11Renderer.h"
 #include "GLOBALS.h"
 
 #if DIRECTX11 == 1
@@ -8,6 +9,7 @@
 #include <assimp/postprocess.h>
 #include <stdexcept>
 #include <Instances/Instance.h>
+#include "Texture.h"
 
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"d3dcompiler.lib")

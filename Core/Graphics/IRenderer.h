@@ -21,7 +21,7 @@ public:
     virtual Camera& GetCamera() = 0;
     virtual void CreateSceneResources(int width, int height) = 0;
     virtual void ClearSceneBuffer(float r, float g, float b) = 0;
-
+    virtual Texture* GetViewport() = 0;
     virtual void ReSizeWindow(int width, int height, Window* wnd) = 0;
 
     virtual void SetRenderTargetToScene() = 0;

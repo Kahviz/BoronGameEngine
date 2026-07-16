@@ -10,7 +10,9 @@
 #include "Camera/Camera.h"
 #include <wrl/client.h>
 #include <Instances/Instance.h>
-#include "Graphics/Texture/Texture.h"
+
+#include "Texture.h"
+
 #include "BGE_ASSERTS.h"
 
 using namespace DirectX;
@@ -59,7 +61,7 @@ public:
     ID3D11RenderTargetView* GetMainTarget() { return pTarget.Get(); }
 
     ID3D11DepthStencilView* GetDepthStencil() { return pDepthStencilView.Get(); }
-
+    Texture* GetViewport() { return viewportTexture.get(); }
     //Shadows
     void CreateShadowResources();
     void RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawables);
@@ -130,5 +132,7 @@ private:
     float radius = 10.0f;
 
     XMFLOAT3 lightpos = { 5,5,10 };
+
+    std::unique_ptr<Texture> viewportTexture;
 };
 #endif

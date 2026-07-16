@@ -100,6 +100,10 @@ ID3D11DepthStencilView* Dx11Adapter::GetDepthStencil() noexcept
 {
     return renderer->GetDepthStencil();
 }
+Texture* Dx11Adapter::GetViewport()
+{
+    return renderer->GetViewport();
+}
 void Dx11Adapter::CleanUp()
 {
     

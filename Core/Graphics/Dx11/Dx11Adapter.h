@@ -32,6 +32,7 @@ public:
 
     ID3D11RenderTargetView* GetMainTarget() noexcept; 
     ID3D11DepthStencilView* GetDepthStencil() noexcept;
+    Texture* GetViewport() override;
 
     void CleanUp() override;
 
