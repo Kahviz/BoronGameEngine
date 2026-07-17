@@ -262,9 +262,7 @@ void MakeGui::MakeIMGui(Window& wnd,
 
     ImGui::End();
 
-    ImGui::Begin("Viewport");
-    //Here
-    ImGui::End();
+    
 
     if (CanChange) {
         CreateInfo("Changing");
@@ -524,6 +522,16 @@ void MakeGui::MakeIMGui(Window& wnd,
 
 void MakeGui::MakeIMViewPort(Window& wnd)
 {
+    ImGui::Begin("Viewport");
+
+    #if DIRECTX11 == 1
+        ImGui::Image(
+            (ImTextureID)wnd.GetGraphics().GetRenderer().GetViewport()->GetTextureComPtr().Get(),
+            ImVec2(800, 500)
+        );
+    #endif
+
+    ImGui::End();
 }
 
 void MakeGui::CreateErrorPopUp(IRenderer* renderer, Image2d& image2d, const std::string& errormsg, const float duration) {

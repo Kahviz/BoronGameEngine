@@ -266,8 +266,6 @@ void ScreenResizerDetector(Window* wnd) {
     );
 }
 
-
-
 float GetRandomFloat(float min, float max) { //Mathlib
     static std::random_device rd;
     static std::mt19937 gen(rd());
@@ -305,7 +303,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 
     if (ctrlPressed) {
-        
         AddAMesh("\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false,false);
 
         cubes++;
@@ -345,6 +342,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 #endif
 
+    wnd->GetGraphics().SetRenderTargetToBackBuffer();
     graphics.ClearBuffer(0.0f, 0.0f, 1.0f);
 
     if (InProject) {
@@ -375,6 +373,12 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             Init = true;
         }
     }
+#if INEDITOR == 1
+    wnd->GetGraphics().SetRenderTargetToScene();
+    wnd->GetGraphics().ClearSceneBuffer(0.1f, 0.1f, 0.1f);
+#endif
+
+
 #if INEDITOR == 1
     if (InProject && ImGuiInited) {
         makeGui.MakeIMViewPort(*wnd);
@@ -420,27 +424,37 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
         physics.ApplyGravity(*Drawable,deltatime);
     }
+
 #if DIRECTX11 == 1
     wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
-#endif    
+#endif
+
     if (!ctrlPressed && !Typing) {
         camC.MakeCameraControls(*wnd, deltatime);
     }
 
-#if INEDITOR == 1 
-    if (ImGuiInited) {
-        ImGui::Render();
-        #if DIRECTX11 == 1
-            ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-        #endif
-    }
-#endif
+    #if INEDITOR == 1
+        if (ImGuiInited) {
+            wnd->GetGraphics().SetRenderTargetToBackBuffer();
+
+            ImGui::Render();
+
+            #if DIRECTX11 == 1
+                ImGui_ImplDX11_RenderDrawData(
+                    ImGui::GetDrawData()
+                );
+            #endif
+        }
+    #endif
+
     float fps = 1.0f / deltatime;
     profiler.AddFPS(fps);
 
-#if VULKAN == 1
-    wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
-#endif
-
+    #if VULKAN == 1
+        wnd->GetGraphics().DrawAFrame(
+            deltatime,
+            Drawables
+        );
+    #endif
     wnd->GetGraphics().EndFrame();
 }

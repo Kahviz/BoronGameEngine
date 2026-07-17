@@ -34,6 +34,7 @@ public:
     VkRenderPass GetRenderPass() const;
     void UpdateDescriptorSet(const Instance* inst);
     void RenderAMesh(const Instance* drawable);
+    Texture* GetViewport() override;
 
     void EndFrame() override;
     void CreateSceneResources(int width, int height) override;

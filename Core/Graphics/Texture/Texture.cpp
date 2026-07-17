@@ -273,6 +273,11 @@ void Texture::Cleanup(VkDevice device)
 }
 #endif
 #if DIRECTX11 == 1
+void Texture::SetSRV(ID3D11ShaderResourceView* srv)
+{
+    pTexture = srv;
+    Loaded = true;
+}
 ID3D11ShaderResourceView* Texture::Load(std::string path, IRenderer& renderer)
 {
     auto& dx = static_cast<Dx11Adapter&>(renderer);

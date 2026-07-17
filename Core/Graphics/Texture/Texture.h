@@ -28,6 +28,8 @@ public:
 #if DIRECTX11 == 1
     Texture() : pTexture(nullptr) {}
 
+    void SetSRV(ID3D11ShaderResourceView* srv);
+
     ID3D11ShaderResourceView* Load(std::string path, IRenderer& renderer);
 
     ID3D11ShaderResourceView* GetSRV() const {

@@ -586,10 +586,11 @@ void Dx11Renderer::CreateSceneResources(int width, int height) {
     td.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
     pDevice->CreateTexture2D(&td, nullptr, &pSceneTexture);
-
     pDevice->CreateRenderTargetView(pSceneTexture.Get(), nullptr, &pSceneRTV);
-
     pDevice->CreateShaderResourceView(pSceneTexture.Get(), nullptr, &pSceneSRV);
+
+    viewportTexture = std::make_unique<Texture>();
+    viewportTexture->SetSRV(pSceneSRV.Get());
 }
 
 ID3D11ShaderResourceView* Dx11Renderer::GetSceneSRV() {
@@ -598,7 +599,7 @@ ID3D11ShaderResourceView* Dx11Renderer::GetSceneSRV() {
 
 ID3D11RenderTargetView* Dx11Renderer::GetBackBufferRTV()
 {
-    return pSceneRTV.Get();
+    return pTarget.Get();
 }
 
 Dx11Renderer::~Dx11Renderer()
@@ -759,7 +760,6 @@ void Dx11Renderer::ClearSceneBuffer(float r, float g, float b)
     const float color[] = { r, g, b, 1.0f };
 
     pContext->ClearRenderTargetView(pSceneRTV.Get(), color);
-
     pContext->ClearDepthStencilView(pDepthStencilView.Get(),
         D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
