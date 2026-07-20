@@ -74,6 +74,7 @@ public:
     void createShadowRenderPass();
 
     void createShadowPipeline();
+
     //Getters
     VkDevice GetDevice() { return vkDevice.GetDevice(); };
     VkPhysicalDevice GetPhysicalDevice() { return vkDevice.GetPhysicalDevice(); };
@@ -88,6 +89,8 @@ public:
     VkCommandBuffer GetCurrentFrameCommandBuffer() { return vkCommandBuffer.GetCommandBuffers()[currentFrame]; };
     VkCommandPool GetCommandPool() { return vkCommandBuffer.GetCommandPool(); }
     VkQueue GetGraphicsQueue() { return vkDevice.GetGraphicsQueue(); }
+
+    Texture* GetViewport() { return viewportTexture.get(); }
 private:
     std::array<VkClearValue, 2> clearValues{};
 
@@ -176,5 +179,7 @@ private:
     VkPipeline shadowPipeline = VK_NULL_HANDLE;
     VkPipelineLayout shadowPipelineLayout = VK_NULL_HANDLE;
     VkFramebuffer shadowFramebuffer = VK_NULL_HANDLE;
+
+    std::unique_ptr<Texture> viewportTexture;
 };
 #endif

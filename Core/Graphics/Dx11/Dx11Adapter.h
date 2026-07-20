@@ -3,7 +3,9 @@
 #include <vector>
 #include <memory>
 #include "Instance.h"
+#include "GLOBALS.h"
 
+#if DIRECTX11 == 1
 class Dx11Renderer;
 
 class Dx11Adapter : public IRenderer
@@ -30,7 +32,7 @@ public:
 
     ID3D11RenderTargetView* GetBackBufferRTV() noexcept;
 
-    ID3D11RenderTargetView* GetMainTarget() noexcept; 
+    ID3D11RenderTargetView* GetMainTarget() noexcept;
     ID3D11DepthStencilView* GetDepthStencil() noexcept;
     Texture* GetViewport() override;
 
@@ -43,3 +45,4 @@ public:
 private:
     std::unique_ptr<Dx11Renderer> renderer;
 };
+#endif

@@ -114,7 +114,7 @@ void VulkanAdapter::RenderAMesh(const Instance* drawable) {
 
 Texture* VulkanAdapter::GetViewport()
 {
-    return nullptr;
+    return renderer->GetViewport();
 }
 
 #endif
