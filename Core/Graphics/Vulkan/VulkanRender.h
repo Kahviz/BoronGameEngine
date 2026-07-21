@@ -181,5 +181,9 @@ private:
     VkFramebuffer shadowFramebuffer = VK_NULL_HANDLE;
 
     std::unique_ptr<Texture> viewportTexture;
+
+    VkFramebuffer viewportFramebuffer = VK_NULL_HANDLE;
+    VkDescriptorSet viewportDescriptor = VK_NULL_HANDLE;
+    VkRenderPass viewportRenderPass = VK_NULL_HANDLE;
 };
 #endif
