@@ -75,6 +75,7 @@ public:
 
     void createShadowPipeline();
 
+    void initViewport();
     //Getters
     VkDevice GetDevice() { return vkDevice.GetDevice(); };
     VkPhysicalDevice GetPhysicalDevice() { return vkDevice.GetPhysicalDevice(); };

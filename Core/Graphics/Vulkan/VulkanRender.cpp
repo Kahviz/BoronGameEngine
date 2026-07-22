@@ -205,7 +205,7 @@ bool VulkanRender::Init(GLFWwindow* window)
 
     createDescriptorPool();
     createDescriptorSets(nullptr);
-
+    initViewport();
     //InitEnd
     CreateSuccess("No Fatal Errors in Vulkan Initing :D-<");
     return true;
@@ -1458,6 +1458,10 @@ void VulkanRender::createShadowPipeline() {
     vkDestroyShaderModule(vkDevice.GetDevice(), vertShaderModule, nullptr);
 
     CreateSuccess("Shadow pipeline created!");
+}
+
+void VulkanRender::initViewport()
+{
 }
 
 #endif
