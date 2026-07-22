@@ -58,6 +58,7 @@ public:
     void TransitionImageLayout(VkCommandBuffer cmd, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     void CopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, uint32_t width, uint32_t height);
     void Cleanup(VkDevice device);
+    void CreateRenderTarget(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height);
 #endif
     bool IsLoadedConst() const {
         return Loaded;

@@ -271,6 +271,50 @@ void Texture::Cleanup(VkDevice device)
         m_imageMemory = VK_NULL_HANDLE;
     }
 }
+void Texture::CreateRenderTarget(
+    VkDevice device,
+    VkPhysicalDevice physicalDevice,
+    uint32_t width,
+    uint32_t height)
+{
+    m_width = width;
+    m_height = height;
+
+    CreateImage(
+        device,
+        physicalDevice,
+        width,
+        height,
+        VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+        VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    VkImageViewCreateInfo view{};
+    view.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    view.image = m_image;
+    view.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    view.format = VK_FORMAT_R8G8B8A8_UNORM;
+    view.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    view.subresourceRange.levelCount = 1;
+    view.subresourceRange.layerCount = 1;
+
+    vkCreateImageView(device, &view, nullptr, &m_imageView);
+
+    VkSamplerCreateInfo sampler{};
+    sampler.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    sampler.magFilter = VK_FILTER_LINEAR;
+    sampler.minFilter = VK_FILTER_LINEAR;
+    sampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    sampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    sampler.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    sampler.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+
+    vkCreateSampler(device, &sampler, nullptr, &m_sampler);
+
+    Loaded = true;
+}
 #endif
 #if DIRECTX11 == 1
 void Texture::SetSRV(ID3D11ShaderResourceView* srv)

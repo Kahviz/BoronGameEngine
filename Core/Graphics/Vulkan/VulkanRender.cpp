@@ -206,6 +206,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     createDescriptorPool();
     createDescriptorSets(nullptr);
     initViewport();
+
     //InitEnd
     CreateSuccess("No Fatal Errors in Vulkan Initing :D-<");
     return true;
@@ -1462,6 +1463,13 @@ void VulkanRender::createShadowPipeline() {
 
 void VulkanRender::initViewport()
 {
+    viewportTexture = std::make_unique<Texture>();
+
+    viewportTexture->CreateRenderTarget(
+        vkDevice.GetDevice(),
+        vkDevice.GetPhysicalDevice(),
+        1280,
+        720);
 }
 
 #endif
