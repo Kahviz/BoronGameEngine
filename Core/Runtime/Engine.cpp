@@ -85,6 +85,7 @@ Engine::Engine()
             throw std::runtime_error("Failed to initialize ImGui Vulkan backend");
         }
 
+        vk.initViewport();
         ImGuiInited = true;
 #endif
         ImGuiIO& io = ImGui::GetIO();

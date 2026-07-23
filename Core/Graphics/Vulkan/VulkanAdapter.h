@@ -10,7 +10,7 @@ class VulkanAdapter : public IRenderer
 {
 public:
     bool Init(GLFWwindow* window) override;
-
+    void initViewport();
     void DrawFrame(float dt,
         std::vector<std::unique_ptr<Instance>>& drawables) override;
 

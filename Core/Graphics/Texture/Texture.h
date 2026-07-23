@@ -5,13 +5,7 @@
 #include "GLOBALS.h"
 #include "Releaser.h"
 #include "Debugging/Functions/BGE_ASSERTS.h"
-
-#if DIRECTX11 == 1
-    #include <d3d11.h>
-    #include <wrl/client.h>
-
-    using namespace Microsoft::WRL;
-#endif
+#include "GraphicsBackends.h"
 
 #if VULKAN == 1
     #include "Vulkan/vulkan.h"
@@ -22,7 +16,6 @@ class IRenderer;
 
 class Texture {
 public:
-
     int GetWidth() const { return m_width; }
     int GetHeight() const { return m_height; }
 #if DIRECTX11 == 1
@@ -58,7 +51,11 @@ public:
     void TransitionImageLayout(VkCommandBuffer cmd, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     void CopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, uint32_t width, uint32_t height);
     void Cleanup(VkDevice device);
-    void CreateRenderTarget(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height);
+    void CreateRenderTarget(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height, VkRenderPass renderPass);
+    ImTextureID getImGuiTexture() const { return m_ImGuiTexture; }
+    VkFramebuffer getFramebuffer() const { return m_framebuffer; }
+    VkFormat getFormat() const { return m_format; }
+    void SetImGuiTexture(ImTextureID tex) { m_ImGuiTexture = tex; }
 #endif
     bool IsLoadedConst() const {
         return Loaded;
@@ -78,6 +75,9 @@ private:
     VkDeviceMemory m_imageMemory = VK_NULL_HANDLE;
     VkImageView m_imageView = VK_NULL_HANDLE;
     VkSampler m_sampler = VK_NULL_HANDLE;
+    ImTextureID m_ImGuiTexture = {};
+    VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
+    VkRenderPass m_renderPass = VK_NULL_HANDLE;
 
     VkFormat m_format = VK_FORMAT_R8G8B8A8_UNORM;
 #endif

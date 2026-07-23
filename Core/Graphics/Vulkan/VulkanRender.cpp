@@ -205,7 +205,6 @@ bool VulkanRender::Init(GLFWwindow* window)
 
     createDescriptorPool();
     createDescriptorSets(nullptr);
-    initViewport();
 
     //InitEnd
     CreateSuccess("No Fatal Errors in Vulkan Initing :D-<");
@@ -1469,7 +1468,14 @@ void VulkanRender::initViewport()
         vkDevice.GetDevice(),
         vkDevice.GetPhysicalDevice(),
         1280,
-        720);
-}
+        720,
+        renderPass
+    );
 
+    viewportDescriptor = ImGui_ImplVulkan_AddTexture(
+        viewportTexture->GetSampler(),
+        viewportTexture->GetImageView(),
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    );
+}
 #endif

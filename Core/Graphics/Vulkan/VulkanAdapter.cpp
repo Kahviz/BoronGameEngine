@@ -9,6 +9,11 @@ bool VulkanAdapter::Init(GLFWwindow* window)
     return renderer->Init(window);
 }
 
+void VulkanAdapter::initViewport()
+{
+    renderer->initViewport();
+}
+
 void VulkanAdapter::DrawFrame(
     float dt,
     std::vector<std::unique_ptr<Instance>>& drawables)

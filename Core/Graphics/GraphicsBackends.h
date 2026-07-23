@@ -1,6 +1,8 @@
 #pragma once
 #include "GLOBALS.h"
 
+#include <imgui.h>
+
 #if VULKAN == 1
 	#include "VulkanRender.h"
 	#include "backends/imgui_impl_vulkan.h"

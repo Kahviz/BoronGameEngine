@@ -270,13 +270,20 @@ void Texture::Cleanup(VkDevice device)
         vkFreeMemory(device, m_imageMemory, nullptr);
         m_imageMemory = VK_NULL_HANDLE;
     }
+    if (m_framebuffer != VK_NULL_HANDLE)
+    {
+        vkDestroyFramebuffer(device, m_framebuffer, nullptr);
+        m_framebuffer = VK_NULL_HANDLE;
+    }
 }
 void Texture::CreateRenderTarget(
     VkDevice device,
     VkPhysicalDevice physicalDevice,
     uint32_t width,
-    uint32_t height)
+    uint32_t height,
+    VkRenderPass renderPass)
 {
+    m_renderPass = renderPass;
     m_width = width;
     m_height = height;
 
@@ -313,6 +320,24 @@ void Texture::CreateRenderTarget(
 
     vkCreateSampler(device, &sampler, nullptr, &m_sampler);
 
+    VkFramebufferCreateInfo framebufferInfo{};
+    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    framebufferInfo.renderPass = m_renderPass;
+    framebufferInfo.attachmentCount = 1;
+    framebufferInfo.pAttachments = &m_imageView;
+    framebufferInfo.width = width;
+    framebufferInfo.height = height;
+    framebufferInfo.layers = 1;
+    
+    BGE_ASSERT_VKRESULT(
+        vkCreateFramebuffer(
+            device,
+            &framebufferInfo,
+            nullptr,
+            &m_framebuffer
+        ),
+        "Failed to create viewport framebuffer"
+    );
     Loaded = true;
 }
 #endif

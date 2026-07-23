@@ -3,7 +3,8 @@ Make Error and Warning popups with imgui
 Making Mathlib more clear and easy to use
 Pointlights to vulkan and dx11
 Make sceneloading cached with same objects
-Make Template system -Making
+Make Template system
+Make all member names cameltype
 
 Parent loading
 Create a graphics setting file

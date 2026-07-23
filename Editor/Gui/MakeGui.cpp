@@ -530,7 +530,12 @@ void MakeGui::MakeIMViewPort(Window& wnd)
             ImVec2(800, 500)
         );
     #endif
-
+    #if VULKAN == 1
+        ImGui::Image(
+            wnd.GetGraphics().GetRenderer().GetViewport()->getImGuiTexture(),
+            ImVec2(800, 500)
+        );
+    #endif
     ImGui::End();
 }
 
