@@ -276,6 +276,7 @@ void Texture::Cleanup(VkDevice device)
         m_framebuffer = VK_NULL_HANDLE;
     }
 }
+
 void Texture::CreateRenderTarget(
     VkDevice device,
     VkPhysicalDevice physicalDevice,
