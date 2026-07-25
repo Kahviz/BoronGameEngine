@@ -206,7 +206,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     createDescriptorPool();
     createDescriptorSets(nullptr);
 
-    //InitEnd
+    //InitEnd :D-<
     CreateSuccess("No Fatal Errors in Vulkan Initing :D-<");
     return true;
 }
