@@ -1460,6 +1460,10 @@ void VulkanRender::createShadowPipeline() {
     CreateSuccess("Shadow pipeline created!");
 }
 
+void VulkanRender::createViewportRenderPass() {
+
+}
+
 void VulkanRender::initViewport()
 {
     viewportTexture = std::make_unique<Texture>();
@@ -1471,6 +1475,8 @@ void VulkanRender::initViewport()
         720,
         renderPass
     );
+
+    createViewportRenderPass();
 
     viewportDescriptor = ImGui_ImplVulkan_AddTexture(
         viewportTexture->GetSampler(),

@@ -74,6 +74,7 @@ public:
     void createShadowRenderPass();
 
     void createShadowPipeline();
+    void createViewportRenderPass();
 
     void initViewport();
     //Getters
