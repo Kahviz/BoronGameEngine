@@ -1461,7 +1461,7 @@ void VulkanRender::createShadowPipeline() {
 }
 
 void VulkanRender::createViewportRenderPass() {
-
+    CreateInfo("Viewport renderpass createing...");
 }
 
 void VulkanRender::initViewport()
