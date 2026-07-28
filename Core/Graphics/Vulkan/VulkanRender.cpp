@@ -1522,6 +1522,7 @@ void VulkanRender::createViewportRenderPass()
 
     CreateSuccess("Viewport render pass created");
 }
+
 void VulkanRender::initViewport()
 {
     viewportTexture = std::make_unique<Texture>();
