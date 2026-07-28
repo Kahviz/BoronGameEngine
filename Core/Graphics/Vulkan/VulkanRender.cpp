@@ -270,6 +270,18 @@ void VulkanRender::Cleanup()
 {
     CreateInfo("Starting Vulkan Cleanup");
 
+    if (viewportCommandBuffer != VK_NULL_HANDLE)
+    {
+        vkFreeCommandBuffers(
+            vkDevice.GetDevice(),
+            vkCommandBuffer.GetCommandPool(),
+            1,
+            &viewportCommandBuffer
+        );
+
+        viewportCommandBuffer = VK_NULL_HANDLE;
+    }
+
     if (vkDevice.GetDevice() != VK_NULL_HANDLE) {
         vkDeviceWaitIdle(vkDevice.GetDevice());
     }
@@ -346,6 +358,7 @@ void VulkanRender::Cleanup()
     if (vkInstance.GetInstance() != VK_NULL_HANDLE) {
         vkDestroyInstance(vkInstance.GetInstance(), nullptr);
     }
+
     CreateInfo("Cleaned up successfully!");
 }
 
@@ -353,40 +366,7 @@ uint32_t VulkanRender::GetImageIndex() {
     return CurrentimageIndex;
 }
 
-void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bool usesTexture)
-{
-    CurrentimageIndex = imageIndex;
-    VkCommandBuffer cmd = vkCommandBuffer.GetCommandBuffers()[imageIndex];
-    vkResetCommandBuffer(cmd, 0);
-
-    VkCommandBufferBeginInfo beginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-    vkBeginCommandBuffer(cmd, &beginInfo);
-
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = (float)screen_width;
-    viewport.height = (float)screen_height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(cmd, 0, 1, &viewport);
-
-    VkRect2D scissor{};
-    scissor.offset = { 0, 0 };
-    scissor.extent = { (uint32_t)screen_width, (uint32_t)screen_height };
-    vkCmdSetScissor(cmd, 0, 1, &scissor);
-
-    VkRenderPassBeginInfo rp{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-    rp.renderPass = renderPass;
-    rp.framebuffer = vkSwapchain.GetSwapchainFramebuffers()[imageIndex];
-    rp.renderArea.extent = vkSwapchain.GetSwapchainExtent();
-    rp.clearValueCount = static_cast<uint32_t>(clearValues.size());
-    rp.pClearValues = clearValues.data();
-
-    vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
-
-    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline.GetGraphicsPipeline());
-
+void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
     for (const auto& drawCmd : drawCommands)
     {
         bool hasTexture = drawCmd.usesTexture;
@@ -423,6 +403,43 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bo
 
         drawCmd.mesh->Draw(cmd);
     }
+}
+
+void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bool usesTexture)
+{
+    CurrentimageIndex = imageIndex;
+    VkCommandBuffer cmd = vkCommandBuffer.GetCommandBuffers()[imageIndex];
+    vkResetCommandBuffer(cmd, 0);
+
+    VkCommandBufferBeginInfo beginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+    vkBeginCommandBuffer(cmd, &beginInfo);
+
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = (float)screen_width;
+    viewport.height = (float)screen_height;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+    VkRect2D scissor{};
+    scissor.offset = { 0, 0 };
+    scissor.extent = { (uint32_t)screen_width, (uint32_t)screen_height };
+    vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+    VkRenderPassBeginInfo rp{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+    rp.renderPass = renderPass;
+    rp.framebuffer = vkSwapchain.GetSwapchainFramebuffers()[imageIndex];
+    rp.renderArea.extent = vkSwapchain.GetSwapchainExtent();
+    rp.clearValueCount = static_cast<uint32_t>(clearValues.size());
+    rp.pClearValues = clearValues.data();
+
+    vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
+
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline.GetGraphicsPipeline());
+
+    DrawMeshesForRecordCommandBuffer(cmd);
 
     if (renderImGui && ImGui::GetDrawData()) {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
@@ -1523,6 +1540,87 @@ void VulkanRender::createViewportRenderPass()
     CreateSuccess("Viewport render pass created");
 }
 
+void VulkanRender::createViewportDepthResources(uint32_t width, uint32_t height)
+{
+    VkFormat format = FindDepthFormat(vkDevice.GetPhysicalDevice());
+
+    VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.extent = { width, height, 1 };
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.format = format;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    vkCreateImage(vkDevice.GetDevice(), &imageInfo, nullptr, &viewportDepthImage);
+
+    VkMemoryRequirements memReq;
+    vkGetImageMemoryRequirements(vkDevice.GetDevice(), viewportDepthImage, &memReq);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memReq.size;
+    allocInfo.memoryTypeIndex = FindMemoryType(
+        memReq.memoryTypeBits,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        vkDevice.GetPhysicalDevice());
+
+    vkAllocateMemory(vkDevice.GetDevice(), &allocInfo, nullptr, &viewportDepthMemory);
+    vkBindImageMemory(vkDevice.GetDevice(), viewportDepthImage, viewportDepthMemory, 0);
+
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = viewportDepthImage;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.format = format;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.layerCount = 1;
+
+    vkCreateImageView(vkDevice.GetDevice(), &viewInfo, nullptr, &viewportDepthView);
+}
+
+void VulkanRender::RecordViewportCommandBuffer()
+{
+    VkCommandBuffer cmd = viewportCommandBuffer;
+
+    vkResetCommandBuffer(cmd, 0);
+
+    VkCommandBufferBeginInfo begin{};
+    begin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+    vkBeginCommandBuffer(cmd, &begin);
+
+    VkClearValue clear[2];
+    clear[0].color = { {0.15f,0.15f,0.18f,1.0f} };
+    clear[1].depthStencil = { 1.0f,0 };
+
+    VkRenderPassBeginInfo rp{};
+    rp.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    rp.renderPass = viewportRenderPass;
+    rp.framebuffer = viewportFramebuffer;
+    rp.renderArea.extent = { 1280,720 };
+    rp.clearValueCount = 2;
+    rp.pClearValues = clear;
+
+    vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
+
+    vkCmdBindPipeline(cmd,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        vkPipeline.GetGraphicsPipeline());
+
+    DrawMeshesForRecordCommandBuffer(cmd);
+
+    vkCmdEndRenderPass(cmd);
+
+    vkEndCommandBuffer(cmd);
+}
+
 void VulkanRender::initViewport()
 {
     viewportTexture = std::make_unique<Texture>();
@@ -1536,11 +1634,44 @@ void VulkanRender::initViewport()
     );
 
     createViewportRenderPass();
+    createViewportDepthResources(800, 500);
 
     viewportDescriptor = ImGui_ImplVulkan_AddTexture(
         viewportTexture->GetSampler(),
         viewportTexture->GetImageView(),
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    );
+
+    VkImageView attachments[] =
+    {
+        viewportTexture->GetImageView(),
+        viewportDepthView
+    };
+
+    VkFramebufferCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    info.renderPass = viewportRenderPass;
+    info.attachmentCount = 2;
+    info.pAttachments = attachments;
+    info.width = 1280;
+    info.height = 720;
+    info.layers = 1;
+
+    vkCreateFramebuffer(vkDevice.GetDevice(), &info, nullptr, &viewportFramebuffer);
+
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = vkCommandBuffer.GetCommandPool();
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = 1;
+
+    BGE_ASSERT_VKRESULT(
+        vkAllocateCommandBuffers(
+            vkDevice.GetDevice(),
+            &allocInfo,
+            &viewportCommandBuffer
+        ),
+        "Failed to allocate viewport command buffer"
     );
 }
 #endif

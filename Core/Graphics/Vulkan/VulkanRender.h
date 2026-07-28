@@ -40,6 +40,7 @@ public:
     bool Init(GLFWwindow* window);
     void Cleanup();
     uint32_t GetImageIndex();
+    void DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd);
     void RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bool usesTexture);
     void RecreateSwapchain();
     void CreateFramebuffers();
@@ -75,6 +76,10 @@ public:
 
     void createShadowPipeline();
     void createViewportRenderPass();
+
+    void createViewportDepthResources(uint32_t width, uint32_t height);
+
+    void RecordViewportCommandBuffer();
 
     void initViewport();
     //Getters
@@ -187,5 +192,10 @@ private:
     VkFramebuffer viewportFramebuffer = VK_NULL_HANDLE;
     VkDescriptorSet viewportDescriptor = VK_NULL_HANDLE;
     VkRenderPass viewportRenderPass = VK_NULL_HANDLE;
+
+    VkImage viewportDepthImage = VK_NULL_HANDLE;
+    VkDeviceMemory viewportDepthMemory = VK_NULL_HANDLE;
+    VkImageView viewportDepthView = VK_NULL_HANDLE;
+    VkCommandBuffer viewportCommandBuffer = VK_NULL_HANDLE;
 };
 #endif
