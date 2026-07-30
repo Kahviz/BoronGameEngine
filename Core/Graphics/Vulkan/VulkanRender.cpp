@@ -1108,6 +1108,25 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         return;
     }
 
+    RecordViewportCommandBuffer();
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &viewportCommandBuffer;
+
+    BGE_ASSERT_VKRESULT(
+        vkQueueSubmit(
+            vkDevice.GetGraphicsQueue(),
+            1,
+            &submitInfo,
+            VK_NULL_HANDLE
+        ),
+        "Failed to submit viewport command buffer"
+    );
+
+    vkQueueWaitIdle(vkDevice.GetGraphicsQueue());
+
     bool RenderImGui = true;
     RecordCommandBuffer(imageIndex, RenderImGui,false);
 }
@@ -1610,6 +1629,19 @@ void VulkanRender::RecordViewportCommandBuffer()
 
     vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
 
+    VkViewport vp{};
+    vp.x = 0;
+    vp.y = 0;
+    vp.width = 1280;
+    vp.height = 720;
+    vp.minDepth = 0.0f;
+    vp.maxDepth = 1.0f;
+    vkCmdSetViewport(cmd, 0, 1, &vp);
+
+    VkRect2D scissor{};
+    scissor.extent = { 1280,720 };
+    vkCmdSetScissor(cmd, 0, 1, &scissor);
+
     vkCmdBindPipeline(cmd,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         vkPipeline.GetGraphicsPipeline());
@@ -1625,16 +1657,16 @@ void VulkanRender::initViewport()
 {
     viewportTexture = std::make_unique<Texture>();
 
+    createViewportRenderPass();
+    createViewportDepthResources(1280, 720);
+
     viewportTexture->CreateRenderTarget(
         vkDevice.GetDevice(),
         vkDevice.GetPhysicalDevice(),
         1280,
         720,
-        renderPass
+        viewportRenderPass
     );
-
-    createViewportRenderPass();
-    createViewportDepthResources(800, 500);
 
     viewportDescriptor = ImGui_ImplVulkan_AddTexture(
         viewportTexture->GetSampler(),
