@@ -88,7 +88,7 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 
-    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) { //Do ths with assert
         throw std::runtime_error("Failed to create pipeline layout!");
     }
 

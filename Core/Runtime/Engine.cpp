@@ -85,7 +85,6 @@ Engine::Engine()
             throw std::runtime_error("Failed to initialize ImGui Vulkan backend");
         }
 
-        vk.initViewport();
         ImGuiInited = true;
 #endif
         ImGuiIO& io = ImGui::GetIO();
@@ -143,6 +142,14 @@ int Engine::EngineRun()
     #endif
     
     auto lastFrameTime = clock::now();
+
+#if VULKAN == 1
+    auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
+
+    #if INEDITOR == 1
+        vk.initViewport();
+    #endif
+#endif
 
     while (!glfwWindowShouldClose(glfwWND))
     {
@@ -361,12 +368,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
                     world.AddChild(Drawable.get());
                 }
             }
-            if (Drawables.empty()) { 
-                SaveProject::Save(Drawables);
 
-                Instance* inst = AddAMesh("\\Cube.obj", "Cube2", BML::Vec3{ 0,0,0 }, BML::Vec3{ 0.5,1,0.5 }, false,false);
-                Instance* inst2 = AddAMesh("\\Cube.obj", "Cube", BML::Vec3{ 0,-5,0 }, BML::Vec3{ 10,1,10 }, false, false);
-                inst->AddChild(inst2);
+            if (Drawables.empty()) {
             }
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);
@@ -382,7 +385,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
 #if INEDITOR == 1
     if (InProject && ImGuiInited) {
-        makeGui.MakeIMViewPort(*wnd);
         makeGui.MakeIMGui(
             *wnd,
             Drawables,
@@ -436,6 +438,10 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     #if INEDITOR == 1
         if (ImGuiInited) {
+            if (InProject) {
+                makeGui.MakeIMViewPort(*wnd);
+            }
+
             wnd->GetGraphics().SetRenderTargetToBackBuffer();
 
             ImGui::Render();

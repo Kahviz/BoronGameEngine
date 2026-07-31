@@ -190,7 +190,7 @@ private:
     std::unique_ptr<Texture> viewportTexture;
 
     VkFramebuffer viewportFramebuffer = VK_NULL_HANDLE;
-    VkDescriptorSet viewportDescriptor = VK_NULL_HANDLE;
+    ImTextureID viewportDescriptor = {};
     VkRenderPass viewportRenderPass = VK_NULL_HANDLE;
 
     VkImage viewportDepthImage = VK_NULL_HANDLE;
