@@ -36,7 +36,7 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd)
     float AspectX = screen_width;
     float AspectY = screen_height;
     float Aspect = AspectX / AspectY;
-    camera.SetProjectionValues(FOV, Aspect, zNear, 1000.0f);
+    camera.SetProjectionValues(g_FOV, Aspect, zNear, 1000.0f);
 
     CreateConstantBuffers();
     CreateShadowResources();
@@ -570,7 +570,7 @@ void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd)
     viewport_width = AspectX;
 
     CreateSceneResources(width, height);
-    camera.SetProjectionValues(FOV, Aspect, zNear, 1000.0f);
+    camera.SetProjectionValues(g_FOV, Aspect, zNear, 1000.0f);
 }
 
 
@@ -625,7 +625,7 @@ void Dx11Renderer::EndFrame()
 {
     if (!pSwap) return;
 
-    HRESULT hr = pSwap->Present(vSync, 0);
+    HRESULT hr = pSwap->Present(g_vSync, 0);
 
     if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
         throw std::runtime_error("DirectX device lost");

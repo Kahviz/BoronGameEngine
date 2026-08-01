@@ -14,12 +14,11 @@ extern float viewport_height = 200.0f;
     #include <cstdlib>
 #endif
 
-bool vSync = true;
-bool Running = true;
-bool Typing = false;
-float FOV = 100.0f;
-
-int Index = 0;
+bool g_vSync = true;
+bool g_Running = true;
+bool g_Typing = false;
+float g_FOV = 100.0f;
+int g_Index = 0;
 
 std::string GetAppDataPath() {
     char* buffer = nullptr;

@@ -143,7 +143,7 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
 
     Drawables.push_back(std::move(obj));
 
-    Index++;
+    g_Index++;
     return *objPtr;
 }
 

@@ -25,7 +25,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     float Aspect = AspectX / AspectY;
 
     viewportTexture = std::make_unique<Texture>();
-    m_Camera.SetProjectionValues(FOV, Aspect, 0.0f, 1000.0f);
+    m_Camera.SetProjectionValues(g_FOV, Aspect, 0.0f, 1000.0f);
 
     CreateInfo("Vulkan Init Started");
 
@@ -546,7 +546,7 @@ void VulkanRender::CreateSwapchain() {
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(vkDevice.GetPhysicalDevice(), vkDevice.GetSurface(), &presentModeCount, presentModes.data());
 
-    if (vSync) {
+    if (g_vSync) {
         presentMode = VK_PRESENT_MODE_FIFO_KHR;
     }
     else {

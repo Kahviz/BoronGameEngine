@@ -170,10 +170,10 @@ void MakeGui::MakeIMGui(Window& wnd,
     MakeStyle();
     
     if (ImGui::IsAnyItemActive()) {
-        Typing = true;
+        g_Typing = true;
     }
     else {
-        Typing = false;
+        g_Typing = false;
     }
     
     ImGuiIO& io = ImGui::GetIO();
@@ -366,7 +366,7 @@ void MakeGui::MakeIMGui(Window& wnd,
         if (ImGui::Selectable("Script")) {
             Script* script = new Script(
                 "Script",
-                Index,
+                g_Index,
                 { 255, 255, 255 },                // color
                 { 255, 255, 255 },                // original color
                 { 0, 0, 0 },                      // velocity
@@ -376,8 +376,8 @@ void MakeGui::MakeIMGui(Window& wnd,
             );
 
             Drawables.push_back(std::unique_ptr<Instance>(script));
-            script->UniqueID = Index;
-            Index++;
+            script->UniqueID = g_Index;
+            g_Index++;
             world.AddChild(script);
             plusGuiOpen = false;
         }

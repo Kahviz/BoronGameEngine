@@ -3,7 +3,7 @@
 //Server
 bool Physics::ApplyGravity(Instance& inst, float deltatime)
 {
-    if (Running) {
+    if (g_Running) {
         BML::Vector3 pos = inst.transform.Position;
         BML::Vector3 vel = inst.Velocity;
 

@@ -194,7 +194,7 @@ Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
         std::make_shared<Mesh>()
     );
 
-    obj->UniqueID = Index;
+    obj->UniqueID = g_Index;
 
 #if DIRECTX11 == 1
     if (!LiteralPath) {
@@ -248,7 +248,7 @@ Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
     Instance* objPtr = obj.get();
     Drawables.push_back(std::move(obj));
 
-    Index++;
+    g_Index++;
     return objPtr;
 }
 
@@ -436,7 +436,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
 #endif
 
-    if (!ctrlPressed && !Typing) {
+    if (!ctrlPressed && !g_Typing) {
         camC.MakeCameraControls(*wnd, deltatime);
     }
 

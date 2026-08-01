@@ -33,7 +33,7 @@ bool VulkanSwapchain::Init(VkDevice& device,VkPhysicalDevice& physicalDevice, Vk
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data());
 
-    if (vSync) {
+    if (g_vSync) {
         presentMode = VK_PRESENT_MODE_FIFO_KHR;
     }
     else {
