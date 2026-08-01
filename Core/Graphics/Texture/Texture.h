@@ -12,6 +12,7 @@
 
     class VulkanRender;
 #endif
+
 class IRenderer;
 
 class Texture {

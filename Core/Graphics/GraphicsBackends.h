@@ -17,8 +17,9 @@
 	#include <d3d11.h>
 	#include <DirectXMath.h>
 	#include <wrl/client.h>
+	using Microsoft::WRL::ComPtr;
+
 	#include <wincodec.h>
 	#include <d3dcompiler.h>
 	#include "Dx11Renderer.h"
-	#include "backends/imgui_impl_dx11.h"
 #endif
