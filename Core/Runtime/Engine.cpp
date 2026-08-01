@@ -173,7 +173,7 @@ int Engine::EngineRun()
 }
 
 Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
-    BML::Vector3 pos, BML::Vector3 Size, bool Selec,bool LiteralPath)
+    BML::Vector3 pos, BML::Vector3 Size, bool Selec,bool LiteralPath, bool UsesTexture)
 {
     Transform transform;
     transform.Position = pos;
@@ -207,6 +207,7 @@ Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
 
 #if VULKAN == 1
     auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
+
     if (!LiteralPath) {
         obj.get()->OBJmesh = Mesh::Load(
             assets + Path,
@@ -232,15 +233,16 @@ Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
 
     std::string fullPath = textures + "\\TestTexture.png";
 
-    #if 0
+    if (UsesTexture) {
         #if DIRECTX11 == 1
-            obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
+                obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
         #endif
         #if VULKAN == 1
             obj->texture.LoadVK(fullPath, vk);
             vk.UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
         #endif
-    #endif
+    }
+
     obj->Parent = &world;
 
     Instance* objPtr = obj.get();
@@ -370,6 +372,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             }
 
             if (Drawables.empty()) {
+                AddAMesh("\\Cube.obj", "Cube", { 0,2,0 }, { 1,1,1 }, false, false,true);
+                AddAMesh("\\Cube.obj", "Cube2", { 0,0,0 }, { 1,1,1 }, false, false,true);
             }
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);

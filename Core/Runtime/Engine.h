@@ -28,8 +28,7 @@ public:
     ~Engine();
 
     int EngineRun();
-    Instance* AddAMesh(const std::string& Path, const std::string& Name, BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath);    
-private:
+    Instance* AddAMesh(const std::string& Path, const std::string& Name, BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath, bool UsesTexture = false);
     void EngineDoFrame(Window* wnd, float deltatime);
     bool ImGuiInited = false;
 

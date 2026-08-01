@@ -373,6 +373,7 @@ void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
 
         if (hasTexture)
         {
+            CreateSuccess("Using texture pipeline");
             vkCmdBindPipeline(
                 cmd,
                 VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -381,6 +382,8 @@ void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
         }
         else
         {
+            CreateSuccess("Not using texture pipeline");
+
             vkCmdBindPipeline(
                 cmd,
                 VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -401,7 +404,9 @@ void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
             &dynamicOffset
         );
 
-        drawCmd.mesh->Draw(cmd);
+        if (drawCmd.mesh) {
+            drawCmd.mesh->Draw(cmd);
+        }
     }
 }
 
@@ -621,7 +626,13 @@ void VulkanRender::createUniformBuffers() {
 void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount) {
     vkDeviceWaitIdle(vkDevice.GetDevice());
 
-    if (m_UniformBuffer != VK_NULL_HANDLE) {
+    if (m_UniformBufferMemory != VK_NULL_HANDLE)
+    {
+        vkUnmapMemory(vkDevice.GetDevice(), m_UniformBufferMemory);
+    }
+
+    if (m_UniformBuffer != VK_NULL_HANDLE)
+    {
         vkDestroyBuffer(vkDevice.GetDevice(), m_UniformBuffer, nullptr);
         vkFreeMemory(vkDevice.GetDevice(), m_UniformBufferMemory, nullptr);
     }
@@ -652,7 +663,15 @@ void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount) {
     BGE_ASSERT_VKRESULT(vkAllocateMemory(vkDevice.GetDevice(), &allocInfo, nullptr, &m_UniformBufferMemory), "Failed to allocate uniform buffer memory");
 
     vkBindBufferMemory(vkDevice.GetDevice(), m_UniformBuffer, m_UniformBufferMemory, 0);
-    vkMapMemory(vkDevice.GetDevice(), m_UniformBufferMemory, 0, m_UniformBufferSize, 0, &uniformBufferMapped);
+
+    vkMapMemory(
+        vkDevice.GetDevice(),
+        m_UniformBufferMemory,
+        0,
+        m_UniformBufferSize,
+        0,
+        &uniformBufferMapped
+    );
 }
 
 void VulkanRender::createDescriptorPool() {
@@ -743,14 +762,28 @@ void VulkanRender::createDescriptorSets(const Instance* inst) {
         descriptorWrites[1].pBufferInfo = nullptr;
         descriptorWrites[1].pTexelBufferView = nullptr;
 
-        vkUpdateDescriptorSets(vkDevice.GetDevice(), 3, descriptorWrites.data(), 0, nullptr); // 2 bindings
+        vkUpdateDescriptorSets(vkDevice.GetDevice(),
+            3,
+            descriptorWrites.data(),
+            0,
+            nullptr
+        );
     }
     else {
         if (inst != nullptr) {
-            vkUpdateDescriptorSets(vkDevice.GetDevice(), 2, &descriptorWrites[0], 0, nullptr); //only 1 binding
-        }
-        else {
-            CreateError("inst is nullptr, if this happened at start dont worry!");
+
+            VkWriteDescriptorSet writes[2];
+
+            writes[0] = descriptorWrites[0];
+            writes[1] = descriptorWrites[2];
+
+            vkUpdateDescriptorSets(
+                vkDevice.GetDevice(),
+                2,
+                writes,
+                0,
+                nullptr
+            );
         }
     }
 }
@@ -1055,6 +1088,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
     lightSpaceMatrix = lightProj * lightView;
 
     shadowDrawCommands.clear();
+
     for (const auto& cmd : drawCommands) {
         ShadowDrawCommand shadowCmd;
         shadowCmd.mesh = cmd.mesh;
