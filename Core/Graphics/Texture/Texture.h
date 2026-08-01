@@ -55,15 +55,22 @@ public:
     ImTextureID getImGuiTexture() const { return m_ImGuiTexture; }
     VkFramebuffer getFramebuffer() const { return m_framebuffer; }
     VkFormat getFormat() const { return m_format; }
+    VkDescriptorSet getDescriptorSet() const {
+        if (this == nullptr)
+            return VK_NULL_HANDLE;
+
+        return m_descriptorSet;
+    }
     void SetImGuiTexture(ImTextureID tex) { m_ImGuiTexture = tex; }
 #endif
     bool IsLoadedConst() const {
         return Loaded;
     }
-    bool IsLoaded() {
-        if (this != nullptr) {
-            return Loaded;
-        }
+    bool IsLoaded() const {
+        if (this != nullptr)
+            return false;
+
+        return Loaded;
     }
 private:
     bool Loaded = false;
@@ -78,7 +85,7 @@ private:
     ImTextureID m_ImGuiTexture = {};
     VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
-
+    VkDescriptorSet m_descriptorSet = VK_NULL_HANDLE;
     VkFormat m_format = VK_FORMAT_R8G8B8A8_UNORM;
 #endif
     int m_width = 0;

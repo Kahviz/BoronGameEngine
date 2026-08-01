@@ -4,12 +4,11 @@
 #include <filesystem>
 #include "BGE_ASSERTS.h"
 #include "IRenderer.h"
+#include <Libs/STBIcons/stb_image.h>
 
 #if VULKAN == 1
-    #include <filesystem>
     #include <stdexcept>
     #include "Vulkan/VulkanHelpers.h"
-    #include <Libs/STBIcons/stb_image.h>
     #include "VulkanAdapter.h"
 #endif
 
@@ -20,10 +19,9 @@
     #include <Dx11Adapter.h>
 #endif
 
-#include <Libs/STBIcons/stb_image.h>
+namespace fs = std::filesystem;
 
 #if VULKAN == 1
-namespace fs = std::filesystem;
 
 bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
 {
