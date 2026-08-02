@@ -1,7 +1,8 @@
+#pragma once
+
 #include "GLOBALS.h"
 
 #if VULKAN == 1
-#pragma once
 #include "GraphicsSettings.h"
 
 #include <vector>
