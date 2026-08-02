@@ -93,4 +93,4 @@ std::string savings = BoronEnginePath + "\\Savings";
 std::string assets = BoronEnginePath + "\\Assets";
 std::string textures = BoronEnginePath + "\\Textures";
 std::string fonts = BoronEnginePath + "\\Fonts";
-fs::path appDataTarget = GetAppDataDir();
+fs::path g_appDataTarget = GetAppDataDir();

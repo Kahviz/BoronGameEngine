@@ -269,7 +269,7 @@ void MakeFiles::MakeAPPDATAFolders() {
                 std::cout << "\nAttempting to copy files recursively...\n";
             #endif 
         #endif
-        bool success = CopyDirectoryRecursive(AssetTemplateFolder, appDataTarget);
+        bool success = CopyDirectoryRecursive(AssetTemplateFolder, g_appDataTarget);
 
         if (success) {
             #ifdef _DEBUG
@@ -278,7 +278,7 @@ void MakeFiles::MakeAPPDATAFolders() {
                 #endif 
             #endif
 
-            if (fs::exists(appDataTarget) && fs::is_directory(appDataTarget)) {
+            if (fs::exists(g_appDataTarget) && fs::is_directory(g_appDataTarget)) {
                 #ifdef _DEBUG
                     #if DEBUGFILEMAKING == 1
                         std::cout << "\nFiles now in AppData:\n";
@@ -286,7 +286,7 @@ void MakeFiles::MakeAPPDATAFolders() {
                 #endif
                 try {
                     int copiedCount = 0;
-                    for (const auto& entry : fs::recursive_directory_iterator(appDataTarget)) {
+                    for (const auto& entry : fs::recursive_directory_iterator(g_appDataTarget)) {
                         if (entry.is_regular_file()) {
                             copiedCount++;
                         }

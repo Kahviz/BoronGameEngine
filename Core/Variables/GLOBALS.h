@@ -49,7 +49,7 @@ extern std::string textures;
 extern std::string savings;
 extern std::string g_projectName;
 
-extern fs::path appDataTarget;
+extern fs::path g_appDataTarget;
 
 extern int g_Index;
 extern bool g_vSync;
