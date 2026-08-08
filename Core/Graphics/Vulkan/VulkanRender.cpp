@@ -936,6 +936,11 @@ bool VulkanRender::RenderAMesh(const Instance* drawable)
     return true;
 }
 
+void VulkanRender::resizeViewport()
+{
+
+}
+
 void VulkanRender::PrintInfo() {
     if (shadowImage == VK_NULL_HANDLE) {
         CreateError("shadowImage is VK_NULL_HANDLE");
