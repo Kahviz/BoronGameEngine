@@ -466,7 +466,7 @@ void VulkanRender::RecreateSwapchain() {
     CreateDepthResources(vkSwapchain.GetSwapchainExtent().width, vkSwapchain.GetSwapchainExtent().height);
     CreateFramebuffers();
     uint32_t framebufferCount = static_cast<uint32_t>(vkSwapchain.GetSwapchainFramebuffers().size());
-
+    
     if (!vkCommandBuffer.AllocateCommandBuffers(vkDevice.GetDevice(), framebufferCount)) {
         CreateError("Failed to allocate command buffers at RecreateSwapchain!");
     }
@@ -936,9 +936,110 @@ bool VulkanRender::RenderAMesh(const Instance* drawable)
     return true;
 }
 
-void VulkanRender::resizeViewport()
-{
+void VulkanRender::resizeViewport(uint32_t width, uint32_t height) {
+    if (width == 0 || height == 0)
+        return;
 
+    vkDeviceWaitIdle(vkDevice.GetDevice());
+
+    if (viewportFramebuffer != VK_NULL_HANDLE)
+    {
+        vkDestroyFramebuffer(
+            vkDevice.GetDevice(),
+            viewportFramebuffer,
+            nullptr
+        );
+
+        viewportFramebuffer = VK_NULL_HANDLE;
+    }
+
+    if (viewportDepthView != VK_NULL_HANDLE)
+    {
+        vkDestroyImageView(
+            vkDevice.GetDevice(),
+            viewportDepthView,
+            nullptr
+        );
+
+        viewportDepthView = VK_NULL_HANDLE;
+    }
+
+    if (viewportDepthImage != VK_NULL_HANDLE)
+    {
+        vkDestroyImage(
+            vkDevice.GetDevice(),
+            viewportDepthImage,
+            nullptr
+        );
+
+        viewportDepthImage = VK_NULL_HANDLE;
+    }
+
+    if (viewportDepthMemory != VK_NULL_HANDLE)
+    {
+        vkFreeMemory(
+            vkDevice.GetDevice(),
+            viewportDepthMemory,
+            nullptr
+        );
+
+        viewportDepthMemory = VK_NULL_HANDLE;
+    }
+
+    viewportTexture->DestroyRenderTarget(
+        vkDevice.GetDevice()
+    );
+
+    viewportTexture->CreateRenderTarget(
+        vkDevice.GetDevice(),
+        vkDevice.GetPhysicalDevice(),
+        width,
+        height,
+        viewportRenderPass
+    );
+
+    createViewportDepthResources(width, height);
+
+    VkImageView attachments[] =
+    {
+        viewportTexture->GetImageView(),
+        viewportDepthView
+    };
+
+    VkFramebufferCreateInfo framebufferInfo{};
+    framebufferInfo.sType =
+        VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+
+    framebufferInfo.renderPass = viewportRenderPass;
+    framebufferInfo.attachmentCount = 2;
+    framebufferInfo.pAttachments = attachments;
+    framebufferInfo.width = width;
+    framebufferInfo.height = height;
+    framebufferInfo.layers = 1;
+
+    BGE_ASSERT_VKRESULT(
+        vkCreateFramebuffer(
+            vkDevice.GetDevice(),
+            &framebufferInfo,
+            nullptr,
+            &viewportFramebuffer
+        ),
+        "Failed to recreate viewport framebuffer"
+    );
+
+    ImTextureID viewportDescriptor =
+        (ImTextureID)ImGui_ImplVulkan_AddTexture(
+            viewportTexture->GetSampler(),
+            viewportTexture->GetImageView(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+    viewportTexture->SetImGuiTexture(viewportDescriptor);
+
+    viewport_width = width;
+    viewport_height = height;
+
+    CreateSuccess("Viewport resized");
 }
 
 void VulkanRender::PrintInfo() {
@@ -1666,7 +1767,10 @@ void VulkanRender::RecordViewportCommandBuffer()
     rp.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     rp.renderPass = viewportRenderPass;
     rp.framebuffer = viewportFramebuffer;
-    rp.renderArea.extent = { 1280,720 };
+    rp.renderArea.extent = {
+        static_cast<uint32_t>(viewport_width),
+        static_cast<uint32_t>(viewport_height)
+    };
     rp.clearValueCount = 2;
     rp.pClearValues = clear;
 
@@ -1675,8 +1779,8 @@ void VulkanRender::RecordViewportCommandBuffer()
     VkViewport vp{};
     vp.x = 0;
     vp.y = 0;
-    vp.width = 1280;
-    vp.height = 720;
+    vp.width = viewport_width;
+    vp.height = viewport_height;
     vp.minDepth = 0.0f;
     vp.maxDepth = 1.0f;
     vkCmdSetViewport(cmd, 0, 1, &vp);

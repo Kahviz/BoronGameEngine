@@ -56,7 +56,7 @@ public:
     BML::Matrix4x4 createModelMatrix(BML::Vector3 orientation, BML::Vector3 scale, BML::Vector3 pos);
     void updateUniformBuffer(const Instance& inst, uint32_t objectIndex, BML::Vector3 scale, BML::Vector3 Orientation, BML::Vector3 pos, BML::Int3 color);
     bool RenderAMesh(const Instance* drawable);
-    void resizeViewport();
+    void resizeViewport(uint32_t width, uint32_t height);
     void PrintInfo();
 
     void RecordShadowCommandBuffer();

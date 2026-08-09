@@ -53,6 +53,7 @@ public:
     void CopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, uint32_t width, uint32_t height);
     void Cleanup(VkDevice device);
     void CreateRenderTarget(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height, VkRenderPass renderPass);
+    void DestroyRenderTarget(VkDevice device);
     ImTextureID getImGuiTexture() const { return m_ImGuiTexture; }
     VkFramebuffer getFramebuffer() const { return m_framebuffer; }
     VkFormat getFormat() const { return m_format; }

@@ -360,6 +360,36 @@ void Texture::CreateRenderTarget(
     );
     Loaded = true;
 }
+void Texture::DestroyRenderTarget(VkDevice device) {
+    if (device == VK_NULL_HANDLE)
+        return;
+
+    if (m_sampler != VK_NULL_HANDLE)
+    {
+        vkDestroySampler(device, m_sampler, nullptr);
+        m_sampler = VK_NULL_HANDLE;
+    }
+
+    if (m_imageView != VK_NULL_HANDLE)
+    {
+        vkDestroyImageView(device, m_imageView, nullptr);
+        m_imageView = VK_NULL_HANDLE;
+    }
+
+    if (m_image != VK_NULL_HANDLE)
+    {
+        vkDestroyImage(device, m_image, nullptr);
+        m_image = VK_NULL_HANDLE;
+    }
+
+    if (m_imageMemory != VK_NULL_HANDLE)
+    {
+        vkFreeMemory(device, m_imageMemory, nullptr);
+        m_imageMemory = VK_NULL_HANDLE;
+    }
+
+    m_ImGuiTexture = {};
+}
 #endif
 #if DIRECTX11 == 1
 void Texture::SetSRV(ID3D11ShaderResourceView* srv)
