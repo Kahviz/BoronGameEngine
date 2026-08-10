@@ -39,6 +39,7 @@ public:
     void EndFrame() override;
     void CreateSceneResources(int width, int height) override;
     void ClearSceneBuffer(float r, float g, float b) override;
+    void ReSizeViewport(int width, int height) override;
 private:
     std::unique_ptr<VulkanRender> renderer;
 };

@@ -108,4 +108,7 @@ void Dx11Adapter::CleanUp()
 {
     
 }
+void Dx11Adapter::ReSizeViewport(int width, int height)
+{
+}
 #endif

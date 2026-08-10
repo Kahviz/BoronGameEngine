@@ -42,6 +42,7 @@ public:
     {
         return renderer.get();
     }
+    void ReSizeViewport(int width, int height) override;
 private:
     std::unique_ptr<Dx11Renderer> renderer;
 };

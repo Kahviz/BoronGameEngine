@@ -524,21 +524,41 @@ void MakeGui::MakeIMViewPort(Window& wnd)
 {
     ImGui::Begin("Viewport");
 
-    #if DIRECTX11 == 1
-        ImGui::Image(
-            (ImTextureID)wnd.GetGraphics().GetRenderer().GetViewport()->GetTextureComPtr().Get(),
-            ImVec2(800, 500)
-        );
-    #endif
-    #if VULKAN == 1
-        ImGui::Image(
-            wnd.GetGraphics().GetRenderer().GetViewport()->getImGuiTexture(),
-            ImVec2(800, 500)
-        );
-    #endif
+    ImVec2 size = ImGui::GetContentRegionAvail();
+
+    static ImVec2 lastSize = ImVec2(0, 0);
+
+    if (size.x != lastSize.x || size.y != lastSize.y)
+    {
+        int width = static_cast<int>(size.x);
+        int height = static_cast<int>(size.y);
+
+        if (width > 0 && height > 0)
+        {
+            wnd.GetGraphics().GetRenderer().ReSizeViewport(width, height);
+        }
+
+        lastSize = size;
+    }
+
+#if DIRECTX11 == 1
+    ImGui::Image(
+        (ImTextureID)wnd.GetGraphics().GetRenderer()
+        .GetViewport()->GetTextureComPtr().Get(),
+        size
+    );
+#endif
+
+#if VULKAN == 1
+    ImGui::Image(
+        wnd.GetGraphics().GetRenderer()
+        .GetViewport()->getImGuiTexture(),
+        size
+    );
+#endif
+
     ImGui::End();
 }
-
 void MakeGui::CreateErrorPopUp(IRenderer* renderer, Image2d& image2d, const std::string& errormsg, const float duration) {
     std::string fullPath = textures + "\\ErrorIcon.png";
 

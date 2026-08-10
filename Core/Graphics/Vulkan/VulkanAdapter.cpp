@@ -80,6 +80,11 @@ void VulkanAdapter::ClearSceneBuffer(float r, float g, float b)
     //renderer->ClearSceneBuffer(r, g, b);
 }
 
+void VulkanAdapter::ReSizeViewport(int width, int height)
+{
+    renderer->resizeViewport(width, height);
+}
+
 void VulkanAdapter::CleanUp()
 {
     renderer->Cleanup();
