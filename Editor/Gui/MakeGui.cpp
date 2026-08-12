@@ -537,7 +537,6 @@ void MakeGui::MakeIMViewPort(Window& wnd)
         {
             wnd.GetGraphics().GetRenderer().ReSizeViewport(width, height);
         }
-
         lastSize = size;
     }
 

@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
 #define PRINTDEBUGINFO 1  //1 = True, 0 = False
 
 #if !defined(_DEBUG)
-	#undef VALIDATIONLAYERS
+	#undef VALIDATIONLAYERS // If not in debug disable validation layers
 #endif
 #if VULKAN == 0
 	#undef VALIDATIONLAYERS

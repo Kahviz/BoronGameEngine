@@ -373,7 +373,6 @@ void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
 
         if (hasTexture)
         {
-            CreateSuccess("Using texture pipeline");
             vkCmdBindPipeline(
                 cmd,
                 VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -382,8 +381,6 @@ void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
         }
         else
         {
-            CreateSuccess("Not using texture pipeline");
-
             vkCmdBindPipeline(
                 cmd,
                 VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -887,8 +884,13 @@ void VulkanRender::updateUniformBuffer(
     ubo.UsesTexture = (tex && tex->IsLoadedConst()) ? 1.0f : 0.0f;
 
     ubo.view = m_Camera.GetViewMatrix().transposed();
-
-    float aspect = (float)screen_width / (float)screen_height;
+    float aspect = -1;
+#if INEDITOR == 1
+    aspect = (float)viewport_width / (float)viewport_height;
+#endif
+#if INEDITOR == 0
+    aspect = (float)screen_width / (float)screen_height;
+#endif
     ubo.proj = CreateVulkanPerspective(
         45.0f * PI / 180.0f,
         aspect,
