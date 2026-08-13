@@ -50,11 +50,11 @@ public:
     void EndFrame();
 
     void DrawAFrame(float deltatime, std::vector<std::unique_ptr<Instance>>& Drawables);
-
+    
     void ClearBuffer(float r, float g, float b);
     void ClearSceneBuffer(float r, float g, float b);
     void ReSizeWindow(int width, int height, HWND hWnd);
-
+    void ReSizeViewport(int width, int height);
     void CreateSceneResources(int width, int height);
     ID3D11ShaderResourceView* GetSceneSRV();
     ID3D11RenderTargetView* GetBackBufferRTV();

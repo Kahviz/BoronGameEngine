@@ -573,6 +573,10 @@ void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd)
     camera.SetProjectionValues(g_FOV, Aspect, zNear, 1000.0f);
 }
 
+void Dx11Renderer::ReSizeViewport(int width, int height)
+{
+}
+
 
 void Dx11Renderer::CreateSceneResources(int width, int height) {
     D3D11_TEXTURE2D_DESC td = {};
