@@ -575,6 +575,7 @@ void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd)
 
 void Dx11Renderer::ReSizeViewport(int width, int height)
 {
+    //Logic
 }
 
 
