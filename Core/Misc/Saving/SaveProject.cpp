@@ -56,9 +56,6 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
 
             file << "MeshFile: " << to.filename().string() << "\n";
             file << "InstanceType: " << static_cast<int>(Drawable->InstanceType) << '\n';
-            std::cout << "Saving InstanceType = "
-                << static_cast<int>(Drawable->InstanceType)
-                << '\n';
             file << "END\n";
         }
         else if (Drawable->InstanceType == Boron::Enums::InstanceType::Script) {

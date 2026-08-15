@@ -54,6 +54,7 @@ public:
     void ClearBuffer(float r, float g, float b);
     void ClearSceneBuffer(float r, float g, float b);
     void ReSizeWindow(int width, int height, HWND hWnd);
+    void CreateSceneDepthStencil(int width, int height);
     void ReSizeViewport(int width, int height);
     void CreateSceneResources(int width, int height);
     ID3D11ShaderResourceView* GetSceneSRV();
@@ -127,6 +128,8 @@ private:
         float padding;
     };
 
+    ComPtr<ID3D11Texture2D> pSceneDepthStencil;
+    ComPtr<ID3D11DepthStencilView> pSceneDepthStencilView;
     //Light Setting
     float lightAngle = 0.0f;
     float radius = 10.0f;

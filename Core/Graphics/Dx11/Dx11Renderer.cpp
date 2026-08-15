@@ -241,8 +241,13 @@ void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawa
     if (oldDSV) oldDSV->Release();
 }
 
-void Dx11Renderer::SetRenderTargetToScene() {
-    pContext->OMSetRenderTargets(1, pSceneRTV.GetAddressOf(), pDepthStencilView.Get());
+void Dx11Renderer::SetRenderTargetToScene()
+{
+    pContext->OMSetRenderTargets(
+        1,
+        pSceneRTV.GetAddressOf(),
+        pSceneDepthStencilView.Get()
+    );
 }
 
 void Dx11Renderer::SetRenderTargetToBackBuffer() {
@@ -572,13 +577,124 @@ void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd)
     CreateSceneResources(width, height);
     camera.SetProjectionValues(g_FOV, Aspect, zNear, 1000.0f);
 }
+void Dx11Renderer::CreateSceneDepthStencil(int width, int height)
+{
+    pSceneDepthStencil.Reset();
+    pSceneDepthStencilView.Reset();
 
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = static_cast<UINT>(width);
+    desc.Height = static_cast<UINT>(height);
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+    HRESULT hr = pDevice->CreateTexture2D(
+        &desc,
+        nullptr,
+        &pSceneDepthStencil
+    );
+
+    if (FAILED(hr))
+        throw std::runtime_error("Failed to create scene depth stencil");
+
+    hr = pDevice->CreateDepthStencilView(
+        pSceneDepthStencil.Get(),
+        nullptr,
+        &pSceneDepthStencilView
+    );
+
+    if (FAILED(hr))
+        throw std::runtime_error("Failed to create scene depth stencil view");
+}
 void Dx11Renderer::ReSizeViewport(int width, int height)
 {
-    //Logic
+    if (!pContext || !pDevice || width <= 0 || height <= 0)
+        return;
+
+    pSceneRTV.Reset();
+    pSceneSRV.Reset();
+    pSceneTexture.Reset();
+    pSceneRTV.Reset();
+    pSceneSRV.Reset();
+    pSceneTexture.Reset();
+    pSceneDepthStencil.Reset();
+    pSceneDepthStencilView.Reset();
+
+    CreateSceneResources(width, height);
+    CreateSceneDepthStencil(width, height);
+
+    D3D11_TEXTURE2D_DESC td = {};
+    td.Width = static_cast<UINT>(width);
+    td.Height = static_cast<UINT>(height);
+    td.MipLevels = 1;
+    td.ArraySize = 1;
+    td.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    td.SampleDesc.Count = 1;
+    td.SampleDesc.Quality = 0;
+    td.Usage = D3D11_USAGE_DEFAULT;
+    td.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+    HRESULT hr = pDevice->CreateTexture2D(
+        &td,
+        nullptr,
+        &pSceneTexture
+    );
+
+    if (FAILED(hr))
+        throw std::runtime_error("Failed to resize scene texture");
+
+    hr = pDevice->CreateRenderTargetView(
+        pSceneTexture.Get(),
+        nullptr,
+        &pSceneRTV
+    );
+
+    if (FAILED(hr))
+        throw std::runtime_error("Failed to resize scene RTV");
+
+    hr = pDevice->CreateShaderResourceView(
+        pSceneTexture.Get(),
+        nullptr,
+        &pSceneSRV
+    );
+
+    if (FAILED(hr))
+        throw std::runtime_error("Failed to resize scene SRV");
+
+    if (!viewportTexture)
+        viewportTexture = std::make_unique<Texture>();
+
+    viewportTexture->SetSRV(pSceneSRV.Get());
+
+    D3D11_VIEWPORT vp = {};
+    vp.TopLeftX = 0.0f;
+    vp.TopLeftY = 0.0f;
+    vp.Width = static_cast<float>(width);
+    vp.Height = static_cast<float>(height);
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+
+    pContext->RSSetViewports(1, &vp);
+
+    viewport_width = width;
+    viewport_height = height;
+
+    const float aspect =
+        static_cast<float>(width) /
+        static_cast<float>(height);
+
+    camera.SetProjectionValues(
+        g_FOV,
+        aspect,
+        zNear,
+        1000.0f
+    );
 }
-
-
 void Dx11Renderer::CreateSceneResources(int width, int height) {
     D3D11_TEXTURE2D_DESC td = {};
     td.Width = width;
@@ -759,14 +875,19 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
 
 void Dx11Renderer::ClearSceneBuffer(float r, float g, float b)
 {
-    if (!pContext || !pSceneRTV || !pDepthStencilView)
+    if (!pContext || !pSceneRTV || !pSceneDepthStencilView)
         return;
 
     const float color[] = { r, g, b, 1.0f };
 
     pContext->ClearRenderTargetView(pSceneRTV.Get(), color);
-    pContext->ClearDepthStencilView(pDepthStencilView.Get(),
-        D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+    pContext->ClearDepthStencilView(
+        pSceneDepthStencilView.Get(),
+        D3D11_CLEAR_DEPTH,
+        1.0f,
+        0
+    );
 }
 
 void Dx11Renderer::ClearBuffer(float r, float g, float b)
