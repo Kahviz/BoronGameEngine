@@ -798,7 +798,7 @@ void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Insta
             BML::Int3 color = inst.color;
             float Brightness = 1.0f;
 
-            // Matrix
+            // Matrix 
             XMMATRIX scale = XMMatrixScaling(size.x(), size.y(), size.z());
             XMMATRIX rotation = XMMatrixRotationRollPitchYaw(Orientation.x(), Orientation.y(), Orientation.z());
             XMMATRIX translation = XMMatrixTranslation(pos.x(), pos.y(), pos.z());
