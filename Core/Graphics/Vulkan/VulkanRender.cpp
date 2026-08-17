@@ -27,7 +27,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     viewportTexture = std::make_unique<Texture>();
     m_Camera.SetProjectionValues(g_FOV, Aspect, 0.0f, 1000.0f);
 
-    CreateInfo("Vulkan Init Started");
+    CreateInfo("Vulkan Init Started!");
 
     if (!vkInstance.Init()) {
         CreateError("A Unexpected error happened on vkInstance.Init");
