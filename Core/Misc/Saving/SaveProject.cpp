@@ -133,7 +133,16 @@ Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string
 #endif
 #if VULKAN == 1
     obj->texture.LoadVK(fullPath, vk);
-    vk.UpdateDescriptorSet(obj.get());
+
+    std::vector<const Instance*> constDrawable;
+    constDrawable.reserve(Drawables.size());
+
+    for (const auto& drawable : Drawables)
+    {
+        constDrawable.push_back(drawable.get());
+    }
+
+    vk.UpdateDescriptorSet(constDrawable);
 #endif
 
     Instance* objPtr = obj.get();

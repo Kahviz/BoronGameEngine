@@ -203,9 +203,6 @@ bool VulkanRender::Init(GLFWwindow* window)
     createShadowResources();
     createShadowPipeline();
 
-    createDescriptorPool();
-    createDescriptorSets(nullptr);
-
     //InitEnd :D-<
     CreateSuccess("No Fatal Errors in Vulkan Initing :D-<");
     return true;
@@ -285,6 +282,13 @@ void VulkanRender::Cleanup()
     if (vkDevice.GetDevice() != VK_NULL_HANDLE) {
         vkDeviceWaitIdle(vkDevice.GetDevice());
     }
+
+    if (descriptorPool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(vkDevice.GetDevice(), descriptorPool, nullptr);
+        descriptorPool = VK_NULL_HANDLE;
+    }
+
+    descriptorSets.clear();
 
     if (imguiPool != VK_NULL_HANDLE) {
         ImGui_ImplVulkan_Shutdown();
@@ -388,7 +392,11 @@ void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
             );
         }
 
-        uint32_t dynamicOffset = drawCmd.objectIndex * dynamicAlignment;
+        uint32_t dynamicOffset =
+            drawCmd.objectIndex * dynamicAlignment;
+
+        VkDescriptorSet descriptorSet =
+            descriptorSets[drawCmd.objectIndex];
 
         vkCmdBindDescriptorSets(
             cmd,
@@ -439,11 +447,11 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bo
 
     vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
 
-    #if INEDITOR == 0
-        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline.GetGraphicsPipeline());
+#if INEDITOR == 0
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline.GetGraphicsPipeline());
 
-        DrawMeshesForRecordCommandBuffer(cmd);
-    #endif
+    DrawMeshesForRecordCommandBuffer(cmd);
+#endif
 
     if (renderImGui && ImGui::GetDrawData()) {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
@@ -463,13 +471,13 @@ void VulkanRender::RecreateSwapchain() {
     CreateDepthResources(vkSwapchain.GetSwapchainExtent().width, vkSwapchain.GetSwapchainExtent().height);
     CreateFramebuffers();
     uint32_t framebufferCount = static_cast<uint32_t>(vkSwapchain.GetSwapchainFramebuffers().size());
-    
+
     if (!vkCommandBuffer.AllocateCommandBuffers(vkDevice.GetDevice(), framebufferCount)) {
         CreateError("Failed to allocate command buffers at RecreateSwapchain!");
     }
 
     for (size_t i = 0; i < vkCommandBuffer.GetCommandBuffers().size(); i++) {
-        RecordCommandBuffer(static_cast<uint32_t>(i), false,false);
+        RecordCommandBuffer(static_cast<uint32_t>(i), false, false);
     }
 }
 
@@ -671,113 +679,168 @@ void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount) {
     );
 }
 
-void VulkanRender::createDescriptorPool() {
+void VulkanRender::createDescriptorPool(uint32_t maxObjects)
+{
     std::array<VkDescriptorPoolSize, 2> poolSizes{};
 
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    poolSizes[0].descriptorCount = 1;
+    poolSizes[0].descriptorCount = maxObjects;
 
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[1].descriptorCount = 2;
+    poolSizes[1].descriptorCount = maxObjects * 2;
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = 1;
+    poolInfo.maxSets = maxObjects;
 
-    BGE_ASSERT_VKRESULT(vkCreateDescriptorPool(vkDevice.GetDevice(), &poolInfo, nullptr, &descriptorPool), "Failed to create descriptor pool");
+    BGE_ASSERT_VKRESULT(
+        vkCreateDescriptorPool(
+            vkDevice.GetDevice(),
+            &poolInfo,
+            nullptr,
+            &descriptorPool
+        ),
+        "Failed to create descriptor pool"
+    );
 }
 
-void VulkanRender::UpdateDescriptorSet(const Instance* inst) {
+void VulkanRender::UpdateDescriptorSets(
+    const std::vector<const Instance*>& instances)
+{
     vkDeviceWaitIdle(vkDevice.GetDevice());
 
-    if (descriptorPool != VK_NULL_HANDLE) {
-        vkDestroyDescriptorPool(vkDevice.GetDevice(), descriptorPool, nullptr);
+    if (descriptorPool != VK_NULL_HANDLE)
+    {
+        vkDestroyDescriptorPool(
+            vkDevice.GetDevice(),
+            descriptorPool,
+            nullptr
+        );
+
         descriptorPool = VK_NULL_HANDLE;
     }
 
-    createDescriptorPool();
-    createDescriptorSets(inst);
+    descriptorSets.clear();
+
+    createDescriptorPool(
+        static_cast<uint32_t>(instances.size())
+    );
+
+    createDescriptorSets(instances);
 }
+void VulkanRender::createDescriptorSets(
+    const std::vector<const Instance*>& instances)
+{
+    uint32_t count = static_cast<uint32_t>(instances.size());
 
-void VulkanRender::createDescriptorSets(const Instance* inst) {
-    const Texture* texture = (inst != nullptr) ? inst->GetConstTexture() : nullptr;
+    if (count == 0)
+        return;
 
-    VkDescriptorSetLayout layouts[] = { vkPipeline.GetDescriptorSetLayout() };
+    descriptorSets.resize(count);
+
+    std::vector<VkDescriptorSetLayout> layouts(
+        count,
+        vkPipeline.GetDescriptorSetLayout()
+    );
 
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = layouts;
+    allocInfo.descriptorSetCount = count;
+    allocInfo.pSetLayouts = layouts.data();
 
-    BGE_ASSERT_VKRESULT(vkAllocateDescriptorSets(vkDevice.GetDevice(), &allocInfo, &descriptorSet), "Failed to allocate descriptor sets");
+    BGE_ASSERT_VKRESULT(
+        vkAllocateDescriptorSets(
+            vkDevice.GetDevice(),
+            &allocInfo,
+            descriptorSets.data()
+        ),
+        "Failed to allocate descriptor sets"
+    );
 
-    VkDescriptorBufferInfo bufferInfo{};
-    bufferInfo.buffer = m_UniformBuffer;
-    bufferInfo.offset = 0;
-    bufferInfo.range = sizeof(UniformBufferObject);
+    for (uint32_t i = 0; i < count; i++)
+    {
+        const Instance* inst = instances[i];
 
-    std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+        const Texture* texture =
+            (inst != nullptr)
+            ? inst->GetConstTexture()
+            : nullptr;
 
-    descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrites[0].dstSet = descriptorSet;
-    descriptorWrites[0].dstBinding = 0;
-    descriptorWrites[0].dstArrayElement = 0;
-    descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    descriptorWrites[0].descriptorCount = 1;
-    descriptorWrites[0].pBufferInfo = &bufferInfo;
-    descriptorWrites[0].pImageInfo = nullptr;
-    descriptorWrites[0].pTexelBufferView = nullptr;
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = m_UniformBuffer;
+        bufferInfo.offset = 0;
+        bufferInfo.range = sizeof(UniformBufferObject);
 
-    VkDescriptorImageInfo shadowImageInfo{};
-    shadowImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    shadowImageInfo.imageView = shadowImageView;
-    shadowImageInfo.sampler = shadowSampler;
+        VkDescriptorImageInfo shadowImageInfo{};
+        shadowImageInfo.imageLayout =
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        shadowImageInfo.imageView = shadowImageView;
+        shadowImageInfo.sampler = shadowSampler;
 
-    descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrites[2].dstSet = descriptorSet;
-    descriptorWrites[2].dstBinding = 2;
-    descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrites[2].descriptorCount = 1;
-    descriptorWrites[2].pImageInfo = &shadowImageInfo;
+        std::array<VkWriteDescriptorSet, 3> writes{};
 
-    VkDescriptorImageInfo imageInfo{};
-    if (texture != nullptr && texture->IsLoadedConst()) {
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = texture->GetImageView();
-        imageInfo.sampler = texture->GetSampler();
+        writes[0].sType =
+            VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writes[0].dstSet = descriptorSets[i];
+        writes[0].dstBinding = 0;
+        writes[0].dstArrayElement = 0;
+        writes[0].descriptorType =
+            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        writes[0].descriptorCount = 1;
+        writes[0].pBufferInfo = &bufferInfo;
 
-        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet = descriptorSet;
-        descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pImageInfo = &imageInfo;
-        descriptorWrites[1].pBufferInfo = nullptr;
-        descriptorWrites[1].pTexelBufferView = nullptr;
+        writes[2].sType =
+            VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writes[2].dstSet = descriptorSets[i];
+        writes[2].dstBinding = 2;
+        writes[2].dstArrayElement = 0;
+        writes[2].descriptorType =
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        writes[2].descriptorCount = 1;
+        writes[2].pImageInfo = &shadowImageInfo;
 
-        vkUpdateDescriptorSets(vkDevice.GetDevice(),
-            3,
-            descriptorWrites.data(),
-            0,
-            nullptr
-        );
-    }
-    else {
-        if (inst != nullptr) {
+        if (texture != nullptr && texture->IsLoadedConst())
+        {
+            VkDescriptorImageInfo imageInfo{};
 
-            VkWriteDescriptorSet writes[2];
+            imageInfo.imageLayout =
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView = texture->GetImageView();
+            imageInfo.sampler = texture->GetSampler();
 
-            writes[0] = descriptorWrites[0];
-            writes[1] = descriptorWrites[2];
+            writes[1].sType =
+                VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            writes[1].dstSet = descriptorSets[i];
+            writes[1].dstBinding = 1;
+            writes[1].dstArrayElement = 0;
+            writes[1].descriptorType =
+                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            writes[1].descriptorCount = 1;
+            writes[1].pImageInfo = &imageInfo;
+
+            vkUpdateDescriptorSets(
+                vkDevice.GetDevice(),
+                3,
+                writes.data(),
+                0,
+                nullptr
+            );
+        }
+        else
+        {
+            VkWriteDescriptorSet texturelessWrites[2] =
+            {
+                writes[0],
+                writes[2]
+            };
 
             vkUpdateDescriptorSets(
                 vkDevice.GetDevice(),
                 2,
-                writes,
+                texturelessWrites,
                 0,
                 nullptr
             );
@@ -867,7 +930,6 @@ void VulkanRender::updateUniformBuffer(
     {
         uint32_t newSize = Max(m_CurrentObjectCount * 2, objectIndex + 1);
         ReallocateUniformBuffer(newSize);
-        UpdateDescriptorSet(&inst);
     }
 
     UniformBufferObject ubo{};
@@ -1085,7 +1147,7 @@ void VulkanRender::RecordShadowCommandBuffer()
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    BGE_ASSERT_VKRESULT(vkBeginCommandBuffer(shadowCommandBuffer, &beginInfo),"Failed to begin shadow command buffer");
+    BGE_ASSERT_VKRESULT(vkBeginCommandBuffer(shadowCommandBuffer, &beginInfo), "Failed to begin shadow command buffer");
 
     VkClearValue clearValue{};
     clearValue.depthStencil = { 1.0f, 0 };
@@ -1152,13 +1214,40 @@ inline BML::Matrix4x4 CreateOrthographic(
     return result;
 }
 
-void VulkanRender::ClearBuffer(float r,float b,float g) {
+void VulkanRender::ClearBuffer(float r, float b, float g) {
     clearValues[0].color = { {r,b,g} };
     clearValues[1].depthStencil = { 1.0f, 0 };
 }
 
 void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables)
 {
+    std::vector<const Instance*> instances;
+    instances.reserve(Drawables.size());
+
+    uint32_t maxObjectIndex = 0;
+    bool hasInstances = false;
+
+    for (const auto& drawable : Drawables)
+    {
+        if (!drawable)
+            continue;
+
+        const uint32_t index = static_cast<uint32_t>(drawable->UniqueID);
+        maxObjectIndex = max(maxObjectIndex, index);
+        hasInstances = true;
+        instances.push_back(drawable.get());
+    }
+
+    if (hasInstances && maxObjectIndex >= m_CurrentObjectCount)
+    {
+        const uint32_t newSize =
+            Max(m_CurrentObjectCount * 2, maxObjectIndex + 1);
+
+        ReallocateUniformBuffer(newSize);
+    }
+
+    UpdateDescriptorSets(instances);
+
     /*
     static int frames = 0;
     frames++;
@@ -1252,29 +1341,29 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         return;
     }
 
-    #if INEDITOR == 1
-        RecordViewportCommandBuffer();
+#if INEDITOR == 1
+    RecordViewportCommandBuffer();
 
-        VkSubmitInfo submitInfo{};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &viewportCommandBuffer;
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &viewportCommandBuffer;
 
-        BGE_ASSERT_VKRESULT(
-            vkQueueSubmit(
-                vkDevice.GetGraphicsQueue(),
-                1,
-                &submitInfo,
-                VK_NULL_HANDLE
-            ),
-            "Failed to submit viewport command buffer"
-        );
+    BGE_ASSERT_VKRESULT(
+        vkQueueSubmit(
+            vkDevice.GetGraphicsQueue(),
+            1,
+            &submitInfo,
+            VK_NULL_HANDLE
+        ),
+        "Failed to submit viewport command buffer"
+    );
 
-        vkQueueWaitIdle(vkDevice.GetGraphicsQueue());
-    #endif
+    vkQueueWaitIdle(vkDevice.GetGraphicsQueue());
+#endif
 
     bool RenderImGui = true;
-    RecordCommandBuffer(imageIndex, RenderImGui,false);
+    RecordCommandBuffer(imageIndex, RenderImGui, false);
 }
 
 void VulkanRender::EndFrame() {
@@ -1339,7 +1428,7 @@ VkCommandBuffer VulkanRender::BeginSingleTimeCommands() {
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    BGE_ASSERT_VKRESULT(vkBeginCommandBuffer(commandBuffer, &beginInfo),"Failed to begin command buffer");
+    BGE_ASSERT_VKRESULT(vkBeginCommandBuffer(commandBuffer, &beginInfo), "Failed to begin command buffer");
     return commandBuffer;
 }
 
@@ -1490,7 +1579,7 @@ void VulkanRender::createShadowRenderPass() {
     subpass.colorAttachmentCount = 0;
     subpass.pColorAttachments = nullptr;
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
-     
+
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;

@@ -235,11 +235,20 @@ Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
 
     if (UsesTexture) {
         #if DIRECTX11 == 1
-                obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
+            obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
         #endif
         #if VULKAN == 1
             obj->texture.LoadVK(fullPath, vk);
-            vk.UpdateDescriptorSet(obj.get()); //Updates DescriptorSets so the texture is loaded in the renderer
+
+            std::vector<const Instance*> constDrawable;
+            constDrawable.reserve(Drawables.size());
+
+            for (const auto& drawable : Drawables)
+            {
+                constDrawable.push_back(drawable.get());
+            }
+
+            vk.UpdateDescriptorSet(constDrawable);
         #endif
     }
 

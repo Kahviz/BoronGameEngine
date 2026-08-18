@@ -114,10 +114,11 @@ VkRenderPass VulkanAdapter::GetRenderPass() const
     return renderer->GetRenderPass();
 }
 
-void VulkanAdapter::UpdateDescriptorSet(const Instance* inst)
+void VulkanAdapter::UpdateDescriptorSet(std::vector<const Instance*> instances)
 {
-    renderer->UpdateDescriptorSet(inst);
+    renderer->UpdateDescriptorSets(instances);
 }
+
 void VulkanAdapter::RenderAMesh(const Instance* drawable) {
     renderer->RenderAMesh(drawable);
 }

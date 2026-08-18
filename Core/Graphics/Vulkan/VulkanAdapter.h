@@ -32,7 +32,7 @@ public:
     uint32_t GetGraphicsFamilyIndex() const;
     VkDescriptorPool& GetImGuiPool() const;
     VkRenderPass GetRenderPass() const;
-    void UpdateDescriptorSet(const Instance* inst);
+    void UpdateDescriptorSet(std::vector<const Instance*> instances);
     void RenderAMesh(const Instance* drawable);
     Texture* GetViewport() override;
 

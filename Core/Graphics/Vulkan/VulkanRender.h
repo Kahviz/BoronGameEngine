@@ -49,9 +49,9 @@ public:
     void CreateSwapchain();
     void createUniformBuffers();
     void ReallocateUniformBuffer(uint32_t newObjectCount);
-    void createDescriptorPool();
-    void UpdateDescriptorSet(const Instance* inst);
-    void createDescriptorSets(const Instance* inst = nullptr);
+    void createDescriptorPool(uint32_t maxObjects);
+    void UpdateDescriptorSets(const std::vector<const Instance*>& instances);
+    void createDescriptorSets(const std::vector<const Instance*>& instances);
     BML::Matrix4x4 CreateVulkanPerspective(float fovY, float aspect, float zNear, float zFar);
     BML::Matrix4x4 createModelMatrix(BML::Vector3 orientation, BML::Vector3 scale, BML::Vector3 pos);
     void updateUniformBuffer(const Instance& inst, uint32_t objectIndex, BML::Vector3 scale, BML::Vector3 Orientation, BML::Vector3 pos, BML::Int3 color);
@@ -198,5 +198,8 @@ private:
     VkDeviceMemory viewportDepthMemory = VK_NULL_HANDLE;
     VkImageView viewportDepthView = VK_NULL_HANDLE;
     VkCommandBuffer viewportCommandBuffer = VK_NULL_HANDLE;
+
+    //Multi Desc
+    std::vector<VkDescriptorSet> descriptorSets;
 };
 #endif
