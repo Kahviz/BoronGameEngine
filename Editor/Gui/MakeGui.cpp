@@ -284,7 +284,8 @@ void MakeGui::MakeIMGui(Window& wnd,
         ImGuiWindowFlags_AlwaysVerticalScrollbar
     );
 
-    Image2d plusbutton;
+    static Image2d plusbutton;
+
     plusbutton.LoadImGuiImage(renderer, textures + "\\PlusIcon.png");
 
     static bool plusGuiOpen = false;

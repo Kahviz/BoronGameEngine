@@ -267,6 +267,24 @@ void VulkanRender::Cleanup()
 {
     CreateInfo("Starting Vulkan Cleanup");
 
+    if (uniformBufferMapped != nullptr &&
+        m_UniformBufferMemory != VK_NULL_HANDLE)
+    {
+        vkUnmapMemory(vkDevice.GetDevice(), m_UniformBufferMemory);
+        uniformBufferMapped = nullptr;
+    }
+
+    if (m_UniformBuffer != VK_NULL_HANDLE)
+    {
+        vkDestroyBuffer(vkDevice.GetDevice(), m_UniformBuffer, nullptr);
+        m_UniformBuffer = VK_NULL_HANDLE;
+    }
+
+    if (m_UniformBufferMemory != VK_NULL_HANDLE)
+    {
+        vkFreeMemory(vkDevice.GetDevice(), m_UniformBufferMemory, nullptr);
+        m_UniformBufferMemory = VK_NULL_HANDLE;
+    }
     if (viewportCommandBuffer != VK_NULL_HANDLE)
     {
         vkFreeCommandBuffers(
@@ -917,6 +935,7 @@ BML::Matrix4x4 VulkanRender::createModelMatrix(BML::Vector3 orientation, BML::Ve
 
     return model;
 }
+
 void VulkanRender::updateUniformBuffer(
     const Instance& inst,
     uint32_t objectIndex,

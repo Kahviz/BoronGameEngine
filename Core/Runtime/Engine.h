@@ -7,6 +7,7 @@
 #include "Window/Window.h"
 #include "GLOBALS.h"
 #include "Misc/Saving/SaveProject.h"
+#include "Misc/DiscordPresence/DiscordPresence.h"
 
 #include "Keyboard/Keyboard.h"
 #include "Mouse/Mouse.h"
@@ -37,6 +38,7 @@ public:
 #if INEDITOR == 1
     MakeGui makeGui;
 #endif
+    DiscordPresence dcPresence;
     Window window;
     Instance world;
 

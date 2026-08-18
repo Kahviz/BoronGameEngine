@@ -133,6 +133,7 @@ Engine::~Engine()
 
 int Engine::EngineRun()
 {
+    dcPresence.Initialize();
     GLFWwindow* glfwWND = window.GetWindow();
 
     using clock = std::chrono::high_resolution_clock;
@@ -294,6 +295,7 @@ float GetRandomFloat(float min, float max) { //Mathlib
 
 void Engine::EngineDoFrame(Window* wnd, float deltatime)
 {
+    dcPresence.Update();
     Keyboard::Init(wnd->GetWindow());
     Mouse::updateMouse(wnd);
 

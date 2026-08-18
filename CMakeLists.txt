@@ -80,6 +80,64 @@ FetchContent_MakeAvailable(assimp)
 FetchContent_MakeAvailable(SDL3)
 FetchContent_MakeAvailable(imgui)
 
+set(DISCORD_SDK_ROOT "${CMAKE_SOURCE_DIR}/lib/discord_social_sdk")
+set(DISCORD_SDK_LIB_DIR "${DISCORD_SDK_ROOT}/lib/release")
+set(DISCORD_SDK_BIN_DIR "${DISCORD_SDK_ROOT}/bin/release")
+set(DISCORD_SDK_INCLUDE_DIR "${DISCORD_SDK_ROOT}/include")
+if(WIN32)
+
+    set(DISCORD_SDK_ROOT
+        "${CMAKE_SOURCE_DIR}/lib/discord_social_sdk"
+    )
+
+    set(DISCORD_SDK_INCLUDE_DIR
+        "${DISCORD_SDK_ROOT}/include"
+    )
+
+    set(DISCORD_SDK_LIB_DIR
+        "${DISCORD_SDK_ROOT}/lib/release"
+    )
+
+    set(DISCORD_SDK_BIN_DIR
+        "${DISCORD_SDK_ROOT}/bin/release"
+    )
+
+    set(DISCORD_LIB_PATH
+        "${DISCORD_SDK_LIB_DIR}/discord_partner_sdk.lib"
+    )
+
+    set(DISCORD_SHARED_LIB
+        "${DISCORD_SDK_BIN_DIR}/discord_partner_sdk.dll"
+    )
+
+    if(NOT EXISTS "${DISCORD_SDK_INCLUDE_DIR}/discordpp.h")
+        message(FATAL_ERROR
+            "Discord SDK header not found:\n"
+            "${DISCORD_SDK_INCLUDE_DIR}/discordpp.h"
+        )
+    endif()
+
+    if(NOT EXISTS "${DISCORD_LIB_PATH}")
+        message(FATAL_ERROR
+            "Discord SDK library not found:\n"
+            "${DISCORD_LIB_PATH}"
+        )
+    endif()
+
+    if(NOT EXISTS "${DISCORD_SHARED_LIB}")
+        message(FATAL_ERROR
+            "Discord SDK DLL not found:\n"
+            "${DISCORD_SHARED_LIB}"
+        )
+    endif()
+
+    message(STATUS "Discord SDK:")
+    message(STATUS "  Include: ${DISCORD_SDK_INCLUDE_DIR}")
+    message(STATUS "  Library: ${DISCORD_LIB_PATH}")
+    message(STATUS "  DLL:     ${DISCORD_SHARED_LIB}")
+
+endif()
+
 add_definitions(
     -DPROJECT_DIR="${CMAKE_SOURCE_DIR}/"
 )
@@ -143,6 +201,9 @@ add_executable(BoronEngine
     Core/Misc/Saving/SaveProject.h
     Core/Misc/Saving/SaveProject.cpp
 
+    Core/Misc/DiscordPresence/DiscordPresence.h
+    Core/Misc/DiscordPresence/DiscordPresence.cpp
+
     Core/Misc/Colission/Colission.cpp
     Core/Misc/Controller/Controller.cpp
     Core/Misc/Timer/Timer.cpp
@@ -174,6 +235,9 @@ target_include_directories(BoronEngine PRIVATE
     #Assimp
     ${assimp_SOURCE_DIR}/include
     ${assimp_BINARY_DIR}/include
+
+    #Discord
+    ${DISCORD_SDK_INCLUDE_DIR}
 
     #Engine
     Core/Instances/Instances/
@@ -227,16 +291,26 @@ target_link_libraries(imgui PUBLIC
     Vulkan::Vulkan
 )
 #Link
-target_link_libraries(BoronEngine PRIVATE
-    assimp
-    Vulkan::Vulkan
-    glfw
-    SDL3::SDL3
-    imgui
-)
+if(WIN32)
+    target_link_libraries(BoronEngine PRIVATE
+        assimp
+        Vulkan::Vulkan
+        glfw
+        SDL3::SDL3
+        imgui
+        "${DISCORD_LIB_PATH}"
+    )
+else()
+    target_link_libraries(BoronEngine PRIVATE
+        assimp
+        Vulkan::Vulkan
+        glfw
+        SDL3::SDL3
+        imgui
+    )
+endif()
 
 if(WIN32)
-
     add_custom_command(
         TARGET BoronEngine
         POST_BUILD
@@ -245,9 +319,12 @@ if(WIN32)
             $<TARGET_RUNTIME_DLLS:BoronEngine>
             $<TARGET_FILE_DIR:BoronEngine>
 
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${DISCORD_SHARED_LIB}"
+            $<TARGET_FILE_DIR:BoronEngine>
+
         COMMAND_EXPAND_LISTS
     )
-
 endif()
 if(WIN32)
     target_link_options(BoronEngine PRIVATE "/SUBSYSTEM:CONSOLE")

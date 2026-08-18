@@ -153,9 +153,14 @@ bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
     return true;
 }
 
-void Texture::CreateImage(VkDevice device, VkPhysicalDevice physicalDevice,
-    uint32_t width, uint32_t height, VkFormat format,
-    VkImageTiling tiling, VkImageUsageFlags usage,
+void Texture::CreateImage(
+    VkDevice device,
+    VkPhysicalDevice physicalDevice,
+    uint32_t width,
+    uint32_t height,
+    VkFormat format,
+    VkImageTiling tiling,
+    VkImageUsageFlags usage,
     VkMemoryPropertyFlags properties)
 {
     VkImageCreateInfo imageInfo{};
@@ -173,27 +178,93 @@ void Texture::CreateImage(VkDevice device, VkPhysicalDevice physicalDevice,
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateImage(device, &imageInfo, nullptr, &m_image) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to create image!");
+    VkResult result = vkCreateImage(
+        device,
+        &imageInfo,
+        nullptr,
+        &m_image
+    );
+
+    if (result != VK_SUCCESS) {
+        CreateError(
+            "vkCreateImage failed: " +
+            std::to_string(result)
+        );
+        m_image = VK_NULL_HANDLE;
+        return;
     }
 
-    VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(device, m_image, &memRequirements);
+    VkMemoryRequirements memRequirements{};
+    vkGetImageMemoryRequirements(
+        device,
+        m_image,
+        &memRequirements
+    );
+
+    uint32_t memoryTypeIndex;
+
+    try {
+        memoryTypeIndex = FindMemoryType(
+            memRequirements.memoryTypeBits,
+            properties,
+            physicalDevice
+        );
+    }
+    catch (...) {
+        vkDestroyImage(device, m_image, nullptr);
+        m_image = VK_NULL_HANDLE;
+        throw;
+    }
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = FindMemoryType(
-        memRequirements.memoryTypeBits,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        physicalDevice
+    allocInfo.memoryTypeIndex = memoryTypeIndex;
+
+    result = vkAllocateMemory(
+        device,
+        &allocInfo,
+        nullptr,
+        &m_imageMemory
     );
 
-    if (vkAllocateMemory(device, &allocInfo, nullptr, &m_imageMemory) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to allocate image memory!");
+    if (result != VK_SUCCESS) {
+        CreateError(
+            "vkAllocateMemory failed: " +
+            std::to_string(result) +
+            " | size: " +
+            std::to_string(memRequirements.size)
+        );
+
+        vkDestroyImage(device, m_image, nullptr);
+
+        m_image = VK_NULL_HANDLE;
+        m_imageMemory = VK_NULL_HANDLE;
+
+        return;
     }
 
-    vkBindImageMemory(device, m_image, m_imageMemory, 0);
+    result = vkBindImageMemory(
+        device,
+        m_image,
+        m_imageMemory,
+        0
+    );
+
+    if (result != VK_SUCCESS) {
+        CreateError(
+            "vkBindImageMemory failed: " +
+            std::to_string(result)
+        );
+
+        vkFreeMemory(device, m_imageMemory, nullptr);
+        vkDestroyImage(device, m_image, nullptr);
+
+        m_imageMemory = VK_NULL_HANDLE;
+        m_image = VK_NULL_HANDLE;
+
+        return;
+    }
 }
 
 void Texture::TransitionImageLayout(VkCommandBuffer cmd, VkFormat format,

@@ -7,6 +7,7 @@
 #include <format>
 #include "BoronMathLibrary.h"
 #include "GLOBALS.h"
+
 int main() {
     CreateInfo("BoronEngine started!");
 
