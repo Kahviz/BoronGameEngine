@@ -39,7 +39,7 @@ public:
 #if INEDITOR == 1
     MakeGui makeGui;
 #endif
-    Console m_Console;
+    Console m_console;
     DiscordPresence dcPresence;
     Window window;
     Instance world;

@@ -1121,8 +1121,6 @@ void VulkanRender::resizeViewport(uint32_t width, uint32_t height) {
 
     viewport_width = width;
     viewport_height = height;
-
-    CreateSuccess("Viewport resized");
 }
 
 void VulkanRender::PrintInfo() {

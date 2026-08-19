@@ -325,6 +325,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     if (ctrlPressed) {
         AddAMesh("\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false,false);
+        m_console.write("Creating cube", Boron::Enums::ConsoleLineType::Info);
 
         cubes++;
     }
@@ -478,5 +479,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             Drawables
         );
     #endif
+
+    m_console.update();
     wnd->GetGraphics().EndFrame();
 }

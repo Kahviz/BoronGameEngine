@@ -12,6 +12,13 @@ namespace Boron {
 			World = 3,
 			Script = 4
 		};
+
+        enum class ConsoleLineType : uint8_t {
+            None = 0,
+            Info = 1,
+            Warning = 2,
+            Error = 3
+        };
 	}
     
 	namespace Editor {

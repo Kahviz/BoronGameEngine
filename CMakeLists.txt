@@ -284,7 +284,9 @@ if (WIN32)
     )
 endif()
 
-add_library(imgui STATIC ${IMGUI_SOURCES} "Core/Debugging/Console/Console.h" "Core/Debugging/Console/Console.cpp")
+add_library(imgui STATIC
+    ${IMGUI_SOURCES}
+)
 
 target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}

@@ -389,14 +389,41 @@ void MakeGui::MakeIMGui(Window& wnd,
 
     if (CanChange) {
 
-        ImGui::SetNextWindowSize(ImVec2(screen_w, screen_h / 4.0f), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(screen_w - window_w * 1.5f, screen_h / 4.0f), ImGuiCond_Always);
 
-        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(0, screen_h - screen_h / 4.0f), ImGuiCond_Always);
     }
 
-    if (ImGui::Begin("Console", nullptr)) {
+    if (ImGui::Begin("Console", nullptr))
+    {
+        for (const ConsoleLine& line : engine->m_console.getConsoleLog())
+        {
+            bool usedCustomColor = false;
 
+            if (line.type == Boron::Enums::ConsoleLineType::Error) {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+                usedCustomColor = true;
+            }
+
+            if (line.type == Boron::Enums::ConsoleLineType::Warning) {
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
+                usedCustomColor = true;
+            }
+
+            ImGui::TextUnformatted(line.timestamp.c_str());
+            ImGui::SameLine();
+            ImGui::TextUnformatted(line.text.c_str());
+
+            if (usedCustomColor) {
+                ImGui::PopStyleColor();
+            }
+        }
+        
+        if (engine->m_console.isWrited()) {
+            ImGui::SetScrollHereY(1.0f);
+        }
     }
+
     ImGui::End();
 
     if (CanChange) {
