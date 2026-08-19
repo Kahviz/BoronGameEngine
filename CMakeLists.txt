@@ -221,6 +221,9 @@ add_executable(BoronEngine
     Core/Input/Mouse/Mouse.cpp
 
     Core/Instances/Instances/Script.h
+
+    Core/Debugging/Console/Console.h
+    Core/Debugging/Console/Console.cpp
 )
 
 target_compile_options(BoronEngine PRIVATE /W4)
@@ -231,6 +234,7 @@ target_include_directories(BoronEngine PRIVATE
     Core
     Editor/
     ../Editor/
+    Core/Debugging/
 
     #Assimp
     ${assimp_SOURCE_DIR}/include
@@ -280,7 +284,7 @@ if (WIN32)
     )
 endif()
 
-add_library(imgui STATIC ${IMGUI_SOURCES})
+add_library(imgui STATIC ${IMGUI_SOURCES} "Core/Debugging/Console/Console.h" "Core/Debugging/Console/Console.cpp")
 
 target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}

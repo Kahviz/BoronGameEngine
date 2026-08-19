@@ -431,6 +431,7 @@ void Texture::CreateRenderTarget(
     );
     Loaded = true;
 }
+
 void Texture::DestroyRenderTarget(VkDevice device) {
     if (device == VK_NULL_HANDLE)
         return;
@@ -462,6 +463,7 @@ void Texture::DestroyRenderTarget(VkDevice device) {
     m_ImGuiTexture = {};
 }
 #endif
+
 #if DIRECTX11 == 1
 void Texture::SetSRV(ID3D11ShaderResourceView* srv)
 {

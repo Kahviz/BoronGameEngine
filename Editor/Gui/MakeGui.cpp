@@ -350,6 +350,7 @@ void MakeGui::MakeIMGui(Window& wnd,
         ImGui::TreePop();
     }
     ImGui::End();
+
     if (plusGuiOpen && selectedInst) {
         ImGui::SetNextWindowSize(ImVec2(200, 300), ImGuiCond_Once);
         ImGui::Begin("Add a instance", &plusGuiOpen);
@@ -392,6 +393,19 @@ void MakeGui::MakeIMGui(Window& wnd,
 
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     }
+
+    if (ImGui::Begin("Console", nullptr)) {
+
+    }
+    ImGui::End();
+
+    if (CanChange) {
+
+        ImGui::SetNextWindowSize(ImVec2(screen_w, screen_h / 4.0f), ImGuiCond_Always);
+
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    }
+
     static bool openFileBrowser = false;
     static bool Downloads = false;
     static fs::path currentPath = fs::current_path();
