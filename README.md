@@ -15,6 +15,7 @@
 - ImGui for debugging / tools
 - STB Image for icon and texture loading
 - Input system
+- Discord rich presence
 
 ## Libraries Used
 - **Assimp** – 3D model loading  
@@ -22,6 +23,8 @@
 - **ImGui** – Graphical user interface  
 - **stb_image** – Image loading (icons, textures)
 - **BoronMathLibrary ( BML )** -simd-Math and non simd-math
+- **Discord RPC** - Rich presence
+  
 ## How to Switch Renderer
 
 1. Open `GLOBALS.h`
