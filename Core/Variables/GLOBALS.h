@@ -5,36 +5,30 @@
 
 namespace fs = std::filesystem;
 
-#define INEDITOR 1 //Use 1 For Editing, 0 For The Release
+#define INEDITOR 1
 
-#define DIRECTX11 0 //1 = True, 0 = False
-#define VULKAN 1 //1 = True, 0 = False
+#define DIRECTX11 0
+#define VULKAN 1
 
-#define VALIDATIONLAYERS 1; //If in debug and VALIDATIONLAYERS = 1 then true else false
-#define BGE_VERSION 1.2; //BoronGameEngine Version
-#define DEBUGFILEMAKING 0 //1 = True, 0 = False
-#define PRINTDEBUGINFO 1  //1 = True, 0 = False
+#define BGE_VERSION 1.2
+#define DEBUGFILEMAKING 0
+#define PRINTDEBUGINFO 1
 
-#if !defined(_DEBUG)
-	#undef VALIDATIONLAYERS // If not in debug disable validation layers
-#endif
-#if VULKAN == 0
-	#undef VALIDATIONLAYERS
-#endif
+#define VALIDATIONLAYERS 1
 
 #if INEDITOR == 1
-	#define PROFILER
+#define PROFILER
 #endif
 
 #if VULKAN == 1
-	#ifndef GLFW_INCLUDE_VULKAN
-	#define GLFW_INCLUDE_VULKAN
-	#endif
+#ifndef GLFW_INCLUDE_VULKAN
+#define GLFW_INCLUDE_VULKAN
+#endif
 #endif
 
 #include <GLFW/glfw3.h>
 
-#define AURA // Most Useful thing in this project
+#define AURA
 
 extern int screen_width;
 extern int screen_height;

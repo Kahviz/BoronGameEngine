@@ -65,10 +65,25 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 
-#ASSIMP
+# ASSIMP
 set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
 set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
+
+if(TARGET assimp AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(assimp PRIVATE
+        -Wno-error
+        -Wno-unsafe-buffer-usage
+        -Wno-padded
+        -Wno-switch-default
+        -Wno-nrvo
+        -Wno-unique-object-duplication
+        -Wno-nontrivial-memcall
+    )
+endif()
 
 #SDL3
 set(SDL_SHARED ON CACHE BOOL "" FORCE)
@@ -76,7 +91,17 @@ set(SDL_STATIC OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(glfw)
 FetchContent_MakeAvailable(BoronMathLibrary)
+
 FetchContent_MakeAvailable(assimp)
+#cmake --build out/build/clang --config Debug --parallel
+if(TARGET assimp AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(assimp PRIVATE
+        -Wno-error=padded
+        -Wno-error=switch-default
+        -Wno-error=unsafe-buffer-usage
+    )
+endif()
+
 FetchContent_MakeAvailable(SDL3)
 FetchContent_MakeAvailable(imgui)
 

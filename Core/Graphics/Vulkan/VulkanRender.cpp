@@ -69,6 +69,7 @@ bool VulkanRender::Init(GLFWwindow* window)
 
     if (!vkSwapchain.Init(vkDevice.GetDevice(), vkDevice.GetPhysicalDevice(), vkDevice.GetSurface())) {
         CreateError("A Unexpected error happened on vkSwapchain.Init");
+        return false;
     }
 
     std::array<VkAttachmentDescription, 2> attachments = {};

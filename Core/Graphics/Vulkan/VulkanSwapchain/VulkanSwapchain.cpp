@@ -63,14 +63,25 @@ bool VulkanSwapchain::Init(VkDevice& device,VkPhysicalDevice& physicalDevice, Vk
     swapchainCreateInfo.clipped = VK_TRUE;
     swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if (vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain) != VK_SUCCESS) {
-        CreateError("Failed to create swapchain");
-        return false;
-    }
+    BGE_ASSERT_VKRESULT(vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain), "Failed to create swapchain");
 
     uint32_t swapchainImageCount = 0;
+
+    vkGetSwapchainImagesKHR(
+        device,
+        swapchain,
+        &swapchainImageCount,
+        nullptr
+    );
+
     std::vector<VkImage> tempImages(swapchainImageCount);
-    vkGetSwapchainImagesKHR(device, swapchain, &swapchainImageCount, tempImages.data());
+
+    vkGetSwapchainImagesKHR(
+        device,
+        swapchain,
+        &swapchainImageCount,
+        tempImages.data()
+    );
 
     swapchainImages = std::move(tempImages);
 

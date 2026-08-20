@@ -28,7 +28,7 @@ int main() {
     MakeFiles mf;
     mf.MakeAPPDATAFolders();
 
-    const int WaitTime = 1;
+    const int WaitTime = 5;
 
     #if INEDITOR == 0
         #ifdef NDEBUG
