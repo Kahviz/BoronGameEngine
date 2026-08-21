@@ -12,6 +12,7 @@
 #include "Style.h"
 #include "IRenderer.h"
 #include "Image2d.h"
+#include "ECS.h"
 
 class Engine;
 

@@ -26,11 +26,18 @@ public:
 	}
 
 	template<typename T>
-	bool HasComponent(uint32_t entity, const T& component)
+	bool HasComponent(EntityECS entity)
 	{
-		return false;
+		return m_componentManager->GetStorage<T>().Has(entity);
 	}
-
+	template<typename Func>
+	void EachEntity(Func&& function)
+	{
+		for (EntityECS entity = 0; entity < m_currentHandleID; ++entity)
+		{
+			function(entity);
+		}
+	}
 	template<typename T>
 	inline T& GetComponent(EntityECS entity)
 	{

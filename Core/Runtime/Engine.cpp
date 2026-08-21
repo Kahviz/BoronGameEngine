@@ -176,29 +176,35 @@ int Engine::EngineRun()
     return 0;
 }
 
-Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
+EntityECS Engine::AddAMesh(ECS& ecs,const std::string& Path, const std::string& Name,
     BML::Vector3 pos, BML::Vector3 Size, bool Selec,bool LiteralPath, bool UsesTexture)
 {
     Transform transform;
     transform.Position = pos;
     transform.Size = Size;
 
-    auto obj = std::make_unique<Object>(
-        Name,
-        1,
-        BML::Int3(
-            static_cast<int>(Color3.x() * 255.0f),
-            static_cast<int>(Color3.y() * 255.0f),
-            static_cast<int>(Color3.z() * 255.0f)
-        ),
-        BML::Int3(168, 160, 160),
-        BML::Vector3(0, 0, 0),
-        transform,
-        true,
-        std::make_shared<Mesh>()
-    );
+    EntityECS entity = ecs.createEntity();
+    
+    BasicInfoComponent basicComp;
+    ColorComponent colorComp;
+    TransformComponent transformComp;
+    PhysicsComponent physicsComp;
+    ObjectComponent objectComp;
+    EditorSettingsComponent editorComp;
+    HierarcyComponent hierarcyComp;
+    TextureComponent textureComp;
+    InstanceTypeComponent instTypeComp;
+    instTypeComp.InstanceType = Boron::Enums::InstanceType::Instance;
 
-    obj->UniqueID = g_Index;
+    editorComp.IsVisibleInExplorer = true;
+    basicComp.Name = Name;
+    colorComp.color = BML::Int3(
+        static_cast<int>(Color3.x() * 255.0f),
+        static_cast<int>(Color3.y() * 255.0f),
+        static_cast<int>(Color3.z() * 255.0f)
+    );
+    transformComp.transform = transform;
+    physicsComp.anchored = true;
 
 #if DIRECTX11 == 1
     if (!LiteralPath) {
@@ -213,7 +219,7 @@ Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
     auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
 
     if (!LiteralPath) {
-        obj.get()->OBJmesh = Mesh::Load(
+        objectComp.OBJmesh = Mesh::Load(
             assets + Path,
             vk.GetDevice(),
             vk.GetPhysicalDevice(),
@@ -222,7 +228,7 @@ Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
         );
     }
     else {
-        obj.get()->OBJmesh = Mesh::Load(
+        objectComp.OBJmesh = Mesh::Load(
             Path,
             vk.GetDevice(),
             vk.GetPhysicalDevice(),
@@ -233,16 +239,14 @@ Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
     
 #endif
 
-    obj->Selected = Selec;
-
     std::string fullPath = textures + "\\TestTexture.png";
 
     if (UsesTexture) {
         #if DIRECTX11 == 1
-            obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
+            textureComp.texture.Load(fullPath, window.GetGraphics().GetRenderer());
         #endif
         #if VULKAN == 1
-            obj->texture.LoadVK(fullPath, vk);
+            textureComp.texture.LoadVK(fullPath, vk);
 
             std::vector<const Instance*> constDrawable;
             constDrawable.reserve(Drawables.size());
@@ -256,13 +260,18 @@ Instance* Engine::AddAMesh(const std::string& Path, const std::string& Name,
         #endif
     }
 
-    obj->Parent = &world;
+    hierarcyComp.parent = world;
 
-    Instance* objPtr = obj.get();
-    Drawables.push_back(std::move(obj));
+    ecs.AddComponent(entity, basicComp);
+    ecs.AddComponent(entity, colorComp);
+    ecs.AddComponent(entity, transformComp);
+    ecs.AddComponent(entity, physicsComp);
+    ecs.AddComponent(entity, objectComp);
+    ecs.AddComponent(entity, hierarcyComp);
+    ecs.AddComponent(entity, editorComp);
+    ecs.AddComponent(entity, textureComp);
 
-    g_Index++;
-    return objPtr;
+    return entity;
 }
 
 void ScreenResizerDetector(Window* wnd) {
@@ -327,13 +336,13 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 
     if (ctrlPressed) {
-        AddAMesh("\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false,false);
+        AddAMesh(m_ecs,"\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false,false, true);
         m_console.write("Creating cube", Boron::Enums::ConsoleLineType::Info);
 
         cubes++;
     }
     if (RctrlPressed) {
-        AddAMesh("\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false);
+        AddAMesh(m_ecs, "\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false, true);
 
         cubes++;
         std::cout << "FPS: " << (1.0f / deltatime) << '\n';
@@ -372,12 +381,16 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     if (InProject) {
         if (!Init) {
-            CreateSuccess("Initing drawables");
+            CreateSuccess("Initing World");
+            BasicInfoComponent basicInfoComp;
+            basicInfoComp.Name = "World";
 
-            world.Name = "World";
-            world.Parent = nullptr;
-            world.InstanceType = Boron::Enums::InstanceType::World;
-            world.UniqueID = -1;
+            HierarcyComponent hierarcyComp;
+            hierarcyComp.parent = -10;
+
+            InstanceTypeComponent instTypeComp;
+            instTypeComp.InstanceType = Boron::Enums::InstanceType::World;
+
             Drawables = SaveProject::Load(window,world);
 
             for (auto& Drawable : Drawables) {
@@ -387,8 +400,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             }
 
             if (Drawables.empty()) {
-                AddAMesh("\\Cube.obj", "Cube", { 0,2,0 }, { 1,1,1 }, false, false,true);
-                AddAMesh("\\Cube.obj", "Cube2", { 0,0,0 }, { 1,1,1 }, false, false,true);
+                AddAMesh(m_ecs, "\\Cube.obj", "Cube", { 0,2,0 }, { 1,1,1 }, false, false,true);
+                AddAMesh(m_ecs, "\\Cube.obj", "Cube2", { 0,0,0 }, { 1,1,1 }, false, false,true);
             }
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);
@@ -437,18 +450,19 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 #endif
     //Physics
-    for (auto& Drawableptr : Drawables) {
-        auto Drawable = Drawableptr.get();
+    m_ecs.Each<PhysicsComponent>(
+        [&](EntityECS entity, PhysicsComponent& physicsComp)
+        {
+            if (physicsComp.anchored)
+                return;
 
-        if (Drawable->Anchored) { continue; }
-        if (!Drawable->CanDraw()) { continue; }
+            physics.ApplyGravity(m_ecs, entity, deltatime);
+        }
+    );
 
-        physics.ApplyGravity(*Drawable,deltatime);
-    }
-
-#if DIRECTX11 == 1
-    wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
-#endif
+    #if DIRECTX11 == 1
+        wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
+    #endif
 
     if (!ctrlPressed && !g_Typing) {
         camC.MakeCameraControls(*wnd, deltatime);

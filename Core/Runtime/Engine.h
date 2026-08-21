@@ -18,11 +18,10 @@
 #endif
 
 #include "Debugging/Profiler/Profiler.h"
-#include "Instances/Instance.h"
 #include "BoronPhysics/Physics.h"
 #include "CameraControl.h"
 
-#include "ECS/ECS.h"
+#include "ECS.h"
 
 class Instance;
 
@@ -32,7 +31,7 @@ public:
     ~Engine();
 
     int EngineRun();
-    Instance* AddAMesh(const std::string& Path, const std::string& Name, BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath, bool UsesTexture = false);
+    EntityECS AddAMesh(ECS& ecs, const std::string& Path, const std::string& Name, BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath, bool UsesTexture);
     void EngineDoFrame(Window* wnd, float deltatime);
     bool ImGuiInited = false;
 
@@ -44,7 +43,7 @@ public:
     Console m_console;
     DiscordPresence dcPresence;
     Window window;
-    Instance world;
+    EntityECS world;
 
     std::vector<std::unique_ptr<Instance>> Drawables = {};
 

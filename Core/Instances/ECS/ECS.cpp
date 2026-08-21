@@ -11,6 +11,9 @@ void ECS::init(ComponentManager* componentManager)
     m_componentManager->RegisterComponent<ObjectComponent>();
     m_componentManager->RegisterComponent<TransformComponent>();
     m_componentManager->RegisterComponent<PhysicsComponent>();
+    m_componentManager->RegisterComponent<BasicInfoComponent>();
+    m_componentManager->RegisterComponent<HierarcyComponent>();
+    m_componentManager->RegisterComponent<TextureComponent>();
 
     CreateSuccess("Inited ECS!");
 }
