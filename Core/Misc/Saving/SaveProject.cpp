@@ -198,7 +198,6 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
 
     std::vector<PendingParent> pendingParents;
 
-    // Vanha EntityECS -> uusi EntityECS
     std::unordered_map<EntityECS, EntityECS> entityIDMap;
 
     std::string line;

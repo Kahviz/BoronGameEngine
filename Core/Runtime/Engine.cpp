@@ -169,7 +169,7 @@ int Engine::EngineRun()
         glfwPollEvents();
     }
 
-    SaveProject::Save(Drawables);
+    SaveProject::Save(m_ecs);
 
     profiler.PrintInformation();
     
@@ -396,7 +396,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             m_ecs.AddComponent(world, hierarcyComp);
             m_ecs.AddComponent(world, instTypeComp);
 
-            Drawables = SaveProject::Load(window,world);
+            SaveProject::Load(m_ecs, window, world);
 
             m_ecs.Each<HierarcyComponent>(
                 [&](EntityECS entity, HierarcyComponent& hierarchy)
