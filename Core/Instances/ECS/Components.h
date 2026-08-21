@@ -6,4 +6,4 @@
 #include "Components/ObjectComponent.h"
 #include "Components/TransformComponent.h"
 #include "Components/VelocityComponent.h"
-#include "Tags.h"
+#include "Components/PhysicsComponent.h"
