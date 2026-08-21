@@ -5,6 +5,6 @@
 
 class Physics {
 public:
-	bool ApplyGravity(Instance& inst,float deltatime);
+	bool ApplyGravity(ECS& ecs,EntityECS entity,float deltatime);
 private:
 };
