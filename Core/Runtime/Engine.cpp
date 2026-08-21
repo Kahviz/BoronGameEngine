@@ -426,8 +426,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 #if INEDITOR == 1
     if (InProject && ImGuiInited) {
         makeGui.MakeIMGui(
+            m_ecs,
             *wnd,
-            Drawables,
             reinterpret_cast<float*>(&Color3),
             false,
             this,
