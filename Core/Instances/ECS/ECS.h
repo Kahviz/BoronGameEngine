@@ -40,6 +40,24 @@ public:
 	template<typename ...Components, typename Func>
 	void Each(Func&& function)
 	{
+		using FirstComponent =
+			std::tuple_element_t<0, std::tuple<Components...>>;
+
+		auto& storage =
+			m_componentManager->GetStorage<FirstComponent>();
+
+		storage.ForEach(
+			[&](EntityECS entity, FirstComponent&)
+			{
+				if ((HasComponent<Components>(entity) && ...))
+				{
+					function(
+						entity,
+						GetComponent<Components>(entity)...
+					);
+				}
+			}
+		);
 	}
 
 
