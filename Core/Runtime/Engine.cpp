@@ -436,7 +436,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         }
     }
 #endif
-
     //Physics
     for (auto& Drawableptr : Drawables) {
         auto Drawable = Drawableptr.get();

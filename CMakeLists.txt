@@ -276,6 +276,7 @@ target_include_directories(BoronEngine PRIVATE
 
     #Engine
     Core/Instances/Instances/
+    Core/Instances/Instances/ESC/
     Core/Instances/
     Core/Variables/
     Core/Debugging/Functions/
