@@ -67,10 +67,19 @@ public:
 		);
 	}
 
+	void DeselectAll()
+	{
+		Each<EditorSettingsComponent>(
+			[](EntityECS entity, EditorSettingsComponent& editor)
+			{
+				editor.selected = false;
+			}
+		);
+	}
 
 	void Update(float deltaTime);
 	void Clear();
 private:
 	ComponentManager* m_componentManager = nullptr;
-	uint32_t m_currentHandleID = 0;
+	uint32_t m_currentHandleID = 1;
 };

@@ -15,8 +15,8 @@ struct MeshButton
     const char* name;
 };
 void CreatePlusButton(
-    Instance* target,
-    Instance*& selectedInst,
+    EntityECS target,
+    EntityECS& selectedInst,
     Image2d& plusbutton,
     bool& plusGuiOpen,
     float screen_w,
@@ -40,7 +40,7 @@ void CreatePlusButton(
         itemTopY
     ));
 
-    std::string id = "##plusbutton" + std::to_string(target->UniqueID);
+    std::string id = "##plusbutton" + std::to_string(target);
 
     if (ImGui::ImageButton(id.c_str(),
         plusbutton.GetTexture(),
@@ -53,6 +53,7 @@ void CreatePlusButton(
     ImGui::SetCursorPos(savedCursor);
     ImGui::Dummy(ImVec2(0.0f, 0.0f));
 }
+
 static bool InputTextStd(const char* label, std::string& str)
 {
     char buf[256];
@@ -74,61 +75,66 @@ static MeshButton meshButtons[] =
     { "Cylinder", assets + "\\Cylinder.obj", "Cylinder"}
 };
 
-void MakeChildrenNodes(Instance* inst,
-    std::vector<std::unique_ptr<Instance>>& Drawables,
-    Instance& world)
+void MakeChildrenNodes(ECS& ecs, EntityECS parent)
 {
-    if (!inst) return;
-
-    std::vector<Instance*> children = inst->GetChildren();
-    for (auto& child : children) {
-        if (!child) continue;
-
-        std::vector<Instance*> grandChildren = child->GetChildren();
-
-        if (grandChildren.empty())
+    ecs.Each<HierarcyComponent, BasicInfoComponent, EditorSettingsComponent>(
+        [&](EntityECS entity,
+            HierarcyComponent& hierarchy,
+            BasicInfoComponent& basic,
+            EditorSettingsComponent& editor)
         {
-            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf |
-                ImGuiTreeNodeFlags_NoTreePushOnOpen;
+            if (hierarchy.parent != parent)
+                return;
 
-            if (child->Selected) {
+            ImGuiTreeNodeFlags flags =
+                ImGuiTreeNodeFlags_OpenOnArrow;
+
+            if (editor.selected)
                 flags |= ImGuiTreeNodeFlags_Selected;
-            }
 
-            bool open = ImGui::TreeNodeEx((void*)child, flags, "%s", child->Name.c_str());
+            bool hasChildren = false;
 
-            if (ImGui::IsItemClicked()) {
-                for (auto& i : Drawables) {
-                    i->Deselect();
+            ecs.Each<HierarcyComponent>(
+                [&](EntityECS child, HierarcyComponent& childHierarchy)
+                {
+                    if (childHierarchy.parent == entity)
+                        hasChildren = true;
                 }
+            );
 
-                child->Select();
-                CreateError("Selected child");
-                world.Selected = false;
+            if (!hasChildren)
+            {
+                flags |= ImGuiTreeNodeFlags_Leaf |
+                    ImGuiTreeNodeFlags_NoTreePushOnOpen;
             }
-        }
-        else
-        {
-            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 
-            if (child->Selected) flags |= ImGuiTreeNodeFlags_Selected;
-
-            bool open = ImGui::TreeNodeEx((void*)child, flags, "%s", child->Name.c_str());
+            bool open = ImGui::TreeNodeEx(
+                (void*)(uintptr_t)entity,
+                flags,
+                "%s",
+                basic.Name.c_str()
+            );
 
             if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
             {
-                for (auto& i : Drawables)
-                    i->Deselect();
+                ecs.Each<EditorSettingsComponent>(
+                    [&](EntityECS other,
+                        EditorSettingsComponent& otherEditor)
+                    {
+                        otherEditor.selected = false;
+                    }
+                );
 
-                child->Select();
-                world.Selected = false;
+                editor.selected = true;
             }
-            if (open) {
-                MakeChildrenNodes(child, Drawables, world);
+
+            if (open && hasChildren)
+            {
+                MakeChildrenNodes(ecs, entity);
                 ImGui::TreePop();
             }
         }
-    }
+    );
 }
 BML::Vector3 MakeVec3TextEdit(Instance* inst,
     const std::string& name,
@@ -141,7 +147,7 @@ void MakeGui::MakeStyle() {
     style.CreateImGuiStyle();
 }
 
-void MakeFloat3Edit(const Instance& inst,std::string Name, BML::Vector3& vec) {
+void MakeFloat3Edit(EntityECS entity,std::string Name, BML::Vector3& vec) {
     char label[128];
 
     snprintf(label, sizeof(label), "%s:", (Name).c_str());
@@ -149,21 +155,22 @@ void MakeFloat3Edit(const Instance& inst,std::string Name, BML::Vector3& vec) {
     ImGui::Text("%s", label);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(80);
-    ImGui::InputFloat(("##x" + Name + std::to_string(inst.UniqueID)).c_str(), &vec.x(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
+    ImGui::InputFloat(("##x" + Name + std::to_string(entity)).c_str(), &vec.x(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(80);
-    ImGui::InputFloat(("##y" + Name + std::to_string(inst.UniqueID)).c_str(), &vec.y(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
+    ImGui::InputFloat(("##y" + Name + std::to_string(entity)).c_str(), &vec.y(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(80);
-    ImGui::InputFloat(("##z" + Name + std::to_string(inst.UniqueID)).c_str(), &vec.z(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
+    ImGui::InputFloat(("##z" + Name + std::to_string(entity)).c_str(), &vec.z(), 0.0f, 0.0f, "%g", ImGuiInputTextFlags_CharsDecimal);
 }
 
-void MakeGui::MakeIMGui(Window& wnd,
-    std::vector<std::unique_ptr<Instance>>& Drawables,
+void MakeGui::MakeIMGui(
+    ECS& ecs,
+    Window& wnd,
     float* Color3,
     bool Selec,
     Engine* engine,
-    Instance& world,
+    EntityECS world,
     IRenderer* renderer
 )
 { 
@@ -227,43 +234,45 @@ void MakeGui::MakeIMGui(Window& wnd,
     
     bool anyDrawableSelected = false;
 
-    for (const auto& Drawable : Drawables) {
-        if (Drawable.get()->Selected) {
-            world.Selected = false;
+    ecs.Each<BasicInfoComponent, EditorSettingsComponent, TransformComponent, PhysicsComponent>(
+        [&](EntityECS entity,
+            BasicInfoComponent& basicInfoComp,
+            EditorSettingsComponent& editorSettingsComp,
+            TransformComponent& transformComp,
+            PhysicsComponent& physicsComp)
+        {
+            if (!editorSettingsComp.selected)
+                return;
+
+            ecs.GetComponent<EditorSettingsComponent>(world).selected = false;
             anyDrawableSelected = true;
 
-            Instance& inst = *Drawable.get();
-
-            // Name
             ImGui::Text("Name: ");
             ImGui::SameLine();
-            InputTextStd("##Name", inst.Name);
+            InputTextStd("##Name", basicInfoComp.Name);
 
-            // Transform
-            if (ImGui::CollapsingHeader("Transform")) {
-
-                MakeFloat3Edit(inst, "Position", inst.transform.Position);
-                MakeFloat3Edit(inst, "Orientation", inst.transform.Orientation);
-                MakeFloat3Edit(inst, "Size", inst.transform.Size);
+            if (ImGui::CollapsingHeader("Transform"))
+            {
+                MakeFloat3Edit(entity, "Position", transformComp.transform.Position);
+                MakeFloat3Edit(entity, "Orientation", transformComp.transform.Orientation);
+                MakeFloat3Edit(entity, "Size", transformComp.transform.Size);
             }
 
-            // Anchored
-            if (ImGui::CollapsingHeader("Physics")) {
-                ImGui::Checkbox("Anchored: ", &inst.Anchored);
+            if (ImGui::CollapsingHeader("Physics"))
+            {
+                ImGui::Checkbox("Anchored", &physicsComp.anchored);
             }
         }
-    }
+    );
 
-    if (!anyDrawableSelected && world.Selected) {
+    if (!anyDrawableSelected && ecs.GetComponent<EditorSettingsComponent>(world).selected) {
         ImGui::Text("Name: ");
         ImGui::SameLine();
-        InputTextStd("##NameWORLD", world.Name);
+        InputTextStd("##NameWORLD", ecs.GetComponent<BasicInfoComponent>(world).Name);
     }
 
     ImGui::End();
-
     
-
     if (CanChange) {
         CreateInfo("Changing");
         float windowWidth = window_w * 1.5f;
@@ -289,9 +298,9 @@ void MakeGui::MakeIMGui(Window& wnd,
     plusbutton.LoadImGuiImage(renderer, textures + "\\PlusIcon.png");
 
     static bool plusGuiOpen = false;
-    static Instance* selectedInst = nullptr;
+    static EntityECS selectedInst = 0;
 
-    std::string WorldName = world.Name + " ##world";
+    std::string WorldName = ecs.GetComponent<BasicInfoComponent>(world).Name + " ##world";
 
     bool worldNodeOpen = ImGui::TreeNodeEx(
         WorldName.c_str(),
@@ -300,52 +309,67 @@ void MakeGui::MakeIMGui(Window& wnd,
 
     if (ImGui::IsItemClicked())
     {
-        for (auto& i : Drawables)
-            i->Deselect();
+        ecs.DeselectAll();
 
-        world.Selected = true;
+        ecs.GetComponent<EditorSettingsComponent>(world).selected = true;
     }
 
-    if (world.Selected)
+    if (ecs.GetComponent<EditorSettingsComponent>(world).selected)
     {
-        CreatePlusButton(&world, selectedInst, plusbutton, plusGuiOpen, screen_w, screen_h);
+        CreatePlusButton(world, selectedInst, plusbutton, plusGuiOpen, screen_w, screen_h);
     }
 
     if (worldNodeOpen)
     {
-        for (auto& instPtr : Drawables)
-        {
-            Instance* inst = instPtr.get();
+        ecs.Each<EditorSettingsComponent, BasicInfoComponent, HierarcyComponent>(
+            [&](EntityECS entity,
+                EditorSettingsComponent& editorSettingsComp,
+                BasicInfoComponent& basicInfoComp,
+                HierarcyComponent& hierarchy)
+            {
+                if (hierarchy.parent != world)
+                    return;
 
-            if (!inst || inst->Parent != &world)
-                continue;
+                if (!editorSettingsComp.isVisibleInExplorer)
+                    return;
 
-            ImGuiTreeNodeFlags flags =
-                ImGuiTreeNodeFlags_OpenOnArrow;
-            
-            if (inst->IsVisibleInExplorer) {
-                bool nodeOpen = ImGui::TreeNodeEx((void*)inst, flags, "%s", inst->Name.c_str());
+                ImGuiTreeNodeFlags flags =
+                    ImGuiTreeNodeFlags_OpenOnArrow;
+
+                bool nodeOpen = ImGui::TreeNodeEx(
+                    (void*)(uintptr_t)entity,
+                    flags,
+                    "%s",
+                    basicInfoComp.Name.c_str()
+                );
+
                 bool clicked = ImGui::IsItemClicked();
 
-                //Plusbutton
-                if (inst->Selected) {
-                    CreatePlusButton(inst, selectedInst, plusbutton, plusGuiOpen, screen_w, screen_h);
-                }
-
-                if (nodeOpen)
+                if (editorSettingsComp.selected)
                 {
-                    MakeChildrenNodes(inst, Drawables, world);
-                    ImGui::TreePop();
+                    CreatePlusButton(
+                        entity,
+                        selectedInst,
+                        plusbutton,
+                        plusGuiOpen,
+                        screen_w,
+                        screen_h
+                    );
                 }
 
                 if (clicked)
                 {
-                    for (auto& i : Drawables) i->Deselect();
-                    inst->Select();
-                    world.Selected = false;
+                    ecs.DeselectAll();
+                    editorSettingsComp.selected = true;
+                }
+
+                if (nodeOpen)
+                {
+                    MakeChildrenNodes(ecs, entity);
+                    ImGui::TreePop();
                 }
             }
-        }
+        );
 
         ImGui::TreePop();
     }
@@ -356,32 +380,16 @@ void MakeGui::MakeIMGui(Window& wnd,
         ImGui::Begin("Add a instance", &plusGuiOpen);
 
         if (ImGui::Selectable("Object")) {
-            Instance* inst = engine->AddAMesh(
-                "\\Cube.obj", "Object", { 0,5,0 }, { 2,2,2 }, false, false
+            EntityECS inst = engine->AddAMesh(
+                ecs,"\\Cube.obj", "Object", { 0,5,0 }, { 2,2,2 }, false, false,true
             );
             if (selectedInst && inst) {
-                selectedInst->Children.push_back(inst);
-                inst->Parent = selectedInst;
+                ecs.GetComponent<HierarcyComponent>(inst).parent = selectedInst;
             }
             plusGuiOpen = false;
         }
         if (ImGui::Selectable("Script")) {
-            Script* script = new Script(
-                "Script",
-                g_Index,
-                { 255, 255, 255 },                // color
-                { 255, 255, 255 },                // original color
-                { 0, 0, 0 },                      // velocity
-                Transform{},                    // default transform
-                false,                          // anchored
-                nullptr                         // mesh
-            );
-
-            Drawables.push_back(std::unique_ptr<Instance>(script));
-            script->UniqueID = g_Index;
-            g_Index++;
-            world.AddChild(script);
-            plusGuiOpen = false;
+            CreateError("Not making this a while bec of ecs...");
         }
 
         ImGui::End();
@@ -468,15 +476,7 @@ void MakeGui::MakeIMGui(Window& wnd,
         if (ImGui::BeginTabBar("##TABS")) {
             if (ImGui::BeginTabItem("Home")) {
                 if (ImGui::Button("Move",ImVec2(screen_w / 15,screen_h / 10))) {
-                    for (auto& DrawablePTR : Drawables) {
-                        if (DrawablePTR.get()->Selected) {
-                            Instance* inst = DrawablePTR.get();
-
-                            if (inst->IsVisibleInExplorer) {
-                                //Move it makes arrow that cant be deleted by user...
-                            }
-                        }
-                    }
+                    
                 }
 
                 ImGui::EndTabItem();
@@ -549,7 +549,7 @@ void MakeGui::MakeIMGui(Window& wnd,
                     std::string path = selectedFile;
                     std::string name = fs::path(selectedFile).stem().string();
 
-                    engine->AddAMesh(path, name, { 0,5,0 }, { 10,10,10 }, false, true);
+                    engine->AddAMesh(ecs, path, name, { 0,5,0 }, { 10,10,10 }, false, true, true);
                 }
             }
         }

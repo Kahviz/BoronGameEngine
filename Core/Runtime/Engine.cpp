@@ -391,6 +391,10 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             InstanceTypeComponent instTypeComp;
             instTypeComp.InstanceType = Boron::Enums::InstanceType::World;
 
+            m_ecs.AddComponent(world, basicInfoComp);
+            m_ecs.AddComponent(world, hierarcyComp);
+            m_ecs.AddComponent(world, instTypeComp);
+
             Drawables = SaveProject::Load(window,world);
 
             for (auto& Drawable : Drawables) {

@@ -1,5 +1,6 @@
 #pragma once
 
 struct EditorSettingsComponent {
-    bool IsVisibleInExplorer = false;
+    bool isVisibleInExplorer = true;
+    bool selected = false;
 };

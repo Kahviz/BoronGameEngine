@@ -22,7 +22,7 @@ class MakeGui
 {
 public:
     void MakeStyle();
-    void MakeIMGui(Window& wnd, std::vector<std::unique_ptr<Instance>>& Drawables, float* Color3, bool Selec, Engine* engine, Instance& world, IRenderer* renderer);
+    void MakeIMGui(ECS& ecs, Window& wnd, float* Color3, bool Selec, Engine* engine, EntityECS world, IRenderer* renderer);
     void MakeIMViewPort(Window& wnd);
     void CreateErrorPopUp(IRenderer* renderer, Image2d& image2d, const std::string& errormsg, const float duration);
     bool MakeDashBoard(IRenderer* renderer);

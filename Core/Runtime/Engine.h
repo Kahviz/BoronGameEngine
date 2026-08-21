@@ -43,7 +43,7 @@ public:
     Console m_console;
     DiscordPresence dcPresence;
     Window window;
-    EntityECS world;
+    EntityECS world = m_ecs.createEntity();
 
     std::vector<std::unique_ptr<Instance>> Drawables = {};
 
