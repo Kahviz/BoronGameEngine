@@ -10,7 +10,6 @@ void ECS::init(ComponentManager* componentManager)
     m_componentManager->RegisterComponent<InstanceTypeComponent>();
     m_componentManager->RegisterComponent<ObjectComponent>();
     m_componentManager->RegisterComponent<TransformComponent>();
-    m_componentManager->RegisterComponent<VelocityComponent>();
     m_componentManager->RegisterComponent<PhysicsComponent>();
 
     CreateSuccess("Inited ECS!");
