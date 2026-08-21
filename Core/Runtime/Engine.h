@@ -22,6 +22,8 @@
 #include "BoronPhysics/Physics.h"
 #include "CameraControl.h"
 
+#include "ECS/ECS.h"
+
 class Instance;
 
 class Engine {
@@ -53,4 +55,8 @@ public:
     int screen_height = 800;
 
     BML::Vec3 Color3 = { 0.0f, 0.0f, 1.0f };
+
+    //ECS
+    ECS m_ecs;
+    ComponentManager m_componentManager;
 };

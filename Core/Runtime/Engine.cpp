@@ -21,6 +21,9 @@
 Engine::Engine()
     : window(1280, 800, "BoronEngine")
 {
+    dcPresence.Initialize();
+    m_ecs.init(&m_componentManager);
+
     if (!ImGuiInited) {
         std::cout << "ImGui version: " << IMGUI_VERSION << std::endl;
         std::cout << "BoronMathVersion: " << BORONMATHversion << std::endl;
@@ -38,12 +41,12 @@ Engine::Engine()
 #endif
 
         if (!ImGui_ImplGlfw_InitForOther(glfwWindow, true)) {
-            throw std::runtime_error("Failed to initialize ImGui GLFW backend");
+            CreateError("Failed to initialize ImGui GLFW backend");
         }
 
 #if DIRECTX11 == 1 
         if (!ImGui_ImplDX11_Init(device, contextDX11)) {
-            throw std::runtime_error("Failed to initialize ImGui DX11 backend");
+            CreateError("Failed to initialize ImGui DX11 backend");
         }
         else {
             ImGuiInited = true;
@@ -82,7 +85,7 @@ Engine::Engine()
         };
 
         if (!ImGui_ImplVulkan_Init(&init_info)) {
-            throw std::runtime_error("Failed to initialize ImGui Vulkan backend");
+            CreateError("Failed to initialize ImGui Vulkan backend");
         }
 
         ImGuiInited = true;
@@ -106,6 +109,7 @@ Engine::Engine()
         IO.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleFonts;
     }
 }
+
 Engine::~Engine()
 {
     if (ImGuiInited) {
@@ -133,7 +137,6 @@ Engine::~Engine()
 
 int Engine::EngineRun()
 {
-    dcPresence.Initialize();
     GLFWwindow* glfwWND = window.GetWindow();
 
     using clock = std::chrono::high_resolution_clock;

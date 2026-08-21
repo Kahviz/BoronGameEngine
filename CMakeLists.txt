@@ -249,6 +249,12 @@ add_executable(BoronEngine
 
     Core/Debugging/Console/Console.h
     Core/Debugging/Console/Console.cpp
+
+    #ECS
+    Core/Instances/ECS/Components.h
+    Core/Instances/ECS/ECS.h
+    Core/Instances/ECS/ECS.cpp
+    Core/Instances/ECS/Entity.h
 )
 
 target_compile_options(BoronEngine PRIVATE /W4)

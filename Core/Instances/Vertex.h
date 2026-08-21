@@ -2,7 +2,6 @@
 #include <array>
 #include "BoronMathLibrary.h"
 #include "Vulkan/vulkan.h"
-
 struct Vertex
 {
     GPUVector3 pos = { 0,0,0 };

@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "BoronMathLibrary.h"
-#include "Instances/Instances/Mesh/Mesh.h"
+#include "Mesh/Mesh.h"
 #include "Enums.h"
 
 class Texture;
