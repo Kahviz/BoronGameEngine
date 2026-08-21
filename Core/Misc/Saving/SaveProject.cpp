@@ -116,7 +116,7 @@ EntityECS AddAMesh(ECS& ecs,EntityECS world, Window& window, const std::string& 
     HierarcyComponent hierarcyComp;
     TextureComponent textureComp;
     InstanceTypeComponent instTypeComp;
-    instTypeComp.InstanceType = Boron::Enums::InstanceType::Instance;
+    instTypeComp.InstanceType = Boron::Enums::InstanceType::Object;
 
     editorComp.isVisibleInExplorer = true;
     basicComp.Name = Name;
@@ -193,10 +193,13 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
     struct PendingParent
     {
         EntityECS child;
-        EntityECS parent;
+        EntityECS oldParent;
     };
 
     std::vector<PendingParent> pendingParents;
+
+    // Vanha EntityECS -> uusi EntityECS
+    std::unordered_map<EntityECS, EntityECS> entityIDMap;
 
     std::string line;
 
@@ -206,11 +209,14 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
     BML::Vector3 loadedOrientation(0, 0, 0);
 
     std::string loadedMeshFile;
-    int loadedUniqueID = -1;
+
+    EntityECS loadedUniqueID = 0;
+    EntityECS loadedParentID = static_cast<EntityECS>(-1);
 
     BML::Int3 loadedColor(255, 255, 255);
 
-    EntityECS loadedParentID = 0;
+    bool loadedAnchored = true;
+    bool loadedCanDraw = true;
 
     Boron::Enums::InstanceType loadedInstanceType =
         Boron::Enums::InstanceType::Object;
@@ -287,7 +293,9 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
         else if (line.rfind("UniqueID:", 0) == 0)
         {
             loadedUniqueID =
-                std::stoi(line.substr(10));
+                static_cast<EntityECS>(
+                    std::stoul(line.substr(10))
+                    );
         }
 
         else if (line.rfind("Color:", 0) == 0)
@@ -310,18 +318,37 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
             loadedColor = BML::Int3(r, g, b);
         }
 
+        else if (line.rfind("Anchored:", 0) == 0)
+        {
+            loadedAnchored =
+                std::stoi(line.substr(9)) != 0;
+        }
+
+        else if (line.rfind("CanDraw:", 0) == 0)
+        {
+            loadedCanDraw =
+                std::stoi(line.substr(8)) != 0;
+        }
+
         else if (line.rfind("ParentID:", 0) == 0)
         {
-            loadedParentID =
-                static_cast<EntityECS>(
-                    std::stoi(line.substr(10))
-                    );
+            int parentID = std::stoi(line.substr(10));
+
+            if (parentID == -1)
+            {
+                loadedParentID =
+                    static_cast<EntityECS>(-1);
+            }
+            else
+            {
+                loadedParentID =
+                    static_cast<EntityECS>(parentID);
+            }
         }
 
         else if (line.rfind("InstanceType:", 0) == 0)
         {
-            int value =
-                std::stoi(line.substr(14));
+            int value = std::stoi(line.substr(14));
 
             loadedInstanceType =
                 static_cast<Boron::Enums::InstanceType>(value);
@@ -329,38 +356,8 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
 
         else if (line == "END")
         {
-            std::string meshPath =
-                savings + "\\" +
-                g_projectName +
-                "\\MeshFiles\\" +
-                loadedMeshFile;
-
-            EntityECS entity = 0;
-
-            if (loadedInstanceType ==
+            if (loadedInstanceType !=
                 Boron::Enums::InstanceType::Object)
-            {
-                entity = AddAMesh(
-                    ecs,
-                    world,
-                    window,
-                    meshPath,
-                    loadedName,
-                    loadedPos,
-                    loadedSize,
-                    loadedColor,
-                    false,
-                    true,
-                    true
-                );
-
-                auto& transform =
-                    ecs.GetComponent<TransformComponent>(entity);
-
-                transform.transform.Orientation =
-                    loadedOrientation;
-            }
-            else
             {
                 std::cerr
                     << "Unsupported InstanceType: "
@@ -369,14 +366,67 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
 
                 loadedName.clear();
                 loadedMeshFile.clear();
+                loadedUniqueID = 0;
+                loadedParentID = static_cast<EntityECS>(-1);
 
                 continue;
             }
 
+            std::string meshPath =
+                savings + "\\" +
+                g_projectName +
+                "\\MeshFiles\\" +
+                loadedMeshFile;
+
+            if (!fs::exists(meshPath))
+            {
+                std::cerr
+                    << "Mesh does not exist: "
+                    << meshPath
+                    << '\n';
+
+                continue;
+            }
+
+            EntityECS entity = AddAMesh(
+                ecs,
+                world,
+                window,
+                meshPath,
+                loadedName,
+                loadedPos,
+                loadedSize,
+                loadedColor,
+                false,
+                true,
+                true
+            );
+
             if (entity == 0)
                 continue;
 
-            if (loadedParentID != static_cast<EntityECS>(-1))
+            entityIDMap[loadedUniqueID] = entity;
+
+            auto& transform =
+                ecs.GetComponent<TransformComponent>(entity);
+
+            transform.transform.Orientation =
+                loadedOrientation;
+
+            auto& physics =
+                ecs.GetComponent<PhysicsComponent>(entity);
+
+            physics.anchored =
+                loadedAnchored;
+
+            auto& object =
+                ecs.GetComponent<ObjectComponent>(entity);
+
+            object.canDraw =
+                loadedCanDraw;
+
+            if (loadedParentID !=
+                static_cast<EntityECS>(-1))
             {
                 pendingParents.push_back({
                     entity,
@@ -386,13 +436,59 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
 
             loadedName.clear();
             loadedMeshFile.clear();
+
             loadedPos = { 0, 0, 0 };
             loadedSize = { 1, 1, 1 };
             loadedOrientation = { 0, 0, 0 };
+
+            loadedUniqueID = 0;
+            loadedParentID =
+                static_cast<EntityECS>(-1);
+
             loadedColor = { 255, 255, 255 };
-            loadedParentID = 0;
+
+            loadedAnchored = true;
+            loadedCanDraw = true;
+
+            loadedInstanceType =
+                Boron::Enums::InstanceType::Object;
         }
     }
 
     file.close();
+
+    for (const PendingParent& pending : pendingParents)
+    {
+        auto childIt =
+            entityIDMap.find(
+                pending.child
+            );
+
+        if (childIt == entityIDMap.end())
+            continue;
+
+        auto parentIt =
+            entityIDMap.find(
+                pending.oldParent
+            );
+
+        if (parentIt == entityIDMap.end())
+        {
+            ecs.GetComponent<HierarcyComponent>(
+                childIt->second
+            ).parent = world;
+
+            continue;
+        }
+
+        EntityECS child =
+            childIt->second;
+
+        EntityECS parent =
+            parentIt->second;
+
+        ecs.GetComponent<HierarcyComponent>(
+            child
+        ).parent = parent;
+    }
 }
