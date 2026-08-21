@@ -2,13 +2,13 @@
 #include <vector>
 #include <memory>
 #include "Window/Window.h"
-
+#include "ECS.h"
 class Instance;
 
 class SaveProject {
 public:
-	static void Save(const std::vector<std::unique_ptr<Instance>>& Drawables);
-	static std::vector<std::unique_ptr<Instance>> Load(Window& window, Instance& world);
+	static void Save(ECS& ecs);
+	static void Load(ECS& ecs, Window& window, EntityECS world);
 private:
 
 };

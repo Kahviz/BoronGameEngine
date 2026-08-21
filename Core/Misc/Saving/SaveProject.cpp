@@ -10,7 +10,7 @@
 
 namespace fs = std::filesystem;
 
-void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
+void SaveProject::Save(ECS& ecs)
 {
     std::string path = savings + "\\" + g_projectName;
     std::string meshFilesPath = savings + "\\" + g_projectName + "\\MeshFiles";
@@ -19,11 +19,28 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
 
     std::ofstream file(path + "\\save.BGEproject");
 
-    for (auto& Drawable : Drawables) {
-        if (Drawable->InstanceType == Boron::Enums::InstanceType::Object) {
-            fs::path from = Drawable->OBJmesh->GetMeshPath();
+    ecs.Each<
+        BasicInfoComponent,
+        TransformComponent,
+        PhysicsComponent,
+        ObjectComponent,
+        HierarcyComponent,
+        InstanceTypeComponent,
+        ColorComponent
+    >(
+        [&](EntityECS entity,
+            BasicInfoComponent& basic,
+            TransformComponent& transform,
+            PhysicsComponent& physics,
+            ObjectComponent& object,
+            HierarcyComponent& hierarchy,
+            InstanceTypeComponent& instanceType,
+            ColorComponent colorComp
+            )
+        {
+            fs::path from = object.OBJmesh->GetMeshPath();
 
-            std::string newName = std::to_string(Drawable->UniqueID);
+            std::string newName = std::to_string(entity);
 
             fs::path to =
                 fs::path(meshFilesPath) /
@@ -39,160 +56,185 @@ void SaveProject::Save(const std::vector<std::unique_ptr<Instance>>& Drawables)
             }
 
             file << "-\n";
-            file << "Name: " << Drawable->Name << "\n";
-            file << "Anchored: " << Drawable->Anchored << "\n";
-            file << "Size: " << Drawable->transform.Size << "\n";
-            file << "Orientation: " << Drawable->transform.Orientation << "\n";
-            file << "Position: " << Drawable->transform.Position << "\n";
-            file << "Color: " << Drawable->color << "\n";
-            file << "CanDraw: " << Drawable->CanDraw() << "\n";
-            file << "UniqueID: " << Drawable->UniqueID << "\n";
-            file << "Color: " << Drawable->color << "\n";
 
-            if (Drawable->Parent)
-                file << "ParentID: " << Drawable->Parent->UniqueID << "\n";
+            file << "Name: " << basic.Name << "\n";
+            file << "Anchored: " << physics.anchored << "\n";
+
+            file << "Size: "
+                << transform.transform.Size << "\n";
+
+            file << "Orientation: "
+                << transform.transform.Orientation << "\n";
+
+            file << "Position: "
+                << transform.transform.Position << "\n";
+
+            file << "Color: "
+                << colorComp.color << "\n";
+
+            file << "CanDraw: "
+                << object.canDraw << "\n";
+
+            file << "UniqueID: "
+                << entity << "\n";
+
+            if (hierarchy.parent != 0)
+                file << "ParentID: "
+                << hierarchy.parent << "\n";
             else
                 file << "ParentID: -1\n";
 
-            file << "MeshFile: " << to.filename().string() << "\n";
-            file << "InstanceType: " << static_cast<int>(Drawable->InstanceType) << '\n';
+            file << "MeshFile: "
+                << to.filename().string() << "\n";
+
+            file << "InstanceType: "
+                << static_cast<int>(instanceType.InstanceType)
+                << '\n';
+
             file << "END\n";
         }
-        else if (Drawable->InstanceType == Boron::Enums::InstanceType::Script) {
-            file << "-\n";
-            file << "Name: " << Drawable->Name << "\n";
-            file << "UniqueID: " << Drawable->UniqueID << "\n";
-            if (Drawable->Parent)
-                file << "ParentID: " << Drawable->Parent->UniqueID << "\n";
-            else
-                file << "ParentID: -1\n";
-
-            file << "InstanceType: " << static_cast<int>(Drawable->InstanceType) << '\n';
-            file << "END\n";
-
-        }
-    }
+    );
 
     file.close();
 }
 
-Instance& AddAMesh(const std::string& Path,const int UniqueID, const std::string& Name,
-    BML::Vector3 pos, BML::Vector3 Size,BML::Int3 color, bool Selec, Window& window, std::vector<std::unique_ptr<Instance>>& Drawables)
+EntityECS AddAMesh(ECS& ecs,EntityECS world, Window& window, const std::string& Path, const std::string& Name,
+    BML::Vector3 pos, BML::Vector3 Size,BML::Int3 color, bool Selec, bool LiteralPath, bool UsesTexture)
 {
     Transform transform;
     transform.Position = pos;
     transform.Size = Size;
 
-    auto obj = std::make_unique<Object>(
-        Name,
-        1,
-        color,
-        color,
-        BML::Vector3(0, 0, 0),
-        transform,
-        true,
-        std::make_shared<Mesh>()
-    );
+    EntityECS entity = ecs.createEntity();
 
+    BasicInfoComponent basicComp;
+    ColorComponent colorComp;
+    TransformComponent transformComp;
+    PhysicsComponent physicsComp;
+    ObjectComponent objectComp;
+    EditorSettingsComponent editorComp;
+    HierarcyComponent hierarcyComp;
+    TextureComponent textureComp;
+    InstanceTypeComponent instTypeComp;
+    instTypeComp.InstanceType = Boron::Enums::InstanceType::Instance;
 
-    obj->UniqueID = UniqueID;
-    std::string finalPath;
-
-    if (fs::path(Path).is_absolute())
-    {
-        finalPath = Path;
-    }
-    else
-    {
-        finalPath = assets + Path;
-    }
+    editorComp.isVisibleInExplorer = true;
+    basicComp.Name = Name;
+    colorComp.color = color;
+        
+    transformComp.transform = transform;
+    physicsComp.anchored = true;
 
 #if DIRECTX11 == 1
-    obj->OBJmesh = Mesh::Load(finalPath, window.GetGraphics().GetDevice());
+    if (!LiteralPath) {
+        obj->OBJmesh = Mesh::Load(assets + Path, window.GetGraphics().GetDevice());
+    }
+    else {
+        obj->OBJmesh = Mesh::Load(Path, window.GetGraphics().GetDevice());
+    }
 #endif
 
 #if VULKAN == 1
-    auto& gfx = window.GetGraphics();
-    auto& vk = static_cast<VulkanAdapter&>(gfx.GetRenderer());
+    auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
 
-    obj->OBJmesh = Mesh::Load(
-        finalPath,
-        vk.GetDevice(),
-        vk.GetPhysicalDevice(),
-        vk.GetCommandPool(),
-        vk.GetGraphicsQueue()
-    );
+    if (!LiteralPath) {
+        objectComp.OBJmesh = Mesh::Load(
+            assets + Path,
+            vk.GetDevice(),
+            vk.GetPhysicalDevice(),
+            vk.GetCommandPool(),
+            vk.GetGraphicsQueue()
+        );
+    }
+    else {
+        objectComp.OBJmesh = Mesh::Load(
+            Path,
+            vk.GetDevice(),
+            vk.GetPhysicalDevice(),
+            vk.GetCommandPool(),
+            vk.GetGraphicsQueue()
+        );
+    }
+
 #endif
-
-    obj->Selected = Selec;
 
     std::string fullPath = textures + "\\TestTexture.png";
 
-#if DIRECTX11 == 1
-    obj->texture.Load(fullPath, window.GetGraphics().GetRenderer());
-#endif
-#if VULKAN == 1
-    obj->texture.LoadVK(fullPath, vk);
+    CreateError("No texture here for now");
 
-    std::vector<const Instance*> constDrawable;
-    constDrawable.reserve(Drawables.size());
+    hierarcyComp.parent = world;
 
-    for (const auto& drawable : Drawables)
-    {
-        constDrawable.push_back(drawable.get());
-    }
+    ecs.AddComponent(entity, basicComp);
+    ecs.AddComponent(entity, colorComp);
+    ecs.AddComponent(entity, transformComp);
+    ecs.AddComponent(entity, physicsComp);
+    ecs.AddComponent(entity, objectComp);
+    ecs.AddComponent(entity, hierarcyComp);
+    ecs.AddComponent(entity, editorComp);
+    ecs.AddComponent(entity, textureComp);
+    ecs.AddComponent(entity, instTypeComp);
 
-    vk.UpdateDescriptorSet(constDrawable);
-#endif
-
-    Instance* objPtr = obj.get();
-
-    Drawables.push_back(std::move(obj));
-
-    g_Index++;
-    return *objPtr;
+    return entity;
 }
 
-std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance& world)
-{
-    std::vector<std::unique_ptr<Instance>> Loaded;
-    std::ifstream file(savings + "\\" + g_projectName + "\\save.BGEproject");
 
-    if (!file.is_open()) {
+void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
+{
+    std::ifstream file(
+        savings + "\\" + g_projectName + "\\save.BGEproject"
+    );
+
+    if (!file.is_open())
+    {
         std::cout << "File not found\n";
-        return {};
+        return;
     }
+
+    struct PendingParent
+    {
+        EntityECS child;
+        EntityECS parent;
+    };
+
+    std::vector<PendingParent> pendingParents;
 
     std::string line;
 
-    std::string loadedName = "LoadedObject";
+    std::string loadedName;
     BML::Vector3 loadedPos(0, 0, 0);
     BML::Vector3 loadedSize(1, 1, 1);
     BML::Vector3 loadedOrientation(0, 0, 0);
-    std::string loadedMeshFile = "";
-    std::string loadedUniqueID = "-1";
-    BML::Int3 loadedColor(0,0,0);
-    std::string loadedParentID = "-1";
-    std::unordered_map<int, int> parentIDs;
+
+    std::string loadedMeshFile;
+    int loadedUniqueID = -1;
+
+    BML::Int3 loadedColor(255, 255, 255);
+
+    EntityECS loadedParentID = 0;
+
     Boron::Enums::InstanceType loadedInstanceType =
-        Boron::Enums::InstanceType::Instance;
+        Boron::Enums::InstanceType::Object;
 
     while (std::getline(file, line))
     {
         if (line == "-")
-        {
             continue;
-        }
 
         if (line.rfind("Name:", 0) == 0)
         {
             loadedName = line.substr(6);
         }
+
         else if (line.rfind("Position:", 0) == 0)
         {
             std::string data = line.substr(10);
 
-            std::replace(data.begin(), data.end(), ',', ' ');
+            std::replace(
+                data.begin(),
+                data.end(),
+                ',',
+                ' '
+            );
 
             std::stringstream ss(data);
 
@@ -200,50 +242,66 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
                 >> loadedPos.y()
                 >> loadedPos.z();
         }
+
         else if (line.rfind("Size:", 0) == 0)
         {
             std::string data = line.substr(6);
 
-            std::replace(data.begin(), data.end(), ',', ' ');
+            std::replace(
+                data.begin(),
+                data.end(),
+                ',',
+                ' '
+            );
 
             std::stringstream ss(data);
 
             ss >> loadedSize.x()
                 >> loadedSize.y()
                 >> loadedSize.z();
-            std::cout << loadedSize << std::endl;
         }
+
         else if (line.rfind("Orientation:", 0) == 0)
         {
             std::string data = line.substr(13);
 
-            std::replace(data.begin(), data.end(), ',', ' ');
+            std::replace(
+                data.begin(),
+                data.end(),
+                ',',
+                ' '
+            );
 
             std::stringstream ss(data);
-
-            loadedOrientation = BML::Vector3(0, 0, 0);
 
             ss >> loadedOrientation.x()
                 >> loadedOrientation.y()
                 >> loadedOrientation.z();
         }
+
         else if (line.rfind("MeshFile:", 0) == 0)
         {
             loadedMeshFile = line.substr(10);
         }
+
         else if (line.rfind("UniqueID:", 0) == 0)
         {
-            loadedUniqueID = line.substr(10);
+            loadedUniqueID =
+                std::stoi(line.substr(10));
         }
+
         else if (line.rfind("Color:", 0) == 0)
         {
             std::string data = line.substr(6);
 
-            std::replace(data.begin(), data.end(), ',', ' ');
+            std::replace(
+                data.begin(),
+                data.end(),
+                ',',
+                ' '
+            );
 
             std::stringstream ss(data);
-
-            loadedColor = BML::Int3(0, 0, 0);
 
             int r, g, b;
 
@@ -251,18 +309,24 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
 
             loadedColor = BML::Int3(r, g, b);
         }
+
         else if (line.rfind("ParentID:", 0) == 0)
         {
-            loadedParentID = line.substr(10);
+            loadedParentID =
+                static_cast<EntityECS>(
+                    std::stoi(line.substr(10))
+                    );
         }
+
         else if (line.rfind("InstanceType:", 0) == 0)
         {
-            std::cout << "[" << line << "]\n";
-            std::cout << "[" << line.substr(14) << "]\n";
+            int value =
+                std::stoi(line.substr(14));
 
-            int value = std::stoi(line.substr(14));
-            loadedInstanceType = static_cast<Boron::Enums::InstanceType>(value);
+            loadedInstanceType =
+                static_cast<Boron::Enums::InstanceType>(value);
         }
+
         else if (line == "END")
         {
             std::string meshPath =
@@ -271,82 +335,64 @@ std::vector<std::unique_ptr<Instance>> SaveProject::Load(Window& window,Instance
                 "\\MeshFiles\\" +
                 loadedMeshFile;
 
-            Instance* inst = nullptr;
+            EntityECS entity = 0;
 
-            switch (loadedInstanceType)
+            if (loadedInstanceType ==
+                Boron::Enums::InstanceType::Object)
             {
-            case Boron::Enums::InstanceType::Object:
-                inst = &AddAMesh(
+                entity = AddAMesh(
+                    ecs,
+                    world,
+                    window,
                     meshPath,
-                    std::stoi(loadedUniqueID),
                     loadedName,
                     loadedPos,
                     loadedSize,
                     loadedColor,
                     false,
-                    window,
-                    Loaded
-                );
-                break;
-
-            case Boron::Enums::InstanceType::Script:
-            {
-                auto script = std::make_unique<Script>(
-                    loadedName,
-                    std::stoi(loadedUniqueID),
-                    BML::Int3{ 255,255,255 },
-                    BML::Int3{ 255,255,255 },
-                    BML::Vector3{ 0,0,0 },
-                    Transform{},
-                    false,
-                    nullptr
+                    true,
+                    true
                 );
 
-                inst = script.get();
-                Loaded.push_back(std::move(script));
-                break;
-            }
+                auto& transform =
+                    ecs.GetComponent<TransformComponent>(entity);
 
-            default:
-                std::cerr << "Unknown InstanceType: "
-                    << static_cast<int>(loadedInstanceType)
-                    << '\n';
-                break;
-            }
-
-            if (!inst)
-            {
-                continue;
-            }
-
-            inst->InstanceType = loadedInstanceType;
-            std::cout << static_cast<int>(loadedInstanceType) << '\n';
-            int parentID = std::stoi(loadedParentID);
-
-            if (parentID == -1)
-            {
-                world.AddChild(inst);
+                transform.transform.Orientation =
+                    loadedOrientation;
             }
             else
             {
-                parentIDs[inst->UniqueID] = parentID;
+                std::cerr
+                    << "Unsupported InstanceType: "
+                    << static_cast<int>(loadedInstanceType)
+                    << '\n';
+
+                loadedName.clear();
+                loadedMeshFile.clear();
+
+                continue;
             }
+
+            if (entity == 0)
+                continue;
+
+            if (loadedParentID != static_cast<EntityECS>(-1))
+            {
+                pendingParents.push_back({
+                    entity,
+                    loadedParentID
+                    });
+            }
+
+            loadedName.clear();
+            loadedMeshFile.clear();
+            loadedPos = { 0, 0, 0 };
+            loadedSize = { 1, 1, 1 };
+            loadedOrientation = { 0, 0, 0 };
+            loadedColor = { 255, 255, 255 };
+            loadedParentID = 0;
         }
     }
 
-    for(const auto& [childID, parentID] : parentIDs)
-    {
-        //std::cout << childID << " -> " << parentID << '\n';
-
-        for (auto& Child : Loaded) {
-            if (Child->UniqueID == childID) {
-                for (auto& Parent : Loaded) {
-                    if (Parent->UniqueID == parentID) {
-                        Parent->AddChild(Child.get());
-                    }
-                }
-            }
-        }
-    }
-    return Loaded;
+    file.close();
 }

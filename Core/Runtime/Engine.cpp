@@ -196,7 +196,7 @@ EntityECS Engine::AddAMesh(ECS& ecs,const std::string& Path, const std::string& 
     InstanceTypeComponent instTypeComp;
     instTypeComp.InstanceType = Boron::Enums::InstanceType::Instance;
 
-    editorComp.IsVisibleInExplorer = true;
+    editorComp.isVisibleInExplorer = true;
     basicComp.Name = Name;
     colorComp.color = BML::Int3(
         static_cast<int>(Color3.x() * 255.0f),
@@ -270,6 +270,7 @@ EntityECS Engine::AddAMesh(ECS& ecs,const std::string& Path, const std::string& 
     ecs.AddComponent(entity, hierarcyComp);
     ecs.AddComponent(entity, editorComp);
     ecs.AddComponent(entity, textureComp);
+    ecs.AddComponent(entity, instTypeComp);
 
     return entity;
 }
@@ -397,11 +398,14 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
             Drawables = SaveProject::Load(window,world);
 
-            for (auto& Drawable : Drawables) {
-                if (Drawable->Parent == nullptr) {
-                    world.AddChild(Drawable.get());
+            m_ecs.Each<HierarcyComponent>(
+                [&](EntityECS entity, HierarcyComponent& hierarchy)
+                {
+                    if (hierarchy.parent == 0) {
+                        hierarchy.parent = world;
+                    }
                 }
-            }
+            );
 
             if (Drawables.empty()) {
                 AddAMesh(m_ecs, "\\Cube.obj", "Cube", { 0,2,0 }, { 1,1,1 }, false, false,true);
