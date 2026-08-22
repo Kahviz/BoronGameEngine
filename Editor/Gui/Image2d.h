@@ -1,11 +1,11 @@
 #pragma once
 #include <string>
 #include "GLOBALS.h"
-#include "Texture.h"
 #include "imgui.h"
-#include "IRenderer.h"
 #include "GraphicsBackends.h"
+#include "Texture.h"
 
+class IRenderer;
 class Image2d {
 public:
 	void Draw(ImVec2 size);
@@ -14,6 +14,7 @@ public:
 	#if VULKAN == 1
 		VkDescriptorSet& GetTexture() { return m_descriptorSet; };
 	#endif
+
 	#if DIRECTX11 == 1
 		ID3D11ShaderResourceView* GetTexture() { return srv.Get(); };
 	#endif

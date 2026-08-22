@@ -1,7 +1,8 @@
 #pragma once
-#include "Texture.h"
+
+class Texture;
 
 struct TextureComponent
 {
-	Texture texture;
+    Texture* texture = nullptr;
 };

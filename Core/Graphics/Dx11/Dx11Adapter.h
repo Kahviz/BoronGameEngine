@@ -2,7 +2,6 @@
 #include "IRenderer.h"
 #include <vector>
 #include <memory>
-#include "Instance.h"
 #include "GLOBALS.h"
 
 #if DIRECTX11 == 1

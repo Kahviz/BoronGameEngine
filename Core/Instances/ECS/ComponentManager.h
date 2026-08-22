@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "ComponentStorage.h"
+#include "ErrorHandling/ErrorMessage.h"
 
 class ComponentManager
 {
@@ -20,9 +21,16 @@ public:
     template<typename T>
     ComponentStorage<T>& GetStorage()
     {
-        return *std::static_pointer_cast<ComponentStorage<T>>(
-            m_storages.at(typeid(T))
-        );
+        auto it = m_storages.find(typeid(T));
+
+        if (it == m_storages.end())
+        {
+            CreateError("Missing componentType!");
+        }
+
+        return *static_cast<ComponentStorage<T>*>(
+            it->second.get()
+            );
     }
 
 private:

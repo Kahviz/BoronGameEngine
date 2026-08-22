@@ -16,14 +16,16 @@
 #include "ScoreCounter.h"
 #include <GLFW/glfw3.h>
 #include "Vulkan/VulkanHelpers.h"
-#include <Instances/Instance.h>
 #include "Instances/Vertex.h"
 #include <unordered_map>
-#include "Mesh/Vulkan/MeshVulkan.h"
+#include "Mesh/Mesh.h"
 #include <Camera/Camera.h>
-#include <minmax.h>
-#include <algorithm>
-#include "Texture.h"
+
+#include "ECS.h"
+#include <memory>
+
+//Imgui
+#include "imgui.h"
 
 //SubClasses
 #include "VulkanDevice/VulkanDevice.h"
@@ -36,7 +38,9 @@ class Texture;
 
 class VulkanRender {
 public:
-    VulkanRender() = default;
+    VulkanRender();
+    ~VulkanRender();
+
     void CreateDepthResources(uint32_t width, uint32_t height);
     bool Init(GLFWwindow* window);
     void Cleanup();
@@ -50,12 +54,12 @@ public:
     void createUniformBuffers();
     void ReallocateUniformBuffer(uint32_t newObjectCount);
     void createDescriptorPool(uint32_t maxObjects);
-    void UpdateDescriptorSets(const std::vector<const Instance*>& instances);
-    void createDescriptorSets(const std::vector<const Instance*>& instances);
+    void UpdateDescriptorSets(ECS& ecs);
+    void createDescriptorSets(ECS& ecs);
     BML::Matrix4x4 CreateVulkanPerspective(float fovY, float aspect, float zNear, float zFar);
     BML::Matrix4x4 createModelMatrix(BML::Vector3 orientation, BML::Vector3 scale, BML::Vector3 pos);
-    void updateUniformBuffer(const Instance& inst, uint32_t objectIndex, BML::Vector3 scale, BML::Vector3 Orientation, BML::Vector3 pos, BML::Int3 color);
-    bool RenderAMesh(const Instance* drawable);
+    void updateUniformBuffer(ECS& ecs, EntityECS entity, uint32_t objectIndex, BML::Vector3 scale, BML::Vector3 Orientation, BML::Vector3 pos, BML::Int3 color);
+    bool RenderAMesh(ECS& ecs, EntityECS entity);
     void resizeViewport(uint32_t width, uint32_t height);
     void PrintInfo();
 
@@ -65,7 +69,8 @@ public:
 
     void ClearBuffer(float r, float b, float g);
 
-    void DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables);
+    void DrawFrame(ECS& ecs, float deltaTime);
+
     Camera& GetCamera();
     VkCommandBuffer BeginSingleTimeCommands();
 
@@ -143,14 +148,13 @@ private:
 
     uint32_t imageIndex = -1;
     uint32_t maxInstances = 100;
-    VkDeviceSize dynamicAlignment = -1;
+    uint32_t dynamicAlignment = -1;
 
     VkViewport viewport{};
     VkRect2D scissor = {};
 
     std::unordered_map<const Mesh*, std::unique_ptr<MeshVK>> meshCache = {};
     std::vector<DrawCommand> drawCommands = {};
-    std::vector<std::unique_ptr<Instance>> DrawablesCopy = {};
     std::vector<uint32_t> drawObjectIndices = {};
 
     GLFWwindow* main_window = nullptr;

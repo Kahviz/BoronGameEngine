@@ -35,13 +35,13 @@ void Graphics::SetRenderTargetToScene() {
 }
 
 void Graphics::RenderAMesh(
-    float Deltatime,
-    const Instance* drawable
+    ECS& ecs,
+    EntityECS entity
 ) 
 {
     #if VULKAN == 1
         auto& vk = static_cast<VulkanAdapter&>(*Renderer.get());
-        vk.RenderAMesh(drawable);
+        vk.RenderAMesh(ecs, entity);
     #endif
 
     #if DIRECTX11 == 1
@@ -103,13 +103,12 @@ Camera& Graphics::GetCamera()
     return Renderer->GetCamera();
 }
 
-void Graphics::EndFrame()
-{
+void Graphics::EndFrame() {
     Renderer->EndFrame();
 }
 
-void Graphics::DrawAFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables) {
-    Renderer->DrawFrame(DELTATIME, Drawables);
+void Graphics::DrawAFrame(float dt,ECS& ecs) {
+    Renderer->DrawFrame(dt,ecs);
 }
 
 void Graphics::ClearBuffer(float r, float g, float b)

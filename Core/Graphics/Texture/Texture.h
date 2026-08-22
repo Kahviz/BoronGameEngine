@@ -1,16 +1,22 @@
 #pragma once
 #include <string>
 #include <filesystem>
-#include "ErrorHandling/ErrorMessage.h"
 #include "GLOBALS.h"
+#include <imgui.h>
+
+#include "ErrorHandling/ErrorMessage.h"
 #include "Releaser.h"
 #include "Debugging/Functions/BGE_ASSERTS.h"
-#include "GraphicsBackends.h"
+
+#if DIRECTX11 == 1
+    #include <d3d11.h>
+    #include <wrl/client.h>
+
+    using Microsoft::WRL::ComPtr;
+#endif
 
 #if VULKAN == 1
     #include "Vulkan/vulkan.h"
-
-    class VulkanRender;
 #endif
 
 class IRenderer;
@@ -66,10 +72,13 @@ public:
     void SetImGuiTexture(ImTextureID tex) { m_ImGuiTexture = tex; }
 #endif
     bool IsLoadedConst() const {
+        if (this == nullptr)
+            return false;
+
         return Loaded;
     }
     bool IsLoaded() const {
-        if (this != nullptr)
+        if (this == nullptr)
             return false;
 
         return Loaded;

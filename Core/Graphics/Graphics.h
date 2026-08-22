@@ -13,7 +13,6 @@ class Window;
 #include "ErrorHandling/ErrorMessage.h"
 
 #include <vector>
-#include "Instances/Instance.h"
 #include <IRenderer.h>
 #include <VulkanAdapter.h>
 
@@ -28,16 +27,14 @@ public:
 
     bool InitGraphics(GLFWwindow* window);
     void SetRenderTargetToScene();
-    void RenderAMesh(float Deltatime,
-        const Instance* drawable
-    );
+
+    void RenderAMesh(ECS& ecs, EntityECS entity);
     void SetRenderTargetToBackBuffer();
 
     Camera& GetCamera();
 
+    void DrawAFrame(float dt, ECS& ecs);
     void EndFrame();
-
-    void DrawAFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables);
 
     void ClearBuffer(float r, float g, float b);
     void ClearSceneBuffer(float r, float g, float b);

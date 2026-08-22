@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "Entity.h"
 #include "ComponentManager.h"
-#include "Components.h"
+#include <tuple>
 
 using EntityECS = uint32_t;
 
@@ -30,23 +30,32 @@ public:
 	{
 		return m_componentManager->GetStorage<T>().Has(entity);
 	}
-	template<typename Func>
-	void EachEntity(Func&& function)
-	{
-		for (EntityECS entity = 0; entity < m_currentHandleID; ++entity)
-		{
-			function(entity);
-		}
-	}
+
 	template<typename T>
 	inline T& GetComponent(EntityECS entity)
 	{
 		return m_componentManager->GetStorage<T>().Get(entity);
 	}
 
-	template<typename ...Components, typename Func>
+	template<typename Func>
+	void EachEntity(Func&& function)
+	{
+		for (EntityECS entity = 0;
+			entity < m_currentHandleID + 1;
+			++entity)
+		{
+			function(entity);
+		}
+	}
+
+	template<typename... Components, typename Func>
 	void Each(Func&& function)
 	{
+		static_assert(
+			sizeof...(Components) > 0,
+			"ECS::Each requires at least one component"
+			);
+
 		using FirstComponent =
 			std::tuple_element_t<0, std::tuple<Components...>>;
 
@@ -67,18 +76,11 @@ public:
 		);
 	}
 
-	void DeselectAll()
-	{
-		Each<EditorSettingsComponent>(
-			[](EntityECS entity, EditorSettingsComponent& editor)
-			{
-				editor.selected = false;
-			}
-		);
-	}
-
+	void DeselectAll();
 	void Update(float deltaTime);
 	void Clear();
+
+	uint32_t getNumberOfEntities() { return m_currentHandleID; }
 private:
 	ComponentManager* m_componentManager = nullptr;
 	uint32_t m_currentHandleID = 1;

@@ -2,7 +2,6 @@
 #include <stdexcept>
 #include <chrono>
 #include <iostream>
-#include "Object.h"
 #include "GLOBALS.h"
 #include "Camera/CameraControl.h"
 #include "BGE_ASSERTS.h"
@@ -15,6 +14,7 @@
 
 #include "backends/imgui_impl_glfw.h"
 #include "GraphicsBackends.h"
+#include "Components.h"
 
 #include <random>
 
@@ -120,11 +120,14 @@ Engine::~Engine()
         #if VULKAN == 1
             auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
 
-            for (auto& Drawable : Drawables) {
-                if (Drawable->GetTexture()->IsLoaded()) {
-                    Drawable->GetTexture()->Cleanup(vk.GetDevice());
+            m_ecs.Each<TextureComponent>(
+                [&](EntityECS entity, TextureComponent& textureComponent)
+                {
+                    if (textureComponent.texture->IsLoaded()) {
+                        textureComponent.texture->Cleanup(vk.GetDevice());
+                    }
                 }
-            }
+            );
 
             window.GetGraphics().GetRenderer().CleanUp();
         #endif
@@ -176,15 +179,11 @@ int Engine::EngineRun()
     return 0;
 }
 
-EntityECS Engine::AddAMesh(ECS& ecs,const std::string& Path, const std::string& Name,
-    BML::Vector3 pos, BML::Vector3 Size, bool Selec,bool LiteralPath, bool UsesTexture)
+EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string& Name,
+    BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath, bool UsesTexture)
 {
-    Transform transform;
-    transform.Position = pos;
-    transform.Size = Size;
-
     EntityECS entity = ecs.createEntity();
-    
+
     BasicInfoComponent basicComp;
     ColorComponent colorComp;
     TransformComponent transformComp;
@@ -194,29 +193,29 @@ EntityECS Engine::AddAMesh(ECS& ecs,const std::string& Path, const std::string& 
     HierarcyComponent hierarcyComp;
     TextureComponent textureComp;
     InstanceTypeComponent instTypeComp;
+
     instTypeComp.InstanceType = Boron::Enums::InstanceType::Instance;
 
     editorComp.isVisibleInExplorer = true;
+    editorComp.selected = false;
     basicComp.Name = Name;
+
     colorComp.color = BML::Int3(
         static_cast<int>(Color3.x() * 255.0f),
         static_cast<int>(Color3.y() * 255.0f),
         static_cast<int>(Color3.z() * 255.0f)
     );
+    Transform transform;
+    transform.Size = Size;
+    transform.Position = pos;
+
     transformComp.transform = transform;
     physicsComp.anchored = true;
 
-#if DIRECTX11 == 1
-    if (!LiteralPath) {
-        obj->OBJmesh = Mesh::Load(assets + Path, window.GetGraphics().GetDevice());
-    }
-    else {
-        obj->OBJmesh = Mesh::Load(Path, window.GetGraphics().GetDevice());
-    }
-#endif
-
 #if VULKAN == 1
-    auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
+    auto& vk = static_cast<VulkanAdapter&>(
+        window.GetGraphics().GetRenderer()
+        );
 
     if (!LiteralPath) {
         objectComp.OBJmesh = Mesh::Load(
@@ -236,29 +235,17 @@ EntityECS Engine::AddAMesh(ECS& ecs,const std::string& Path, const std::string& 
             vk.GetGraphicsQueue()
         );
     }
-    
 #endif
 
     std::string fullPath = textures + "\\TestTexture.png";
 
+#if VULKAN == 1
     if (UsesTexture) {
-        #if DIRECTX11 == 1
-            textureComp.texture.Load(fullPath, window.GetGraphics().GetRenderer());
-        #endif
-        #if VULKAN == 1
-            textureComp.texture.LoadVK(fullPath, vk);
+        textureComp.texture = new Texture();
 
-            std::vector<const Instance*> constDrawable;
-            constDrawable.reserve(Drawables.size());
-
-            for (const auto& drawable : Drawables)
-            {
-                constDrawable.push_back(drawable.get());
-            }
-
-            vk.UpdateDescriptorSet(constDrawable);
-        #endif
+        textureComp.texture->LoadVK(fullPath, vk);
     }
+#endif
 
     hierarcyComp.parent = world;
 
@@ -269,12 +256,14 @@ EntityECS Engine::AddAMesh(ECS& ecs,const std::string& Path, const std::string& 
     ecs.AddComponent(entity, objectComp);
     ecs.AddComponent(entity, hierarcyComp);
     ecs.AddComponent(entity, editorComp);
-    ecs.AddComponent(entity, textureComp);
     ecs.AddComponent(entity, instTypeComp);
+
+    if (UsesTexture) {
+        ecs.AddComponent(entity, textureComp);
+    }
 
     return entity;
 }
-
 void ScreenResizerDetector(Window* wnd) {
     static int lastWidth = 0, lastHeight = 0;
     glfwGetFramebufferSize(wnd->GetWindow(), &screen_width, &screen_height);
@@ -337,13 +326,13 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     }
 
     if (ctrlPressed) {
-        AddAMesh(m_ecs,"\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false,false, true);
+        AddAMesh(m_ecs,"\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false,false, false);
         m_console.write("Creating cube", Boron::Enums::ConsoleLineType::Info);
 
         cubes++;
     }
     if (RctrlPressed) {
-        AddAMesh(m_ecs, "\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false, true);
+        AddAMesh(m_ecs, "\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false, false);
 
         cubes++;
         std::cout << "FPS: " << (1.0f / deltatime) << '\n';
@@ -383,20 +372,36 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     if (InProject) {
         if (!Init) {
             CreateSuccess("Initing World");
+
             BasicInfoComponent basicInfoComp;
             basicInfoComp.Name = "World";
 
             HierarcyComponent hierarcyComp;
-            hierarcyComp.parent = -10;
+            hierarcyComp.parent = -10; //FIX
 
             InstanceTypeComponent instTypeComp;
             instTypeComp.InstanceType = Boron::Enums::InstanceType::World;
 
+            EditorSettingsComponent editorComp;
+            editorComp.isVisibleInExplorer = true;
+            editorComp.selected = false;
+
             m_ecs.AddComponent(world, basicInfoComp);
             m_ecs.AddComponent(world, hierarcyComp);
             m_ecs.AddComponent(world, instTypeComp);
+            m_ecs.AddComponent(world, editorComp);
+            CreateSuccess("Starting loading the project!");
 
             SaveProject::Load(m_ecs, window, world);
+
+            CreateSuccess("Ended loading the project!");
+
+            #if VULKAN == 1
+                auto& vk = static_cast<VulkanAdapter&>(
+                    window.GetGraphics().GetRenderer()
+                );
+                vk.UpdateDescriptorSet(m_ecs);
+            #endif
 
             m_ecs.Each<HierarcyComponent>(
                 [&](EntityECS entity, HierarcyComponent& hierarchy)
@@ -407,9 +412,9 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
                 }
             );
 
-            if (Drawables.empty()) {
-                AddAMesh(m_ecs, "\\Cube.obj", "Cube", { 0,2,0 }, { 1,1,1 }, false, false,true);
-                AddAMesh(m_ecs, "\\Cube.obj", "Cube2", { 0,0,0 }, { 1,1,1 }, false, false,true);
+            if (m_ecs.getNumberOfEntities() <= 0) {
+                AddAMesh(m_ecs, "\\Cube.obj", "Cube", { 0,2,0 }, { 1,1,1 }, false, false,false);
+                AddAMesh(m_ecs, "\\Cube.obj", "Cube2", { 0,0,0 }, { 1,1,1 }, false, false,false);
             }
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);
@@ -434,7 +439,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             world,
             &graphics.GetRenderer()
         );
-        
     }
     else {
         if (makeGui.MakeDashBoard(&graphics.GetRenderer())) {
@@ -447,15 +451,20 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 #endif
 
 #if VULKAN == 1
-    for (auto& Drawableptr : Drawables) {
-        Instance* Drawable = Drawableptr.get();
-        if (Drawable->CanDraw()) {
+    m_ecs.Each<TransformComponent, ObjectComponent>(
+        [&](EntityECS entity,
+            TransformComponent& transform,
+            ObjectComponent& object)
+        {
+            if (!object.canDraw)
+                return;
+
             wnd->GetGraphics().RenderAMesh(
-                deltatime,
-                Drawable
+                m_ecs,
+                entity
             );
         }
-    }
+    );
 #endif
     //Physics
     m_ecs.Each<PhysicsComponent>(
@@ -500,7 +509,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     #if VULKAN == 1
         wnd->GetGraphics().DrawAFrame(
             deltatime,
-            Drawables
+            m_ecs
         );
     #endif
 

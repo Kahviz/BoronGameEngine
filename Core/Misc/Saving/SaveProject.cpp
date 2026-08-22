@@ -1,12 +1,11 @@
 #include "SaveProject.h"
 #include <fstream>
 #include "GLOBALS.h"
-#include "Instance.h"
 #include <filesystem>
 #include <iostream>
-#include <Object.h>
 #include <Graphics/Graphics.h>
-#include <Script.h>
+#include "Components.h"
+#include "Texture.h"
 
 namespace fs = std::filesystem;
 
@@ -98,8 +97,19 @@ void SaveProject::Save(ECS& ecs)
     file.close();
 }
 
-EntityECS AddAMesh(ECS& ecs,EntityECS world, Window& window, const std::string& Path, const std::string& Name,
-    BML::Vector3 pos, BML::Vector3 Size,BML::Int3 color, bool Selec, bool LiteralPath, bool UsesTexture)
+EntityECS AddAMesh(
+    ECS& ecs,
+    EntityECS world,
+    Window& window,
+    const std::string& Path,
+    const std::string& Name,
+    BML::Vector3 pos,
+    BML::Vector3 Size,
+    BML::Int3 color,
+    bool Selec,
+    bool LiteralPath,
+    bool UsesTexture
+)
 {
     Transform transform;
     transform.Position = pos;
@@ -116,28 +126,45 @@ EntityECS AddAMesh(ECS& ecs,EntityECS world, Window& window, const std::string& 
     HierarcyComponent hierarcyComp;
     TextureComponent textureComp;
     InstanceTypeComponent instTypeComp;
-    instTypeComp.InstanceType = Boron::Enums::InstanceType::Object;
+
+    instTypeComp.InstanceType =
+        Boron::Enums::InstanceType::Object;
 
     editorComp.isVisibleInExplorer = true;
+
     basicComp.Name = Name;
+
     colorComp.color = color;
-        
+
     transformComp.transform = transform;
+
     physicsComp.anchored = true;
 
+    hierarcyComp.parent = world;
+
 #if DIRECTX11 == 1
-    if (!LiteralPath) {
-        obj->OBJmesh = Mesh::Load(assets + Path, window.GetGraphics().GetDevice());
+    if (!LiteralPath)
+    {
+        objectComp.OBJmesh = Mesh::Load(
+            assets + Path,
+            window.GetGraphics().GetDevice()
+        );
     }
-    else {
-        obj->OBJmesh = Mesh::Load(Path, window.GetGraphics().GetDevice());
+    else
+    {
+        objectComp.OBJmesh = Mesh::Load(
+            Path,
+            window.GetGraphics().GetDevice()
+        );
     }
 #endif
 
 #if VULKAN == 1
-    auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
-
-    if (!LiteralPath) {
+    auto& vk =
+        static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
+            
+    if (!LiteralPath)
+    {
         objectComp.OBJmesh = Mesh::Load(
             assets + Path,
             vk.GetDevice(),
@@ -146,7 +173,8 @@ EntityECS AddAMesh(ECS& ecs,EntityECS world, Window& window, const std::string& 
             vk.GetGraphicsQueue()
         );
     }
-    else {
+    else
+    {
         objectComp.OBJmesh = Mesh::Load(
             Path,
             vk.GetDevice(),
@@ -158,21 +186,72 @@ EntityECS AddAMesh(ECS& ecs,EntityECS world, Window& window, const std::string& 
 
 #endif
 
-    std::string fullPath = textures + "\\TestTexture.png";
+#if VULKAN == 1
+    if (UsesTexture)
+    {
+        std::string fullPath =
+            textures + "\\TestTexture.png";
 
-    CreateError("No texture here for now");
+        textureComp.texture = new Texture();
 
-    hierarcyComp.parent = world;
+        textureComp.texture->LoadVK(
+            fullPath,
+            vk
+        );
+    }
+#endif
 
-    ecs.AddComponent(entity, basicComp);
-    ecs.AddComponent(entity, colorComp);
-    ecs.AddComponent(entity, transformComp);
-    ecs.AddComponent(entity, physicsComp);
-    ecs.AddComponent(entity, objectComp);
-    ecs.AddComponent(entity, hierarcyComp);
-    ecs.AddComponent(entity, editorComp);
-    ecs.AddComponent(entity, textureComp);
-    ecs.AddComponent(entity, instTypeComp);
+    ecs.AddComponent(
+        entity,
+        basicComp
+    );
+
+    ecs.AddComponent(
+        entity,
+        colorComp
+    );
+
+    ecs.AddComponent(
+        entity,
+        transformComp
+    );
+
+    ecs.AddComponent(
+        entity,
+        physicsComp
+    );
+
+    ecs.AddComponent(
+        entity,
+        objectComp
+    );
+
+    ecs.AddComponent(
+        entity,
+        hierarcyComp
+    );
+
+    ecs.AddComponent(
+        entity,
+        editorComp
+    );
+
+    ecs.AddComponent(
+        entity,
+        textureComp
+    );
+
+    ecs.AddComponent(
+        entity,
+        instTypeComp
+    );
+
+    #if VULKAN == 1
+        if (UsesTexture)
+        {
+            vk.UpdateDescriptorSet(ecs);
+        }
+    #endif
 
     return entity;
 }
@@ -398,7 +477,7 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
                 loadedColor,
                 false,
                 true,
-                true
+                false
             );
 
             if (entity == 0)

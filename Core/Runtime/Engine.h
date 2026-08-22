@@ -23,8 +23,6 @@
 
 #include "ECS.h"
 
-class Instance;
-
 class Engine {
 public:
     Engine();
@@ -44,8 +42,6 @@ public:
     DiscordPresence dcPresence;
     Window window;
     EntityECS world = m_ecs.createEntity();
-
-    std::vector<std::unique_ptr<Instance>> Drawables = {};
 
     bool InProject = false;
     CameraControl camC;

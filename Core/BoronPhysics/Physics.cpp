@@ -1,4 +1,5 @@
 #include "Physics.h"
+#include "Components.h"
 
 //Server
 bool Physics::ApplyGravity(ECS& ecs,EntityECS entity, float deltatime)

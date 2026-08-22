@@ -16,6 +16,7 @@
 #include <CameraControl.h>
 #include "imgui.h"
 #include <imgui_impl_vulkan.h>
+#include "Components.h"
 #include "Texture.h"
 
 bool VulkanRender::Init(GLFWwindow* window)
@@ -24,11 +25,10 @@ bool VulkanRender::Init(GLFWwindow* window)
     float AspectY = (float)screen_height;
     float Aspect = AspectX / AspectY;
 
-    viewportTexture = std::make_unique<Texture>();
     m_Camera.SetProjectionValues(g_FOV, Aspect, 0.0f, 1000.0f);
 
     CreateInfo("Vulkan Init Started!");
-
+    viewportTexture = std::make_unique<Texture>();
     if (!vkInstance.Init()) {
         CreateError("A Unexpected error happened on vkInstance.Init");
         return false;
@@ -207,6 +207,14 @@ bool VulkanRender::Init(GLFWwindow* window)
     //InitEnd :D-<
     CreateSuccess("No Fatal Errors in Vulkan Initing :D-<");
     return true;
+}
+
+VulkanRender::VulkanRender()
+{
+}
+
+VulkanRender::~VulkanRender()
+{
 }
 
 void VulkanRender::CreateDepthResources(uint32_t width, uint32_t height) {
@@ -725,8 +733,7 @@ void VulkanRender::createDescriptorPool(uint32_t maxObjects)
     );
 }
 
-void VulkanRender::UpdateDescriptorSets(
-    const std::vector<const Instance*>& instances)
+void VulkanRender::UpdateDescriptorSets(ECS& ecs)
 {
     vkDeviceWaitIdle(vkDevice.GetDevice());
 
@@ -744,20 +751,22 @@ void VulkanRender::UpdateDescriptorSets(
     descriptorSets.clear();
 
     createDescriptorPool(
-        static_cast<uint32_t>(instances.size())
+        ecs.getNumberOfEntities()
     );
 
-    createDescriptorSets(instances);
+    createDescriptorSets(ecs);
 }
-void VulkanRender::createDescriptorSets(
-    const std::vector<const Instance*>& instances)
+void VulkanRender::createDescriptorSets(ECS& ecs)
 {
-    uint32_t count = static_cast<uint32_t>(instances.size());
+    uint32_t count = ecs.getNumberOfEntities();
 
-    if (count == 0)
-        return;
+    std::cout << "CREATE DESCRIPTOR SETS\n";
+    std::cout << "count = " << count << '\n';
 
     descriptorSets.resize(count);
+
+    std::cout << "after resize = "
+        << descriptorSets.size() << '\n';
 
     std::vector<VkDescriptorSetLayout> layouts(
         count,
@@ -779,92 +788,89 @@ void VulkanRender::createDescriptorSets(
         "Failed to allocate descriptor sets"
     );
 
-    for (uint32_t i = 0; i < count; i++)
-    {
-        const Instance* inst = instances[i];
-
-        const Texture* texture =
-            (inst != nullptr)
-            ? inst->GetConstTexture()
-            : nullptr;
-
-        VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = m_UniformBuffer;
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(UniformBufferObject);
-
-        VkDescriptorImageInfo shadowImageInfo{};
-        shadowImageInfo.imageLayout =
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        shadowImageInfo.imageView = shadowImageView;
-        shadowImageInfo.sampler = shadowSampler;
-
-        std::array<VkWriteDescriptorSet, 3> writes{};
-
-        writes[0].sType =
-            VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writes[0].dstSet = descriptorSets[i];
-        writes[0].dstBinding = 0;
-        writes[0].dstArrayElement = 0;
-        writes[0].descriptorType =
-            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-        writes[0].descriptorCount = 1;
-        writes[0].pBufferInfo = &bufferInfo;
-
-        writes[2].sType =
-            VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writes[2].dstSet = descriptorSets[i];
-        writes[2].dstBinding = 2;
-        writes[2].dstArrayElement = 0;
-        writes[2].descriptorType =
-            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        writes[2].descriptorCount = 1;
-        writes[2].pImageInfo = &shadowImageInfo;
-
-        if (texture != nullptr && texture->IsLoadedConst())
+    ecs.Each<TextureComponent>(
+        [&](EntityECS entity, TextureComponent textureComponent)
         {
-            VkDescriptorImageInfo imageInfo{};
+            const Texture* texture = textureComponent.texture;
 
-            imageInfo.imageLayout =
+            VkDescriptorBufferInfo bufferInfo{};
+            bufferInfo.buffer = m_UniformBuffer;
+            bufferInfo.offset = 0;
+            bufferInfo.range = sizeof(UniformBufferObject);
+
+            VkDescriptorImageInfo shadowImageInfo{};
+            shadowImageInfo.imageLayout =
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView = texture->GetImageView();
-            imageInfo.sampler = texture->GetSampler();
+            shadowImageInfo.imageView = shadowImageView;
+            shadowImageInfo.sampler = shadowSampler;
 
-            writes[1].sType =
+            std::array<VkWriteDescriptorSet, 3> writes{};
+
+            writes[0].sType =
                 VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            writes[1].dstSet = descriptorSets[i];
-            writes[1].dstBinding = 1;
-            writes[1].dstArrayElement = 0;
-            writes[1].descriptorType =
+            writes[0].dstSet = descriptorSets[entity];
+            writes[0].dstBinding = 0;
+            writes[0].dstArrayElement = 0;
+            writes[0].descriptorType =
+                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+            writes[0].descriptorCount = 1;
+            writes[0].pBufferInfo = &bufferInfo;
+
+            writes[2].sType =
+                VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            writes[2].dstSet = descriptorSets[entity];
+            writes[2].dstBinding = 2;
+            writes[2].dstArrayElement = 0;
+            writes[2].descriptorType =
                 VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            writes[1].descriptorCount = 1;
-            writes[1].pImageInfo = &imageInfo;
+            writes[2].descriptorCount = 1;
+            writes[2].pImageInfo = &shadowImageInfo;
 
-            vkUpdateDescriptorSets(
-                vkDevice.GetDevice(),
-                3,
-                writes.data(),
-                0,
-                nullptr
-            );
-        }
-        else
-        {
-            VkWriteDescriptorSet texturelessWrites[2] =
+            if (texture != nullptr && texture->IsLoadedConst())
             {
-                writes[0],
-                writes[2]
-            };
+                VkDescriptorImageInfo imageInfo{};
 
-            vkUpdateDescriptorSets(
-                vkDevice.GetDevice(),
-                2,
-                texturelessWrites,
-                0,
-                nullptr
-            );
+                imageInfo.imageLayout =
+                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                imageInfo.imageView = texture->GetImageView();
+                imageInfo.sampler = texture->GetSampler();
+
+                writes[1].sType =
+                    VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                writes[1].dstSet = descriptorSets[entity];
+                writes[1].dstBinding = 1;
+                writes[1].dstArrayElement = 0;
+                writes[1].descriptorType =
+                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                writes[1].descriptorCount = 1;
+                writes[1].pImageInfo = &imageInfo;
+
+                vkUpdateDescriptorSets(
+                    vkDevice.GetDevice(),
+                    3,
+                    writes.data(),
+                    0,
+                    nullptr
+                );
+            }
+            else
+            {
+                VkWriteDescriptorSet texturelessWrites[2] =
+                {
+                    writes[0],
+                    writes[2]
+                };
+
+                vkUpdateDescriptorSets(
+                    vkDevice.GetDevice(),
+                    2,
+                    texturelessWrites,
+                    0,
+                    nullptr
+                );
+            }
         }
-    }
+    );
 }
 
 BML::Matrix4x4 VulkanRender::CreateVulkanPerspective(float fovY, float aspect, float zNear, float zFar) {
@@ -938,7 +944,8 @@ BML::Matrix4x4 VulkanRender::createModelMatrix(BML::Vector3 orientation, BML::Ve
 }
 
 void VulkanRender::updateUniformBuffer(
-    const Instance& inst,
+    ECS& ecs,
+    EntityECS entity,
     uint32_t objectIndex,
     BML::Vector3 scale,
     BML::Vector3 Orientation,
@@ -948,7 +955,7 @@ void VulkanRender::updateUniformBuffer(
 {
     if (objectIndex >= m_CurrentObjectCount)
     {
-        uint32_t newSize = Max(m_CurrentObjectCount * 2, objectIndex + 1);
+        uint32_t newSize = std::max(m_CurrentObjectCount * 2, objectIndex + 1);
         ReallocateUniformBuffer(newSize);
     }
 
@@ -961,18 +968,23 @@ void VulkanRender::updateUniformBuffer(
         color.y() / 255.0f,
         color.z() / 255.0f
     );
-
-    const Texture* tex = inst.GetConstTexture();
-    ubo.UsesTexture = (tex && tex->IsLoadedConst()) ? 1.0f : 0.0f;
+    ubo.UsesTexture = false;
+    if (ecs.HasComponent<TextureComponent>(entity))
+    {
+        const Texture* tex =
+            ecs.GetComponent<TextureComponent>(entity).texture;
+        ubo.UsesTexture = true;
+    }
 
     ubo.view = m_Camera.GetViewMatrix().transposed();
-    float aspect = -1;
-#if INEDITOR == 1
-    aspect = (float)viewport_width / (float)viewport_height;
-#endif
-#if INEDITOR == 0
-    aspect = (float)screen_width / (float)screen_height;
-#endif
+    float aspect = -1.0f;
+
+    #if INEDITOR == 1
+        aspect = (float)viewport_width / (float)viewport_height;
+    #endif
+    #if INEDITOR == 0
+        aspect = (float)screen_width / (float)screen_height;
+    #endif
     ubo.proj = CreateVulkanPerspective(
         45.0f * PI / 180.0f,
         aspect,
@@ -986,40 +998,44 @@ void VulkanRender::updateUniformBuffer(
     memcpy(dst, &ubo, sizeof(ubo));
 }
 
-bool VulkanRender::RenderAMesh(const Instance* drawable)
+bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity)
 {
-    if (drawable == nullptr)
+    if (!ecs.HasComponent<TransformComponent>(entity) ||
+        !ecs.HasComponent<ColorComponent>(entity) ||
+        !ecs.HasComponent<ObjectComponent>(entity))
+    {
+        CreateError("Missing rendering component");
         return false;
+    }
 
-    BML::Vector3 size = drawable->transform.Size;
-    BML::Vector3 Orientation = drawable->transform.Orientation;
-    BML::Vector3 pos = drawable->transform.Position;
-    BML::Int3 color = drawable->color;
-
-    int pIndex = drawable->UniqueID;
+    auto& transform = ecs.GetComponent<TransformComponent>(entity);
+    auto& color = ecs.GetComponent<ColorComponent>(entity);
+    auto& mesh = ecs.GetComponent<ObjectComponent>(entity);
 
     updateUniformBuffer(
-        *drawable,
-        pIndex,
-        size,
-        Orientation,
-        pos,
-        color
+        ecs,
+        entity,
+        entity,
+        transform.transform.Size,
+        transform.transform.Orientation,
+        transform.transform.Position,
+        color.color
     );
 
     DrawCommand cmd;
-    cmd.mesh = &drawable->OBJmesh->VM;
-    cmd.objectIndex = pIndex;
-    cmd.modelMatrix = createModelMatrix(Orientation, size, pos);
+    cmd.mesh = &mesh.OBJmesh->VM;
+    cmd.objectIndex = entity;
 
-    const Texture* tex = drawable->GetConstTexture();
-    cmd.usesTexture = tex && tex->IsLoadedConst();
+    cmd.modelMatrix = createModelMatrix(
+        transform.transform.Orientation,
+        transform.transform.Size,
+        transform.transform.Position
+    );
 
     drawCommands.push_back(cmd);
 
     return true;
 }
-
 void VulkanRender::resizeViewport(uint32_t width, uint32_t height) {
     if (width == 0 || height == 0)
         return;
@@ -1237,26 +1253,20 @@ void VulkanRender::ClearBuffer(float r, float b, float g) {
     clearValues[1].depthStencil = { 1.0f, 0 };
 }
 
-void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instance>>& Drawables)
+void VulkanRender::DrawFrame(ECS& ecs,float deltaTime)
 {
-    std::vector<const Instance*> instances;
-    instances.reserve(Drawables.size());
-
     uint32_t maxObjectIndex = 0;
-    bool hasInstances = false;
+    bool hasEntities = false;
 
-    for (const auto& drawable : Drawables)
-    {
-        if (!drawable)
-            continue;
+    ecs.EachEntity(
+        [&](EntityECS entity)
+        {
+            maxObjectIndex = std::max(maxObjectIndex, entity);
+            hasEntities = true;
+        }
+    );
 
-        const uint32_t index = static_cast<uint32_t>(drawable->UniqueID);
-        maxObjectIndex = max(maxObjectIndex, index);
-        hasInstances = true;
-        instances.push_back(drawable.get());
-    }
-
-    if (hasInstances && maxObjectIndex >= m_CurrentObjectCount)
+    if (hasEntities && maxObjectIndex >= m_CurrentObjectCount)
     {
         const uint32_t newSize =
             Max(m_CurrentObjectCount * 2, maxObjectIndex + 1);
@@ -1264,17 +1274,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         ReallocateUniformBuffer(newSize);
     }
 
-    UpdateDescriptorSets(instances);
-
-    /*
-    static int frames = 0;
-    frames++;
-
-    if (frames == 500) {
-        frames = 0;
-        PrintInfo();
-    }
-    */
+    UpdateDescriptorSets(ecs);
 
     VkResult result = vkAcquireNextImageKHR(
         vkDevice.GetDevice(), vkSwapchain.GetSwapchain(), UINT64_MAX,
@@ -1289,6 +1289,7 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         RecreateSwapchain();
         return;
     }
+
     BGE_ASSERT_VKRESULT(result, "Failed to acquire swapchain image");
 
     BML::Vector3 lightDir = BML::Vector3(0.5f, -1.0f, 0.5f).normalized();
@@ -1359,26 +1360,26 @@ void VulkanRender::DrawFrame(float DELTATIME, std::vector<std::unique_ptr<Instan
         return;
     }
 
-#if INEDITOR == 1
-    RecordViewportCommandBuffer();
+    #if INEDITOR == 1
+        RecordViewportCommandBuffer();
 
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &viewportCommandBuffer;
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &viewportCommandBuffer;
 
-    BGE_ASSERT_VKRESULT(
-        vkQueueSubmit(
-            vkDevice.GetGraphicsQueue(),
-            1,
-            &submitInfo,
-            VK_NULL_HANDLE
-        ),
-        "Failed to submit viewport command buffer"
-    );
+        BGE_ASSERT_VKRESULT(
+            vkQueueSubmit(
+                vkDevice.GetGraphicsQueue(),
+                1,
+                &submitInfo,
+                VK_NULL_HANDLE
+            ),
+            "Failed to submit viewport command buffer"
+        );
 
-    vkQueueWaitIdle(vkDevice.GetGraphicsQueue());
-#endif
+        vkQueueWaitIdle(vkDevice.GetGraphicsQueue());
+    #endif
 
     bool RenderImGui = true;
     RecordCommandBuffer(imageIndex, RenderImGui, false);
@@ -1754,7 +1755,7 @@ void VulkanRender::createViewportRenderPass()
     CreateInfo("Creating viewport renderpass...");
 
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = viewportTexture->getFormat();
+    colorAttachment.format = viewportTexture->getFormat(); //CHECK
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -1960,4 +1961,5 @@ void VulkanRender::initViewport()
         "Failed to allocate viewport command buffer"
     );
 }
+
 #endif

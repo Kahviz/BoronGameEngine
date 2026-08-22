@@ -174,7 +174,6 @@ add_executable(BoronEngine
     Core/SetupPaths/MakeFiles.cpp
 
     Core/Variables/GLOBALS.cpp
-    Core/Services/Raycasting.cpp
 
     Core/Runtime/Engine.cpp
 
@@ -229,7 +228,6 @@ add_executable(BoronEngine
     Core/Misc/DiscordPresence/DiscordPresence.h
     Core/Misc/DiscordPresence/DiscordPresence.cpp
 
-    Core/Misc/Colission/Colission.cpp
     Core/Misc/Controller/Controller.cpp
     Core/Misc/Timer/Timer.cpp
 
@@ -244,8 +242,6 @@ add_executable(BoronEngine
 
     Core/Input/Mouse/Mouse.h
     Core/Input/Mouse/Mouse.cpp
-
-    Core/Instances/Instances/Script.h
 
     Core/Debugging/Console/Console.h
     Core/Debugging/Console/Console.cpp

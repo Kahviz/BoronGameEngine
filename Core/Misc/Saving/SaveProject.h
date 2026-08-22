@@ -3,7 +3,6 @@
 #include <memory>
 #include "Window/Window.h"
 #include "ECS.h"
-class Instance;
 
 class SaveProject {
 public:

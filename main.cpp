@@ -43,12 +43,10 @@ int main() {
     }
     catch (const std::exception& e) {
         std::cerr << "\033[1;31m[ERROR]\033[0m " << e.what() << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(3));
         return -5;
     }
     catch (...) {
         std::cerr << "\033[1;31m[ERROR]\033[0m Unknown exception occurred!" << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(3));
         return -6;
     }
 

@@ -3,9 +3,9 @@
 #include "Camera/Camera.h"
 #include <GLFW/glfw3.h>
 #include <Window/Window.h>
-#include "GraphicsBackends.h"
+#include "ECS.h"
 
-class Instance;
+class Texture;
 
 class IRenderer
 {
@@ -15,7 +15,7 @@ public:
     virtual bool Init(GLFWwindow* window) = 0;
     virtual void CleanUp() = 0;
     virtual void DrawFrame(float dt,
-        std::vector<std::unique_ptr<Instance>>& drawables) = 0;
+        ECS& ecs) = 0;
     virtual void EndFrame() = 0;
     virtual void ClearBuffer(float r, float g, float b) = 0;
     virtual Camera& GetCamera() = 0;

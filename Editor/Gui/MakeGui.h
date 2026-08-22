@@ -1,11 +1,9 @@
 #pragma once
 #include <vector>
 #include <functional>
-#include "Object.h"
 #include <DirectXMath.h>
 #include "GLOBALS.h"
 #include <memory>
-#include "Instances/Instance.h"
 #include "GLFW/glfw3.h"
 #include "Window/Window.h"
 #include <filesystem>

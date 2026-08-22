@@ -11,8 +11,7 @@ class VulkanAdapter : public IRenderer
 public:
     bool Init(GLFWwindow* window) override;
     void initViewport();
-    void DrawFrame(float dt,
-        std::vector<std::unique_ptr<Instance>>& drawables) override;
+    void DrawFrame(float dt, ECS& ecs) override;
 
     void ClearBuffer(float r, float g, float b) override;
 
@@ -32,8 +31,8 @@ public:
     uint32_t GetGraphicsFamilyIndex() const;
     VkDescriptorPool& GetImGuiPool() const;
     VkRenderPass GetRenderPass() const;
-    void UpdateDescriptorSet(std::vector<const Instance*> instances);
-    void RenderAMesh(const Instance* drawable);
+    void UpdateDescriptorSet(ECS& ecs);
+    void RenderAMesh(ECS& ecs, EntityECS entity);
     Texture* GetViewport() override;
 
     void EndFrame() override;

@@ -5,7 +5,6 @@
 #include <assimp/postprocess.h>
 #include <stdexcept>
 #include "Vulkan/VulkanHelpers.h"
-#include "Instances/Instance.h"
 #include "ErrorHandling/ErrorMessage.h"
 
 void MeshVK::Load(

@@ -9,7 +9,6 @@
 #include <string>
 #include "Camera/Camera.h"
 #include <wrl/client.h>
-#include <Instances/Instance.h>
 
 #include "Texture.h"
 

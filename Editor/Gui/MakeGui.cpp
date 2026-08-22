@@ -6,7 +6,8 @@
 #include "Graphics/Graphics.h"
 #include <imgui_internal.h>
 #include "Runtime/Engine.h"
-#include <Script.h>
+#include "Components.h"
+#include <algorithm>
 
 struct MeshButton
 {
@@ -136,12 +137,6 @@ void MakeChildrenNodes(ECS& ecs, EntityECS parent)
         }
     );
 }
-BML::Vector3 MakeVec3TextEdit(Instance* inst,
-    const std::string& name,
-    const std::string& VecType)
-{
-    return { 0,0,0 };
-}
 
 void MakeGui::MakeStyle() {
     style.CreateImGuiStyle();
@@ -265,7 +260,9 @@ void MakeGui::MakeIMGui(
         }
     );
 
-    if (!anyDrawableSelected && ecs.GetComponent<EditorSettingsComponent>(world).selected) {
+    if (!anyDrawableSelected &&
+        ecs.HasComponent<EditorSettingsComponent>(world) &&
+        ecs.GetComponent<EditorSettingsComponent>(world).selected) {
         ImGui::Text("Name: ");
         ImGui::SameLine();
         InputTextStd("##NameWORLD", ecs.GetComponent<BasicInfoComponent>(world).Name);

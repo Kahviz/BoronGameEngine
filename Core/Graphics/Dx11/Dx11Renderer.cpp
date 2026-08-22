@@ -8,7 +8,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <stdexcept>
-#include <Instances/Instance.h>
 #include "Texture.h"
 
 #pragma comment(lib,"d3d11.lib")

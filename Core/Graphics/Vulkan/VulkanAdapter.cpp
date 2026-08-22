@@ -14,11 +14,9 @@ void VulkanAdapter::initViewport()
     renderer->initViewport();
 }
 
-void VulkanAdapter::DrawFrame(
-    float dt,
-    std::vector<std::unique_ptr<Instance>>& drawables)
+void VulkanAdapter::DrawFrame(float dt, ECS& ecs)
 {
-    renderer->DrawFrame(dt, drawables);
+    renderer->DrawFrame(ecs,dt);
 }
 
 void VulkanAdapter::ClearBuffer(float r, float g, float b)
@@ -114,13 +112,13 @@ VkRenderPass VulkanAdapter::GetRenderPass() const
     return renderer->GetRenderPass();
 }
 
-void VulkanAdapter::UpdateDescriptorSet(std::vector<const Instance*> instances)
+void VulkanAdapter::UpdateDescriptorSet(ECS& ecs)
 {
-    renderer->UpdateDescriptorSets(instances);
+    renderer->UpdateDescriptorSets(ecs);
 }
 
-void VulkanAdapter::RenderAMesh(const Instance* drawable) {
-    renderer->RenderAMesh(drawable);
+void VulkanAdapter::RenderAMesh(ECS& ecs, EntityECS entity) {
+    renderer->RenderAMesh(ecs,entity);
 }
 
 Texture* VulkanAdapter::GetViewport()
