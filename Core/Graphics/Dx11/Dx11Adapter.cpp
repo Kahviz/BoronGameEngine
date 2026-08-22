@@ -5,12 +5,9 @@
 
 #include "Dx11Renderer.h"
 
-#if DIRECTX11 == 1 
-    #define GLFW_EXPOSE_NATIVE_WIN32
-#endif
+#define GLFW_EXPOSE_NATIVE_WIN32
 
 #include <GLFW/glfw3native.h>
-#include "Dx11Renderer.h"
 
 bool Dx11Adapter::Init(GLFWwindow* window)
 {
@@ -23,9 +20,9 @@ bool Dx11Adapter::Init(GLFWwindow* window)
 
     return true;
 }
-void Dx11Adapter::DrawFrame(float dt, std::vector<std::unique_ptr<Instance>>& drawables)
+void Dx11Adapter::DrawFrame(float dt, ECS& ecs)
 {
-    renderer->DrawAFrame(dt, drawables);
+    renderer->DrawAFrame(dt, ecs);
 }
 
 void Dx11Adapter::CreateSceneResources(int width, int height)

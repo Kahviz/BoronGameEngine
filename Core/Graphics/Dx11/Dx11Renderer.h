@@ -10,9 +10,11 @@
 #include "Camera/Camera.h"
 #include <wrl/client.h>
 
-#include "Texture.h"
+class Texture;
 
 #include "BGE_ASSERTS.h"
+
+#include "ECS.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -36,9 +38,9 @@ public:
     void SetRenderTargetToScene();
     void SetRenderTargetToBackBuffer();
 
-    Dx11Renderer() = default;
-
+    Dx11Renderer();
     ~Dx11Renderer();
+
     Dx11Renderer(const Dx11Renderer&) = delete;
     Dx11Renderer& operator=(const Dx11Renderer&) = delete;
 
@@ -46,9 +48,8 @@ public:
     ID3D11Device* GetDevice() noexcept;
     ID3D11DeviceContext* GetpContext() noexcept;
 
+    void DrawAFrame(float deltaTime, ECS& ecs);
     void EndFrame();
-
-    void DrawAFrame(float deltatime, std::vector<std::unique_ptr<Instance>>& Drawables);
     
     void ClearBuffer(float r, float g, float b);
     void ClearSceneBuffer(float r, float g, float b);
@@ -64,8 +65,8 @@ public:
     Texture* GetViewport() { return viewportTexture.get(); }
     //Shadows
     void CreateShadowResources();
-    void RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawables);
     void SetShadowMapToShader();
+    void RenderShadowMap(ECS& ecs);
 private:
     ComPtr<ID3D11DepthStencilState> pDepthStencilState;
     void CreateDeviceAndSwapChain(int width, int height, HWND hWnd);

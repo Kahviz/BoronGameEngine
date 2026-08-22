@@ -15,7 +15,6 @@
 #include "backends/imgui_impl_glfw.h"
 #include "GraphicsBackends.h"
 #include "Components.h"
-
 #include <random>
 
 Engine::Engine()
@@ -236,7 +235,22 @@ EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string&
         );
     }
 #endif
+#if DIRECTX11 == 1
+    auto* device = window.GetGraphics().GetDevice();
 
+    if (!LiteralPath) {
+        objectComp.OBJmesh = Mesh::Load(
+            assets + Path,
+            device
+        );
+    }
+    else {
+        objectComp.OBJmesh = Mesh::Load(
+            Path,
+            device
+        );
+    }
+#endif
     std::string fullPath = textures + "\\TestTexture.png";
 
 #if VULKAN == 1
@@ -479,7 +493,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     );
 
     #if DIRECTX11 == 1
-        wnd->GetGraphics().DrawAFrame(deltatime, Drawables);
+        wnd->GetGraphics().DrawAFrame(deltatime,m_ecs);
     #endif
 
     if (!ctrlPressed && !g_Typing) {

@@ -3,12 +3,15 @@
 
 #if DIRECTX11 == 1
 #include "GraphicsBackends.h"
+#include "Texture.h"
+
 #include "Releaser.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <stdexcept>
-#include "Texture.h"
+
+#include "Components.h"
 
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"d3dcompiler.lib")
@@ -123,7 +126,7 @@ void Dx11Renderer::SetShadowMapToShader()
     pContext->PSSetSamplers(1, 1, &shadowSampler);
 }
 
-void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawables)
+void Dx11Renderer::RenderShadowMap(ECS& ecs)
 {
     XMVECTOR lightPosition = XMLoadFloat3(&lightpos);
     XMVECTOR lightTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
@@ -192,36 +195,44 @@ void Dx11Renderer::RenderShadowMap(std::vector<std::unique_ptr<Instance>>& Drawa
     pContext->IASetInputLayout(pLayout.Get());
     pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    for (auto& Instptr : Drawables) {
-        Instance& inst = *Instptr.get();
-        if (inst.CanDraw()) {
-            const Mesh* mesh = inst.OBJmesh.get();
+    ecs.Each<ObjectComponent, TransformComponent>(
+        [&](EntityECS entity, ObjectComponent& objectComponent, TransformComponent& transformComponent)
+        {
+            if (objectComponent.canDraw) {
+                const Mesh* mesh = objectComponent.OBJmesh.get();
 
-            XMMATRIX scale = XMMatrixScaling(inst.transform.Size.x(), inst.transform.Size.y(), inst.transform.Size.z());
-            XMMATRIX rotation = XMMatrixRotationRollPitchYaw(
-                inst.transform.Orientation.x(), inst.transform.Orientation.y(), inst.transform.Orientation.z());
-            XMMATRIX translation = XMMatrixTranslation(inst.transform.Position.x(), inst.transform.Position.y(), inst.transform.Position.z());
-            XMMATRIX world = scale * rotation * translation;
+                if (!mesh)
+                {
+                    CreateError("Object has no mesh?!?");
+                    return;
+                }
 
-            XMMATRIX lightViewProj = XMMatrixTranspose(world * lightView * lightProj);
+                XMMATRIX scale = XMMatrixScaling(transformComponent.transform.Size.x(), transformComponent.transform.Size.y(), transformComponent.transform.Size.z());
+                XMMATRIX rotation = XMMatrixRotationRollPitchYaw(
+                    transformComponent.transform.Orientation.x(), transformComponent.transform.Orientation.y(), transformComponent.transform.Orientation.z());
+                XMMATRIX translation = XMMatrixTranslation(transformComponent.transform.Position.x(), transformComponent.transform.Position.y(), transformComponent.transform.Position.z());
+                XMMATRIX world = scale * rotation * translation;
 
-            ConstantBuffer cb = {};
-            cb.worldViewProj = lightViewProj;
-            cb.world = XMMatrixTranspose(world);
-            cb.cubeColor = XMFLOAT3(1.0f, 1.0f, 1.0f);
-            cb.padding = 0.0f;
+                XMMATRIX lightViewProj = XMMatrixTranspose(world * lightView * lightProj);
 
-            D3D11_MAPPED_SUBRESOURCE msrVS;
-            pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
-            memcpy(msrVS.pData, &cb, sizeof(cb));
-            pContext->Unmap(pConstantBuffer.Get(), 0);
+                ConstantBuffer cb = {};
+                cb.worldViewProj = lightViewProj;
+                cb.world = XMMatrixTranspose(world);
+                cb.cubeColor = XMFLOAT3(1.0f, 1.0f, 1.0f);
+                cb.padding = 0.0f;
 
-            pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
-            pContext->VSSetConstantBuffers(1, 1, pShadowCB.GetAddressOf());
+                D3D11_MAPPED_SUBRESOURCE msrVS;
+                pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
+                memcpy(msrVS.pData, &cb, sizeof(cb));
+                pContext->Unmap(pConstantBuffer.Get(), 0);
 
-            mesh->DrawForDX11(pContext.Get());
+                pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
+                pContext->VSSetConstantBuffers(1, 1, pShadowCB.GetAddressOf());
+
+                mesh->DrawForDX11(pContext.Get());
+            }
         }
-    }
+    );
 
     pContext->RSSetState(oldRasterizer);
     if (oldRasterizer) oldRasterizer->Release();
@@ -722,6 +733,10 @@ ID3D11RenderTargetView* Dx11Renderer::GetBackBufferRTV()
     return pTarget.Get();
 }
 
+Dx11Renderer::Dx11Renderer()
+{
+}
+
 Dx11Renderer::~Dx11Renderer()
 {
 }
@@ -752,124 +767,125 @@ void Dx11Renderer::EndFrame()
     }
 }
 
-void Dx11Renderer::DrawAFrame(float deltatime, std::vector<std::unique_ptr<Instance>>& Drawables)
+void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs)
 {
-    RenderShadowMap(Drawables);
+    RenderShadowMap(ecs);
     SetShadowMapToShader();
 
     const float lightSpeed = 0.1f;
-    lightAngle += lightSpeed * deltatime;
+    lightAngle += lightSpeed * deltaTime;
     if (lightAngle >= DOUBLE_PI) lightAngle -= DOUBLE_PI;
 
     LightingCB lcb = {};
     lcb.lightpos = BML::Vector3(lightpos.x, lightpos.y, lightpos.z);
     lcb.lightRange = 20.0f;
 
-    for (auto& Instptr : Drawables) {
-        Instance& inst = *Instptr.get();
+    ecs.Each<TextureComponent, ObjectComponent, TransformComponent, ColorComponent>(
+        [&](EntityECS entity, TextureComponent& textureComponent, ObjectComponent& objectComponent, TransformComponent& transformComponent, ColorComponent& colorComponent)
+        {
+            ID3D11PixelShader* selectedPS = pPSNoTexture.Get();
 
-        ID3D11PixelShader* selectedPS = pPSNoTexture.Get();
+            Texture* tex = textureComponent.texture;
+            bool hasTexture = tex->IsLoaded();
 
-        Texture* tex = inst.GetTexture();
-        bool hasTexture = tex->IsLoaded();
+            if (hasTexture && tex->GetTextureComPtr() != nullptr) {
+                selectedPS = pPSTexture.Get();
+                ID3D11ShaderResourceView* textureSRV = tex->GetTextureComPtr().Get();
+                pContext->PSSetShaderResources(0, 1, &textureSRV);
+            }
+            else {
+                ID3D11ShaderResourceView* nullSRV = nullptr;
+                pContext->PSSetShaderResources(0, 1, &nullSRV);
+            }
 
-        if (hasTexture && tex->GetTextureComPtr() != nullptr) {
-            selectedPS = pPSTexture.Get();
-            ID3D11ShaderResourceView* textureSRV = tex->GetTextureComPtr().Get();
-            pContext->PSSetShaderResources(0, 1, &textureSRV);
+            pContext->VSSetShader(pVS.Get(), nullptr, 0);
+            pContext->PSSetShader(selectedPS, nullptr, 0);
+
+            ID3D11SamplerState* samplers[] = { pSampler.Get(), pShadowSampler.Get() };
+            pContext->PSSetSamplers(0, 2, samplers);
+
+            if (objectComponent.canDraw) {
+                const Mesh* mesh = objectComponent.OBJmesh.get();
+                BML::Vector3 Orientation = transformComponent.transform.Orientation;
+                BML::Vector3& pos = transformComponent.transform.Position;
+                BML::Vector3& size = transformComponent.transform.Size;
+                BML::Int3 color = colorComponent.color;
+                float Brightness = 1.0f;
+
+                // Matrix 
+                XMMATRIX scale = XMMatrixScaling(size.x(), size.y(), size.z());
+                XMMATRIX rotation = XMMatrixRotationRollPitchYaw(Orientation.x(), Orientation.y(), Orientation.z());
+                XMMATRIX translation = XMMatrixTranslation(pos.x(), pos.y(), pos.z());
+                XMMATRIX world = scale * rotation * translation;
+
+                // Camera Matrix
+                BML::Matrix4x4 mat = camera.GetViewMatrix();
+                BML::Matrix4x4 projMat = camera.GetProjectionMatrix();
+
+                XMMATRIX proj = XMMATRIX(
+                    XMVectorSet(projMat(0, 0), projMat(0, 1), projMat(0, 2), projMat(0, 3)),
+                    XMVectorSet(projMat(1, 0), projMat(1, 1), projMat(1, 2), projMat(1, 3)),
+                    XMVectorSet(projMat(2, 0), projMat(2, 1), projMat(2, 2), projMat(2, 3)),
+                    XMVectorSet(projMat(3, 0), projMat(3, 1), projMat(3, 2), projMat(3, 3))
+                );
+
+                XMMATRIX view = XMMATRIX(
+                    XMVectorSet(mat(0, 0), mat(1, 0), mat(2, 0), mat(3, 0)),
+                    XMVectorSet(mat(0, 1), mat(1, 1), mat(2, 1), mat(3, 1)),
+                    XMVectorSet(mat(0, 2), mat(1, 2), mat(2, 2), mat(3, 2)),
+                    XMVectorSet(mat(0, 3), mat(1, 3), mat(2, 3), mat(3, 3))
+                );
+                XMMATRIX worldViewProj = world * view * proj;
+
+                // VS constant buffer
+                ConstantBuffer cb = {};
+                cb.worldViewProj = XMMatrixTranspose(worldViewProj);
+                cb.world = XMMatrixTranspose(world);
+                cb.cubeColor = XMFLOAT3(
+                    color.x() / 255.0f,
+                    color.y() / 255.0f,
+                    color.z() / 255.0f
+                );
+                cb.padding = 0.0f;
+
+                D3D11_MAPPED_SUBRESOURCE msrVS;
+                HRESULT hr = pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
+                if (FAILED(hr)) throw std::runtime_error("Failed to map VS constant buffer");
+                memcpy(msrVS.pData, &cb, sizeof(cb));
+                pContext->Unmap(pConstantBuffer.Get(), 0);
+
+                // PS Color buffer
+                PixelConstantBuffer pcb = {};
+                pcb.color = XMFLOAT4(color.x() / 255.f, color.y() / 255.f, color.z() / 255.f, 1.0f);
+
+                D3D11_MAPPED_SUBRESOURCE msrColor;
+                hr = pContext->Map(pColorBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrColor);
+                if (FAILED(hr)) throw std::runtime_error("Failed to map color buffer");
+                memcpy(msrColor.pData, &pcb, sizeof(pcb));
+                pContext->Unmap(pColorBuffer.Get(), 0);
+
+                LightingCB lcbPerMesh = lcb;
+                lcbPerMesh.WorldPos = BML::Vector3(pos.x(), pos.y(), pos.z());
+                lcbPerMesh.Brightness = Brightness;
+
+                D3D11_MAPPED_SUBRESOURCE msrLighting;
+                hr = pContext->Map(pLightingBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrLighting);
+                if (FAILED(hr)) throw std::runtime_error("Failed to map lighting buffer");
+                memcpy(msrLighting.pData, &lcbPerMesh, sizeof(lcbPerMesh));
+                pContext->Unmap(pLightingBuffer.Get(), 0);
+
+                pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
+                pContext->VSSetConstantBuffers(1, 1, pShadowCB.GetAddressOf());
+                pContext->PSSetConstantBuffers(0, 1, pColorBuffer.GetAddressOf());
+                pContext->PSSetConstantBuffers(1, 1, pLightingBuffer.GetAddressOf());
+
+                pContext->IASetInputLayout(pLayout.Get());
+                pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+                mesh->DrawForDX11(pContext.Get());
+            }
         }
-        else {
-            ID3D11ShaderResourceView* nullSRV = nullptr;
-            pContext->PSSetShaderResources(0, 1, &nullSRV);
-        }
-        
-        pContext->VSSetShader(pVS.Get(), nullptr, 0);
-        pContext->PSSetShader(selectedPS, nullptr, 0);
-
-        ID3D11SamplerState* samplers[] = { pSampler.Get(), pShadowSampler.Get() };
-        pContext->PSSetSamplers(0, 2, samplers);
-
-        if (inst.CanDraw()) {
-            const Mesh* mesh = inst.OBJmesh.get();
-            BML::Vector3 Orientation = inst.transform.Orientation;
-            BML::Vector3& pos = inst.transform.Position;
-            BML::Vector3& size = inst.transform.Size;
-            BML::Int3 color = inst.color;
-            float Brightness = 1.0f;
-
-            // Matrix 
-            XMMATRIX scale = XMMatrixScaling(size.x(), size.y(), size.z());
-            XMMATRIX rotation = XMMatrixRotationRollPitchYaw(Orientation.x(), Orientation.y(), Orientation.z());
-            XMMATRIX translation = XMMatrixTranslation(pos.x(), pos.y(), pos.z());
-            XMMATRIX world = scale * rotation * translation;
-
-            // Camera Matrix
-            BML::Matrix4x4 mat = camera.GetViewMatrix();
-            BML::Matrix4x4 projMat = camera.GetProjectionMatrix();
-
-            XMMATRIX proj = XMMATRIX(
-                XMVectorSet(projMat(0, 0), projMat(0, 1), projMat(0, 2), projMat(0, 3)),
-                XMVectorSet(projMat(1, 0), projMat(1, 1), projMat(1, 2), projMat(1, 3)),
-                XMVectorSet(projMat(2, 0), projMat(2, 1), projMat(2, 2), projMat(2, 3)),
-                XMVectorSet(projMat(3, 0), projMat(3, 1), projMat(3, 2), projMat(3, 3))
-            );
-
-            XMMATRIX view = XMMATRIX(
-                XMVectorSet(mat(0, 0), mat(1, 0), mat(2, 0), mat(3, 0)),
-                XMVectorSet(mat(0, 1), mat(1, 1), mat(2, 1), mat(3, 1)),
-                XMVectorSet(mat(0, 2), mat(1, 2), mat(2, 2), mat(3, 2)),
-                XMVectorSet(mat(0, 3), mat(1, 3), mat(2, 3), mat(3, 3))
-            );
-            XMMATRIX worldViewProj = world * view * proj;
-
-            // VS constant buffer
-            ConstantBuffer cb = {};
-            cb.worldViewProj = XMMatrixTranspose(worldViewProj);
-            cb.world = XMMatrixTranspose(world);
-            cb.cubeColor = XMFLOAT3(
-                color.x() / 255.0f,
-                color.y() / 255.0f,
-                color.z() / 255.0f
-            );
-            cb.padding = 0.0f;
-
-            D3D11_MAPPED_SUBRESOURCE msrVS;
-            HRESULT hr = pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
-            if (FAILED(hr)) throw std::runtime_error("Failed to map VS constant buffer");
-            memcpy(msrVS.pData, &cb, sizeof(cb));
-            pContext->Unmap(pConstantBuffer.Get(), 0);
-
-            // PS Color buffer
-            PixelConstantBuffer pcb = {};
-            pcb.color = XMFLOAT4(color.x() / 255.f, color.y() / 255.f, color.z() / 255.f, 1.0f);
-
-            D3D11_MAPPED_SUBRESOURCE msrColor;
-            hr = pContext->Map(pColorBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrColor);
-            if (FAILED(hr)) throw std::runtime_error("Failed to map color buffer");
-            memcpy(msrColor.pData, &pcb, sizeof(pcb));
-            pContext->Unmap(pColorBuffer.Get(), 0);
-
-            LightingCB lcbPerMesh = lcb;
-            lcbPerMesh.WorldPos = BML::Vector3(pos.x(), pos.y(), pos.z());
-            lcbPerMesh.Brightness = Brightness;
-
-            D3D11_MAPPED_SUBRESOURCE msrLighting;
-            hr = pContext->Map(pLightingBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrLighting);
-            if (FAILED(hr)) throw std::runtime_error("Failed to map lighting buffer");
-            memcpy(msrLighting.pData, &lcbPerMesh, sizeof(lcbPerMesh));
-            pContext->Unmap(pLightingBuffer.Get(), 0);
-
-            pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
-            pContext->VSSetConstantBuffers(1, 1, pShadowCB.GetAddressOf());
-            pContext->PSSetConstantBuffers(0, 1, pColorBuffer.GetAddressOf());
-            pContext->PSSetConstantBuffers(1, 1, pLightingBuffer.GetAddressOf());
-
-            pContext->IASetInputLayout(pLayout.Get());
-            pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-            mesh->DrawForDX11(pContext.Get());
-        }
-    }
+    );
 }
 
 void Dx11Renderer::ClearSceneBuffer(float r, float g, float b)

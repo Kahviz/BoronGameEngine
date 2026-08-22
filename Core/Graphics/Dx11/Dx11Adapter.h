@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include "GLOBALS.h"
+#include "GraphicsBackends.h"
 
 #if DIRECTX11 == 1
 class Dx11Renderer;
@@ -11,8 +12,7 @@ class Dx11Adapter : public IRenderer
 {
 public:
     bool Init(GLFWwindow* window) override;
-    void DrawFrame(float dt,
-        std::vector<std::unique_ptr<Instance>>& drawables) override;
+    void DrawFrame(float dt, ECS& ecs) override;
     void EndFrame() override;
     void ClearBuffer(float r, float g, float b) override;
     void CreateSceneResources(int width, int height) override;
