@@ -23,7 +23,7 @@ void SaveProject::Save(ECS& ecs)
         TransformComponent,
         PhysicsComponent,
         ObjectComponent,
-        HierarcyComponent,
+        HierarchyComponent,
         InstanceTypeComponent,
         ColorComponent
     >(
@@ -32,9 +32,9 @@ void SaveProject::Save(ECS& ecs)
             TransformComponent& transform,
             PhysicsComponent& physics,
             ObjectComponent& object,
-            HierarcyComponent& hierarchy,
+            HierarchyComponent& hierarchy,
             InstanceTypeComponent& instanceType,
-            ColorComponent colorComp
+            ColorComponent& colorComp
             )
         {
             fs::path from = object.OBJmesh->GetMeshPath();
@@ -77,11 +77,7 @@ void SaveProject::Save(ECS& ecs)
             file << "UniqueID: "
                 << entity << "\n";
 
-            if (hierarchy.parent != 0)
-                file << "ParentID: "
-                << hierarchy.parent << "\n";
-            else
-                file << "ParentID: -1\n";
+            file << "ParentID: " << hierarchy.parent << "\n";
 
             file << "MeshFile: "
                 << to.filename().string() << "\n";
@@ -123,7 +119,7 @@ EntityECS AddAMesh(
     PhysicsComponent physicsComp;
     ObjectComponent objectComp;
     EditorSettingsComponent editorComp;
-    HierarcyComponent hierarcyComp;
+    HierarchyComponent hierarcyComp;
     TextureComponent textureComp;
     InstanceTypeComponent instTypeComp;
 
@@ -289,7 +285,7 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
     std::string loadedMeshFile;
 
     EntityECS loadedUniqueID = 0;
-    EntityECS loadedParentID = static_cast<EntityECS>(-1);
+    EntityECS loadedParentID = 0;
 
     BML::Int3 loadedColor(255, 255, 255);
 
@@ -307,6 +303,7 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
         if (line.rfind("Name:", 0) == 0)
         {
             loadedName = line.substr(6);
+            CreateSuccess("Loading..." + loadedName);
         }
 
         else if (line.rfind("Position:", 0) == 0)
@@ -407,23 +404,13 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
             loadedCanDraw =
                 std::stoi(line.substr(8)) != 0;
         }
-
         else if (line.rfind("ParentID:", 0) == 0)
         {
-            int parentID = std::stoi(line.substr(10));
-
-            if (parentID == -1)
-            {
-                loadedParentID =
-                    static_cast<EntityECS>(-1);
-            }
-            else
-            {
-                loadedParentID =
-                    static_cast<EntityECS>(parentID);
-            }
+            loadedParentID =
+                static_cast<EntityECS>(
+                    std::stoul(line.substr(10))
+                    );
         }
-
         else if (line.rfind("InstanceType:", 0) == 0)
         {
             int value = std::stoi(line.substr(14));
@@ -431,21 +418,20 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
             loadedInstanceType =
                 static_cast<Boron::Enums::InstanceType>(value);
         }
-
         else if (line == "END")
         {
             if (loadedInstanceType !=
-                Boron::Enums::InstanceType::Object)
+                Boron::Enums::InstanceType::Instance)
             {
                 std::cerr
-                    << "Unsupported InstanceType: "
+                    << "Unsupported InstanceType!: "
                     << static_cast<int>(loadedInstanceType)
                     << '\n';
 
                 loadedName.clear();
                 loadedMeshFile.clear();
                 loadedUniqueID = 0;
-                loadedParentID = static_cast<EntityECS>(-1);
+                loadedParentID = 0;
 
                 continue;
             }
@@ -529,7 +515,7 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
             loadedCanDraw = true;
 
             loadedInstanceType =
-                Boron::Enums::InstanceType::Object;
+                Boron::Enums::InstanceType::Instance;
         }
     }
 
@@ -537,35 +523,21 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
 
     for (const PendingParent& pending : pendingParents)
     {
-        auto childIt =
-            entityIDMap.find(
-                pending.child
-            );
-
-        if (childIt == entityIDMap.end())
-            continue;
-
-        auto parentIt =
-            entityIDMap.find(
-                pending.oldParent
-            );
+        auto parentIt = entityIDMap.find(pending.oldParent);
 
         if (parentIt == entityIDMap.end())
         {
-            ecs.GetComponent<HierarcyComponent>(
-                childIt->second
+            ecs.GetComponent<HierarchyComponent>(
+                pending.child
             ).parent = world;
 
             continue;
         }
 
-        EntityECS child =
-            childIt->second;
+        EntityECS child = pending.child;
+        EntityECS parent = parentIt->second;
 
-        EntityECS parent =
-            parentIt->second;
-
-        ecs.GetComponent<HierarcyComponent>(
+        ecs.GetComponent<HierarchyComponent>(
             child
         ).parent = parent;
     }

@@ -78,9 +78,9 @@ static MeshButton meshButtons[] =
 
 void MakeChildrenNodes(ECS& ecs, EntityECS parent)
 {
-    ecs.Each<HierarcyComponent, BasicInfoComponent, EditorSettingsComponent>(
+    ecs.Each<HierarchyComponent, BasicInfoComponent, EditorSettingsComponent>(
         [&](EntityECS entity,
-            HierarcyComponent& hierarchy,
+            HierarchyComponent& hierarchy,
             BasicInfoComponent& basic,
             EditorSettingsComponent& editor)
         {
@@ -95,8 +95,8 @@ void MakeChildrenNodes(ECS& ecs, EntityECS parent)
 
             bool hasChildren = false;
 
-            ecs.Each<HierarcyComponent>(
-                [&](EntityECS child, HierarcyComponent& childHierarchy)
+            ecs.Each<HierarchyComponent>(
+                [&](EntityECS child, HierarchyComponent& childHierarchy)
                 {
                     if (childHierarchy.parent == entity)
                         hasChildren = true;
@@ -318,11 +318,11 @@ void MakeGui::MakeIMGui(
 
     if (worldNodeOpen)
     {
-        ecs.Each<EditorSettingsComponent, BasicInfoComponent, HierarcyComponent>(
+        ecs.Each<EditorSettingsComponent, BasicInfoComponent, HierarchyComponent>(
             [&](EntityECS entity,
                 EditorSettingsComponent& editorSettingsComp,
                 BasicInfoComponent& basicInfoComp,
-                HierarcyComponent& hierarchy)
+                HierarchyComponent& hierarchy)
             {
                 if (hierarchy.parent != world)
                     return;
@@ -381,7 +381,7 @@ void MakeGui::MakeIMGui(
                 ecs,"\\Cube.obj", "Object", { 0,5,0 }, { 2,2,2 }, false, false,true
             );
             if (selectedInst && inst) {
-                ecs.GetComponent<HierarcyComponent>(inst).parent = selectedInst;
+                ecs.GetComponent<HierarchyComponent>(inst).parent = selectedInst;
             }
             plusGuiOpen = false;
         }

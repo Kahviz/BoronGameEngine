@@ -52,7 +52,7 @@ public:
     void CreateImageViews();
     void CreateSwapchain();
     void createUniformBuffers();
-    void ReallocateUniformBuffer(uint32_t newObjectCount);
+    void ReallocateUniformBuffer(uint32_t newObjectCount, ECS* ecs = nullptr);
     void createDescriptorPool(uint32_t maxObjects);
     void UpdateDescriptorSets(ECS& ecs);
     void createDescriptorSets(ECS& ecs);
@@ -202,6 +202,8 @@ private:
     VkDeviceMemory viewportDepthMemory = VK_NULL_HANDLE;
     VkImageView viewportDepthView = VK_NULL_HANDLE;
     VkCommandBuffer viewportCommandBuffer = VK_NULL_HANDLE;
+
+    bool descriptorsDirty = true;
 
     //Multi Desc
     std::vector<VkDescriptorSet> descriptorSets;

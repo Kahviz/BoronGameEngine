@@ -190,7 +190,7 @@ EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string&
     PhysicsComponent physicsComp;
     ObjectComponent objectComp;
     EditorSettingsComponent editorComp;
-    HierarcyComponent hierarcyComp;
+    HierarchyComponent hierarcyComp;
     TextureComponent textureComp;
     InstanceTypeComponent instTypeComp;
 
@@ -244,6 +244,7 @@ EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string&
         textureComp.texture = new Texture();
 
         textureComp.texture->LoadVK(fullPath, vk);
+        vk.UpdateDescriptorSet(ecs);
     }
 #endif
 
@@ -321,16 +322,20 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     static int cubes = 0;
     frames++;
 
-    if (frames == 1000) {
+    if (frames == 100) {
+
+        
+
         frames = 0;
     }
 
     if (ctrlPressed) {
-        AddAMesh(m_ecs,"\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, {1,1,1}, false,false, false);
+        AddAMesh(m_ecs, "\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false, false, true);
         m_console.write("Creating cube", Boron::Enums::ConsoleLineType::Info);
 
         cubes++;
     }
+
     if (RctrlPressed) {
         AddAMesh(m_ecs, "\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false, false);
 
@@ -375,10 +380,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
             BasicInfoComponent basicInfoComp;
             basicInfoComp.Name = "World";
-
-            HierarcyComponent hierarcyComp;
-            hierarcyComp.parent = -10; //FIX
-
+            std::cout << world << std::endl;
             InstanceTypeComponent instTypeComp;
             instTypeComp.InstanceType = Boron::Enums::InstanceType::World;
 
@@ -387,7 +389,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             editorComp.selected = false;
 
             m_ecs.AddComponent(world, basicInfoComp);
-            m_ecs.AddComponent(world, hierarcyComp);
             m_ecs.AddComponent(world, instTypeComp);
             m_ecs.AddComponent(world, editorComp);
             CreateSuccess("Starting loading the project!");
@@ -403,8 +404,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
                 vk.UpdateDescriptorSet(m_ecs);
             #endif
 
-            m_ecs.Each<HierarcyComponent>(
-                [&](EntityECS entity, HierarcyComponent& hierarchy)
+            m_ecs.Each<HierarchyComponent>(
+                [&](EntityECS entity, HierarchyComponent& hierarchy)
                 {
                     if (hierarchy.parent == 0) {
                         hierarchy.parent = world;
@@ -502,7 +503,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             #endif
         }
     #endif
-
+        
     float fps = 1.0f / deltatime;
     profiler.AddFPS(fps);
 

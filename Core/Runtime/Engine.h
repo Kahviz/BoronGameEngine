@@ -41,7 +41,6 @@ public:
     Console m_console;
     DiscordPresence dcPresence;
     Window window;
-    EntityECS world = m_ecs.createEntity();
 
     bool InProject = false;
     CameraControl camC;
@@ -54,4 +53,6 @@ public:
     //ECS
     ECS m_ecs;
     ComponentManager m_componentManager;
+
+    EntityECS world = m_ecs.createEntity();
 };

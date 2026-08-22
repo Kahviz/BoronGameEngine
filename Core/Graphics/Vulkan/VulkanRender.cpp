@@ -651,11 +651,11 @@ void VulkanRender::CreateSwapchain() {
 }
 
 void VulkanRender::createUniformBuffers() {
-    m_CurrentObjectCount = 100;
+    m_CurrentObjectCount = 500;
     ReallocateUniformBuffer(m_CurrentObjectCount);
 }
 
-void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount) {
+void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount, ECS* ecs) {
     vkDeviceWaitIdle(vkDevice.GetDevice());
 
     if (m_UniformBufferMemory != VK_NULL_HANDLE)
@@ -668,7 +668,9 @@ void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount) {
         vkDestroyBuffer(vkDevice.GetDevice(), m_UniformBuffer, nullptr);
         vkFreeMemory(vkDevice.GetDevice(), m_UniformBufferMemory, nullptr);
     }
-
+    if (ecs != nullptr) {
+        newObjectCount = ecs->getNumberOfEntities() + 1000;
+    }
     m_UniformBufferSize = dynamicAlignment * newObjectCount;
     m_CurrentObjectCount = newObjectCount;
 
@@ -760,13 +762,7 @@ void VulkanRender::createDescriptorSets(ECS& ecs)
 {
     uint32_t count = ecs.getNumberOfEntities();
 
-    std::cout << "CREATE DESCRIPTOR SETS\n";
-    std::cout << "count = " << count << '\n';
-
     descriptorSets.resize(count);
-
-    std::cout << "after resize = "
-        << descriptorSets.size() << '\n';
 
     std::vector<VkDescriptorSetLayout> layouts(
         count,
@@ -788,10 +784,15 @@ void VulkanRender::createDescriptorSets(ECS& ecs)
         "Failed to allocate descriptor sets"
     );
 
-    ecs.Each<TextureComponent>(
-        [&](EntityECS entity, TextureComponent textureComponent)
+    ecs.Each<ObjectComponent>(
+        [&](EntityECS entity, ObjectComponent& obj)
         {
-            const Texture* texture = textureComponent.texture;
+            const Texture* texture = nullptr;
+
+            if (ecs.HasComponent<TextureComponent>(entity))
+            {
+                texture = ecs.GetComponent<TextureComponent>(entity).texture;
+            }
 
             VkDescriptorBufferInfo bufferInfo{};
             bufferInfo.buffer = m_UniformBuffer;
@@ -799,75 +800,45 @@ void VulkanRender::createDescriptorSets(ECS& ecs)
             bufferInfo.range = sizeof(UniformBufferObject);
 
             VkDescriptorImageInfo shadowImageInfo{};
-            shadowImageInfo.imageLayout =
-                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            shadowImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             shadowImageInfo.imageView = shadowImageView;
             shadowImageInfo.sampler = shadowSampler;
 
             std::array<VkWriteDescriptorSet, 3> writes{};
-
-            writes[0].sType =
-                VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             writes[0].dstSet = descriptorSets[entity];
             writes[0].dstBinding = 0;
-            writes[0].dstArrayElement = 0;
-            writes[0].descriptorType =
-                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
             writes[0].descriptorCount = 1;
+            writes[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
             writes[0].pBufferInfo = &bufferInfo;
 
-            writes[2].sType =
-                VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            writes[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             writes[2].dstSet = descriptorSets[entity];
             writes[2].dstBinding = 2;
-            writes[2].dstArrayElement = 0;
-            writes[2].descriptorType =
-                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             writes[2].descriptorCount = 1;
+            writes[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             writes[2].pImageInfo = &shadowImageInfo;
 
             if (texture != nullptr && texture->IsLoadedConst())
             {
                 VkDescriptorImageInfo imageInfo{};
-
-                imageInfo.imageLayout =
-                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 imageInfo.imageView = texture->GetImageView();
                 imageInfo.sampler = texture->GetSampler();
 
-                writes[1].sType =
-                    VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 writes[1].dstSet = descriptorSets[entity];
                 writes[1].dstBinding = 1;
-                writes[1].dstArrayElement = 0;
-                writes[1].descriptorType =
-                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                 writes[1].descriptorCount = 1;
+                writes[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                 writes[1].pImageInfo = &imageInfo;
 
-                vkUpdateDescriptorSets(
-                    vkDevice.GetDevice(),
-                    3,
-                    writes.data(),
-                    0,
-                    nullptr
-                );
+                vkUpdateDescriptorSets(vkDevice.GetDevice(), 3, writes.data(), 0, nullptr);
             }
             else
             {
-                VkWriteDescriptorSet texturelessWrites[2] =
-                {
-                    writes[0],
-                    writes[2]
-                };
-
-                vkUpdateDescriptorSets(
-                    vkDevice.GetDevice(),
-                    2,
-                    texturelessWrites,
-                    0,
-                    nullptr
-                );
+                VkWriteDescriptorSet texturelessWrites[2] = { writes[0], writes[2] };
+                vkUpdateDescriptorSets(vkDevice.GetDevice(), 2, texturelessWrites, 0, nullptr);
             }
         }
     );
@@ -956,7 +927,7 @@ void VulkanRender::updateUniformBuffer(
     if (objectIndex >= m_CurrentObjectCount)
     {
         uint32_t newSize = std::max(m_CurrentObjectCount * 2, objectIndex + 1);
-        ReallocateUniformBuffer(newSize);
+        ReallocateUniformBuffer(newSize, &ecs);
     }
 
     UniformBufferObject ubo{};
@@ -1025,6 +996,9 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity)
     DrawCommand cmd;
     cmd.mesh = &mesh.OBJmesh->VM;
     cmd.objectIndex = entity;
+    cmd.usesTexture = ecs.HasComponent<TextureComponent>(entity)
+        && ecs.GetComponent<TextureComponent>(entity).texture != nullptr
+        && ecs.GetComponent<TextureComponent>(entity).texture->IsLoaded();
 
     cmd.modelMatrix = createModelMatrix(
         transform.transform.Orientation,
@@ -1271,10 +1245,24 @@ void VulkanRender::DrawFrame(ECS& ecs,float deltaTime)
         const uint32_t newSize =
             Max(m_CurrentObjectCount * 2, maxObjectIndex + 1);
 
-        ReallocateUniformBuffer(newSize);
+        ReallocateUniformBuffer(newSize,&ecs);
     }
 
-    UpdateDescriptorSets(ecs);
+    static uint32_t lastFrameSize = 0;
+
+    uint32_t currentSize = ecs.getNumberOfEntities();
+
+    if (currentSize != lastFrameSize)
+    {
+        descriptorsDirty = true;
+        lastFrameSize = currentSize;
+    }
+
+    if (descriptorsDirty)
+    {
+        UpdateDescriptorSets(ecs);
+        descriptorsDirty = false;
+    }
 
     VkResult result = vkAcquireNextImageKHR(
         vkDevice.GetDevice(), vkSwapchain.GetSwapchain(), UINT64_MAX,
@@ -1896,7 +1884,10 @@ void VulkanRender::RecordViewportCommandBuffer()
     vkCmdSetViewport(cmd, 0, 1, &vp);
 
     VkRect2D scissor{};
-    scissor.extent = { 1280,720 };
+    scissor.extent = {
+        static_cast<uint32_t>(viewport_width),
+        static_cast<uint32_t>(viewport_height)
+    };
     vkCmdSetScissor(cmd, 0, 1, &scissor);
 
     vkCmdBindPipeline(cmd,

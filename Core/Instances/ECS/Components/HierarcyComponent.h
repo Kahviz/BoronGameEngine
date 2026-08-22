@@ -1,8 +1,12 @@
 #pragma once
 
+#include <cstdint>
+
 using EntityECS = uint32_t;
 
-struct HierarcyComponent
+constexpr EntityECS INVALID_ENTITY = UINT32_MAX;
+
+struct HierarchyComponent
 {
-	EntityECS parent;
+    EntityECS parent = INVALID_ENTITY;
 };

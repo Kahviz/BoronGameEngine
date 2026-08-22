@@ -13,6 +13,14 @@ public:
 
     void Add(EntityECS entity, const T& component)
     {
+        auto it = entityToIndex.find(entity);
+
+        if (it != entityToIndex.end())
+        {
+            components[it->second] = component;
+            return;
+        }
+
         entityToIndex[entity] = components.size();
         components.push_back(component);
         entities.push_back(entity);
