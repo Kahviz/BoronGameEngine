@@ -788,7 +788,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs)
             Texture* tex = textureComponent.texture;
             bool hasTexture = tex->IsLoaded();
 
-            if (hasTexture && tex->GetTextureComPtr() != nullptr) {
+            if (hasTexture) {
                 selectedPS = pPSTexture.Get();
                 ID3D11ShaderResourceView* textureSRV = tex->GetTextureComPtr().Get();
                 pContext->PSSetShaderResources(0, 1, &textureSRV);

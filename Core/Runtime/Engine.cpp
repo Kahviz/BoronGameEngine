@@ -253,14 +253,15 @@ EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string&
 #endif
     std::string fullPath = textures + "\\TestTexture.png";
 
-#if VULKAN == 1
     if (UsesTexture) {
         textureComp.texture = new Texture();
 
-        textureComp.texture->LoadVK(fullPath, vk);
-        vk.UpdateDescriptorSet(ecs);
+        textureComp.texture->Load(fullPath, window.GetGraphics().GetRenderer());
+
+        #if VULKAN == 1
+            vk.UpdateDescriptorSet(ecs);
+        #endif
     }
-#endif
 
     hierarcyComp.parent = world;
 
@@ -272,13 +273,11 @@ EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string&
     ecs.AddComponent(entity, hierarcyComp);
     ecs.AddComponent(entity, editorComp);
     ecs.AddComponent(entity, instTypeComp);
-
-    if (UsesTexture) {
-        ecs.AddComponent(entity, textureComp);
-    }
+    ecs.AddComponent(entity, textureComp);
 
     return entity;
 }
+
 void ScreenResizerDetector(Window* wnd) {
     static int lastWidth = 0, lastHeight = 0;
     glfwGetFramebufferSize(wnd->GetWindow(), &screen_width, &screen_height);
