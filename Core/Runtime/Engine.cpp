@@ -16,6 +16,7 @@
 #include "GraphicsBackends.h"
 #include "Components.h"
 #include <random>
+#include "Texture.h"
 
 Engine::Engine()
     : window(1280, 800, "BoronEngine")

@@ -554,18 +554,61 @@ void MakeGui::MakeIMGui(
         ImGui::End();
     }
 
-    ImGui::End();
-
     CanChange = false;
+
+    ImGui::End();
 }
 
 void MakeGui::MakeIMViewPort(Window& wnd)
 {
-    ImGui::Begin("Viewport");
+    ImGuiIO& io = ImGui::GetIO();
+
+    float screen_w = io.DisplaySize.x;
+    float screen_h = io.DisplaySize.y;
+
+    float mainTabHeight = screen_h / 4.0f;
+    float consoleHeight = screen_h / 4.0f;
+
+    float rightPanelWidth = screen_w * 0.30f;
+
+    float viewportX = 0.0f;
+    float viewportY = mainTabHeight;
+
+    float viewportWidth =
+        screen_w - rightPanelWidth;
+
+    float viewportHeight =
+        screen_h - mainTabHeight - consoleHeight;
+
+    ImVec2 windowSize = ImGui::GetContentRegionAvail();
+
+    static ImVec2 windowLastSize(0.0f, 0.0f);
+
+    if (windowSize.x != windowLastSize.x || windowSize.y != windowLastSize.y)
+    {
+        ImGui::SetNextWindowPos(
+            ImVec2(viewportX, viewportY),
+            ImGuiCond_Always
+        );
+
+        ImGui::SetNextWindowSize(
+            ImVec2(viewportWidth, viewportHeight),
+            ImGuiCond_Always
+        );
+
+        windowLastSize = windowSize;
+    }
+
+    
+
+    ImGui::Begin(
+        "Viewport",
+        nullptr
+    );
 
     ImVec2 size = ImGui::GetContentRegionAvail();
 
-    static ImVec2 lastSize = ImVec2(0, 0);
+    static ImVec2 lastSize(0.0f, 0.0f);
 
     if (size.x != lastSize.x || size.y != lastSize.y)
     {
@@ -574,27 +617,36 @@ void MakeGui::MakeIMViewPort(Window& wnd)
 
         if (width > 0 && height > 0)
         {
-            wnd.GetGraphics().GetRenderer().ReSizeViewport(width, height);
+            wnd.GetGraphics()
+                .GetRenderer()
+                .ReSizeViewport(width, height);
         }
+
         lastSize = size;
     }
 
 #if DIRECTX11 == 1
     ImGui::Image(
-        (ImTextureID)wnd.GetGraphics().GetRenderer()
-        .GetViewport()->GetTextureComPtr().Get(),
+        (ImTextureID)
+        wnd.GetGraphics()
+        .GetRenderer()
+        .GetViewport()
+        ->GetTextureComPtr()
+        .Get(),
         size
     );
+
 #endif
 
 #if VULKAN == 1
     ImGui::Image(
-        wnd.GetGraphics().GetRenderer()
-        .GetViewport()->getImGuiTexture(),
+        wnd.GetGraphics()
+        .GetRenderer()
+        .GetViewport()
+        ->getImGuiTexture(),
         size
     );
 #endif
-
     ImGui::End();
 }
 void MakeGui::CreateErrorPopUp(IRenderer* renderer, Image2d& image2d, const std::string& errormsg, const float duration) {

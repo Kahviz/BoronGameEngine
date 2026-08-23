@@ -741,32 +741,29 @@ void VulkanRender::UpdateDescriptorSets(ECS& ecs)
 
     if (descriptorPool != VK_NULL_HANDLE)
     {
-        vkDestroyDescriptorPool(
-            vkDevice.GetDevice(),
-            descriptorPool,
-            nullptr
-        );
-
+        vkDestroyDescriptorPool(vkDevice.GetDevice(), descriptorPool, nullptr);
         descriptorPool = VK_NULL_HANDLE;
     }
 
     descriptorSets.clear();
 
-    createDescriptorPool(
-        ecs.getNumberOfEntities()
-    );
-
-    createDescriptorSets(ecs);
-}
-void VulkanRender::createDescriptorSets(ECS& ecs)
-{
     uint32_t maxEntityId = 0;
+    bool hasEntities = false;
     ecs.EachEntity([&](EntityECS entity) {
         maxEntityId = std::max(maxEntityId, entity);
-        }
-    );
+        hasEntities = true;
+        });
 
-    uint32_t count = maxEntityId;
+    if (!hasEntities)
+        return;
+
+    uint32_t count = maxEntityId + 1;
+
+    createDescriptorPool(count);
+    createDescriptorSets(ecs, count);
+}
+void VulkanRender::createDescriptorSets(ECS& ecs, uint32_t count)
+{
     descriptorSets.resize(count);
 
     std::vector<VkDescriptorSetLayout> layouts(

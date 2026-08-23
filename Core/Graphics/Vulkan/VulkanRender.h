@@ -55,7 +55,7 @@ public:
     void ReallocateUniformBuffer(uint32_t newObjectCount, ECS* ecs = nullptr);
     void createDescriptorPool(uint32_t maxObjects);
     void UpdateDescriptorSets(ECS& ecs);
-    void createDescriptorSets(ECS& ecs);
+    void createDescriptorSets(ECS& ecs, uint32_t count);
     BML::Matrix4x4 CreateVulkanPerspective(float fovY, float aspect, float zNear, float zFar);
     BML::Matrix4x4 createModelMatrix(BML::Vector3 orientation, BML::Vector3 scale, BML::Vector3 pos);
     void updateUniformBuffer(ECS& ecs, EntityECS entity, uint32_t objectIndex, BML::Vector3 scale, BML::Vector3 Orientation, BML::Vector3 pos, BML::Int3 color);
