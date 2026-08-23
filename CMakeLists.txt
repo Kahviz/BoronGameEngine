@@ -53,6 +53,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG release-3.2.16
 )
+
 #ImGui
 FetchContent_Declare(
     imgui
@@ -449,3 +450,4 @@ endif()
 if(MSVC)
     set(CMAKE_VS_NO_COMPILE_BATCHING ON)
 endif()
+

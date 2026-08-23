@@ -126,10 +126,9 @@
 
 	#define BGE_ASSERT_HRESULT(HResult, message) \
 		BGE_ASSERT_HRESULT_IMPL(HResult, message, #HResult)
-	
 #else
-	#define BGE_ASSERT_VKRESULT(VkResult, message) (VkResult)
+	#define BGE_ASSERT_VKRESULT(expr, message) ((void)(expr))
 	#define BGE_VK_ASSERT(handle, message) ((void)(handle))
-	#define BGE_ASSERT(condition, message) ((void)0)
+	#define BGE_ASSERT(condition, message) ((void)(condition))
 	#define BGE_ASSERT_HRESULT(expr, message) ((void)(expr))
 #endif

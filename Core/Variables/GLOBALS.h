@@ -23,9 +23,9 @@ namespace fs = std::filesystem;
 #endif
 
 #if VULKAN == 1
-#ifndef GLFW_INCLUDE_VULKAN
-#define GLFW_INCLUDE_VULKAN
-#endif
+	#ifndef GLFW_INCLUDE_VULKAN
+		#define GLFW_INCLUDE_VULKAN
+	#endif
 #endif
 
 #include <GLFW/glfw3.h>

@@ -181,7 +181,6 @@ EntityECS AddAMesh(
     }
 
 #endif
-
 #if VULKAN == 1
     if (UsesTexture)
     {
@@ -420,8 +419,8 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
         }
         else if (line == "END")
         {
-            if (loadedInstanceType !=
-                Boron::Enums::InstanceType::Instance)
+            if (loadedInstanceType != Boron::Enums::InstanceType::Object &&
+                loadedInstanceType != Boron::Enums::InstanceType::Instance)
             {
                 std::cerr
                     << "Unsupported InstanceType!: "

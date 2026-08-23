@@ -99,10 +99,6 @@ bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)
     deviceCreateInfo.enabledExtensionCount = 1;
     deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions;
 
-    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions;
-    deviceCreateInfo.enabledLayerCount = 0;
-
     if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device) != VK_SUCCESS) {
         CreateError("Can't Create a VkDevice");
         return false;

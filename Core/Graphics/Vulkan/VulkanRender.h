@@ -130,11 +130,11 @@ private:
     struct DrawCommand {
         const MeshVK* mesh = nullptr;
         bool usesTexture = false;
-        uint32_t objectIndex = -1;
+        uint32_t objectIndex = 0;
         BML::Matrix4x4 modelMatrix = {};
     };
 
-    uint32_t CurrentimageIndex = -1;
+    uint32_t CurrentimageIndex = 0;
     bool framebufferResized = false;
 
     int currentFrame = 0;
@@ -146,9 +146,8 @@ private:
     uint32_t m_UniformBufferSize = 0;
     uint32_t m_CurrentObjectCount = 0;
 
-    uint32_t imageIndex = -1;
-    uint32_t maxInstances = 100;
-    uint32_t dynamicAlignment = -1;
+    uint32_t imageIndex = 0;
+    uint32_t dynamicAlignment = 0;
 
     VkViewport viewport{};
     VkRect2D scissor = {};

@@ -51,7 +51,6 @@ bool VulkanRender::Init(GLFWwindow* window)
     std::cout << "Selected GPU: " << selectedProps.deviceName << "\n";
 #endif // _DEBUG
 
-
     uint32_t formatCount = 0;
 
     vkGetPhysicalDeviceSurfaceFormatsKHR(vkDevice.GetPhysicalDevice(), vkDevice.GetSurface(), &formatCount, nullptr);
@@ -475,6 +474,7 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bo
     vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
 
 #if INEDITOR == 0
+    CreateSuccess("Not editing...");
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline.GetGraphicsPipeline());
 
     DrawMeshesForRecordCommandBuffer(cmd);
@@ -760,8 +760,13 @@ void VulkanRender::UpdateDescriptorSets(ECS& ecs)
 }
 void VulkanRender::createDescriptorSets(ECS& ecs)
 {
-    uint32_t count = ecs.getNumberOfEntities();
+    uint32_t maxEntityId = 0;
+    ecs.EachEntity([&](EntityECS entity) {
+        maxEntityId = std::max(maxEntityId, entity);
+        }
+    );
 
+    uint32_t count = maxEntityId;
     descriptorSets.resize(count);
 
     std::vector<VkDescriptorSetLayout> layouts(
@@ -978,7 +983,6 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity)
         CreateError("Missing rendering component");
         return false;
     }
-
     auto& transform = ecs.GetComponent<TransformComponent>(entity);
     auto& color = ecs.GetComponent<ColorComponent>(entity);
     auto& mesh = ecs.GetComponent<ObjectComponent>(entity);
@@ -993,7 +997,12 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity)
         color.color
     );
 
-    DrawCommand cmd;
+    DrawCommand cmd{};
+    if (!mesh.OBJmesh)
+    {
+        CreateError("OBJmesh is NULL");
+        return false;
+    }
     cmd.mesh = &mesh.OBJmesh->VM;
     cmd.objectIndex = entity;
     cmd.usesTexture = ecs.HasComponent<TextureComponent>(entity)
@@ -1294,7 +1303,7 @@ void VulkanRender::DrawFrame(ECS& ecs,float deltaTime)
     shadowDrawCommands.clear();
 
     for (const auto& cmd : drawCommands) {
-        ShadowDrawCommand shadowCmd;
+        ShadowDrawCommand shadowCmd{};
         shadowCmd.mesh = cmd.mesh;
         shadowCmd.modelMatrix = cmd.modelMatrix;
         shadowDrawCommands.push_back(shadowCmd);

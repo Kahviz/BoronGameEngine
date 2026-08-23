@@ -6,6 +6,7 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
     createDescriptorSetLayout(device);
 
     std::string Shaders = std::string(PROJECT_DIR) + "Core/Shaders/";
+    CreateSuccess(Shaders);
     auto vertShaderCode = ReadFile(Shaders + "vertex.spv");
     auto fragShaderCode = ReadFile(Shaders + "fragment.spv");
     auto texFragShaderCode = ReadFile(Shaders + "texture_fragment.spv");
@@ -57,7 +58,7 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
     rasterizer.lineWidth = 1.0f;
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
-    rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT; 
+    rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -89,7 +90,7 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 
     if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) { //Do ths with assert
-        throw std::runtime_error("Failed to create pipeline layout!");
+        CreateError("Failed to create pipeline layout!");
     }
 
     VkPipelineDynamicStateCreateInfo dynamicState{};

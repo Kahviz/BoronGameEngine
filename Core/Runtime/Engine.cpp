@@ -34,23 +34,24 @@ Engine::Engine()
         ImGui::StyleColorsDark();
 
         GLFWwindow* glfwWindow = window.GetWindow();
-#if DIRECTX11 == 1
-        ID3D11Device* device = window.GetGraphics().GetDevice();
-        ID3D11DeviceContext* contextDX11 = window.GetGraphics().GetpContext();
-#endif
+
+        #if DIRECTX11 == 1
+            ID3D11Device* device = window.GetGraphics().GetDevice();
+            ID3D11DeviceContext* contextDX11 = window.GetGraphics().GetpContext();
+        #endif
 
         if (!ImGui_ImplGlfw_InitForOther(glfwWindow, true)) {
             CreateError("Failed to initialize ImGui GLFW backend");
         }
 
-#if DIRECTX11 == 1 
-        if (!ImGui_ImplDX11_Init(device, contextDX11)) {
-            CreateError("Failed to initialize ImGui DX11 backend");
-        }
-        else {
-            ImGuiInited = true;
-        }
-#endif
+        #if DIRECTX11 == 1 
+            if (!ImGui_ImplDX11_Init(device, contextDX11)) {
+                CreateError("Failed to initialize ImGui DX11 backend");
+            }
+            else {
+                ImGuiInited = true;
+            }
+        #endif
 #if VULKAN == 1
         auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
 
@@ -99,7 +100,7 @@ Engine::Engine()
         }
 
         #ifdef _DEBUG
-        CreateSuccess("ImGui initialized successfully!");
+            CreateSuccess("ImGui initialized successfully!");
         #endif
 
         window.SetWindowIcon(window.GetWindow());
@@ -256,7 +257,12 @@ EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string&
     if (UsesTexture) {
         textureComp.texture = new Texture();
 
-        textureComp.texture->Load(fullPath, window.GetGraphics().GetRenderer());
+        #if VULKAN == 1
+            textureComp.texture->LoadVK(fullPath, window.GetGraphics().GetRenderer());
+        #endif
+        #if DIRECTX11 == 1
+            textureComp.texture->Load(fullPath, window.GetGraphics().GetRenderer());
+        #endif
 
         #if VULKAN == 1
             vk.UpdateDescriptorSet(ecs);

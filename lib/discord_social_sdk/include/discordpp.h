@@ -2006,7 +2006,12 @@ public:
     /// pressing their configured push to talk key.
     bool GetPTTActive();
 
-    /// \brief Returns the time that PTT is active after the user releases the PTT key and
+    /// \brief Returns the time that PTT is active after the user 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// s the PTT key and
     /// SetPTTActive(false) is called.
     uint32_t GetPTTReleaseDelay();
 
