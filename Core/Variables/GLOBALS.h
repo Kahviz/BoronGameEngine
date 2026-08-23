@@ -9,8 +9,8 @@ namespace fs = std::filesystem;
 
 #define INEDITOR 1
 
-#define DIRECTX11 1
-#define VULKAN 0
+#define DIRECTX11 0
+#define VULKAN 1
 
 #define BGE_VERSION 1.2
 #define DEBUGFILEMAKING 0
