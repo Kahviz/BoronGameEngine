@@ -7,6 +7,7 @@
 #include <format>
 #include "BoronMathLibrary.h"
 #include "GLOBALS.h"
+
 int main() {
     CreateInfo("BoronEngine started!");
 
@@ -17,12 +18,12 @@ int main() {
         #endif
     #endif
 
-#if VULKAN == 0
-    #if DIRECTX11 == 0
-        CreateError("You have to have one graphics backend");
-        return -1;
+    #if VULKAN == 0
+        #if DIRECTX11 == 0
+            CreateError("You have to have one graphics backend");
+            return -1;
+        #endif
     #endif
-#endif
 
     MakeFiles mf;
     mf.MakeAPPDATAFolders();

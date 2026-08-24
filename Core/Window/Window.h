@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include "ErrorHandling/ErrorMessage.h"
+#include "BoronMathLibrary.h"
 
 class Graphics;
 
@@ -13,6 +14,7 @@ public:
     Window(int Height, int Width, std::string Name);
     void SetWindowIcon(GLFWwindow* window);
     ~Window();
+    BML::Vector2 GetSize() const noexcept;
     GLFWwindow* GetWindow() const noexcept;
     Graphics& GetGraphics();
 private:

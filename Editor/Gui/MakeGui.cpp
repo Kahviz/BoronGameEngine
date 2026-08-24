@@ -580,11 +580,12 @@ void MakeGui::MakeIMViewPort(Window& wnd)
     float viewportHeight =
         screen_h - mainTabHeight - consoleHeight;
 
-    ImVec2 windowSize = ImGui::GetContentRegionAvail();
+    BML::Vector2 windowSize = wnd.GetSize();
 
-    static ImVec2 windowLastSize(0.0f, 0.0f);
+    static BML::Vector2 lastWindowSize{ 0,0 };
 
-    if (windowSize.x != windowLastSize.x || windowSize.y != windowLastSize.y)
+    if (windowSize.x() != lastWindowSize.x() ||
+        windowSize.y() != lastWindowSize.y())
     {
         ImGui::SetNextWindowPos(
             ImVec2(viewportX, viewportY),
@@ -596,10 +597,8 @@ void MakeGui::MakeIMViewPort(Window& wnd)
             ImGuiCond_Always
         );
 
-        windowLastSize = windowSize;
+        lastWindowSize = windowSize;
     }
-
-    
 
     ImGui::Begin(
         "Viewport",
@@ -607,7 +606,6 @@ void MakeGui::MakeIMViewPort(Window& wnd)
     );
 
     ImVec2 size = ImGui::GetContentRegionAvail();
-
     static ImVec2 lastSize(0.0f, 0.0f);
 
     if (size.x != lastSize.x || size.y != lastSize.y)
@@ -649,6 +647,7 @@ void MakeGui::MakeIMViewPort(Window& wnd)
 #endif
     ImGui::End();
 }
+
 void MakeGui::CreateErrorPopUp(IRenderer* renderer, Image2d& image2d, const std::string& errormsg, const float duration) {
     std::string fullPath = textures + "\\ErrorIcon.png";
 

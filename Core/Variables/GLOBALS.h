@@ -12,11 +12,11 @@ namespace fs = std::filesystem;
 #define DIRECTX11 1
 #define VULKAN 0
 
-#define BGE_VERSION 1.2
+#define BGE_VERSION 1.3
 #define DEBUGFILEMAKING 0
-#define PRINTDEBUGINFO 1
+#define PRINTDEBUGINFO 0
 
-#define VALIDATIONLAYERS 1
+#define VALIDATIONLAYERS 0
 
 #if INEDITOR == 1
 	#define PROFILER

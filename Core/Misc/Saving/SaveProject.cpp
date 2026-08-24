@@ -302,7 +302,6 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
         if (line.rfind("Name:", 0) == 0)
         {
             loadedName = line.substr(6);
-            CreateSuccess("Loading..." + loadedName);
         }
 
         else if (line.rfind("Position:", 0) == 0)

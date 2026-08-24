@@ -433,9 +433,9 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
                 }
             );
 
-            if (m_ecs.getNumberOfEntities() <= 0) {
-                AddAMesh(m_ecs, "\\Cube.obj", "Cube", { 0,2,0 }, { 1,1,1 }, false, false,false);
-                AddAMesh(m_ecs, "\\Cube.obj", "Cube2", { 0,0,0 }, { 1,1,1 }, false, false,false);
+            if (m_ecs.getNumberOfEntities() <= 2) {
+                AddAMesh(m_ecs, "\\Cube.obj", "Cube", { 0,-2,0 }, { 10,1,10 }, false, false,false);
+                AddAMesh(m_ecs, "\\Cube.obj", "Cube2", { 0,2,0 }, { 1,2,1 }, false, false,true);
             }
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);
@@ -460,6 +460,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             world,
             &graphics.GetRenderer()
         );
+        makeGui.MakeIMViewPort(*wnd);
     }
     else {
         if (makeGui.MakeDashBoard(&graphics.GetRenderer())) {
@@ -508,10 +509,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     #if INEDITOR == 1
         if (ImGuiInited) {
-            if (InProject) {
-                makeGui.MakeIMViewPort(*wnd);
-            }
-
             wnd->GetGraphics().SetRenderTargetToBackBuffer();
 
             ImGui::Render();

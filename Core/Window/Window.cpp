@@ -73,6 +73,17 @@ Window::~Window()
     }
 }
 
+BML::Vector2 Window::GetSize() const noexcept
+{
+    int width, height;
+    glfwGetWindowSize(m_window, &width, &height);
+
+    return BML::Vector2(
+        static_cast<float>(width),
+        static_cast<float>(height)
+    );
+}
+
 GLFWwindow* Window::GetWindow() const noexcept
 {
     return m_window;
