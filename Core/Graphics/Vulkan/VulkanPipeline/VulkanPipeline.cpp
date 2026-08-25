@@ -4,6 +4,8 @@
 #if VULKAN == 1
 bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
 {
+    CreateInfo("Initing VulkanPipeline!");
+
     createDescriptorSetLayout(device);
 
     std::string Shaders = std::string(PROJECT_DIR) + "Core/Shaders/";
