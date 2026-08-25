@@ -106,6 +106,7 @@ bool VulkanSwapchain::Init(VkDevice& device,VkPhysicalDevice& physicalDevice, Vk
     }
 	return true;
 }
+
 bool VulkanSwapchain::CleanupSwapchain(VkDevice& device, VkCommandPool& commandPool, std::vector<VkCommandBuffer>& commandBuffers)
 {
     for (auto framebuffer : swapchainFramebuffers) {

@@ -1,5 +1,6 @@
 #include "VulkanDevice.h"
 #include <iostream>
+
 //Does physical device, device jobs
 #if VULKAN == 1
 bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)

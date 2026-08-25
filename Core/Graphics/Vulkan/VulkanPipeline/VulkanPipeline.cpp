@@ -1,4 +1,5 @@
 #include "VulkanPipeline.h"
+#include <filesystem>
 
 #if VULKAN == 1
 bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
@@ -6,7 +7,13 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
     createDescriptorSetLayout(device);
 
     std::string Shaders = std::string(PROJECT_DIR) + "Core/Shaders/";
-    CreateSuccess(Shaders);
+    std::filesystem::path fullpath = Shaders;
+    if (!fs::exists(fullpath)) {
+        CreateInfo("Shaders searching...");
+
+        Shaders = std::filesystem::current_path().string();
+    }
+
     auto vertShaderCode = ReadFile(Shaders + "vertex.spv");
     auto fragShaderCode = ReadFile(Shaders + "fragment.spv");
     auto texFragShaderCode = ReadFile(Shaders + "texture_fragment.spv");

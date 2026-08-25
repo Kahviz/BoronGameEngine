@@ -1,11 +1,16 @@
 Version 1.3:
  Added:
-	ColorSaving
+	-ColorSaving
+	-Viewport
+	-Console
+	-ECO
+	i dont remember but i will start doing this again :D
  Removed:
 
  Changed:
 
  Patches:
+	-DX11 not rendering textures
 
 
 Version 1.2:
