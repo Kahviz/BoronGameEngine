@@ -161,6 +161,8 @@ int Engine::EngineRun()
 
     while (!glfwWindowShouldClose(glfwWND))
     {
+        glfwPollEvents();
+
         auto now = clock::now();
 
         float deltaTime =
@@ -169,8 +171,6 @@ int Engine::EngineRun()
         lastFrameTime = now;
 
         EngineDoFrame(&window, deltaTime);
-
-        glfwPollEvents();
     }
 
     SaveProject::Save(m_ecs);
@@ -316,12 +316,29 @@ float GetRandomFloat(float min, float max) { //Mathlib
     return dist(gen);
 }
 
+void ImGui_Impl_NewFrame() {
+    #if DIRECTX11 == 1
+        ImGui_ImplDX11_NewFrame();
+    #endif
+
+    #if VULKAN == 1
+        ImGui_ImplVulkan_NewFrame();
+    #endif
+
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
 void Engine::EngineDoFrame(Window* wnd, float deltatime)
 {
     dcPresence.Update();
     Keyboard::Init(wnd->GetWindow());
     Mouse::updateMouse(wnd);
 
+#if INEDITOR == 1
+    if (ImGuiInited) {
+        ImGui_Impl_NewFrame();
+    }
+#endif
     static float timer = 0.0f;
     static int framesd = 0;
 
@@ -338,16 +355,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     bool ctrlPressed = Keyboard::isHeld(window.GetWindow(), Boron::Keys::LeftCtrl);
     bool RctrlPressed = Keyboard::isHeld(window.GetWindow(), Boron::Keys::RightCtrl);
 
-    static int frames = 0;
     static int cubes = 0;
-    frames++;
-
-    if (frames == 100) {
-
-        
-
-        frames = 0;
-    }
 
     if (ctrlPressed) {
         AddAMesh(m_ecs, "\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false, false, true);
@@ -375,21 +383,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     Graphics& graphics = wnd->GetGraphics();
 
     ScreenResizerDetector(wnd);
-
-#if INEDITOR == 1
-    if (ImGuiInited) {
-        #if DIRECTX11 == 1
-            ImGui_ImplDX11_NewFrame();
-        #endif
-
-        #if VULKAN == 1
-            ImGui_ImplVulkan_NewFrame();
-        #endif
-        
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-    }
-#endif
 
     wnd->GetGraphics().SetRenderTargetToBackBuffer();
     graphics.ClearBuffer(0.0f, 0.0f, 1.0f);

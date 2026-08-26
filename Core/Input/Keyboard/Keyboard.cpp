@@ -1,4 +1,5 @@
 #include "Keyboard.h"
+#include "ErrorHandling/ErrorMessage.h"
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -10,16 +11,22 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 void Keyboard::Init(GLFWwindow* window) {
     if (!inited) {
         inited = true;
-
-        glfwSetKeyCallback(window, keyCallback);
     }
 }
 bool Keyboard::isHeld(GLFWwindow* window, Boron::Keys key)
 {
+    if (!inited) {
+        CreateError("Keyboard class not initiliazed!");
+        return false; 
+    }
     return glfwGetKey(window, static_cast<int>(key)) == GLFW_PRESS;
 }
 
 Boron::Keys Keyboard::getLastPressedKey(GLFWwindow* window)
 {
+    if (!inited) {
+        CreateError("Keyboard class not initiliazed!");
+        return {};
+    }
     return lastKey;
 }

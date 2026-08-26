@@ -7,7 +7,6 @@
 #include <imgui_internal.h>
 #include "Runtime/Engine.h"
 #include "Components.h"
-#include <algorithm>
 
 struct MeshButton
 {
@@ -721,6 +720,7 @@ bool MakeGui::MakeDashBoard(IRenderer* renderer)
 
         ImGui::Text("ProjectName: ");
         ImGui::SameLine();
+
         ImGui::InputTextWithHint(
             "##ProjectName",
             "e.g. MyAwesomeGame",
@@ -730,7 +730,7 @@ bool MakeGui::MakeDashBoard(IRenderer* renderer)
 
         static int value = 0;
 
-        const char* templates[] = { "Void", "Baseplate", "Ducks" };
+        const char* templates[] = { "Void", "Baseplate" };
 
         ImGui::Text("Template (Not made yet): ");
         ImGui::SameLine();
