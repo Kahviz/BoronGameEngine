@@ -1614,7 +1614,14 @@ void VulkanRender::createShadowRenderPass() {
 }
 
 void VulkanRender::createShadowPipeline() {
-    std::string Shaders = std::string(PROJECT_DIR) + "Core/Shaders/";
+    std::string Shaders = std::filesystem::current_path().string() + "\\";
+    std::filesystem::path fullpath = Shaders;
+
+    if (!fs::exists(Shaders + "\\vertex.spv")) {
+        CreateInfo("Shaders searching... in VulkanRender.cpp");
+
+        Shaders = std::string(PROJECT_DIR) + "Core\\Shaders\\";
+    }
     auto vertShaderCode = ReadFile(Shaders + "shadow_vertex.spv");
     VkShaderModule vertShaderModule = CreateShaderModule(vkDevice.GetDevice(), vertShaderCode);
 

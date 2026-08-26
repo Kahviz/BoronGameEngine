@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 
 #define BGE_VERSION 1.3
 #define DEBUGFILEMAKING 0
-#define PRINTDEBUGINFO 0
+#define PRINTDEBUGINFO 1
 
 #define VALIDATIONLAYERS 0
 

@@ -7,13 +7,14 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
     CreateInfo("Initing VulkanPipeline!");
 
     createDescriptorSetLayout(device);
-
-    std::string Shaders = std::string(PROJECT_DIR) + "Core/Shaders/";
+    
+    std::string Shaders = std::filesystem::current_path().string() + "\\";
     std::filesystem::path fullpath = Shaders;
-    if (!fs::exists(fullpath)) {
+
+    if (!fs::exists(Shaders + "\\vertex.spv")) {
         CreateInfo("Shaders searching...");
 
-        Shaders = std::filesystem::current_path().string();
+        Shaders = std::string(PROJECT_DIR) + "Core\\Shaders\\";
     }
 
     auto vertShaderCode = ReadFile(Shaders + "vertex.spv");
