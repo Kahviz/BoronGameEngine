@@ -7,7 +7,7 @@ void BoronGuiBackends::DrawRect() {
 
 }
 void BoronGuiBackends::Init(BoronGuiNeeds& p_boronGuiNeeds) {
-	BoronGui_implVulkan::SetGuiNeeds(p_boronGuiNeeds);
+	
 }
 #endif
 
