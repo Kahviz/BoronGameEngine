@@ -24,7 +24,6 @@ Engine::Engine()
 {
     dcPresence.Initialize();
     m_ecs.init(&m_componentManager);
-    BoronGui::BoronGui::InitBoronGui();
 
     if (!ImGuiInited) {
         std::cout << "ImGui version: " << IMGUI_VERSION << std::endl;
@@ -153,13 +152,25 @@ int Engine::EngineRun()
     
     auto lastFrameTime = clock::now();
 
-#if VULKAN == 1
-    auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
+    BoronGuiNeeds boronGuiNeeds{};
 
-    #if INEDITOR == 1
-        vk.initViewport();
+    #if VULKAN == 1
+        auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
+
+        #if INEDITOR == 1
+            vk.initViewport();
+        #endif
+
+        boronGuiNeeds.commandPool = vk.GetCommandPool();
+        boronGuiNeeds.device = vk.GetDevice();
+        boronGuiNeeds.graphicsQueue = vk.GetGraphicsQueue();
+        boronGuiNeeds.physicalDevice = vk.GetPhysicalDevice();
+        boronGuiNeeds.renderPass = vk.GetRenderPass();
     #endif
-#endif
+
+
+
+    BoronGui::InitBoronGui(boronGuiNeeds);
     while (!glfwWindowShouldClose(glfwWND))
     {
         glfwPollEvents();

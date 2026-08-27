@@ -256,6 +256,13 @@ add_executable(BoronEngine
     #BoronGui
     Core/Graphics/BoronGui/BoronGui.cpp
     Core/Graphics/BoronGui/Widgets/Frame.cpp
+
+    #backends
+    Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.h
+    Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.cpp
+
+    Core/Graphics/BoronGui/Backends/BoronGui_implDX11.h
+    Core/Graphics/BoronGui/Backends/BoronGui_implDX11.cpp
 )
 
 target_compile_options(BoronEngine PRIVATE /W4)

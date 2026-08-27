@@ -13,13 +13,23 @@
 
 #ifdef _DEBUG
 	template<typename T>
-	void BGE_ASSERT_PTR(T* ptr, const std::string& message,
-		const std::source_location& location = std::source_location::current()) {
-		if (ptr == nullptr) {
-			std::string errorMsg = std::format("UGE_ASSERT failed: {} is nullptr!\nMessage: {}\nFile: {} (line: {})",
-				ptr, message,
-				location.file_name(), location.line());
-			MakeAError(errorMsg);
+	void BGE_ASSERT_PTR_IMPL(
+		const T& ptr,
+		const std::string& message,
+		const std::source_location& location = std::source_location::current())
+	{
+		if (ptr == nullptr)
+		{
+			std::string errorMsg = std::format(
+				"BGE_ASSERT_PTR failed: pointer is nullptr!\n"
+				"Message: {}\n"
+				"File: {} (line: {})",
+				message,
+				location.file_name(),
+				location.line()
+			);
+
+			CreateError(errorMsg);
 		}
 	}
 
@@ -120,6 +130,9 @@
 
 	#define BGE_ASSERT(condition, message) \
 		BGE_ASSERT_CONDITION_IMPL(condition, message, #condition)
+
+	#define BGE_ASSERT_PTR(ptr, message) \
+		BGE_ASSERT_PTR_IMPL(ptr, message)
 
 	#define BGE_ASSERT_VKRESULT(VkResult, message) \
 		BGE_ASSERT_VKRESULT_IMPL(VkResult, message, #VkResult)
