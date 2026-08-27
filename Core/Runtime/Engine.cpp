@@ -494,7 +494,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         }
     );
 #endif
-
+    BoronGuiBackends::DrawRect();
     //Physics
     std::thread physicsThread([&]() {
         m_ecs.Each<PhysicsComponent>(
@@ -510,7 +510,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     physicsThread.join();
     
-
     #if DIRECTX11 == 1
         wnd->GetGraphics().DrawAFrame(deltatime,m_ecs);
     #endif
