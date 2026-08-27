@@ -69,7 +69,9 @@ public:
 				{
 					function(
 						entity,
-						GetComponent<Components>(entity)...
+						static_cast<Components&>(
+							GetComponent<Components>(entity)
+							)...
 					);
 				}
 			}

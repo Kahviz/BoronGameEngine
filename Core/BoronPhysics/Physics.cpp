@@ -2,13 +2,14 @@
 #include "Components.h"
 
 //Server
-bool Physics::ApplyGravity(ECS& ecs,EntityECS entity, float deltatime)
+bool Physics::ApplyPhysics(ECS& ecs,EntityECS entity, float deltatime)
 {
     if (g_Running) {
         TransformComponent& transformComp = ecs.GetComponent<TransformComponent>(entity);
         PhysicsComponent& physicsComp = ecs.GetComponent<PhysicsComponent>(entity);
 
         BML::Vector3 pos = transformComp.transform.Position;
+        BML::Vector3 size = transformComp.transform.Size;
         BML::Vector3 vel = physicsComp.Velocity;
 
         vel.y() -= GRAVITY * deltatime;

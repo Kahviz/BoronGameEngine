@@ -6,6 +6,7 @@
 #include "Camera/CameraControl.h"
 #include "BGE_ASSERTS.h"
 #include "BoronGui.h"
+#include <thread>
 
 #ifdef _WIN32
     #define GLFW_EXPOSE_NATIVE_WIN32
@@ -493,16 +494,22 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         }
     );
 #endif
-    //Physics
-    m_ecs.Each<PhysicsComponent>(
-        [&](EntityECS entity, PhysicsComponent& physicsComp)
-        {
-            if (physicsComp.anchored)
-                return;
 
-            physics.ApplyGravity(m_ecs, entity, deltatime);
-        }
-    );
+    //Physics
+    std::thread physicsThread([&]() {
+        m_ecs.Each<PhysicsComponent>(
+            [&](EntityECS entity, PhysicsComponent& physicsComp)
+            {
+                if (physicsComp.anchored)
+                    return;
+
+                physics.ApplyPhysics(m_ecs, entity, deltatime);
+            }
+        );
+    });
+
+    physicsThread.join();
+    
 
     #if DIRECTX11 == 1
         wnd->GetGraphics().DrawAFrame(deltatime,m_ecs);
