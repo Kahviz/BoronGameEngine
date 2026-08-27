@@ -5,6 +5,7 @@
 #include "GLOBALS.h"
 #include "Camera/CameraControl.h"
 #include "BGE_ASSERTS.h"
+#include "BoronGui.h"
 
 #ifdef _WIN32
     #define GLFW_EXPOSE_NATIVE_WIN32
@@ -23,6 +24,7 @@ Engine::Engine()
 {
     dcPresence.Initialize();
     m_ecs.init(&m_componentManager);
+    BoronGui::BoronGui::InitBoronGui();
 
     if (!ImGuiInited) {
         std::cout << "ImGui version: " << IMGUI_VERSION << std::endl;
@@ -158,7 +160,6 @@ int Engine::EngineRun()
         vk.initViewport();
     #endif
 #endif
-
     while (!glfwWindowShouldClose(glfwWND))
     {
         glfwPollEvents();

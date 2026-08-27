@@ -111,7 +111,6 @@ set(DISCORD_SDK_LIB_DIR "${DISCORD_SDK_ROOT}/lib/release")
 set(DISCORD_SDK_BIN_DIR "${DISCORD_SDK_ROOT}/bin/release")
 set(DISCORD_SDK_INCLUDE_DIR "${DISCORD_SDK_ROOT}/include")
 if(WIN32)
-
     set(DISCORD_SDK_ROOT
         "${CMAKE_SOURCE_DIR}/lib/discord_social_sdk"
     )
@@ -238,6 +237,7 @@ add_executable(BoronEngine
     Editor/Gui/Image2d.cpp
 
     Core/Graphics/GraphicsSettings.h
+
     Core/Input/Keyboard/Keyboard.h
     Core/Input/Keyboard/Keyboard.cpp
 
@@ -252,6 +252,10 @@ add_executable(BoronEngine
     Core/Instances/ECS/ECS.h
     Core/Instances/ECS/ECS.cpp
     Core/Instances/ECS/Entity.h
+
+    #BoronGui
+    Core/Graphics/BoronGui/BoronGui.cpp
+    Core/Graphics/BoronGui/Widgets/Frame.cpp
 )
 
 target_compile_options(BoronEngine PRIVATE /W4)
@@ -282,6 +286,7 @@ target_include_directories(BoronEngine PRIVATE
     Core/Graphics/Texture/
     Core/Graphics/Dx11/
     Core/Graphics/Vulkan/
+    Core/Graphics/BoronGui/
 
     Editor/Camera/
     Core/Services/
