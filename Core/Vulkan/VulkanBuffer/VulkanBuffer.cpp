@@ -30,10 +30,17 @@ bool VulkanBuffer::Create(VkDevice& p_device, VkPhysicalDevice p_physicalDevice,
 	BGE_ASSERT_VKRESULT(vkAllocateMemory(m_device, &allocInfo, nullptr, &m_memory), "Failed to allocate buffer memory!");
 
 	BGE_ASSERT_VKRESULT(vkBindBufferMemory(m_device, m_buffer, m_memory, 0), "Failed to bind buffer memory!");
+
+	m_created = true;
+
 	return true;
 }
 
 void VulkanBuffer::Destroy() {
+	if (m_mapped != nullptr) {
+		vkUnmapMemory(m_device, m_memory);
+		m_mapped = nullptr;
+	}
 	if (m_memory != VK_NULL_HANDLE) {
 		vkFreeMemory(m_device, m_memory, nullptr);
 		m_memory = VK_NULL_HANDLE;
@@ -56,6 +63,11 @@ bool VulkanBuffer::UploadData(const void* p_data, VkDeviceSize p_size) {
 }
 
 bool VulkanBuffer::Resize(VkDeviceSize p_newSize, VkCommandPool p_commandPool, VkQueue p_queue) {
+	if (!m_created) {
+		CreateError("VulkanBuffer not created before its resized!");
+		return false;
+	}
+
 	VkBuffer oldBuffer = m_buffer;
 	VkDeviceMemory oldMemory = m_memory;
 
@@ -105,5 +117,21 @@ VkBuffer VulkanBuffer::GetBuffer() const {
 
 VkDeviceMemory VulkanBuffer::GetMemory() const {
 	return m_memory;
+}
+
+void* VulkanBuffer::Map() {
+	BGE_ASSERT_VKRESULT(vkMapMemory(m_device, m_memory, 0, m_deviceSize, 0, &m_mapped), "Failed to map memory!");
+	
+	return m_mapped;
+}
+
+void VulkanBuffer::Unmap() {
+	if (m_mapped != nullptr) {
+		vkUnmapMemory(m_device, m_memory);
+		m_mapped = nullptr;
+	}
+}
+void* VulkanBuffer::GetMappedMemory() const {
+	return m_mapped;
 }
 #endif

@@ -14,7 +14,13 @@ public:
 
     VkBuffer GetBuffer() const;
     VkDeviceMemory GetMemory() const;
+
+    void* Map();
+    void Unmap();
+    void* GetMappedMemory() const;
 private:
+    bool m_created = false;
+
     VkBuffer m_buffer = VK_NULL_HANDLE;
     VkDeviceMemory m_memory = VK_NULL_HANDLE;
 
@@ -25,5 +31,8 @@ private:
     VkBufferUsageFlags m_usage{};
     VkMemoryPropertyFlags m_properties{};
     VkDeviceSize m_deviceSize{};
+
+    //Mapping
+    void* m_mapped = nullptr;
 };
 #endif

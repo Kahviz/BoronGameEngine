@@ -34,6 +34,9 @@
 #include "VulkanCommandBuffer/VulkanCommandBuffer.h"
 #include "VulkanPipeline/VulkanPipeline.h"
 
+//VulkanBuffer
+#include "VulkanBuffer.h"
+
 class Texture;
 
 class VulkanRender {
@@ -140,8 +143,7 @@ private:
     int currentFrame = 0;
 
     std::vector<UniformBufferObject> m_UniformBuffers;
-    VkBuffer m_UniformBuffer = VK_NULL_HANDLE;
-    VkDeviceMemory m_UniformBufferMemory = VK_NULL_HANDLE;
+    VulkanBuffer m_UniformBuffer{};
 
     uint32_t m_UniformBufferSize = 0;
     uint32_t m_CurrentObjectCount = 0;
@@ -157,21 +159,18 @@ private:
     std::vector<uint32_t> drawObjectIndices = {};
 
     GLFWwindow* main_window = nullptr;
-    void* uniformBufferMapped = nullptr;
 
-    VkBuffer uniformBuffer = VK_NULL_HANDLE;
-    VkDeviceMemory uniformBufferMemory = VK_NULL_HANDLE;
+    VulkanBuffer uniformBuffer{};
     VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
     VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
     VkDescriptorPool imguiPool = VK_NULL_HANDLE;
     VkDeviceMemory indexBufferMemory = VK_NULL_HANDLE;
     VkSemaphore imageAvailableSemaphore = VK_NULL_HANDLE;
     VkSemaphore renderFinishedSemaphore = VK_NULL_HANDLE;
-    VkBuffer indexBuffer = VK_NULL_HANDLE;
+    VulkanBuffer indexBuffer{};
     VkFence inFlightFence = VK_NULL_HANDLE;
     VkRenderPass renderPass = VK_NULL_HANDLE;
-    VkBuffer vertexBuffer = VK_NULL_HANDLE;
-    VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
+    VulkanBuffer vertexBuffer{};
 
     //Depth
     VkImage depthImage = VK_NULL_HANDLE;

@@ -275,24 +275,8 @@ void VulkanRender::Cleanup()
 {
     CreateInfo("Starting Vulkan Cleanup");
 
-    if (uniformBufferMapped != nullptr &&
-        m_UniformBufferMemory != VK_NULL_HANDLE)
-    {
-        vkUnmapMemory(vkDevice.GetDevice(), m_UniformBufferMemory);
-        uniformBufferMapped = nullptr;
-    }
+    m_UniformBuffer.Destroy();
 
-    if (m_UniformBuffer != VK_NULL_HANDLE)
-    {
-        vkDestroyBuffer(vkDevice.GetDevice(), m_UniformBuffer, nullptr);
-        m_UniformBuffer = VK_NULL_HANDLE;
-    }
-
-    if (m_UniformBufferMemory != VK_NULL_HANDLE)
-    {
-        vkFreeMemory(vkDevice.GetDevice(), m_UniformBufferMemory, nullptr);
-        m_UniformBufferMemory = VK_NULL_HANDLE;
-    }
     if (viewportCommandBuffer != VK_NULL_HANDLE)
     {
         vkFreeCommandBuffers(
@@ -347,11 +331,7 @@ void VulkanRender::Cleanup()
     if (!vkSwapchain.CleanupSwapchain(vkDevice.GetDevice(), vkCommandBuffer.GetCommandPool(), vkCommandBuffer.GetCommandBuffers())) {
         CreateError("A Error happened in vkSwapchain.CleanupSwapchain");
     }
-
-    if (indexBuffer != VK_NULL_HANDLE) {
-        vkDestroyBuffer(vkDevice.GetDevice(), indexBuffer, nullptr);
-        indexBuffer = VK_NULL_HANDLE;
-    }
+    indexBuffer.Destroy();
     if (indexBufferMemory != VK_NULL_HANDLE) {
         vkFreeMemory(vkDevice.GetDevice(), indexBufferMemory, nullptr);
         indexBufferMemory = VK_NULL_HANDLE;
@@ -658,54 +638,27 @@ void VulkanRender::createUniformBuffers() {
 void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount, ECS* ecs) {
     vkDeviceWaitIdle(vkDevice.GetDevice());
 
-    if (m_UniformBufferMemory != VK_NULL_HANDLE)
-    {
-        vkUnmapMemory(vkDevice.GetDevice(), m_UniformBufferMemory);
-    }
-
-    if (m_UniformBuffer != VK_NULL_HANDLE)
-    {
-        vkDestroyBuffer(vkDevice.GetDevice(), m_UniformBuffer, nullptr);
-        vkFreeMemory(vkDevice.GetDevice(), m_UniformBufferMemory, nullptr);
-    }
     if (ecs != nullptr) {
         newObjectCount = ecs->getNumberOfEntities() + 1000;
     }
     m_UniformBufferSize = dynamicAlignment * newObjectCount;
     m_CurrentObjectCount = newObjectCount;
 
-    VkBufferCreateInfo bufferInfo{};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = m_UniformBufferSize;
-    bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    if (m_UniformBuffer.GetBuffer() == VK_NULL_HANDLE) {
+        m_UniformBuffer.Create(
+            vkDevice.GetDevice(),
+            vkDevice.GetPhysicalDevice(),
+            m_UniformBufferSize,
+            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+        );
 
-    BGE_ASSERT_VKRESULT(vkCreateBuffer(vkDevice.GetDevice(), &bufferInfo, nullptr, &m_UniformBuffer), "Failed to create uniform buffer");
-
-    VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(vkDevice.GetDevice(), m_UniformBuffer, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = FindMemoryType(
-        memRequirements.memoryTypeBits,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        vkDevice.GetPhysicalDevice()
-    );
-
-    BGE_ASSERT_VKRESULT(vkAllocateMemory(vkDevice.GetDevice(), &allocInfo, nullptr, &m_UniformBufferMemory), "Failed to allocate uniform buffer memory");
-
-    vkBindBufferMemory(vkDevice.GetDevice(), m_UniformBuffer, m_UniformBufferMemory, 0);
-
-    vkMapMemory(
-        vkDevice.GetDevice(),
-        m_UniformBufferMemory,
-        0,
-        m_UniformBufferSize,
-        0,
-        &uniformBufferMapped
-    );
+        m_UniformBuffer.Map();
+    }
+    else {
+        m_UniformBuffer.Resize(m_UniformBufferSize, vkCommandBuffer.GetCommandPool(), vkDevice.GetGraphicsQueue());
+    }
 }
 
 void VulkanRender::createDescriptorPool(uint32_t maxObjects)
@@ -797,7 +750,7 @@ void VulkanRender::createDescriptorSets(ECS& ecs, uint32_t count)
             }
 
             VkDescriptorBufferInfo bufferInfo{};
-            bufferInfo.buffer = m_UniformBuffer;
+            bufferInfo.buffer = m_UniformBuffer.GetBuffer();
             bufferInfo.offset = 0;
             bufferInfo.range = sizeof(UniformBufferObject);
 
@@ -967,7 +920,8 @@ void VulkanRender::updateUniformBuffer(
 
     ubo.lightSpaceMatrix = lightSpaceMatrix;
 
-    uint8_t* dst = (uint8_t*)uniformBufferMapped + (objectIndex * dynamicAlignment);
+    uint8_t* dst = (uint8_t*)m_UniformBuffer.GetMappedMemory() + (objectIndex * dynamicAlignment);
+    
     memcpy(dst, &ubo, sizeof(ubo));
 }
 
@@ -995,8 +949,7 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity)
     );
 
     DrawCommand cmd{};
-    if (!mesh.OBJmesh)
-    {
+    if (!mesh.OBJmesh) {
         CreateError("OBJmesh is NULL");
         return false;
     }
