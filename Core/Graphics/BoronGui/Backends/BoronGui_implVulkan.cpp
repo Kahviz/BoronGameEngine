@@ -1,5 +1,6 @@
 #include "BoronGui_implVulkan.h"
-BoronGuiNeeds m_boronGuiNeeds{};
+
+BoronGuiNeeds BoronGui_implVulkan::m_boronGuiNeeds{};
 
 const BoronGuiNeeds& BoronGui_implVulkan::GetGuiNeeds() {
 	return m_boronGuiNeeds;

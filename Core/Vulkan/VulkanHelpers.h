@@ -1,5 +1,8 @@
 #pragma once
 
+#include "GLOBALS.h"
+
+#if VULKAN == 1
 #include "Vulkan/vulkan.h"
 #include <filesystem>
 #include <fstream>
@@ -9,18 +12,22 @@
 #include "BoronMathLibrary.h"
 #include "ErrorHandling/ErrorMessage.h"
 
+#include "BGE_ASSERTS.h"
+
 struct UniformBufferObject {
-    BML::Matrix4x4 model;
-    BML::Matrix4x4 view;
-    BML::Matrix4x4 proj;
-    GPUVector3 color;
-    float UsesTexture;
-    BML::Matrix4x4 lightSpaceMatrix;
+    BML::Matrix4x4 model{};
+    BML::Matrix4x4 view{};
+    BML::Matrix4x4 proj{};
+    GPUVector3 color{};
+    float UsesTexture = 0.0f;
+    BML::Matrix4x4 lightSpaceMatrix{};
 };
 
 inline std::vector<char> ReadFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
-    if (!file.is_open()) CreateError("Failed to open file: " + filename);
+    if (!file.is_open()) {
+        CreateError("Failed to open file: " + filename);
+    }
 
     size_t fileSize = (size_t)file.tellg();
     std::vector<char> buffer(fileSize);
@@ -37,9 +44,8 @@ inline VkShaderModule CreateShaderModule(VkDevice device, const std::vector<char
     createInfo.codeSize = code.size();
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-    VkShaderModule shaderModule;
-    if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create shader module!");
+    VkShaderModule shaderModule = VK_NULL_HANDLE;
+    BGE_ASSERT_VKRESULT(vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule), "Failed to create shader module!");
 
     return shaderModule;
 }
@@ -55,7 +61,7 @@ inline uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags proper
         }
     }
 
-    throw std::runtime_error("Failed to find suitable memory type!");
+    CreateError("Failed to find suitable memory type!");
 }
 inline VkFormat FindDepthFormat(VkPhysicalDevice physicalDevice) {
     std::vector<VkFormat> candidates = {
@@ -73,7 +79,7 @@ inline VkFormat FindDepthFormat(VkPhysicalDevice physicalDevice) {
         }
     }
 
-    throw std::runtime_error("Failed to find depth format!");
+    CreateError("Failed to find depth format!");
 }
 inline VkCommandBuffer BeginSingleTimeCommands(VkCommandPool commandPool,VkDevice device)
 {
@@ -124,8 +130,7 @@ inline void CreateBuffer(
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-        throw std::runtime_error("Failed to create buffer!");
+    BGE_ASSERT_VKRESULT(vkCreateBuffer(device, &bufferInfo, nullptr, &buffer), "Failed to create buffer!");
 
     VkMemoryRequirements memReq;
     vkGetBufferMemoryRequirements(device, buffer, &memReq);
@@ -133,28 +138,20 @@ inline void CreateBuffer(
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memReq.size;
-    allocInfo.memoryTypeIndex =
-        FindMemoryType(memReq.memoryTypeBits, properties, psyDevice);
+    allocInfo.memoryTypeIndex = FindMemoryType(memReq.memoryTypeBits, properties, psyDevice);
 
-    if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-        throw std::runtime_error("Failed to allocate buffer memory!");
+    BGE_ASSERT_VKRESULT(vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory), "Failed to allocate buffer memory!");
 
     vkBindBufferMemory(device, buffer, bufferMemory, 0);
 }
 
-inline void CopyBuffer(
-    VkBuffer src,
-    VkBuffer dst,
-    VkDeviceSize size,
-    VkCommandPool cmdp,
-    VkDevice device,
-    VkQueue gQ
-) {
-    VkCommandBuffer cmd = BeginSingleTimeCommands(cmdp, device);
+inline void CopyBuffer(VkBuffer p_src, VkBuffer p_dst, VkDeviceSize p_size, VkCommandPool p_cmdp, VkDevice p_device, VkQueue p_gQ) {
+    VkCommandBuffer cmd = BeginSingleTimeCommands(p_cmdp, p_device);
 
     VkBufferCopy copy{};
-    copy.size = size;
-    vkCmdCopyBuffer(cmd, src, dst, 1, &copy);
+    copy.size = p_size;
+    vkCmdCopyBuffer(cmd, p_src, p_dst, 1, &copy);
 
-    EndSingleTimeCommands(cmd, gQ, device, cmdp);
+    EndSingleTimeCommands(cmd, p_gQ, p_device, p_cmdp);
 }
+#endif

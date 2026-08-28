@@ -193,22 +193,8 @@ add_executable(BoronEngine
     Core/Camera/Camera.cpp
     Editor/Camera/CameraControl.cpp
 
-    Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.h
-    Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.cpp
-    Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.h
-    Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.cpp
-    Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.h
-    Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.cpp
-    Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.h
-    Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.cpp
-    Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.h
-    Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.cpp
-    Core/Graphics/Vulkan/ScoreCounter.cpp
-
     Core/Graphics/Dx11/Dx11Adapter.h
-    Core/Graphics/Vulkan/VulkanAdapter.h
     Core/Graphics/Dx11/Dx11Adapter.cpp
-    Core/Graphics/Vulkan/VulkanAdapter.cpp
 
     Core/Graphics/Graphics.cpp
     Core/Graphics/GraphicsBackends.h
@@ -268,6 +254,32 @@ add_executable(BoronEngine
 
     Core/Graphics/BoronGui/Backends/BoronGui_implDX11.h
     Core/Graphics/BoronGui/Backends/BoronGui_implDX11.cpp
+
+    #Vulkan
+    Core/Vulkan/VulkanBuffer/VulkanBuffer.h
+    Core/Vulkan/VulkanBuffer/VulkanBuffer.cpp
+
+    Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.h
+    Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.cpp
+
+    Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.h
+    Core/Graphics/Vulkan/VulkanInstance/VulkanInstance.cpp
+
+    Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.h
+    Core/Graphics/Vulkan/VulkanSwapchain/VulkanSwapchain.cpp
+
+    Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.h
+    Core/Graphics/Vulkan/VulkanCommandBuffer/VulkanCommandBuffer.cpp
+
+    Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.h
+    Core/Graphics/Vulkan/VulkanPipeline/VulkanPipeline.cpp
+
+    Core/Graphics/Vulkan/ScoreCounter.h
+    Core/Graphics/Vulkan/ScoreCounter.cpp
+
+    Core/Graphics/Vulkan/VulkanAdapter.h
+    Core/Graphics/Vulkan/VulkanAdapter.cpp
+
 )
 
 target_compile_options(BoronEngine PRIVATE /W4)
@@ -312,6 +324,10 @@ target_include_directories(BoronEngine PRIVATE
 
     #BoronMathLibrary
     ${boronmathlibrary_SOURCE_DIR}
+
+    #Vulkan
+
+    Core/Vulkan/VulkanBuffer/
 )
 
 set(IMGUI_SOURCES

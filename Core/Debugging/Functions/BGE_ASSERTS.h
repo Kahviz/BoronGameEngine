@@ -1,4 +1,5 @@
 #pragma once
+
 #include "ErrorHandling/ErrorMessage.h"
 #include <format>
 #include <string>
@@ -9,7 +10,9 @@
 	#include <comdef.h>
 #endif
 
-#include "GraphicsBackends.h"
+#if VULKAN == 1
+	#include "vulkan/Vulkan.h"
+#endif
 
 #ifdef _DEBUG
 	template<typename T>
@@ -77,6 +80,8 @@
 					);
 
 					CreateError(errorMsg);
+
+					std::exit(-100);
 				}
 		#endif
 	}
