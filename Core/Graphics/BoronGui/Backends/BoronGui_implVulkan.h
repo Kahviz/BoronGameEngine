@@ -15,9 +15,9 @@ struct BoronGuiNeeds {
 
 class BoronGui_implVulkan {
 public:
-    const BoronGuiNeeds& GetGuiNeeds();
-    void SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds);
+    static const BoronGuiNeeds& GetGuiNeeds();
+    static void SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds);
 private:
-    BoronGuiNeeds m_boronGuiNeeds;
+    static BoronGuiNeeds m_boronGuiNeeds;
 };
 #endif
