@@ -1,5 +1,6 @@
 #include "MeshVulkan.h"
 
+#include "GLOBALS.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -7,6 +8,7 @@
 #include "Vulkan/VulkanHelpers.h"
 #include "ErrorHandling/ErrorMessage.h"
 
+#if VULKAN == 1
 void MeshVK::Load(
     const std::string& file,
     VkDevice device,
@@ -173,3 +175,4 @@ void MeshVK::Draw(VkCommandBuffer cmd) const
     vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
     vkCmdDrawIndexed(cmd, indexCount, 1, 0, 0, 0);
 }
+#endif

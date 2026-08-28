@@ -18,6 +18,8 @@ public:
     void* Map();
     void Unmap();
     void* GetMappedMemory() const;
+
+    bool IsCreated() const;
 private:
     bool m_created = false;
 

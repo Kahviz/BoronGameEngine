@@ -50,6 +50,8 @@ void VulkanBuffer::Destroy() {
 		vkDestroyBuffer(m_device, m_buffer, nullptr);
 		m_buffer = VK_NULL_HANDLE;
 	}
+
+	m_created = true;
 }
 
 bool VulkanBuffer::UploadData(const void* p_data, VkDeviceSize p_size) {
@@ -67,14 +69,20 @@ bool VulkanBuffer::Resize(VkDeviceSize p_newSize, VkCommandPool p_commandPool, V
 		CreateError("VulkanBuffer not created before its resized!");
 		return false;
 	}
+	if (m_mapped != nullptr) {
+		Unmap();
+	}
 
 	VkBuffer oldBuffer = m_buffer;
 	VkDeviceMemory oldMemory = m_memory;
 
 	//New creating
+	VkDeviceSize resizeSize;
+	resizeSize = Min(p_newSize, m_deviceSize);
+
 	VkBufferCreateInfo vkBufferCreateInfo{};
 	vkBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	vkBufferCreateInfo.size = p_newSize;
+	vkBufferCreateInfo.size = resizeSize;
 	vkBufferCreateInfo.usage = m_usage;
 	vkBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -108,6 +116,7 @@ bool VulkanBuffer::Resize(VkDeviceSize p_newSize, VkCommandPool p_commandPool, V
 	vkDestroyBuffer(m_device, oldBuffer, nullptr);
 	vkFreeMemory(m_device, oldMemory, nullptr);
 
+	Map();
 	return true;
 }
 
@@ -131,7 +140,12 @@ void VulkanBuffer::Unmap() {
 		m_mapped = nullptr;
 	}
 }
+
 void* VulkanBuffer::GetMappedMemory() const {
 	return m_mapped;
+}
+
+bool VulkanBuffer::IsCreated() const {
+	return m_created;
 }
 #endif
