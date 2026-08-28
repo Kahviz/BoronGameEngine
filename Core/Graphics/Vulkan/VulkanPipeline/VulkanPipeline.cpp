@@ -1,5 +1,6 @@
 #include "VulkanPipeline.h"
 #include <filesystem>
+#include "BGE_ASSERTS.h"
 
 #if VULKAN == 1
 bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
@@ -99,9 +100,7 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 
-    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) { //Do ths with assert
-        CreateError("Failed to create pipeline layout!");
-    }
+    BGE_ASSERT_VKRESULT(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout), "Failed to create pipeline layout!");
 
     VkPipelineDynamicStateCreateInfo dynamicState{};
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -130,29 +129,9 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
 
     shaderStages[1].module = fragShaderModule;
 
-    if (vkCreateGraphicsPipelines(
-        device,
-        VK_NULL_HANDLE,
-        1,
-        &pipelineInfo,
-        nullptr,
-        &graphicsPipeline) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create graphics pipeline!");
-    }
+    BGE_ASSERT_VKRESULT(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline), "Failed to create graphics pipeline!");
 
     shaderStages[1].module = texFragShaderModule;
-
-    if (vkCreateGraphicsPipelines(
-        device,
-        VK_NULL_HANDLE,
-        1,
-        &pipelineInfo,
-        nullptr,
-        &textureGraphicsPipeline) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create texture graphics pipeline!");
-    }
 
     return true;
 }
@@ -183,9 +162,7 @@ void VulkanPipeline::createDescriptorSetLayout(VkDevice device) {
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
     layoutInfo.pBindings = bindings.data();
 
-    if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to create descriptor set layout!");
-    }
+    BGE_ASSERT_VKRESULT(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout), "Failed to create descriptor set layout!");
 }
 #endif
 
