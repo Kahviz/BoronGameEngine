@@ -20,7 +20,7 @@
 ## Libraries Used
 - **Assimp** – 3D model loading  
 - **SDL3** – Controller input / rumble  
-- **ImGui** – Graphical user interface  
+- **ImGui** – Graphical user interface  (Im making my own gui lib)
 - **stb_image** – Image loading (icons, textures)
 - **BoronMathLibrary ( BML )** -simd-Math and non simd-math
 - **Discord RPC** - Rich presence
