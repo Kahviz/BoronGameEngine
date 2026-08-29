@@ -2,7 +2,7 @@
 
 # BoronEngine
 
-**A game engine under development since 12.11.2025**
+**A C++ game engine under development since 12.11.2025**
 
 **Status: Work in progress** – There may be **bugs** and you can help by telling them to me
 
@@ -20,7 +20,7 @@
 ## Libraries Used
 - **Assimp** – 3D model loading  
 - **SDL3** – Controller input / rumble  
-- **ImGui** – Graphical user interface  
+- **ImGui** – Graphical user interface  (Im making my own gui lib)
 - **stb_image** – Image loading (icons, textures)
 - **BoronMathLibrary ( BML )** -simd-Math and non simd-math
 - **Discord RPC** - Rich presence
