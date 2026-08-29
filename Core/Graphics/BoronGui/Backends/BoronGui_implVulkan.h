@@ -15,6 +15,10 @@ struct BoronGuiNeeds {
 
 class BoronGui_implVulkan {
 public:
+    static void BeginFrame();
+    static void DrawRect();
+    static void EndFrame();
+    static bool Init();
     static const BoronGuiNeeds& GetGuiNeeds();
     static void SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds);
 private:

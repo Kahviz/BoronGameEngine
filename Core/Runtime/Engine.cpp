@@ -12,6 +12,10 @@
     #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
 
+#if VULKAN == 1
+    #include "backends/BoronGui_implVulkan.h"
+#endif
+
 #include <GLFW/glfw3native.h>
 
 #include "backends/imgui_impl_glfw.h"
@@ -56,11 +60,13 @@ Engine::Engine()
             }
         #endif
 #if VULKAN == 1
+        BoronGui_implVulkan::Init();
+
         auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
 
         VkRenderPass renderPass = vk.GetRenderPass();
         if (renderPass == VK_NULL_HANDLE) {
-            CreateError("Render pass is null!");
+            CreateError("Render pass is nullptr!");
         }
 
         ImGui_ImplVulkan_InitInfo init_info = {};

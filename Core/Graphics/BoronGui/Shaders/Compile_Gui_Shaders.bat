@@ -14,5 +14,7 @@ set GLSLANG=C:\VulkanSDK\1.4.335.0\Bin\glslangValidator.exe
     --vn FragmentShader ^
     -o FragmentShader.h
 
+powershell -Command "$content = Get-Content VertexShader.h; @('#include <cstdint>') + $content | Set-Content VertexShader.h"
+powershell -Command "$content = Get-Content FragmentShader.h; @('#include <cstdint>') + $content | Set-Content FragmentShader.h"
 echo Compiled!
 pause

@@ -18,6 +18,7 @@
 #include <imgui_impl_vulkan.h>
 #include "Components.h"
 #include "Texture.h"
+#include "backends/BoronGui_implVulkan.h"
 
 bool VulkanRender::Init(GLFWwindow* window)
 {
@@ -463,6 +464,8 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bo
     if (renderImGui && ImGui::GetDrawData()) {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
     }
+
+    BoronGui_implVulkan::DrawRect();
 
     vkCmdEndRenderPass(cmd);
     vkEndCommandBuffer(cmd);
