@@ -465,7 +465,7 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bo
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
     }
 
-    BoronGui_implVulkan::DrawRect();
+    BoronGui_implVulkan::SetupRenderState(cmd);
 
     vkCmdEndRenderPass(cmd);
     vkEndCommandBuffer(cmd);

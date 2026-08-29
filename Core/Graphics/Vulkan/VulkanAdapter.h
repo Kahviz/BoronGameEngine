@@ -31,6 +31,8 @@ public:
     uint32_t GetGraphicsFamilyIndex() const;
     VkDescriptorPool& GetImGuiPool() const;
     VkRenderPass GetRenderPass() const;
+    VkExtent2D GetSwapchainExtent();
+
     void UpdateDescriptorSet(ECS& ecs);
     void RenderAMesh(ECS& ecs, EntityECS entity);
     Texture* GetViewport() override;

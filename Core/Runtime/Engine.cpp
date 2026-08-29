@@ -60,8 +60,6 @@ Engine::Engine()
             }
         #endif
 #if VULKAN == 1
-        BoronGui_implVulkan::Init();
-
         auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
 
         VkRenderPass renderPass = vk.GetRenderPass();
@@ -153,6 +151,7 @@ int Engine::EngineRun()
 
     using clock = std::chrono::high_resolution_clock;
     ImGuiIO& IO = ImGui::GetIO();
+
     #if INEDITOR == 0
         InProject = true;
     #endif
@@ -169,15 +168,19 @@ int Engine::EngineRun()
         #endif
 
         boronGuiNeeds.commandPool = vk.GetCommandPool();
-        boronGuiNeeds.device = vk.GetDevice();
         boronGuiNeeds.graphicsQueue = vk.GetGraphicsQueue();
         boronGuiNeeds.physicalDevice = vk.GetPhysicalDevice();
+        boronGuiNeeds.swapchainExtent = vk.GetSwapchainExtent();
+        boronGuiNeeds.device = vk.GetDevice();
         boronGuiNeeds.renderPass = vk.GetRenderPass();
-    #endif
-
-
+#endif
 
     BoronGui::InitBoronGui(boronGuiNeeds);
+
+    #if VULKAN == 1
+        BoronGui_implVulkan::Init();
+    #endif
+
     while (!glfwWindowShouldClose(glfwWND))
     {
         glfwPollEvents();

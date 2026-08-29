@@ -112,6 +112,10 @@ VkRenderPass VulkanAdapter::GetRenderPass() const
     return renderer->GetRenderPass();
 }
 
+VkExtent2D VulkanAdapter::GetSwapchainExtent() {
+    return renderer->GetSwapchainExtent();
+}
+
 void VulkanAdapter::UpdateDescriptorSet(ECS& ecs)
 {
     renderer->UpdateDescriptorSets(ecs);

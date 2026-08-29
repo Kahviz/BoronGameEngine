@@ -52,10 +52,10 @@ struct Vertex2d
         attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
         attributeDescriptions[1].offset = offsetof(Vertex2d, color);
 
-        attributeDescriptions[3].binding = 0;
-        attributeDescriptions[3].location = 2;
-        attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[3].offset = offsetof(Vertex2d, uv);
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[2].offset = offsetof(Vertex2d, uv);
 
         return attributeDescriptions;
     }

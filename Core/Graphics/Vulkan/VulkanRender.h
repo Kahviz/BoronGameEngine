@@ -101,6 +101,7 @@ public:
     std::vector<VkCommandBuffer> GetCommandBuffers() { return vkCommandBuffer.GetCommandBuffers(); };
     uint32_t GetGraphicsFamilyIndex() { return vkDevice.GetFamilyIndex(); };
     std::vector<VkImageView> GetSwapChainImageViews() { return vkSwapchain.GetSwapchainImageViews(); };
+    VkExtent2D GetSwapchainExtent() { return vkSwapchain.GetSwapchainExtent(); };
     VkRenderPass GetRenderPass() { return renderPass; };
     VkCommandBuffer GetCurrentFrameCommandBuffer() { return vkCommandBuffer.GetCommandBuffers()[currentFrame]; };
     VkCommandPool GetCommandPool() { return vkCommandBuffer.GetCommandPool(); }

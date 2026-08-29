@@ -17,7 +17,20 @@ void BoronGui_implVulkan::BeginFrame() {
 
 }
 
-void BoronGui_implVulkan::DrawRect() {
+void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
+
+    VkViewport viewport{};
+    viewport.height = m_boronGuiNeeds.swapchainExtent.height;
+    viewport.width = m_boronGuiNeeds.swapchainExtent.width;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+    VkRect2D scissor{};
+    scissor.extent = { m_boronGuiNeeds.swapchainExtent.width, m_boronGuiNeeds.swapchainExtent.height };
+
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 
 void BoronGui_implVulkan::EndFrame() {
@@ -25,7 +38,7 @@ void BoronGui_implVulkan::EndFrame() {
 
 bool BoronGui_implVulkan::Init() {
 	CreateInfo("Init func");
-
+    InitPipeline();
 	return true;
 }
 
@@ -37,18 +50,17 @@ void BoronGui_implVulkan::SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
 	m_boronGuiNeeds = p_boronGuiNeeds;
 }
 
-bool BoronGui_implVulkan::InitPipeline(VkDevice device, VkRenderPass renderPass)
+bool BoronGui_implVulkan::InitPipeline()
 {
     CreateInfo("Initing VulkanPipeline!");
-
-    //createDescriptorSetLayout(device);
-
+    
+    //if desc here it would be
 
     auto vertShaderCode = ReadShader(VertexShader);
     auto fragShaderCode = ReadShader(FragmentShader);
-    
-    m_vertShaderModule = CreateShaderModule(device, vertShaderCode);
-    m_fragShaderModule = CreateShaderModule(device, fragShaderCode);
+
+    m_vertShaderModule = CreateShaderModule(m_boronGuiNeeds.device, vertShaderCode);
+    m_fragShaderModule = CreateShaderModule(m_boronGuiNeeds.device, fragShaderCode);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -124,7 +136,7 @@ bool BoronGui_implVulkan::InitPipeline(VkDevice device, VkRenderPass renderPass)
     pipelineLayoutInfo.setLayoutCount = 0;
     pipelineLayoutInfo.pSetLayouts = nullptr;
 
-    BGE_ASSERT_VKRESULT(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &m_pipelineLayout), "Failed to create pipeline layout!");
+    BGE_ASSERT_VKRESULT(vkCreatePipelineLayout(m_boronGuiNeeds.device, &pipelineLayoutInfo, nullptr, &m_pipelineLayout), "Failed to create pipeline layout!");
 
     VkPipelineDynamicStateCreateInfo dynamicState{};
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -148,10 +160,10 @@ bool BoronGui_implVulkan::InitPipeline(VkDevice device, VkRenderPass renderPass)
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.layout = m_pipelineLayout;
-    pipelineInfo.renderPass = renderPass;
+    pipelineInfo.renderPass = m_boronGuiNeeds.renderPass;
     pipelineInfo.subpass = 0;
 
-    BGE_ASSERT_VKRESULT(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline), "Failed to create graphics pipeline!");
+    BGE_ASSERT_VKRESULT(vkCreateGraphicsPipelines(m_boronGuiNeeds.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline), "Failed to create graphics pipeline!");
 
     return true;
 }
