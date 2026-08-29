@@ -38,6 +38,17 @@ inline std::vector<char> ReadFile(const std::string& filename) {
     return buffer;
 }
 
+template<size_t N>
+std::vector<char> ReadShader(const uint32_t(&shader)[N])
+{
+    const char* data = reinterpret_cast<const char*>(shader);
+
+    return std::vector<char>(
+        data,
+        data + N * sizeof(uint32_t)
+    );
+}
+
 inline VkShaderModule CreateShaderModule(VkDevice device, const std::vector<char>& code) {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

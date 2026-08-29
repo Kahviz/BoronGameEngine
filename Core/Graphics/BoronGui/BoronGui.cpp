@@ -8,7 +8,7 @@ std::vector<std::unique_ptr<Borongui::Widget>> BoronGui::widgets;
 void BoronGui::InitBoronGui(BoronGuiNeeds& p_boronGuiNeeds) {
 	CreateInfo("Initing BoronGui");
 
-	BoronGuiBackends::Init(p_boronGuiNeeds);
+	BoronGuiBackends::Init(p_boronGuiNeeds); // i will do it a little cleaner like this
 
 	widgets.push_back(std::make_unique<Borongui::Frame>());
 }

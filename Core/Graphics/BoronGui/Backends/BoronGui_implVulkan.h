@@ -21,7 +21,12 @@ public:
     static bool Init();
     static const BoronGuiNeeds& GetGuiNeeds();
     static void SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds);
+    bool InitPipeline(VkDevice device, VkRenderPass renderPass);
 private:
+    static VkShaderModule m_vertShaderModule;
+    static VkShaderModule m_fragShaderModule;
     static BoronGuiNeeds m_boronGuiNeeds;
+    static VkPipelineLayout m_pipelineLayout;
+    static VkPipeline m_graphicsPipeline;
 };
 #endif
