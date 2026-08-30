@@ -22,6 +22,7 @@ public:
     static bool Init();
     static const BoronGuiNeeds& GetGuiNeeds();
     static void SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds);
+    static bool DrawTriangle(VkCommandBuffer p_commandBuffer);
     static bool InitPipeline();
 private:
     static VkShaderModule m_vertShaderModule;

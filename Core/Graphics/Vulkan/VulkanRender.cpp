@@ -384,10 +384,18 @@ void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
 
         if (hasTexture)
         {
+            VkPipeline pipeline = vkPipeline.GetTextureGraphicsPipeline();
+
+            if (pipeline == VK_NULL_HANDLE)
+            {
+                CreateError("Texture graphics pipeline is VK_NULL_HANDLE!");
+                return;
+            }
+
             vkCmdBindPipeline(
                 cmd,
                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                vkPipeline.GetTextureGraphicsPipeline()
+                pipeline
             );
         }
         else
@@ -466,6 +474,7 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bo
     }
 
     BoronGui_implVulkan::SetupRenderState(cmd);
+    BoronGui_implVulkan::DrawTriangle(cmd);
 
     vkCmdEndRenderPass(cmd);
     vkEndCommandBuffer(cmd);

@@ -3,6 +3,7 @@
 #if VULKAN == 1
 #include "BoronGui_implVulkan.h"
 #endif
+
 void BoronGuiBackends::DrawRect() {
 
 }

@@ -2,8 +2,8 @@
 #include <ErrorHandling/ErrorMessage.h>
 
 #if VULKAN == 1
-#include "Shaders/FragmentShader.h"
-#include "Shaders/VertexShader.h"
+#include "Shaders/Vulkan/FragmentShader.h"
+#include "Shaders/Vulkan/VertexShader.h"
 #include "Vulkan/VulkanHelpers.h"
 #include "Vertex2d.h"
 
@@ -12,6 +12,8 @@ VkShaderModule BoronGui_implVulkan::m_vertShaderModule = VK_NULL_HANDLE;
 VkShaderModule BoronGui_implVulkan::m_fragShaderModule = VK_NULL_HANDLE;
 VkPipelineLayout BoronGui_implVulkan::m_pipelineLayout = VK_NULL_HANDLE;
 VkPipeline BoronGui_implVulkan::m_graphicsPipeline = VK_NULL_HANDLE;
+
+
 
 void BoronGui_implVulkan::BeginFrame() {
 
@@ -50,8 +52,18 @@ void BoronGui_implVulkan::SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
 	m_boronGuiNeeds = p_boronGuiNeeds;
 }
 
-bool BoronGui_implVulkan::InitPipeline()
-{
+bool BoronGui_implVulkan::DrawTriangle(VkCommandBuffer p_commandBuffer) {
+    vkCmdDraw(
+        p_commandBuffer,
+        3,
+        1,
+        0,
+        0
+    );
+    return true;
+}
+
+bool BoronGui_implVulkan::InitPipeline() {
     CreateInfo("Initing VulkanPipeline!");
     
     //if desc here it would be
@@ -79,13 +91,18 @@ bool BoronGui_implVulkan::InitPipeline()
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-    auto bindingDescription = Vertex2d::getBindingDescription();
-    auto attributeDescriptions = Vertex2d::getAttributeDescriptions();
+    //auto bindingDescription = Vertex2d::getBindingDescription();
+    //auto attributeDescriptions = Vertex2d::getAttributeDescriptions();
 
-    vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+    vertexInputInfo.vertexBindingDescriptionCount = 0;
+    vertexInputInfo.pVertexBindingDescriptions = nullptr;
+
+    vertexInputInfo.vertexAttributeDescriptionCount = 0;
+    vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+    //vertexInputInfo.vertexBindingDescriptionCount = 1;
+    //vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+    //vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+    //vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

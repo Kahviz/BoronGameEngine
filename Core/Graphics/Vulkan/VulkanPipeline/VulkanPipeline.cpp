@@ -133,6 +133,8 @@ bool VulkanPipeline::Init(VkDevice device, VkRenderPass renderPass)
 
     shaderStages[1].module = texFragShaderModule;
 
+    BGE_ASSERT_VKRESULT(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &textureGraphicsPipeline), "Failed to create graphics pipeline!");
+
     return true;
 }
 
