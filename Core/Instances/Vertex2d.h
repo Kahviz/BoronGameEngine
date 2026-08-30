@@ -39,25 +39,33 @@ struct Vertex2d
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 4> attributes{};
 
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = VK_FORMAT_R32_SFLOAT;
-        attributeDescriptions[0].offset = offsetof(Vertex2d, pos);
+        attributes[0].binding = 0;
+        attributes[0].location = 0;
+        attributes[0].format = VK_FORMAT_R32G32_SFLOAT;
+        attributes[0].offset = offsetof(Vertex2d, pos);
 
-        attributeDescriptions[1].binding = 0;
-        attributeDescriptions[1].location = 1;
-        attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[1].offset = offsetof(Vertex2d, color);
+        // color
+        attributes[1].binding = 0;
+        attributes[1].location = 1;
+        attributes[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributes[1].offset = offsetof(Vertex2d, color);
 
-        attributeDescriptions[2].binding = 0;
-        attributeDescriptions[2].location = 2;
-        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[2].offset = offsetof(Vertex2d, uv);
+        // UV
+        attributes[2].binding = 0;
+        attributes[2].location = 2;
+        attributes[2].format = VK_FORMAT_R32G32_SFLOAT;
+        attributes[2].offset = offsetof(Vertex2d, uv);
 
-        return attributeDescriptions;
+        // brightness
+        attributes[3].binding = 0;
+        attributes[3].location = 3;
+        attributes[3].format = VK_FORMAT_R32_SFLOAT;
+        attributes[3].offset = offsetof(Vertex2d, brightness);
+
+        return attributes;
     }
 };
 #endif
