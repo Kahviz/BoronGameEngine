@@ -13,7 +13,12 @@ VkShaderModule BoronGui_implVulkan::m_fragShaderModule = VK_NULL_HANDLE;
 VkPipelineLayout BoronGui_implVulkan::m_pipelineLayout = VK_NULL_HANDLE;
 VkPipeline BoronGui_implVulkan::m_graphicsPipeline = VK_NULL_HANDLE;
 
-
+struct Color {
+    float r = 0;
+    float g = 0;
+    float b = 0;
+    float a = 0;
+};
 
 void BoronGui_implVulkan::BeginFrame() {
 
@@ -53,6 +58,29 @@ void BoronGui_implVulkan::SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
 }
 
 bool BoronGui_implVulkan::DrawTriangle(VkCommandBuffer p_commandBuffer) {
+    static BML::Color255 color = { 255,0,0 };
+    color.set(color.x() - 1.0f,color.y(),color.z());
+
+    if (color.x() == 0) {
+        color.set(255, color.y(), color.z());
+
+    }
+    Color col = {
+        color.x() / 255.0f,
+        color.y() / 255.0f,
+        color.z() / 255.0f,
+        1.0f
+    };
+
+    vkCmdPushConstants(
+        p_commandBuffer,
+        m_pipelineLayout,
+        VK_SHADER_STAGE_VERTEX_BIT,
+        0,
+        sizeof(Color),
+        &col
+    );
+
     vkCmdDraw(
         p_commandBuffer,
         3,
@@ -148,19 +176,28 @@ bool BoronGui_implVulkan::InitPipeline() {
     colorBlending.attachmentCount = 1;
     colorBlending.pAttachments = &colorBlendAttachment;
 
+    VkPushConstantRange pushConstant{};
+    pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pushConstant.offset = 0;
+    pushConstant.size = sizeof(Color);
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 0;
     pipelineLayoutInfo.pSetLayouts = nullptr;
+    pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
 
     BGE_ASSERT_VKRESULT(vkCreatePipelineLayout(m_boronGuiNeeds.device, &pipelineLayoutInfo, nullptr, &m_pipelineLayout), "Failed to create pipeline layout!");
 
     VkPipelineDynamicStateCreateInfo dynamicState{};
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+
     VkDynamicState dynamicStates[] = {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR
     };
+
     dynamicState.dynamicStateCount = 2;
     dynamicState.pDynamicStates = dynamicStates;
 
