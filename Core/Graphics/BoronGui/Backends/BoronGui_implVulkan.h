@@ -3,6 +3,7 @@
 
 #if VULKAN == 1
 #include "vulkan/Vulkan.h"
+#include "VulkanBuffer.h"
 
 struct BoronGuiNeeds {
     VkDevice device = VK_NULL_HANDLE;
@@ -30,5 +31,6 @@ private:
     static BoronGuiNeeds m_boronGuiNeeds;
     static VkPipelineLayout m_pipelineLayout;
     static VkPipeline m_graphicsPipeline;
+    static VulkanBuffer m_vkBuffer; // This is just for test
 };
 #endif

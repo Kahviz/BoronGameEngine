@@ -12,12 +12,30 @@ VkShaderModule BoronGui_implVulkan::m_vertShaderModule = VK_NULL_HANDLE;
 VkShaderModule BoronGui_implVulkan::m_fragShaderModule = VK_NULL_HANDLE;
 VkPipelineLayout BoronGui_implVulkan::m_pipelineLayout = VK_NULL_HANDLE;
 VkPipeline BoronGui_implVulkan::m_graphicsPipeline = VK_NULL_HANDLE;
+VulkanBuffer BoronGui_implVulkan::m_vkBuffer{}; // This is just for test
 
 struct Color {
     float r = 0;
     float g = 0;
     float b = 0;
     float a = 0;
+};
+static Vertex2d vertices[] =
+{
+    Vertex2d(
+        { 0.0f, -0.5f },
+        { 1.0f, 0.0f, 0.0f }
+    ),
+
+    Vertex2d(
+        { 0.5f, 0.5f },
+        { 0.0f, 1.0f, 0.0f }
+    ),
+
+    Vertex2d(
+        { -0.5f, 0.5f },
+        { 0.0f, 0.0f, 1.0f }
+    )
 };
 
 void BoronGui_implVulkan::BeginFrame() {
@@ -44,6 +62,17 @@ void BoronGui_implVulkan::EndFrame() {
 }
 
 bool BoronGui_implVulkan::Init() {
+    m_vkBuffer.Create(
+        m_boronGuiNeeds.device,
+        m_boronGuiNeeds.physicalDevice,
+        sizeof(vertices),
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+    );
+
+    m_vkBuffer.UploadData(vertices, sizeof(vertices));
+
 	CreateInfo("Init func");
     InitPipeline();
 	return true;
@@ -58,6 +87,23 @@ void BoronGui_implVulkan::SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
 }
 
 bool BoronGui_implVulkan::DrawTriangle(VkCommandBuffer p_commandBuffer) {
+
+    VkBuffer vertexBuffers[] = {
+        m_vkBuffer.GetBuffer()
+    };
+
+    VkDeviceSize offsets[] = {
+        0
+    };
+
+    vkCmdBindVertexBuffers(
+        p_commandBuffer,
+        0,
+        1,
+        vertexBuffers,
+        offsets
+    );
+
     static BML::Color255 color = { 255,0,0 };
     color.set(color.x() - 1.0f,color.y(),color.z());
 
@@ -119,18 +165,18 @@ bool BoronGui_implVulkan::InitPipeline() {
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-    //auto bindingDescription = Vertex2d::getBindingDescription();
-    //auto attributeDescriptions = Vertex2d::getAttributeDescriptions();
+    auto bindingDescription = Vertex2d::getBindingDescription();
+    auto attributeDescriptions = Vertex2d::getAttributeDescriptions();
 
     vertexInputInfo.vertexBindingDescriptionCount = 0;
     vertexInputInfo.pVertexBindingDescriptions = nullptr;
 
     vertexInputInfo.vertexAttributeDescriptionCount = 0;
     vertexInputInfo.pVertexAttributeDescriptions = nullptr;
-    //vertexInputInfo.vertexBindingDescriptionCount = 1;
-    //vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-    //vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-    //vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

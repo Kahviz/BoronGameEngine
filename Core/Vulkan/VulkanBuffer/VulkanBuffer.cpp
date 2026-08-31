@@ -57,6 +57,9 @@ void VulkanBuffer::Destroy() {
 bool VulkanBuffer::UploadData(const void* p_data, VkDeviceSize p_size) {
 	void* data = nullptr;
 
+	if (p_size > m_deviceSize)
+		return false;
+
 	BGE_ASSERT_VKRESULT(vkMapMemory(m_device, m_memory, 0, p_size, 0, &data), "Failed to map memory!");
 	memcpy(data, p_data, p_size);
 
