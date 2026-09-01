@@ -13,6 +13,8 @@ VkShaderModule BoronGui_implVulkan::m_fragShaderModule = VK_NULL_HANDLE;
 VkPipelineLayout BoronGui_implVulkan::m_pipelineLayout = VK_NULL_HANDLE;
 VkPipeline BoronGui_implVulkan::m_graphicsPipeline = VK_NULL_HANDLE;
 VulkanBuffer BoronGui_implVulkan::m_vkBuffer{}; // This is just for test
+VulkanBuffer BoronGui_implVulkan::m_vkBufferIndex{}; // This is just for test
+VkIndexType BoronGui_implVulkan::indexType = VK_INDEX_TYPE_UINT32;
 
 struct Color {
     float r = 0;
@@ -20,22 +22,32 @@ struct Color {
     float b = 0;
     float a = 0;
 };
-static Vertex2d vertices[] =
-{
+
+static Vertex2d vertices[] = {
     Vertex2d(
-        { 0.0f, -0.5f },
+        { -0.5f, -0.5f },
         { 1.0f, 0.0f, 0.0f }
     ),
 
     Vertex2d(
-        { 0.5f, 0.5f },
+        { 0.5f, -0.5f },
         { 0.0f, 1.0f, 0.0f }
     ),
 
     Vertex2d(
-        { -0.5f, 0.5f },
+        { 0.5f, 0.5f },
         { 0.0f, 0.0f, 1.0f }
+    ),
+
+    Vertex2d(
+        { -0.5f, 0.5f },
+        { 1.0f, 1.0f, 0.0f }
     )
+};
+
+static uint32_t indices[] = {
+    0, 1, 2,
+    2, 3, 0
 };
 
 void BoronGui_implVulkan::BeginFrame() {
@@ -71,7 +83,17 @@ bool BoronGui_implVulkan::Init() {
         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
     );
 
+    m_vkBufferIndex.Create(
+        m_boronGuiNeeds.device,
+        m_boronGuiNeeds.physicalDevice,
+        sizeof(indices),
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+    );
+
     m_vkBuffer.UploadData(vertices, sizeof(vertices));
+    m_vkBufferIndex.UploadData(indices, sizeof(indices));
 
 	CreateInfo("Init func");
     InitPipeline();
@@ -92,6 +114,10 @@ bool BoronGui_implVulkan::DrawTriangle(VkCommandBuffer p_commandBuffer) {
         m_vkBuffer.GetBuffer()
     };
 
+    VkBuffer indexBuffers[] = {
+        m_vkBufferIndex.GetBuffer()
+    };
+
     VkDeviceSize offsets[] = {
         0
     };
@@ -103,7 +129,14 @@ bool BoronGui_implVulkan::DrawTriangle(VkCommandBuffer p_commandBuffer) {
         vertexBuffers,
         offsets
     );
+    vkCmdBindIndexBuffer(
+        p_commandBuffer,
+        *indexBuffers,
+        0,
+        indexType
+    );
 
+    
     static BML::Color255 color = { 255,0,0 };
     color.set(color.x() - 1.0f,color.y(),color.z());
 
@@ -127,13 +160,15 @@ bool BoronGui_implVulkan::DrawTriangle(VkCommandBuffer p_commandBuffer) {
         &col
     );
 
-    vkCmdDraw(
+    vkCmdDrawIndexed(
         p_commandBuffer,
-        3,
+        6,
         1,
+        0,
         0,
         0
     );
+
     return true;
 }
 

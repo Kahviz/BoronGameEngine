@@ -32,5 +32,7 @@ private:
     static VkPipelineLayout m_pipelineLayout;
     static VkPipeline m_graphicsPipeline;
     static VulkanBuffer m_vkBuffer; // This is just for test
+    static VulkanBuffer m_vkBufferIndex; // This is just for test
+    static VkIndexType indexType;
 };
 #endif
