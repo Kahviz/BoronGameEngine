@@ -244,7 +244,6 @@ add_executable(BoronEngine
     Core/Graphics/BoronGui/Widgets/Frame.cpp
 
     Core/Graphics/BoronGui/Backends/Backends.h
-    Core/Graphics/BoronGui/Backends/Backends.cpp
 
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.cpp
 

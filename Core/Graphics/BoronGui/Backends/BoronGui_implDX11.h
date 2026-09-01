@@ -5,8 +5,6 @@
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"d3dcompiler.lib")
 
-struct BoronGuiNeeds {};
-
 class BoronGui_implDX11 {
 public:
 

@@ -4,26 +4,21 @@
 #if VULKAN == 1
 #include "vulkan/Vulkan.h"
 #include "VulkanBuffer.h"
+#include "Backends.h"
+#include "BoronGuiTypes.h"
 
-struct BoronGuiNeeds {
-    VkDevice device = VK_NULL_HANDLE;
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-
-    VkRenderPass renderPass = VK_NULL_HANDLE;
-    VkQueue graphicsQueue = VK_NULL_HANDLE;
-    VkCommandPool commandPool = VK_NULL_HANDLE;
-    VkExtent2D swapchainExtent{};
-};
-
-class BoronGui_implVulkan {
+class BoronGui_implVulkan : public BoronGuiBackends::Backends {
 public:
     static void BeginFrame();
     static void SetupRenderState(VkCommandBuffer commandBuffer);
     static void EndFrame();
-    static bool Init();
     static const BoronGuiNeeds& GetGuiNeeds();
-    static void SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds);
-    static bool DrawTriangle(VkCommandBuffer p_commandBuffer);
+
+    void Init() override;
+    void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) override;
+    void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) override;
+    void RenderAFrame() override;
+
     static bool InitPipeline();
 private:
     static VkShaderModule m_vertShaderModule;
@@ -33,6 +28,9 @@ private:
     static VkPipeline m_graphicsPipeline;
     static VulkanBuffer m_vkBuffer; // This is just for test
     static VulkanBuffer m_vkBufferIndex; // This is just for test
+
     static VkIndexType indexType;
+
+    static VkCommandBuffer m_commandBuffer;
 };
 #endif

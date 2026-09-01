@@ -19,6 +19,7 @@
 #include "Components.h"
 #include "Texture.h"
 #include "backends/BoronGui_implVulkan.h"
+#include <BoronGui.h>
 
 bool VulkanRender::Init(GLFWwindow* window)
 {
@@ -473,8 +474,12 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bo
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
     }
 
+    PerFrameStuct perFrameStruct{};
+    perFrameStruct.commandBuffer = cmd;
+
+    BoronGui::UpdatePerFrameOBJ(perFrameStruct);
     BoronGui_implVulkan::SetupRenderState(cmd);
-    BoronGui_implVulkan::DrawTriangle(cmd);
+    BoronGui::DrawAFrame();
 
     vkCmdEndRenderPass(cmd);
     vkEndCommandBuffer(cmd);

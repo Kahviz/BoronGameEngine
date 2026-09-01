@@ -3,14 +3,33 @@
 #include "ErrorHandling/ErrorMessage.h"
 #include "Backends/Backends.h"
 
+std::unique_ptr<BoronGuiBackends::Backends> BoronGui::m_backend;
 std::vector<std::unique_ptr<Borongui::Widget>> BoronGui::widgets;
 
+void BoronGui::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
+	m_backend->UpdatePerFrameOBJ(p_perFrameStuct);
+}
+
 void BoronGui::InitBoronGui(BoronGuiNeeds& p_boronGuiNeeds) {
-	CreateInfo("Initing BoronGui");
+	bool Inited = false;
 
-	BoronGuiBackends::Init(p_boronGuiNeeds); // i will do it a little cleaner like this
+	#if VULKAN == 1
+		m_backend = std::make_unique<BoronGui_implVulkan>();
+		Inited = true;
+	#endif
 
-	widgets.push_back(std::make_unique<Borongui::Frame>());
+	#if DIRECTX11 == 1
+
+	#endif
+
+	if (Inited) {
+		m_backend->SetBoronGuiNeeds(p_boronGuiNeeds);
+		m_backend->Init();
+
+		CreateInfo("Initing BoronGui");
+
+		widgets.push_back(std::make_unique<Borongui::Frame>());
+	}
 }
 
 void BoronGui::SubmitWidget(std::unique_ptr<Borongui::Widget> p_widget) {
@@ -21,4 +40,8 @@ void BoronGui::SubmitWidget(std::unique_ptr<Borongui::Widget> p_widget) {
 
 void BoronGui::EndFrame() {
 	widgets.clear();
+}
+
+void BoronGui::DrawAFrame() {
+	m_backend->RenderAFrame();
 }

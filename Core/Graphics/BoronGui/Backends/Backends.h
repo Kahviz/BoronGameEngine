@@ -1,18 +1,18 @@
 #pragma once
 
 #include "GLOBALS.h"
-#include "ErrorHandling/ErrorMessage.h"
-
-#if DIRECTX11 == 1
-	#include "BoronGui_implDX11.h"
-#endif
-
-#if VULKAN == 1
-	#include "BoronGui_implVulkan.h"
-#endif
+#include "BoronGuiTypes.h"
 
 namespace BoronGuiBackends {
-	void DrawRect();
+	class Backends {
+	public:
+		virtual ~Backends() = default;
+		virtual void RenderAFrame() = 0;
+		virtual void Init() = 0;
+		virtual void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) = 0;
+		virtual void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) = 0;
+	private:
 
-	void Init(BoronGuiNeeds& p_boronGuiNeeds);
+	};
 };
+

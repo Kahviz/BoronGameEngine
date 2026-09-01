@@ -3,7 +3,7 @@
 #include "GLOBALS.h"
 
 void Borongui::Frame::Render() {
-
+	
 }
 
 bool Borongui::Frame::setSize(const BML::Vec2& p_size) {

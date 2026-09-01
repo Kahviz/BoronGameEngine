@@ -15,7 +15,7 @@ VkPipeline BoronGui_implVulkan::m_graphicsPipeline = VK_NULL_HANDLE;
 VulkanBuffer BoronGui_implVulkan::m_vkBuffer{}; // This is just for test
 VulkanBuffer BoronGui_implVulkan::m_vkBufferIndex{}; // This is just for test
 VkIndexType BoronGui_implVulkan::indexType = VK_INDEX_TYPE_UINT32;
-
+VkCommandBuffer BoronGui_implVulkan::m_commandBuffer;
 struct Color {
     float r = 0;
     float g = 0;
@@ -73,7 +73,7 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
 void BoronGui_implVulkan::EndFrame() {
 }
 
-bool BoronGui_implVulkan::Init() {
+void BoronGui_implVulkan::Init() {
     m_vkBuffer.Create(
         m_boronGuiNeeds.device,
         m_boronGuiNeeds.physicalDevice,
@@ -97,18 +97,21 @@ bool BoronGui_implVulkan::Init() {
 
 	CreateInfo("Init func");
     InitPipeline();
-	return true;
 }
 
 const BoronGuiNeeds& BoronGui_implVulkan::GetGuiNeeds() {
 	return m_boronGuiNeeds;
 }
 
-void BoronGui_implVulkan::SetGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
-	m_boronGuiNeeds = p_boronGuiNeeds;
+void BoronGui_implVulkan::SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
+    m_boronGuiNeeds = p_boronGuiNeeds;
 }
 
-bool BoronGui_implVulkan::DrawTriangle(VkCommandBuffer p_commandBuffer) {
+void BoronGui_implVulkan::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
+    m_commandBuffer = p_perFrameStuct.commandBuffer;
+}
+
+void BoronGui_implVulkan::RenderAFrame() {
 
     VkBuffer vertexBuffers[] = {
         m_vkBuffer.GetBuffer()
@@ -123,14 +126,14 @@ bool BoronGui_implVulkan::DrawTriangle(VkCommandBuffer p_commandBuffer) {
     };
 
     vkCmdBindVertexBuffers(
-        p_commandBuffer,
+        m_commandBuffer,
         0,
         1,
         vertexBuffers,
         offsets
     );
     vkCmdBindIndexBuffer(
-        p_commandBuffer,
+        m_commandBuffer,
         *indexBuffers,
         0,
         indexType
@@ -152,7 +155,7 @@ bool BoronGui_implVulkan::DrawTriangle(VkCommandBuffer p_commandBuffer) {
     };
 
     vkCmdPushConstants(
-        p_commandBuffer,
+        m_commandBuffer,
         m_pipelineLayout,
         VK_SHADER_STAGE_VERTEX_BIT,
         0,
@@ -161,20 +164,17 @@ bool BoronGui_implVulkan::DrawTriangle(VkCommandBuffer p_commandBuffer) {
     );
 
     vkCmdDrawIndexed(
-        p_commandBuffer,
+        m_commandBuffer,
         6,
         1,
         0,
         0,
         0
     );
-
-    return true;
 }
 
 bool BoronGui_implVulkan::InitPipeline() {
     CreateInfo("Initing VulkanPipeline!");
-    
     //if desc here it would be
 
     auto vertShaderCode = ReadShader(VertexShader);

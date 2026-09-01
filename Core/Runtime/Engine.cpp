@@ -173,13 +173,9 @@ int Engine::EngineRun()
         boronGuiNeeds.swapchainExtent = vk.GetSwapchainExtent();
         boronGuiNeeds.device = vk.GetDevice();
         boronGuiNeeds.renderPass = vk.GetRenderPass();
-#endif
+    #endif
 
     BoronGui::InitBoronGui(boronGuiNeeds);
-
-    #if VULKAN == 1
-        BoronGui_implVulkan::Init();
-    #endif
 
     while (!glfwWindowShouldClose(glfwWND))
     {
@@ -503,7 +499,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         }
     );
 #endif
-    BoronGuiBackends::DrawRect();
     //Physics
     std::thread physicsThread([&]() {
         m_ecs.Each<PhysicsComponent>(
