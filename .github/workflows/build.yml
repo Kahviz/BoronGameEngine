@@ -2,11 +2,9 @@ name: Build BoronEngine
 
 on:
   workflow_dispatch:
-
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
@@ -26,14 +24,19 @@ jobs:
           cache: true
 
       - name: Check Vulkan SDK
+        shell: pwsh
         run: |
-          echo VULKAN_SDK=%VULKAN_SDK%
+          echo "VULKAN_SDK=$env:VULKAN_SDK"
+          Test-Path "$env:VULKAN_SDK/Include/vulkan/vulkan.h"
+          Test-Path "$env:VULKAN_SDK/Lib/vulkan-1.lib"
           glslangValidator --version
 
       - name: Configure CMake
+        shell: pwsh
         run: |
-          cmake -S . -B build
+          cmake -S . -B build `
+            -DVulkan_INCLUDE_DIR="$env:VULKAN_SDK/Include" `
+            -DVulkan_LIBRARY="$env:VULKAN_SDK/Lib/vulkan-1.lib"
 
       - name: Build Release
-        run: |
-          cmake --build build --config Release
+        run: cmake --build build --config Release
