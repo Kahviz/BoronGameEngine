@@ -32,16 +32,16 @@ jobs:
           glslangValidator --version
 
       - name: Configure CMake
-          shell: pwsh
-          run: |
-            echo "VULKAN_SDK=$env:VULKAN_SDK"
-            echo "Vulkan header:"
-            Get-Item "$env:VULKAN_SDK/Include/vulkan/vulkan.h"
+        shell: pwsh
+        run: |
+          echo "VULKAN_SDK=$env:VULKAN_SDK"
+          echo "Vulkan header:"
+          Get-Item "$env:VULKAN_SDK/Include/vulkan/vulkan.h"
 
-            echo "Vulkan library:"
-            Get-Item "$env:VULKAN_SDK/Lib/vulkan-1.lib"
+          echo "Vulkan library:"
+          Get-Item "$env:VULKAN_SDK/Lib/vulkan-1.lib"
 
-            cmake -S . -B build
+          cmake -S . -B build
 
       - name: Build Release
         run: cmake --build build --config Release
