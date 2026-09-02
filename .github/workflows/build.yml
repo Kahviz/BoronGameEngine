@@ -56,4 +56,4 @@ jobs:
           cmake -S . -B build
 
       - name: Build Release
-        run: cmake --build build --config Release
+        run: cmake --build build --config Release 
