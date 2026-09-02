@@ -48,7 +48,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "VULKAN_SDK=$env:VULKAN_SDK"
-          cmake -S . -B build
+          cmake -S . -B build -DBORON_USE_DISCORD=OFF
 
       - name: Build Release
         run: cmake --build build --config Release

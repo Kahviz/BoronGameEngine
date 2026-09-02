@@ -106,7 +106,15 @@ endif()
 FetchContent_MakeAvailable(SDL3)
 FetchContent_MakeAvailable(imgui)
 
-if(WIN32)
+option(BORON_USE_DISCORD "Enable Discord integration" ON)
+
+if(BORON_USE_DISCORD)
+    add_compile_definitions(BORON_USE_DISCORD=1)
+else()
+    add_compile_definitions(BORON_USE_DISCORD=0)
+endif()
+
+if(WIN32 AND BORON_USE_DISCORD)
     set(DISCORD_SDK_ROOT "${CMAKE_SOURCE_DIR}/lib/discord_social_sdk")
     set(DISCORD_SDK_INCLUDE_DIR "${DISCORD_SDK_ROOT}/include")
     set(DISCORD_SDK_LIB_DIR "${DISCORD_SDK_ROOT}/lib/release")
@@ -243,6 +251,8 @@ add_executable(BoronEngine
     Core/Graphics/Vulkan/VulkanAdapter.h
     Core/Graphics/Vulkan/VulkanAdapter.cpp
 
+    #Icon
+    BoronEngine.rc
 )
 
 target_compile_options(BoronEngine PRIVATE /W4)
@@ -329,8 +339,13 @@ if(WIN32)
         glfw
         SDL3::SDL3
         imgui
-        "${DISCORD_LIB_PATH}"
     )
+
+    if(BORON_USE_DISCORD)
+        target_link_libraries(BoronEngine PRIVATE
+            "${DISCORD_LIB_PATH}"
+        )
+    endif()
 else()
     target_link_libraries(BoronEngine PRIVATE
         assimp
@@ -350,13 +365,21 @@ if(WIN32)
             $<TARGET_RUNTIME_DLLS:BoronEngine>
             $<TARGET_FILE_DIR:BoronEngine>
 
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${DISCORD_SHARED_LIB}"
-            $<TARGET_FILE_DIR:BoronEngine>
-
         COMMAND_EXPAND_LISTS
     )
+
+    if(BORON_USE_DISCORD)
+        add_custom_command(
+            TARGET BoronEngine
+            POST_BUILD
+
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${DISCORD_SHARED_LIB}"
+                $<TARGET_FILE_DIR:BoronEngine>
+        )
+    endif()
 endif()
+
 if(WIN32)
     target_link_options(BoronEngine PRIVATE "/SUBSYSTEM:CONSOLE")
 endif()
