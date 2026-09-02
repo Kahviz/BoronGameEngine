@@ -27,12 +27,16 @@
 Engine::Engine()
     : window(1280, 800, "BoronEngine")
 {
+    CreateWarning("========================");
+    CreateWarning("BoronEngine Version: " + std::to_string(BGE_VERSION));
+    CreateWarning("BoronMathLibrary Version: " + std::to_string(BORONMATHversion));
+    CreateWarning("========================");
+
     dcPresence.Initialize();
     m_ecs.init(&m_componentManager);
 
     if (!ImGuiInited) {
         std::cout << "ImGui version: " << IMGUI_VERSION << std::endl;
-        std::cout << "BoronMathVersion: " << BORONMATHversion << std::endl;
         IMGUI_CHECKVERSION();
         ImGuiContext* context = ImGui::CreateContext();
 
@@ -357,19 +361,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         ImGui_Impl_NewFrame();
     }
 #endif
-    static float timer = 0.0f;
-    static int framesd = 0;
-
-    timer += deltatime;
-    framesd++;
-
-    if (timer >= 1.0f)
-    {
-        std::cout << "FPS: " << framesd << '\n';
-        timer = 0.0f;
-        framesd = 0;
-    }
-
     bool ctrlPressed = Keyboard::isHeld(window.GetWindow(), Boron::Keys::LeftCtrl);
     bool RctrlPressed = Keyboard::isHeld(window.GetWindow(), Boron::Keys::RightCtrl);
 
@@ -386,6 +377,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         AddAMesh(m_ecs, "\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false, false);
 
         cubes++;
+
         std::cout << "FPS: " << (1.0f / deltatime) << '\n';
         std::cout << "Cubes: " << (cubes) << '\n';
     }
