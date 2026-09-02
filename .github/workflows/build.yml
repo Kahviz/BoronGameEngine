@@ -23,41 +23,36 @@ jobs:
           version: latest
           cache: true
 
-            - name: Check Vulkan SDK
+      - name: Check Vulkan SDK
         shell: pwsh
         run: |
-          Write-Host "VULKAN SDK"
+          Write-Host "========== VULKAN SDK =========="
           Write-Host "VULKAN_SDK = $env:VULKAN_SDK"
-          
+
           Write-Host ""
           Write-Host "========== ENV =========="
           Get-ChildItem Env: | Where-Object { $_.Name -like "*VULKAN*" }
 
           Write-Host ""
-          Write-Host "VULKAN_SDK CONTENTS"
+          Write-Host "========== VULKAN_SDK CONTENTS =========="
           if ($env:VULKAN_SDK) {
               Get-ChildItem "$env:VULKAN_SDK" -ErrorAction SilentlyContinue
           }
 
           Write-Host ""
-          Write-Host "SEARCHING FOR vulkan.h"
+          Write-Host "========== SEARCHING FOR vulkan.h =========="
           Get-ChildItem "D:\a" -Filter vulkan.h -Recurse -ErrorAction SilentlyContinue |
               Select-Object -First 20 FullName
 
           Write-Host ""
-          Write-Host "SEARCH vulkan-1.lib"
+          Write-Host "========== SEARCHING FOR vulkan-1.lib =========="
           Get-ChildItem "D:\a" -Filter vulkan-1.lib -Recurse -ErrorAction SilentlyContinue |
               Select-Object -First 20 FullName
 
       - name: Configure CMake
         shell: pwsh
         run: |
-          echo "VULKAN_SDK=$env:VULKAN_SDK"
-          echo "Vulkan header:"
-          Get-Item "$env:VULKAN_SDK/Include/vulkan/vulkan.h"
-
-          echo "Vulkan library:"
-          Get-Item "$env:VULKAN_SDK/Lib/vulkan-1.lib"
+          Write-Host "VULKAN_SDK=$env:VULKAN_SDK"
 
           cmake -S . -B build
 
