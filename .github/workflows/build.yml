@@ -26,28 +26,23 @@ jobs:
       - name: Check Vulkan SDK
         shell: pwsh
         run: |
-          Write-Host "VULKAN_SDK=$env:VULKAN_SDK"
-          Write-Host "VULKAN_SDK_VERSION=$env:VULKAN_SDK_VERSION"
+          Write-Host "VULKAN_SDK = $env:VULKAN_SDK"
+          Write-Host "PATH:"
+          $env:PATH -split ';' | Where-Object { $_ -like '*VULKAN*' }
 
           Write-Host ""
-          Write-Host "Searching for Vulkan header..."
-          $header = Get-ChildItem "D:\a" -Filter vulkan.h -Recurse -ErrorAction SilentlyContinue |
-              Select-Object -First 10 FullName
-
-          $header | Format-Table -AutoSize
+          Write-Host "SDK contents:"
+          Get-ChildItem "$env:VULKAN_SDK" -Directory
 
           Write-Host ""
-          Write-Host "Searching for Vulkan library..."
-          $lib = Get-ChildItem "D:\a" -Filter vulkan-1.lib -Recurse -ErrorAction SilentlyContinue |
-              Select-Object -First 10 FullName
-
-          $lib | Format-Table -AutoSize
+          Write-Host "Searching vulkan.h:"
+          Get-ChildItem "$env:VULKAN_SDK" -Recurse -Filter vulkan.h -ErrorAction SilentlyContinue |
+              Select-Object FullName
 
           Write-Host ""
-          Write-Host "Searching for glslangValidator..."
-          Get-ChildItem "D:\a" -Filter glslangValidator.exe -Recurse -ErrorAction SilentlyContinue |
-              Select-Object -First 10 FullName |
-              Format-Table -AutoSize
+          Write-Host "Searching vulkan-1.lib:"
+          Get-ChildItem "$env:VULKAN_SDK" -Recurse -Filter vulkan-1.lib -ErrorAction SilentlyContinue |
+              Select-Object FullName
 
       - name: Configure CMake
         shell: pwsh
@@ -56,4 +51,4 @@ jobs:
           cmake -S . -B build
 
       - name: Build Release
-        run: cmake --build build --config Release 
+        run: cmake --build build --config Release
