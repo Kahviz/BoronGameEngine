@@ -1,0 +1,36 @@
+name: Build BoronEngine
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Vulkan SDK
+        uses: humbletim/install-vulkan-sdk@v1.2
+        with:
+          version: latest
+          cache: true
+
+      - name: Check Vulkan SDK
+        run: |
+          echo VULKAN_SDK=%VULKAN_SDK%
+          glslangValidator --version
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build
+
+      - name: Build Release
+        run: |
+          cmake --build build --config Release
