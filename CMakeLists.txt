@@ -106,61 +106,25 @@ endif()
 FetchContent_MakeAvailable(SDL3)
 FetchContent_MakeAvailable(imgui)
 
-set(DISCORD_SDK_ROOT "${CMAKE_SOURCE_DIR}/lib/discord_social_sdk")
-set(DISCORD_SDK_LIB_DIR "${DISCORD_SDK_ROOT}/lib/release")
-set(DISCORD_SDK_BIN_DIR "${DISCORD_SDK_ROOT}/bin/release")
-set(DISCORD_SDK_INCLUDE_DIR "${DISCORD_SDK_ROOT}/include")
 if(WIN32)
-    set(DISCORD_SDK_ROOT
-        "${CMAKE_SOURCE_DIR}/lib/discord_social_sdk"
-    )
+    set(DISCORD_SDK_ROOT "${CMAKE_SOURCE_DIR}/lib/discord_social_sdk")
+    set(DISCORD_SDK_INCLUDE_DIR "${DISCORD_SDK_ROOT}/include")
+    set(DISCORD_SDK_LIB_DIR "${DISCORD_SDK_ROOT}/lib/release")
+    set(DISCORD_SDK_BIN_DIR "${DISCORD_SDK_ROOT}/bin/release")
+    set(DISCORD_LIB_PATH "${DISCORD_SDK_LIB_DIR}/discord_partner_sdk.lib")
+    set(DISCORD_SHARED_LIB "${DISCORD_SDK_BIN_DIR}/discord_partner_sdk.dll")
 
-    set(DISCORD_SDK_INCLUDE_DIR
-        "${DISCORD_SDK_ROOT}/include"
-    )
-
-    set(DISCORD_SDK_LIB_DIR
-        "${DISCORD_SDK_ROOT}/lib/release"
-    )
-
-    set(DISCORD_SDK_BIN_DIR
-        "${DISCORD_SDK_ROOT}/bin/release"
-    )
-
-    set(DISCORD_LIB_PATH
-        "${DISCORD_SDK_LIB_DIR}/discord_partner_sdk.lib"
-    )
-
-    set(DISCORD_SHARED_LIB
-        "${DISCORD_SDK_BIN_DIR}/discord_partner_sdk.dll"
-    )
-
-    if(NOT EXISTS "${DISCORD_SDK_INCLUDE_DIR}/discordpp.h")
-        message(FATAL_ERROR
-            "Discord SDK header not found:\n"
-            "${DISCORD_SDK_INCLUDE_DIR}/discordpp.h"
-        )
+    if(EXISTS "${DISCORD_SDK_INCLUDE_DIR}/discordpp.h" AND 
+       EXISTS "${DISCORD_LIB_PATH}" AND 
+       EXISTS "${DISCORD_SHARED_LIB}")
+        set(DISCORD_SDK_FOUND TRUE)
+        message(STATUS "Discord SDK found")
+    else()
+        set(DISCORD_SDK_FOUND FALSE)
+        message(WARNING "Discord SDK not found - building without Discord support")
     endif()
-
-    if(NOT EXISTS "${DISCORD_LIB_PATH}")
-        message(FATAL_ERROR
-            "Discord SDK library not found:\n"
-            "${DISCORD_LIB_PATH}"
-        )
-    endif()
-
-    if(NOT EXISTS "${DISCORD_SHARED_LIB}")
-        message(FATAL_ERROR
-            "Discord SDK DLL not found:\n"
-            "${DISCORD_SHARED_LIB}"
-        )
-    endif()
-
-    message(STATUS "Discord SDK:")
-    message(STATUS "  Include: ${DISCORD_SDK_INCLUDE_DIR}")
-    message(STATUS "  Library: ${DISCORD_LIB_PATH}")
-    message(STATUS "  DLL:     ${DISCORD_SHARED_LIB}")
-
+else()
+    set(DISCORD_SDK_FOUND FALSE)
 endif()
 
 add_definitions(
