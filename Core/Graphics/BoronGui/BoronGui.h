@@ -10,12 +10,13 @@ class BoronGui {
 public:
 	static void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct);
 	static void InitBoronGui(BoronGuiNeeds& p_boronGuiNeeds);
-	static void SubmitWidget(std::unique_ptr<Borongui::Widget> p_widget);
+	static void SubmitWidget(Borongui::Widget& p_widget);
 	static void EndFrame();
 	static void DrawAFrame();
+	static void DrawWidgets();
 private:
 	static std::unique_ptr<BoronGuiBackends::Backends> m_backend;
 
-	static std::vector<std::unique_ptr<Borongui::Widget>> widgets;
+	static std::vector<Borongui::Widget*> widgets;
 	bool m_inited = false;
 };

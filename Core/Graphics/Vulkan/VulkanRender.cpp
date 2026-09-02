@@ -431,8 +431,7 @@ void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
     }
 }
 
-void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bool usesTexture)
-{
+void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bool usesTexture) {
     CurrentimageIndex = imageIndex;
     VkCommandBuffer cmd = vkCommandBuffer.GetCommandBuffers()[imageIndex];
     vkResetCommandBuffer(cmd, 0);
@@ -479,8 +478,10 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bo
 
     BoronGui::UpdatePerFrameOBJ(perFrameStruct);
     BoronGui_implVulkan::SetupRenderState(cmd);
-    BoronGui::DrawAFrame();
 
+    BoronGui::DrawWidgets();
+
+    //Render here
     vkCmdEndRenderPass(cmd);
     vkEndCommandBuffer(cmd);
 }

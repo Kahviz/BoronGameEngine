@@ -480,6 +480,9 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         }
     }
 
+    Borongui::Frame frame; //test
+    BoronGui::SubmitWidget(frame);
+
     makeGui.RenderPopUps(deltatime); //Here last so thay be rendered always and on top of everything
 #endif
 
@@ -548,4 +551,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     m_console.update();
     wnd->GetGraphics().EndFrame();
+
+    BoronGui::EndFrame();
 }

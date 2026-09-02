@@ -4,7 +4,7 @@
 #include "Backends/Backends.h"
 
 std::unique_ptr<BoronGuiBackends::Backends> BoronGui::m_backend;
-std::vector<std::unique_ptr<Borongui::Widget>> BoronGui::widgets;
+std::vector<Borongui::Widget*> BoronGui::widgets;
 
 void BoronGui::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
 	m_backend->UpdatePerFrameOBJ(p_perFrameStuct);
@@ -27,15 +27,13 @@ void BoronGui::InitBoronGui(BoronGuiNeeds& p_boronGuiNeeds) {
 		m_backend->Init();
 
 		CreateInfo("Initing BoronGui");
-
-		widgets.push_back(std::make_unique<Borongui::Frame>());
 	}
 }
 
-void BoronGui::SubmitWidget(std::unique_ptr<Borongui::Widget> p_widget) {
-	BGE_ASSERT_PTR(p_widget.get(), "Widget cannot be nullptr!");
+void BoronGui::SubmitWidget(Borongui::Widget& p_widget) {
+	BGE_ASSERT_PTR(&p_widget, "Widget cannot be nullptr!");
 
-	widgets.push_back(std::move(p_widget));
+	widgets.push_back(&p_widget);
 }
 
 void BoronGui::EndFrame() {
@@ -44,4 +42,10 @@ void BoronGui::EndFrame() {
 
 void BoronGui::DrawAFrame() {
 	m_backend->RenderAFrame();
+}
+
+void BoronGui::DrawWidgets() {
+	for (Borongui::Widget* widget : widgets) {
+		widget->Render();
+	}
 }

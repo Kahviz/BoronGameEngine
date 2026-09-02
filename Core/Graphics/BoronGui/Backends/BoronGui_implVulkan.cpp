@@ -112,7 +112,6 @@ void BoronGui_implVulkan::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
 }
 
 void BoronGui_implVulkan::RenderAFrame() {
-
     VkBuffer vertexBuffers[] = {
         m_vkBuffer.GetBuffer()
     };
