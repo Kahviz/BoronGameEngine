@@ -26,34 +26,33 @@ jobs:
       - name: Check Vulkan SDK
         shell: pwsh
         run: |
-          Write-Host "========== VULKAN SDK =========="
-          Write-Host "VULKAN_SDK = $env:VULKAN_SDK"
+          Write-Host "VULKAN_SDK=$env:VULKAN_SDK"
+          Write-Host "VULKAN_SDK_VERSION=$env:VULKAN_SDK_VERSION"
 
           Write-Host ""
-          Write-Host "========== ENV =========="
-          Get-ChildItem Env: | Where-Object { $_.Name -like "*VULKAN*" }
+          Write-Host "Searching for Vulkan header..."
+          $header = Get-ChildItem "D:\a" -Filter vulkan.h -Recurse -ErrorAction SilentlyContinue |
+              Select-Object -First 10 FullName
+
+          $header | Format-Table -AutoSize
 
           Write-Host ""
-          Write-Host "========== VULKAN_SDK CONTENTS =========="
-          if ($env:VULKAN_SDK) {
-              Get-ChildItem "$env:VULKAN_SDK" -ErrorAction SilentlyContinue
-          }
+          Write-Host "Searching for Vulkan library..."
+          $lib = Get-ChildItem "D:\a" -Filter vulkan-1.lib -Recurse -ErrorAction SilentlyContinue |
+              Select-Object -First 10 FullName
+
+          $lib | Format-Table -AutoSize
 
           Write-Host ""
-          Write-Host "========== SEARCHING FOR vulkan.h =========="
-          Get-ChildItem "D:\a" -Filter vulkan.h -Recurse -ErrorAction SilentlyContinue |
-              Select-Object -First 20 FullName
-
-          Write-Host ""
-          Write-Host "========== SEARCHING FOR vulkan-1.lib =========="
-          Get-ChildItem "D:\a" -Filter vulkan-1.lib -Recurse -ErrorAction SilentlyContinue |
-              Select-Object -First 20 FullName
+          Write-Host "Searching for glslangValidator..."
+          Get-ChildItem "D:\a" -Filter glslangValidator.exe -Recurse -ErrorAction SilentlyContinue |
+              Select-Object -First 10 FullName |
+              Format-Table -AutoSize
 
       - name: Configure CMake
         shell: pwsh
         run: |
           Write-Host "VULKAN_SDK=$env:VULKAN_SDK"
-
           cmake -S . -B build
 
       - name: Build Release
