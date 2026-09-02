@@ -140,7 +140,7 @@ void BoronGui_implVulkan::RenderAFrame() {
 
     
     static BML::Color255 color = { 255,0,0 };
-    color.set(color.x() - 1.0f,color.y(),color.z());
+    color.set(color.x() - 1, color.y(),color.z());
 
     if (color.x() == 0) {
         color.set(255, color.y(), color.z());

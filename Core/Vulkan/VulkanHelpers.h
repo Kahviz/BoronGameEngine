@@ -91,6 +91,8 @@ inline VkFormat FindDepthFormat(VkPhysicalDevice physicalDevice) {
     }
 
     CreateError("Failed to find depth format!");
+
+    return VK_FORMAT_UNDEFINED;
 }
 inline VkCommandBuffer BeginSingleTimeCommands(VkCommandPool commandPool,VkDevice device)
 {

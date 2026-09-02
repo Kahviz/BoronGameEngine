@@ -34,7 +34,7 @@ private:
 	VkDevice device = VK_NULL_HANDLE;
 	VkQueue graphicsQueue = VK_NULL_HANDLE;
 
-	uint32_t graphicsFamilyIndex = -1;
+	uint32_t graphicsFamilyIndex = UINT32_MAX;
 
 	std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 	std::vector<const char*> extensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };

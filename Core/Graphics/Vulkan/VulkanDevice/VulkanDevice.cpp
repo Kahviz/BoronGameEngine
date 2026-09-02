@@ -52,7 +52,7 @@ bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
 
-    graphicsFamilyIndex = -1;
+    graphicsFamilyIndex = UINT32_MAX;
 
     for (size_t i = 0; i < queueFamilies.size(); i++) {
         if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
