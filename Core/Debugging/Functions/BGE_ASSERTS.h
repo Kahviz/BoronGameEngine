@@ -149,4 +149,5 @@
 	#define BGE_VK_ASSERT(handle, message) ((void)(handle))
 	#define BGE_ASSERT(condition, message) ((void)(condition))
 	#define BGE_ASSERT_HRESULT(expr, message) ((void)(expr))
+	#define BGE_ASSERT_PTR(ptr, message) ((void)(ptr))
 #endif

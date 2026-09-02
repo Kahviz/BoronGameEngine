@@ -1078,14 +1078,14 @@ void VulkanRender::resizeViewport(uint32_t width, uint32_t height) {
         "Failed to recreate viewport framebuffer"
     );
 
-    ImTextureID viewportDescriptor =
+    ImTextureID imGuiViewportDescriptor =
         (ImTextureID)ImGui_ImplVulkan_AddTexture(
             viewportTexture->GetSampler(),
             viewportTexture->GetImageView(),
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-    viewportTexture->SetImGuiTexture(viewportDescriptor);
+    viewportTexture->SetImGuiTexture(imGuiViewportDescriptor);
 
     viewport_width = width;
     viewport_height = height;
