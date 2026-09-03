@@ -8,8 +8,13 @@ public:
 	void Render() override;
 	bool setSize(const BML::Vec2& p_size);
 	bool setPosition(const BML::Vec2& p_position);
+	bool setColor(const BML::Vec3& p_color);
+	const BML::Vec2& getPosition();
+	const BML::Vec2& getSize();
+	const BML::Vec3& getColor();
 private:
 	BML::Vec2 m_size = { 0,0 };
 	BML::Vec2 m_position = { 0,0 };
+	BML::Vec3 m_color = { 255,0,0 };
 };
 }

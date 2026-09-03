@@ -23,32 +23,13 @@ jobs:
           version: 1.4.309.0
           cache: true
 
-      - name: Check Vulkan SDK
-        shell: pwsh
-        run: |
-          Write-Host "VULKAN_SDK = $env:VULKAN_SDK"
-          Write-Host "PATH:"
-          $env:PATH -split ';' | Where-Object { $_ -like '*VULKAN*' }
-
-          Write-Host ""
-          Write-Host "SDK contents:"
-          Get-ChildItem "$env:VULKAN_SDK" -Directory
-
-          Write-Host ""
-          Write-Host "Searching vulkan.h:"
-          Get-ChildItem "$env:VULKAN_SDK" -Recurse -Filter vulkan.h -ErrorAction SilentlyContinue |
-              Select-Object FullName
-
-          Write-Host ""
-          Write-Host "Searching vulkan-1.lib:"
-          Get-ChildItem "$env:VULKAN_SDK" -Recurse -Filter vulkan-1.lib -ErrorAction SilentlyContinue |
-              Select-Object FullName
-
       - name: Configure CMake
         shell: pwsh
         run: |
-          Write-Host "VULKAN_SDK=$env:VULKAN_SDK"
           cmake -S . -B build -DBORON_USE_DISCORD=OFF
 
       - name: Build Release
         run: cmake --build build --config Release
+
+      - name: Run tests
+        run: ctest --test-dir build -C Release --output-on-failure

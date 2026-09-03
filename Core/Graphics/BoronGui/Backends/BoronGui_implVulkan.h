@@ -6,6 +6,7 @@
 #include "VulkanBuffer.h"
 #include "Backends.h"
 #include "BoronGuiTypes.h"
+#include "BoronMathLibrary.h"
 
 class BoronGui_implVulkan : public BoronGuiBackends::Backends {
 public:
@@ -17,7 +18,7 @@ public:
     void Init() override;
     void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) override;
     void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) override;
-    void RenderAFrame() override;
+    void RenderAFrame(Borongui::Frame frame) override;
 
     static bool InitPipeline();
 private:
@@ -32,5 +33,13 @@ private:
     static VkIndexType indexType;
 
     static VkCommandBuffer m_commandBuffer;
+
+    struct CommonPushConstant {
+        GPUVector2 pos{};
+        GPUVector2 size{};
+        GPUVector2 viewportSize{};
+
+        GPUVector4 color;
+    };
 };
 #endif

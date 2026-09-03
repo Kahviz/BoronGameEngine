@@ -6,6 +6,7 @@
 #include "Shaders/Vulkan/VertexShader.h"
 #include "Vulkan/VulkanHelpers.h"
 #include "Vertex2d.h"
+#include "Widgets/Widgets.h"
 
 BoronGuiNeeds BoronGui_implVulkan::m_boronGuiNeeds{};
 VkShaderModule BoronGui_implVulkan::m_vertShaderModule = VK_NULL_HANDLE;
@@ -16,12 +17,6 @@ VulkanBuffer BoronGui_implVulkan::m_vkBuffer{}; // This is just for test
 VulkanBuffer BoronGui_implVulkan::m_vkBufferIndex{}; // This is just for test
 VkIndexType BoronGui_implVulkan::indexType = VK_INDEX_TYPE_UINT32;
 VkCommandBuffer BoronGui_implVulkan::m_commandBuffer;
-struct Color {
-    float r = 0;
-    float g = 0;
-    float b = 0;
-    float a = 0;
-};
 
 static Vertex2d vertices[] = {
     Vertex2d(
@@ -111,7 +106,7 @@ void BoronGui_implVulkan::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
     m_commandBuffer = p_perFrameStuct.commandBuffer;
 }
 
-void BoronGui_implVulkan::RenderAFrame() {
+void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
     VkBuffer vertexBuffers[] = {
         m_vkBuffer.GetBuffer()
     };
@@ -138,28 +133,20 @@ void BoronGui_implVulkan::RenderAFrame() {
         indexType
     );
 
-    
-    static BML::Color255 color = { 255,0,0 };
-    color.set(color.x() - 1, color.y(),color.z());
+    CommonPushConstant commonPushConstant{};
+    commonPushConstant.color = GPUVector4(frame.getColor().x() / 255.0f, frame.getColor().y() / 255.0f, frame.getColor().z() / 255.0f, 1.0f);
+    commonPushConstant.pos = { frame.getPosition().x(), frame.getPosition().y() };
+    commonPushConstant.size = { frame.getSize().x(), frame.getSize().y() };
 
-    if (color.x() == 0) {
-        color.set(255, color.y(), color.z());
-
-    }
-    Color col = {
-        color.x() / 255.0f,
-        color.y() / 255.0f,
-        color.z() / 255.0f,
-        1.0f
-    };
+    commonPushConstant.viewportSize = { static_cast<float>(m_boronGuiNeeds.swapchainExtent.width),static_cast<float>(m_boronGuiNeeds.swapchainExtent.height) };
 
     vkCmdPushConstants(
         m_commandBuffer,
         m_pipelineLayout,
-        VK_SHADER_STAGE_VERTEX_BIT,
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
         0,
-        sizeof(Color),
-        &col
+        sizeof(commonPushConstant),
+        &commonPushConstant
     );
 
     vkCmdDrawIndexed(
@@ -257,9 +244,9 @@ bool BoronGui_implVulkan::InitPipeline() {
     colorBlending.pAttachments = &colorBlendAttachment;
 
     VkPushConstantRange pushConstant{};
-    pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     pushConstant.offset = 0;
-    pushConstant.size = sizeof(Color);
+    pushConstant.size = sizeof(CommonPushConstant);
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

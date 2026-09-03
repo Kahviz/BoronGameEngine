@@ -8,7 +8,7 @@
 
 struct Vertex2d
 {
-    GPUVector2 pos = { 0,0,0 };
+    GPUVector2 pos = { 0,0 };
     GPUVector3 color = { 0,0,0 };
     GPUVector2 uv = { 0,0 };
     float brightness = 1.0f;

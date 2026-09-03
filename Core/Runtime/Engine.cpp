@@ -472,7 +472,11 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         }
     }
 
-    Borongui::Frame frame; //test
+    Borongui::Frame frame{}; //test
+    frame.setPosition({ 100,100 });
+    frame.setSize({ 200,200 });
+    frame.setColor({ 255,0,0 });
+
     BoronGui::SubmitWidget(frame);
 
     makeGui.RenderPopUps(deltatime); //Here last so thay be rendered always and on top of everything

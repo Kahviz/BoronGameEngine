@@ -40,8 +40,8 @@ void BoronGui::EndFrame() {
 	widgets.clear();
 }
 
-void BoronGui::DrawAFrame() {
-	m_backend->RenderAFrame();
+void BoronGui::RenderAFrame(Borongui::Frame& frame) {
+	m_backend->RenderAFrame(frame);
 }
 
 void BoronGui::DrawWidgets() {

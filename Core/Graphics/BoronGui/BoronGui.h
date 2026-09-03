@@ -12,7 +12,7 @@ public:
 	static void InitBoronGui(BoronGuiNeeds& p_boronGuiNeeds);
 	static void SubmitWidget(Borongui::Widget& p_widget);
 	static void EndFrame();
-	static void DrawAFrame();
+	static void RenderAFrame(Borongui::Frame& frame);
 	static void DrawWidgets();
 private:
 	static std::unique_ptr<BoronGuiBackends::Backends> m_backend;
