@@ -33,6 +33,10 @@ private:
         GPUVector2 viewportSize{};
     };
 
+    struct GuiProperties {
+        float rounding = 10.0f;
+    };
+
     static GlobalPushConstant m_globalPushConstant;
     static VkShaderModule m_vertShaderModule;
     static VkShaderModule m_fragShaderModule;

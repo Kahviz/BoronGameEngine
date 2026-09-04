@@ -155,7 +155,6 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
     commonPushConstant.pos = { frame.getPosition().x(), frame.getPosition().y() };
     commonPushConstant.size = { frame.getSize().x(), frame.getSize().y() };
 
-
     if (resized){
         m_globalPushConstant.viewportSize = { 
             static_cast<float>(m_boronGuiNeeds.swapchainExtent.width),
@@ -277,6 +276,7 @@ bool BoronGui_implVulkan::InitPipeline() {
     colorBlending.attachmentCount = 1;
     colorBlending.pAttachments = &colorBlendAttachment;
 
+    //PushConstants
     VkPushConstantRange commonPushConstant{};
     commonPushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     commonPushConstant.offset = 0;
@@ -297,6 +297,7 @@ bool BoronGui_implVulkan::InitPipeline() {
     pipelineLayoutInfo.pSetLayouts = nullptr;
     pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
     pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
+    //
 
     BGE_ASSERT_VKRESULT(vkCreatePipelineLayout(m_boronGuiNeeds.device, &pipelineLayoutInfo, nullptr, &m_pipelineLayout), "Failed to create pipeline layout!");
 
