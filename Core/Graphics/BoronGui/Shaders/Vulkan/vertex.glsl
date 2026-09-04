@@ -6,13 +6,13 @@ layout(location = 2) in vec2 inUV;
 layout(location = 3) in float inBrightness;
 
 layout(push_constant) uniform PushConstants {
+    vec4 color;
     vec2 position;
     vec2 size;
     vec2 viewportSize;
-    vec4 color;
 } pc;
 
-layout(location = 0) out vec3 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 void main()
 {
@@ -26,5 +26,5 @@ void main()
 
     gl_Position = vec4(ndc, 0.0, 1.0);
 
-    fragColor = pc.color.rgb;
+    fragColor = pc.color;
 }

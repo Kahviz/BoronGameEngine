@@ -126,6 +126,7 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
         vertexBuffers,
         offsets
     );
+
     vkCmdBindIndexBuffer(
         m_commandBuffer,
         *indexBuffers,
@@ -134,12 +135,29 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
     );
 
     CommonPushConstant commonPushConstant{};
-    commonPushConstant.color = GPUVector4(frame.getColor().x() / 255.0f, frame.getColor().y() / 255.0f, frame.getColor().z() / 255.0f, 1.0f);
+    std::cout << frame.getColor() << std::endl;
+
+    auto c = frame.getColor();
+
+    std::cout << "RAW: "
+        << c.x() << ", "
+        << c.y() << ", "
+        << c.z() << std::endl;
+
+    commonPushConstant.color = GPUVector4(
+        c.x() / 255.0f,
+        c.y() / 255.0f,
+        c.z() / 255.0f,
+        1.0f
+    );
+
+    std::cout << "NORMALIZED: " << commonPushConstant.color << std::endl;;
+
     commonPushConstant.pos = { frame.getPosition().x(), frame.getPosition().y() };
     commonPushConstant.size = { frame.getSize().x(), frame.getSize().y() };
 
     commonPushConstant.viewportSize = { static_cast<float>(m_boronGuiNeeds.swapchainExtent.width),static_cast<float>(m_boronGuiNeeds.swapchainExtent.height) };
-
+    
     vkCmdPushConstants(
         m_commandBuffer,
         m_pipelineLayout,

@@ -35,11 +35,10 @@ private:
     static VkCommandBuffer m_commandBuffer;
 
     struct CommonPushConstant {
+        GPUVector4 color{};
         GPUVector2 pos{};
         GPUVector2 size{};
         GPUVector2 viewportSize{};
-
-        GPUVector4 color;
     };
 };
 #endif

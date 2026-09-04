@@ -15,6 +15,6 @@ public:
 private:
 	BML::Vec2 m_size = { 0,0 };
 	BML::Vec2 m_position = { 0,0 };
-	BML::Vec3 m_color = { 255,0,0 };
+	BML::Vec3 m_color = { 0,0,0 };
 };
 }
