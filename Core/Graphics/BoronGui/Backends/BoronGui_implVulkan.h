@@ -16,12 +16,24 @@ public:
     static const BoronGuiNeeds& GetGuiNeeds();
 
     void Init() override;
+    void ReSizeViewport(GPUVector2 p_newSize) override;
     void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) override;
     void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) override;
     void RenderAFrame(Borongui::Frame frame) override;
 
     static bool InitPipeline();
 private:
+    struct CommonPushConstant {
+        GPUVector4 color{};
+        GPUVector2 pos{};
+        GPUVector2 size{};
+    };
+
+    struct GlobalPushConstant {
+        GPUVector2 viewportSize{};
+    };
+
+    static GlobalPushConstant m_globalPushConstant;
     static VkShaderModule m_vertShaderModule;
     static VkShaderModule m_fragShaderModule;
     static BoronGuiNeeds m_boronGuiNeeds;
@@ -33,12 +45,5 @@ private:
     static VkIndexType indexType;
 
     static VkCommandBuffer m_commandBuffer;
-
-    struct CommonPushConstant {
-        GPUVector4 color{};
-        GPUVector2 pos{};
-        GPUVector2 size{};
-        GPUVector2 viewportSize{};
-    };
 };
 #endif

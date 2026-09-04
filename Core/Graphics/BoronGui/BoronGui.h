@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Widgets/Widgets.h"
 #include <vector>
 #include "Widgets/Widget.h"
@@ -12,6 +13,7 @@ public:
 	static void InitBoronGui(BoronGuiNeeds& p_boronGuiNeeds);
 	static void SubmitWidget(Borongui::Widget& p_widget);
 	static void EndFrame();
+	static void ReSizeViewport(GPUVector2 p_newSize);
 	static void RenderAFrame(Borongui::Frame& frame);
 	static void DrawWidgets();
 private:

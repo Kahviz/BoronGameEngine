@@ -9,6 +9,7 @@ namespace BoronGuiBackends {
 	public:
 		virtual ~Backends() = default;
 		virtual void RenderAFrame(Borongui::Frame frame) = 0;
+		virtual void ReSizeViewport(GPUVector2 p_newSize) = 0;
 		virtual void Init() = 0;
 		virtual void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) = 0;
 		virtual void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) = 0;

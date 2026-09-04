@@ -17,6 +17,7 @@ VulkanBuffer BoronGui_implVulkan::m_vkBuffer{}; // This is just for test
 VulkanBuffer BoronGui_implVulkan::m_vkBufferIndex{}; // This is just for test
 VkIndexType BoronGui_implVulkan::indexType = VK_INDEX_TYPE_UINT32;
 VkCommandBuffer BoronGui_implVulkan::m_commandBuffer;
+BoronGui_implVulkan::GlobalPushConstant BoronGui_implVulkan::m_globalPushConstant{};
 
 static Vertex2d vertices[] = {
     Vertex2d(
@@ -98,6 +99,11 @@ const BoronGuiNeeds& BoronGui_implVulkan::GetGuiNeeds() {
 	return m_boronGuiNeeds;
 }
 
+void BoronGui_implVulkan::ReSizeViewport(GPUVector2 p_newSize) {
+    m_boronGuiNeeds.swapchainExtent.width = static_cast<uint32_t>(p_newSize.x);
+    m_boronGuiNeeds.swapchainExtent.height = static_cast<uint32_t>(p_newSize.y);
+}
+
 void BoronGui_implVulkan::SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
     m_boronGuiNeeds = p_boronGuiNeeds;
 }
@@ -107,17 +113,26 @@ void BoronGui_implVulkan::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
 }
 
 void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
-    VkBuffer vertexBuffers[] = {
-        m_vkBuffer.GetBuffer()
+    BML::Vec2 currentSize = {
+        static_cast<float>(m_boronGuiNeeds.swapchainExtent.width),
+        static_cast<float>(m_boronGuiNeeds.swapchainExtent.height)
     };
 
-    VkBuffer indexBuffers[] = {
-        m_vkBufferIndex.GetBuffer()
-    };
+    static BML::Vec2 lastSize = currentSize;
 
-    VkDeviceSize offsets[] = {
-        0
-    };
+    static bool resized = true;
+
+    if (currentSize != lastSize) {
+        lastSize = currentSize;
+        resized = true;
+
+        CreateInfo("Resizing..");
+    }
+
+    VkBuffer vertexBuffers[] = {m_vkBuffer.GetBuffer()};
+    VkBuffer indexBuffers[] = {m_vkBufferIndex.GetBuffer()};
+
+    VkDeviceSize offsets[] = {0};
 
     vkCmdBindVertexBuffers(
         m_commandBuffer,
@@ -135,28 +150,18 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
     );
 
     CommonPushConstant commonPushConstant{};
-    std::cout << frame.getColor() << std::endl;
 
-    auto c = frame.getColor();
-
-    std::cout << "RAW: "
-        << c.x() << ", "
-        << c.y() << ", "
-        << c.z() << std::endl;
-
-    commonPushConstant.color = GPUVector4(
-        c.x() / 255.0f,
-        c.y() / 255.0f,
-        c.z() / 255.0f,
-        1.0f
-    );
-
-    std::cout << "NORMALIZED: " << commonPushConstant.color << std::endl;;
-
+    commonPushConstant.color = GPUVector4(frame.getColor().x() / 255.0f, frame.getColor().y() / 255.0f, frame.getColor().z() / 255.0f, 1.0f);
     commonPushConstant.pos = { frame.getPosition().x(), frame.getPosition().y() };
     commonPushConstant.size = { frame.getSize().x(), frame.getSize().y() };
 
-    commonPushConstant.viewportSize = { static_cast<float>(m_boronGuiNeeds.swapchainExtent.width),static_cast<float>(m_boronGuiNeeds.swapchainExtent.height) };
+
+    if (resized){
+        m_globalPushConstant.viewportSize = { 
+            static_cast<float>(m_boronGuiNeeds.swapchainExtent.width),
+            static_cast<float>(m_boronGuiNeeds.swapchainExtent.height) 
+        };
+    }
     
     vkCmdPushConstants(
         m_commandBuffer,
@@ -166,6 +171,17 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
         sizeof(commonPushConstant),
         &commonPushConstant
     );
+
+    if (resized) {
+        vkCmdPushConstants(
+            m_commandBuffer,
+            m_pipelineLayout,
+            VK_SHADER_STAGE_VERTEX_BIT,
+            sizeof(commonPushConstant),
+            sizeof(m_globalPushConstant),
+            &m_globalPushConstant
+        );
+    }
 
     vkCmdDrawIndexed(
         m_commandBuffer,
@@ -261,17 +277,26 @@ bool BoronGui_implVulkan::InitPipeline() {
     colorBlending.attachmentCount = 1;
     colorBlending.pAttachments = &colorBlendAttachment;
 
-    VkPushConstantRange pushConstant{};
-    pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-    pushConstant.offset = 0;
-    pushConstant.size = sizeof(CommonPushConstant);
+    VkPushConstantRange commonPushConstant{};
+    commonPushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    commonPushConstant.offset = 0;
+    commonPushConstant.size = sizeof(CommonPushConstant);
+
+    VkPushConstantRange globalPushConstant{};
+    commonPushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    commonPushConstant.offset = 0;
+    commonPushConstant.size = sizeof(GlobalPushConstant);
+
+    std::vector<VkPushConstantRange> pushConstants;
+    pushConstants.push_back(commonPushConstant);
+    pushConstants.push_back(globalPushConstant);
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 0;
     pipelineLayoutInfo.pSetLayouts = nullptr;
-    pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
-    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
+    pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
 
     BGE_ASSERT_VKRESULT(vkCreatePipelineLayout(m_boronGuiNeeds.device, &pipelineLayoutInfo, nullptr, &m_pipelineLayout), "Failed to create pipeline layout!");
 

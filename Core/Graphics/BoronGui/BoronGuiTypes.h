@@ -15,7 +15,7 @@
 #if VULKAN == 1
 #include "vulkan/Vulkan.h"
 
-struct PerFrameStuct { // holy typo
+struct PerFrameStuct {
     VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
 };
 

@@ -315,9 +315,6 @@ void ScreenResizerDetector(Window* wnd) {
         wnd->GetGraphics().ReSizeWindow(screen_width, screen_height, wnd);
         lastWidth = screen_width;
         lastHeight = screen_height;
-        #ifdef _DEBUG
-            std::cout << "Screen resized to: " << screen_width << "x" << screen_height << std::endl;
-        #endif
     }
 
     ImGuiIO& io = ImGui::GetIO();
@@ -356,11 +353,12 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     Keyboard::Init(wnd->GetWindow());
     Mouse::updateMouse(wnd);
 
-#if INEDITOR == 1
-    if (ImGuiInited) {
-        ImGui_Impl_NewFrame();
-    }
-#endif
+    #if INEDITOR == 1
+        if (ImGuiInited) {
+            ImGui_Impl_NewFrame();
+        }
+    #endif
+
     bool ctrlPressed = Keyboard::isHeld(window.GetWindow(), Boron::Keys::LeftCtrl);
     bool RctrlPressed = Keyboard::isHeld(window.GetWindow(), Boron::Keys::RightCtrl);
 
@@ -472,7 +470,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         }
     }
 
-    Borongui::Frame frame{}; //test
+    BoronGui::ReSizeViewport({ static_cast<float>(screen_width), static_cast<float>(screen_height) });
+    Borongui::Frame frame{};
     frame.setPosition({ 100,100 });
     frame.setSize({ 200,200 });
     frame.setColor({ 0,0,0 });

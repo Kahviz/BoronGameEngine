@@ -40,6 +40,10 @@ void BoronGui::EndFrame() {
 	widgets.clear();
 }
 
+void BoronGui::ReSizeViewport(GPUVector2 p_newSize) {
+	m_backend->ReSizeViewport(p_newSize);
+}
+
 void BoronGui::RenderAFrame(Borongui::Frame& frame) {
 	m_backend->RenderAFrame(frame);
 }

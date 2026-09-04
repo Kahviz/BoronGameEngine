@@ -9,6 +9,8 @@ layout(push_constant) uniform PushConstants {
     vec4 color;
     vec2 position;
     vec2 size;
+
+    //GLOBALS
     vec2 viewportSize;
 } pc;
 
