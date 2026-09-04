@@ -474,7 +474,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     Borongui::Frame frame{};
     frame.setPosition({ 100,100 });
     frame.setSize({ 200,200 });
-    frame.setColor({ 0,0,0 });
+    frame.setColor({ 0,0,255 });
 
     BoronGui::SubmitWidget(frame);
 

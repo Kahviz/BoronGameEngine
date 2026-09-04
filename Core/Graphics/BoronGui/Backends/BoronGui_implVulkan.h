@@ -33,7 +33,7 @@ private:
         GPUVector2 viewportSize{};
     };
 
-    struct GuiProperties {
+    struct GuiPropertiesPushConstant {
         float rounding = 10.0f;
     };
 

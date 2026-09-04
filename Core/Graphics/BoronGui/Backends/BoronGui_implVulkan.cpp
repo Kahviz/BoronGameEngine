@@ -155,6 +155,9 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
     commonPushConstant.pos = { frame.getPosition().x(), frame.getPosition().y() };
     commonPushConstant.size = { frame.getSize().x(), frame.getSize().y() };
 
+    GuiPropertiesPushConstant guiPropPushConstant{};
+    guiPropPushConstant.rounding = 10.0f;
+
     if (resized){
         m_globalPushConstant.viewportSize = { 
             static_cast<float>(m_boronGuiNeeds.swapchainExtent.width),
@@ -181,6 +184,15 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
             &m_globalPushConstant
         );
     }
+
+    vkCmdPushConstants(
+        m_commandBuffer,
+        m_pipelineLayout,
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+        sizeof(commonPushConstant) + sizeof(m_globalPushConstant),
+        sizeof(guiPropPushConstant),
+        &guiPropPushConstant
+    );
 
     vkCmdDrawIndexed(
         m_commandBuffer,
@@ -277,19 +289,22 @@ bool BoronGui_implVulkan::InitPipeline() {
     colorBlending.pAttachments = &colorBlendAttachment;
 
     //PushConstants
-    VkPushConstantRange commonPushConstant{};
-    commonPushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-    commonPushConstant.offset = 0;
-    commonPushConstant.size = sizeof(CommonPushConstant);
+    VkPushConstantRange commonPushConstant = CreatePushConstantRange(
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(CommonPushConstant)
+    );
 
-    VkPushConstantRange globalPushConstant{};
-    commonPushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-    commonPushConstant.offset = 0;
-    commonPushConstant.size = sizeof(GlobalPushConstant);
+    VkPushConstantRange globalPushConstant = CreatePushConstantRange(
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(commonPushConstant), sizeof(GlobalPushConstant)
+    );
+
+    VkPushConstantRange guiPropertiesPushConstant = CreatePushConstantRange(
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(commonPushConstant) + sizeof(globalPushConstant), sizeof(GuiPropertiesPushConstant)
+    );
 
     std::vector<VkPushConstantRange> pushConstants;
     pushConstants.push_back(commonPushConstant);
     pushConstants.push_back(globalPushConstant);
+    pushConstants.push_back(guiPropertiesPushConstant);
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

@@ -158,11 +158,13 @@ inline void CreateBuffer(
     vkBindBufferMemory(device, buffer, bufferMemory, 0);
 }
 
-inline VkPushConstantRange& CreatePushConstantRange(VkShaderStageFlags p_stageFlags, uint32_t p_offset, uint32_t p_size) {
+inline VkPushConstantRange CreatePushConstantRange(VkShaderStageFlags p_stageFlags, uint32_t p_offset, uint32_t p_size) {
     VkPushConstantRange pushConstant{};
     pushConstant.stageFlags = p_stageFlags;
     pushConstant.offset = p_offset;
     pushConstant.size = p_size;
+
+    return pushConstant;
 }
 
 inline void CopyBuffer(VkBuffer p_src, VkBuffer p_dst, VkDeviceSize p_size, VkCommandPool p_cmdp, VkDevice p_device, VkQueue p_gQ) {

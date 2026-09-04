@@ -12,9 +12,14 @@ layout(push_constant) uniform PushConstants {
 
     //GLOBALS
     vec2 viewportSize;
+
+    //GuiProps
+    float rounding;
 } pc;
 
 layout(location = 0) out vec4 fragColor;
+layout(location = 1) out float fragRounding;
+layout(location = 2) out vec2 fragLocalPos;
 
 void main()
 {
@@ -28,5 +33,9 @@ void main()
 
     gl_Position = vec4(ndc, 0.0, 1.0);
 
-    fragColor = pc.color;
+    vec2 localPos = (inPosition + vec2(0.5)) * pc.size;
+
+    fragLocalPos = localPos;
+    fragRounding = pc.rounding;
+    fragColor = pc.color; //pc.color;
 }
