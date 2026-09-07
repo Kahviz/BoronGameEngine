@@ -21,7 +21,7 @@ public:
     void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) override;
     void RenderAFrame(Borongui::Frame frame) override;
 
-    void UploadBatch(const std::vector<GuiVertex>& vertices, const std::vector<uint32_t>& p_indices) override;
+    void UploadBatch(const std::vector<Vertex2d>& vertices, const std::vector<uint32_t>& p_indices) override;
     void DrawBatch() override;
 
     static bool InitPipeline();
@@ -46,8 +46,8 @@ private:
     static BoronGuiNeeds m_boronGuiNeeds;
     static VkPipelineLayout m_pipelineLayout;
     static VkPipeline m_graphicsPipeline;
-    static VulkanBuffer m_vkBuffer; // This is just for test
-    static VulkanBuffer m_vkBufferIndex; // This is just for test
+    static VulkanBuffer m_vkBuffer;
+    static VulkanBuffer m_vkBufferIndex;
 
     static VkIndexType indexType;
 

@@ -21,6 +21,15 @@ bool Borongui::Frame::setPosition(const BML::Vec2& p_position) {
 bool Borongui::Frame::setColor(const BML::Vec3& p_color) {
 	m_color = p_color;
 
+	GPUVector3 color(
+		m_color.x(),
+		m_color.y(),
+		m_color.z()
+	);
+
+	for (auto& vertex : m_vertices)
+		vertex.color = color;
+
 	return true;
 }
 

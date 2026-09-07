@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "ComponentStorage.h"
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 
 class ComponentManager
 {

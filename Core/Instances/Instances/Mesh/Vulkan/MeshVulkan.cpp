@@ -6,7 +6,7 @@
 #include <assimp/postprocess.h>
 #include <stdexcept>
 #include "Vulkan/VulkanHelpers.h"
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 
 #if VULKAN == 1
 void MeshVK::Load(

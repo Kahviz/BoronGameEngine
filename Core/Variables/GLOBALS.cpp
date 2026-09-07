@@ -2,7 +2,7 @@
 #include "Globals.h"
 #include <string>
 #include <iostream>
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 
 int screen_width = 800;
 int screen_height = 400;

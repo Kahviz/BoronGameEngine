@@ -10,7 +10,7 @@
 class Window;
 
 #include "GraphicsBackends.h"
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 
 #include <vector>
 #include <IRenderer.h>

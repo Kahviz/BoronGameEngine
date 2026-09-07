@@ -1,19 +1,19 @@
 #pragma once
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 #include "GLOBALS.h"
 
 class Profiler {
 public:
     Profiler() {
-        TotalFrames = 0.0f;
-        TotalFPS = 0.0f;
+        m_totalFrames = 0.0f;
+        m_totalFPS = 0.0f;
         CreateSuccess("Profiler created!");
     }
 
-    void AddFPS(float FPS);
+    void AddFPS(float p_fps);
     void PrintInformation();
 
 private:
-    float TotalFrames;
-    float TotalFPS;
+    float m_totalFrames;
+    float m_totalFPS;
 };

@@ -220,7 +220,7 @@ EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string&
     instTypeComp.InstanceType = Boron::Enums::InstanceType::Instance;
 
     editorComp.isVisibleInExplorer = true;
-    editorComp.selected = false;
+    editorComp.selected = Selec;
     basicComp.Name = Name;
 
     colorComp.color = BML::Int3(
@@ -375,14 +375,11 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         AddAMesh(m_ecs, "\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false, false);
 
         cubes++;
-
-        std::cout << "FPS: " << (1.0f / deltatime) << '\n';
-        std::cout << "Cubes: " << (cubes) << '\n';
     }
 
 
     if (ImGui::GetCurrentContext() == nullptr) {
-        std::cerr << "ERROR: No ImGui context set!" << std::endl;
+        CreateError("No ImGui context set!");
         return;
     }
 
@@ -401,7 +398,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
             BasicInfoComponent basicInfoComp;
             basicInfoComp.Name = "World";
-            std::cout << world << std::endl;
+
             InstanceTypeComponent instTypeComp;
             instTypeComp.InstanceType = Boron::Enums::InstanceType::World;
 

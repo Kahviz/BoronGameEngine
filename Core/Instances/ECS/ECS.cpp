@@ -1,5 +1,5 @@
 #include "ECS.h"
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 #include "Components.h"
 
 void ECS::init(ComponentManager* componentManager)
@@ -18,13 +18,13 @@ void ECS::init(ComponentManager* componentManager)
 
     CreateSuccess("Inited ECS!");
 }
-uint32_t ECS::createEntity()
-{
+
+uint32_t ECS::createEntity() {
     return m_currentHandleID++;
 }
 
-void ECS::destroyEntity(EntityECS entity)
-{
+void ECS::destroyEntity(EntityECS entity) {
+
 }
 
 void ECS::DeselectAll()
@@ -37,10 +37,8 @@ void ECS::DeselectAll()
     );
 }
 
-void ECS::Update(float deltaTime)
-{
+void ECS::Update(float deltaTime) {
 }
 
-void ECS::Clear()
-{
+void ECS::Clear() {
 }

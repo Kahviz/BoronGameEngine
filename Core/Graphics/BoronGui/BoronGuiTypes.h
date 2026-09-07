@@ -13,12 +13,6 @@
     };
 #endif
 
-struct GuiVertex {
-    GPUVector2 position;
-    BML::Vec2 size;
-    BML::Vec3 color;
-};
-
 #if VULKAN == 1
 #include "vulkan/Vulkan.h"
 

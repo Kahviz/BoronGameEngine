@@ -11,7 +11,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 #include "Mesh/Vulkan/MeshVulkan.h"
 #include <CameraControl.h>
 #include "imgui.h"
@@ -50,7 +50,7 @@ bool VulkanRender::Init(GLFWwindow* window)
     vkGetPhysicalDeviceProperties(vkDevice.GetPhysicalDevice(), &selectedProps);
 
 #ifdef _DEBUG
-    std::cout << "Selected GPU: " << selectedProps.deviceName << "\n";
+    CreateInfo("Selected GPU: ", selectedProps.deviceName);
 #endif // _DEBUG
 
     uint32_t formatCount = 0;

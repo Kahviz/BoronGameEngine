@@ -31,10 +31,10 @@ private:
 	BML::Vec3 m_color = { 0,0,0 };
 
     std::vector<Vertex2d> m_vertices = {
-        Vertex2d({ -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f }),
-        Vertex2d({ 0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f }),
-        Vertex2d({ 0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f }),
-		Vertex2d({ -0.5f, 0.5f },{ 1.0f, 1.0f, 0.0f })
+        Vertex2d({ -0.5f, -0.5f }),
+        Vertex2d({ 0.5f, -0.5f }),
+        Vertex2d({ 0.5f, 0.5f }),
+		Vertex2d({ -0.5f, 0.5f })
     };
 
     std::vector<uint32_t> m_indices = {

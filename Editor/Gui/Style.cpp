@@ -1,7 +1,7 @@
 #include "Style.h"
 #include "ImGui.h"
 #include <string>
-#include <ErrorHandling/ErrorMessage.h>
+#include <Logger/Logger.h>
 
 namespace ImGui
 {

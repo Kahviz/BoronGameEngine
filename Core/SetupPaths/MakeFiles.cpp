@@ -1,6 +1,6 @@
 #include "MakeFiles.h"
 #include "GLOBALS.h"
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 
 #include <filesystem>
 #include <iostream>

@@ -1,5 +1,5 @@
 #include "DiscordPresence.h"
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 
 bool DiscordPresence::initialized = false;
 

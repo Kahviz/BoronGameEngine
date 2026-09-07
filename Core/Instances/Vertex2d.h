@@ -6,12 +6,13 @@
 #if VULKAN == 1
 #include "Vulkan/vulkan.h"
 
-struct Vertex2d
-{
+struct Vertex2d {
     GPUVector2 pos = { 0,0 };
     GPUVector3 color = { 0,0,0 };
     GPUVector2 uv = { 0,0 };
-    float brightness = 1.0f;
+    GPUVector2 size = { 0,0 };
+    float brightness = 0.0f;
+    float rounding = 10.0f;
 
     Vertex2d() = default;
 
@@ -19,13 +20,21 @@ struct Vertex2d
         : brightness(b), pos(p), color(c), uv{ 0.0f, 0.0f } {
     }
 
-    Vertex2d(float b, const GPUVector2& p, const GPUVector3& c, const GPUVector3& n, const GPUVector2& uv_coords)
+    Vertex2d(float b, const GPUVector2& p, const GPUVector3& c, const GPUVector2& uv_coords)
         : brightness(b), pos(p), color(c), uv(uv_coords) {
     }
 
     Vertex2d(const GPUVector2& p,const GPUVector3& c)
         : pos(p),
         color(c),
+        uv{ 0.0f, 0.0f },
+        brightness(1.0f)
+    {
+    }
+
+    Vertex2d(const GPUVector2& p)
+        : pos(p),
+        color(1,0,0),
         uv{ 0.0f, 0.0f },
         brightness(1.0f)
     {
@@ -39,9 +48,10 @@ struct Vertex2d
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 4> attributes{};
+    static std::array<VkVertexInputAttributeDescription, 6> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 6> attributes{};
 
+        //pos
         attributes[0].binding = 0;
         attributes[0].location = 0;
         attributes[0].format = VK_FORMAT_R32G32_SFLOAT;
@@ -64,6 +74,18 @@ struct Vertex2d
         attributes[3].location = 3;
         attributes[3].format = VK_FORMAT_R32_SFLOAT;
         attributes[3].offset = offsetof(Vertex2d, brightness);
+
+        //size
+        attributes[4].binding = 0;
+        attributes[4].location = 4;
+        attributes[4].format = VK_FORMAT_R32G32_SFLOAT;
+        attributes[4].offset = offsetof(Vertex2d, size);
+
+        //rounding
+        attributes[5].binding = 0;
+        attributes[5].location = 5;
+        attributes[5].format = VK_FORMAT_R32_SFLOAT;
+        attributes[5].offset = offsetof(Vertex2d, rounding);
 
         return attributes;
     }

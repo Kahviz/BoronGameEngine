@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include "Logger/Logger.h"
 
 class Entity {
 public:
@@ -13,8 +15,14 @@ public:
         return entity.m_id;
     }
 
-    uint32_t isValid() {
-        return m_id != UINT32_MAX;
+    bool isValid() {
+        bool isValid = m_id != UINT32_MAX;
+
+        if (!isValid) {
+            CreateError("Entity: " + std::to_string(this->getId(*this)) + "is not valid");
+        }
+
+        return isValid;
     }
 
     bool operator==(const Entity& other) const

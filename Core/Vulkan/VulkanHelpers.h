@@ -10,7 +10,7 @@
 #include <string>
 #include <stdexcept>
 #include "BoronMathLibrary.h"
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 
 #include "BGE_ASSERTS.h"
 

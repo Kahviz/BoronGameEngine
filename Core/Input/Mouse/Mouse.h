@@ -1,7 +1,7 @@
 #pragma once
 #include "BoronMathLibrary.h"
 #include "GLOBALS.h"
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 #include "Window/Window.h"
 
 class Mouse {

@@ -2,7 +2,7 @@
 #include "GLOBALS.h"
 
 #if VULKAN == 1
-#include "ErrorHandling/Errormessage.h"
+#include "Logger/Logger.h"
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <Graphics/Vulkan/ScoreCounter.h>

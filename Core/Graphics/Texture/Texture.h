@@ -4,7 +4,7 @@
 #include "GLOBALS.h"
 #include <imgui.h>
 
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 #include "Releaser.h"
 #include "Debugging/Functions/BGE_ASSERTS.h"
 

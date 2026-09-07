@@ -1,12 +1,12 @@
 #include "BoronGui.h"
 #include "BGE_ASSERTS.h"
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 #include "Backends/Backends.h"
 
 std::unique_ptr<BoronGuiBackends::Backends> BoronGui::m_backend{};
 std::vector<Borongui::Widget*> BoronGui::widgets{};
 
-std::vector<GuiVertex> BoronGui::m_vertices{};
+std::vector<Vertex2d> BoronGui::m_vertices{};
 std::vector<uint32_t> BoronGui::m_indicies{};
 
 void BoronGui::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
@@ -40,9 +40,10 @@ void BoronGui::SubmitWidget(Borongui::Widget& p_widget) {
 }
 
 void BoronGui::EndFrame() {
-	widgets.clear();
 	m_indicies.clear();
 	m_vertices.clear();
+
+	widgets.clear();
 }
 
 void BoronGui::ReSizeViewport(GPUVector2 p_newSize) {
@@ -55,23 +56,29 @@ void BoronGui::RenderAFrame(Borongui::Frame& frame) {
 
 void BoronGui::DrawWidgets() {
 	for (Borongui::Widget* widget : widgets) {
-		widget->Render();
-
+		uint32_t vertexOffset = static_cast<uint32_t>(m_vertices.size());
+		
 		if (auto frame = dynamic_cast<Borongui::Frame*>(widget)) {
+			GPUVector3 color = GPUVector3(frame->getColor().x() / 255.0f, frame->getColor().y() / 255.0f, frame->getColor().z() / 255.0f);
+
 			for (auto& vertex : frame->getVertices()) {
-				GuiVertex guiVertex{};
-				guiVertex.color = frame->getColor();
-				guiVertex.position = vertex.pos;
-				guiVertex.size = frame->getSize();
+				Vertex2d guiVertex{};
+				guiVertex.color = color;
+				guiVertex.pos = vertex.pos;
+				guiVertex.size = GPUVector2(frame->getSize().x(), frame->getSize().y());
+				guiVertex.rounding = frame->getRounding();
 
 				m_vertices.push_back(guiVertex);
 			}
 
 			for (auto& index : frame->getIndices()) {
-				m_indicies.push_back(index);
+				m_indicies.push_back(vertexOffset + index);
 			}
+
+			widget->Render();
 		}
 	}
 
 	m_backend->UploadBatch(m_vertices, m_indicies);
+	m_backend->DrawBatch();
 }

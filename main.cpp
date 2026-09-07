@@ -3,7 +3,7 @@
 #include "SetupPaths/MakeFiles.h"
 #include <Debugging/Profiler/Profiler.h>
 #include <thread>
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 #include <format>
 #include "BoronMathLibrary.h"
 #include "GLOBALS.h"

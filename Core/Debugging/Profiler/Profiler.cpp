@@ -2,36 +2,35 @@
 #include <iomanip>
 #include <sstream>
 
-void Profiler::AddFPS([[maybe_unused]] float FPS)
-{
-#ifdef PROFILER
-    static bool firstTime = true;
+void Profiler::AddFPS([[maybe_unused]] float p_fps) {
+    #ifdef PROFILER
+        static bool firstTime = true;
 
-    if (firstTime)
-    {
-        firstTime = false;
-        return;
-    }
+        if (firstTime)
+        {
+            firstTime = false;
+            return;
+        }
 
-    TotalFPS += FPS;
-    TotalFrames++;
-#endif
+        m_totalFPS += p_fps;
+        m_totalFrames++;
+    #endif
 }
 
 void Profiler::PrintInformation()
 {
     #ifdef PROFILER
-        if (TotalFrames == 0) {
+        if (m_totalFrames == 0) {
             CreateError("No frames recorded!");
             return;
         }
 
-        float AverageFPS = TotalFPS / TotalFrames;
+        float AverageFPS = m_totalFPS / m_totalFrames;
 
         std::stringstream ss;
         ss << "Avarage FPS: " << std::fixed << std::setprecision(2) << AverageFPS;
 
-        CreateSuccess("ProfilerInfo ");
+        CreateSuccess("ProfilerInfo: ");
         ProfilerInformation(ss.str());
     #endif
 }

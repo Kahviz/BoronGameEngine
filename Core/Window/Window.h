@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <memory>
 #include <string>
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 #include "BoronMathLibrary.h"
 
 class Graphics;

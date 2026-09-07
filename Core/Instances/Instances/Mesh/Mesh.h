@@ -10,7 +10,7 @@
 #include <Instances/Vertex.h>
 #include <unordered_map>
 #include <memory>
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 
 class Mesh
 {

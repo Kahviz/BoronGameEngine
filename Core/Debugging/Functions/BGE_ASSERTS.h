@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ErrorHandling/ErrorMessage.h"
+#include "Logger/Logger.h"
 #include <format>
 #include <string>
 #include <source_location>

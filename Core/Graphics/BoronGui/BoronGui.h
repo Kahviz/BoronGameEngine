@@ -19,7 +19,7 @@ public:
 private:
 	static std::unique_ptr<BoronGuiBackends::Backends> m_backend;
 
-	static std::vector<GuiVertex> m_vertices;
+	static std::vector<Vertex2d> m_vertices;
 	static std::vector<uint32_t> m_indicies;
 
 	static std::vector<Borongui::Widget*> widgets;

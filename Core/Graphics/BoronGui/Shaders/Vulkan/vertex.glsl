@@ -4,7 +4,10 @@ layout(location = 0) in vec2 inPosition;
 layout(location = 1) in vec3 inColor;
 layout(location = 2) in vec2 inUV;
 layout(location = 3) in float inBrightness;
+layout(location = 4) in vec2 inSize;
+layout(location = 5) in float inRounding;
 
+//pos color UV brightness
 layout(push_constant) uniform PushConstants {
     vec4 color;
     vec2 position;
@@ -17,7 +20,7 @@ layout(push_constant) uniform PushConstants {
     float rounding;
 } pc;
 
-layout(location = 0) out vec4 fragColor;
+layout(location = 0) out vec3 fragColor;
 layout(location = 1) out float fragRounding;
 layout(location = 2) out vec2 fragLocalPos;
 layout(location = 3) out vec2 fragSize;
@@ -37,7 +40,7 @@ void main()
     vec2 localPos = (inPosition + vec2(0.5)) * pc.size;
 
     fragLocalPos = localPos;
-    fragRounding = pc.rounding;
-    fragColor = pc.color; //pc.color;
+    fragRounding = inRounding;
+    fragColor = inColor; //pc.color;
     fragSize = pc.size;
 }

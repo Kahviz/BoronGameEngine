@@ -1,5 +1,5 @@
 #include "BoronGui_implVulkan.h"
-#include <ErrorHandling/ErrorMessage.h>
+#include <Logger/Logger.h>
 
 #if VULKAN == 1
 #include "Shaders/Vulkan/FragmentShader.h"
@@ -13,8 +13,8 @@ VkShaderModule BoronGui_implVulkan::m_vertShaderModule = VK_NULL_HANDLE;
 VkShaderModule BoronGui_implVulkan::m_fragShaderModule = VK_NULL_HANDLE;
 VkPipelineLayout BoronGui_implVulkan::m_pipelineLayout = VK_NULL_HANDLE;
 VkPipeline BoronGui_implVulkan::m_graphicsPipeline = VK_NULL_HANDLE;
-VulkanBuffer BoronGui_implVulkan::m_vkBuffer{}; // This is just for test
-VulkanBuffer BoronGui_implVulkan::m_vkBufferIndex{}; // This is just for test
+VulkanBuffer BoronGui_implVulkan::m_vkBuffer{};
+VulkanBuffer BoronGui_implVulkan::m_vkBufferIndex{};
 VkIndexType BoronGui_implVulkan::indexType = VK_INDEX_TYPE_UINT32;
 VkCommandBuffer BoronGui_implVulkan::m_commandBuffer;
 BoronGui_implVulkan::GlobalPushConstant BoronGui_implVulkan::m_globalPushConstant{};
@@ -85,6 +85,9 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
     VkDeviceSize indexSize =
         frame.getIndices().size() * sizeof(uint32_t);
 
+    static VkDeviceSize lastIndexSize = 0;
+    static VkDeviceSize lastVertexSize = 0;
+
     if (!m_vkBuffer.IsCreated() || !m_vkBufferIndex.IsCreated()) {
         m_vkBuffer.Create(
             m_boronGuiNeeds.device,
@@ -107,17 +110,17 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
         m_vkBuffer.UploadData(frame.getVertices().data(), vertexSize);
         m_vkBufferIndex.UploadData(frame.getIndices().data(), indexSize);
     }
-
-    static VkDeviceSize lastIndexSize = 0;
-    static VkDeviceSize lastVertexSize = 0;
-
-    if (lastIndexSize != indexSize || lastVertexSize != vertexSize) {
+    else if (lastIndexSize != indexSize || lastVertexSize != vertexSize) {
         lastIndexSize = indexSize;
         lastVertexSize = vertexSize;
 
         //ReSize
+
         m_vkBuffer.Resize(vertexSize, m_boronGuiNeeds.commandPool, m_boronGuiNeeds.graphicsQueue);
         m_vkBufferIndex.Resize(indexSize, m_boronGuiNeeds.commandPool, m_boronGuiNeeds.graphicsQueue);
+
+        m_vkBuffer.UploadData(frame.getVertices().data(), vertexSize);
+        m_vkBufferIndex.UploadData(frame.getIndices().data(), indexSize);
     }
 
     VkBuffer vertexBuffers[] = {m_vkBuffer.GetBuffer()};
@@ -184,7 +187,7 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
         sizeof(guiPropPushConstant),
         &guiPropPushConstant
     );
-
+    
     vkCmdDrawIndexed(
         m_commandBuffer,
         6,
@@ -195,7 +198,7 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
     );
 }
 
-void BoronGui_implVulkan::UploadBatch(const std::vector<GuiVertex>& vertices, const std::vector<uint32_t>& p_indices) {
+void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& vertices, const std::vector<uint32_t>& p_indices) {
 
 }
 
