@@ -14,9 +14,9 @@
 #endif
 
 struct GuiVertex {
-    BML::Vec2 position;
+    GPUVector2 position;
     BML::Vec2 size;
-    BML::Col255 color;
+    BML::Vec3 color;
 };
 
 #if VULKAN == 1

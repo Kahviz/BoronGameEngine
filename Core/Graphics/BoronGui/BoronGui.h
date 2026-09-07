@@ -19,6 +19,9 @@ public:
 private:
 	static std::unique_ptr<BoronGuiBackends::Backends> m_backend;
 
+	static std::vector<GuiVertex> m_vertices;
+	static std::vector<uint32_t> m_indicies;
+
 	static std::vector<Borongui::Widget*> widgets;
 	bool m_inited = false;
 };

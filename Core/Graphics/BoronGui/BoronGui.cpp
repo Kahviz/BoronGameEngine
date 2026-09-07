@@ -3,8 +3,11 @@
 #include "ErrorHandling/ErrorMessage.h"
 #include "Backends/Backends.h"
 
-std::unique_ptr<BoronGuiBackends::Backends> BoronGui::m_backend;
-std::vector<Borongui::Widget*> BoronGui::widgets;
+std::unique_ptr<BoronGuiBackends::Backends> BoronGui::m_backend{};
+std::vector<Borongui::Widget*> BoronGui::widgets{};
+
+std::vector<GuiVertex> BoronGui::m_vertices{};
+std::vector<uint32_t> BoronGui::m_indicies{};
 
 void BoronGui::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
 	m_backend->UpdatePerFrameOBJ(p_perFrameStuct);
@@ -38,6 +41,8 @@ void BoronGui::SubmitWidget(Borongui::Widget& p_widget) {
 
 void BoronGui::EndFrame() {
 	widgets.clear();
+	m_indicies.clear();
+	m_vertices.clear();
 }
 
 void BoronGui::ReSizeViewport(GPUVector2 p_newSize) {
@@ -53,7 +58,20 @@ void BoronGui::DrawWidgets() {
 		widget->Render();
 
 		if (auto frame = dynamic_cast<Borongui::Frame*>(widget)) {
+			for (auto& vertex : frame->getVertices()) {
+				GuiVertex guiVertex{};
+				guiVertex.color = frame->getColor();
+				guiVertex.position = vertex.pos;
+				guiVertex.size = frame->getSize();
 
+				m_vertices.push_back(guiVertex);
+			}
+
+			for (auto& index : frame->getIndices()) {
+				m_indicies.push_back(index);
+			}
 		}
 	}
+
+	m_backend->UploadBatch(m_vertices, m_indicies);
 }
