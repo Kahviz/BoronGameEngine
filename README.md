@@ -4,8 +4,11 @@
 
 **A C++ game engine under development since 12.11.2025**
 
-**Status: Work in progress** – There may be **bugs** and you can help by telling them to me
-**BoronEngine uses the SignPath Foundation for code signing.**
+> [!NOTE]
+> Because BoronEngine is still work in progress there may be **bugs**, if you find them report them in the discord server.
+> 
+> **BoronEngine uses the SignPath Foundation for code signing.**
+
 
 ## Features
 - Two rendering backends: **Vulkan** and **DirectX11**
