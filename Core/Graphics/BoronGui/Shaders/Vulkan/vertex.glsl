@@ -7,6 +7,8 @@ layout(location = 3) in float inBrightness;
 layout(location = 4) in vec2 inSize;
 layout(location = 5) in float inRounding;
 
+layout(location = 6) in vec2 inGuiPosition;
+
 //pos color UV brightness
 layout(push_constant) uniform PushConstants {
     vec4 color;
@@ -28,8 +30,8 @@ layout(location = 3) out vec2 fragSize;
 void main()
 {
     vec2 pixelPosition =
-        pc.position +
-        (inPosition + vec2(0.5)) * pc.size;
+        inGuiPosition +
+        (inPosition + vec2(0.5)) * inSize;
 
     vec2 ndc;
     ndc.x = (pixelPosition.x / pc.viewportSize.x) * 2.0 - 1.0;
@@ -37,10 +39,10 @@ void main()
 
     gl_Position = vec4(ndc, 0.0, 1.0);
 
-    vec2 localPos = (inPosition + vec2(0.5)) * pc.size;
+    vec2 localPos = (inPosition + vec2(0.5)) * inSize;
 
     fragLocalPos = localPos;
     fragRounding = inRounding;
-    fragColor = inColor; //pc.color;
+    fragColor = inColor;
     fragSize = inSize;
 }

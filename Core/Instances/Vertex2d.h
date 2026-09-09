@@ -12,25 +12,28 @@ struct Vertex2d {
     GPUVector3 color = { 0,0,0 };
     GPUVector2 uv = { 0,0 };
     GPUVector2 size = { 0,0 };
+    GPUVector2 guiPos = { 0,0 };
+
     float brightness = 0.0f;
     float rounding = 10.0f;
 
     Vertex2d() = default;
 
     Vertex2d(float b, const GPUVector2& p, const GPUVector3& c, const GPUVector3& n)
-        : brightness(b), pos(p), color(c), uv{ 0.0f, 0.0f }, size(100, 100) {
+        : brightness(b), pos(p), color(c), uv{ 0.0f, 0.0f }, size(100, 100), guiPos(100, 100) {
     }
 
     Vertex2d(float b, const GPUVector2& p, const GPUVector3& c, const GPUVector2& uv_coords)
-        : brightness(b), pos(p), color(c), uv(uv_coords), size(100, 100) {
+        : brightness(b), pos(p), color(c), uv(uv_coords), size(100, 100), guiPos(200, 100) {
     }
 
-    Vertex2d(const GPUVector2& p,const GPUVector3& c)
+    Vertex2d(const GPUVector2& p, const GPUVector3& c)
         : pos(p),
         color(c),
         uv{ 0.0f, 0.0f },
         brightness(1.0f),
-        size(100,100)
+        size(100, 100),
+        guiPos(100,100)
     {
     }
 
@@ -39,7 +42,8 @@ struct Vertex2d {
         color(1,0,0),
         uv{ 0.0f, 0.0f },
         brightness(1.0f),
-        size(100, 100)
+        size(100, 100),
+        guiPos(100, 100)
     {
     }
 
@@ -51,8 +55,8 @@ struct Vertex2d {
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 6> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 6> attributes{};
+    static std::array<VkVertexInputAttributeDescription, 7> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 7> attributes{};
 
         //pos
         attributes[0].binding = 0;
@@ -89,6 +93,12 @@ struct Vertex2d {
         attributes[5].location = 5;
         attributes[5].format = VK_FORMAT_R32_SFLOAT;
         attributes[5].offset = offsetof(Vertex2d, rounding);
+
+        //guiPos
+        attributes[6].binding = 0;
+        attributes[6].location = 6;
+        attributes[6].format = VK_FORMAT_R32G32_SFLOAT;
+        attributes[6].offset = offsetof(Vertex2d, guiPos);
 
         return attributes;
     }
