@@ -183,7 +183,7 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
         m_commandBuffer,
         m_pipelineLayout,
         VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-        sizeof(commonPushConstant) + sizeof(m_globalPushConstant),
+        sizeof(CommonPushConstant) + sizeof(GlobalPushConstant),
         sizeof(guiPropPushConstant),
         &guiPropPushConstant
     );
@@ -302,11 +302,11 @@ bool BoronGui_implVulkan::InitPipeline() {
     );
 
     VkPushConstantRange globalPushConstant = CreatePushConstantRange(
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(commonPushConstant), sizeof(GlobalPushConstant)
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(CommonPushConstant), sizeof(GlobalPushConstant)
     );
 
     VkPushConstantRange guiPropertiesPushConstant = CreatePushConstantRange(
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(commonPushConstant) + sizeof(globalPushConstant), sizeof(GuiPropertiesPushConstant)
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(CommonPushConstant) + sizeof(GlobalPushConstant), sizeof(GuiPropertiesPushConstant)
     );
 
     std::vector<VkPushConstantRange> pushConstants;
