@@ -199,8 +199,8 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
     );
 }
 
-void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& vertices, const std::vector<uint32_t>& p_indices) {
-    if (vertices.empty() || p_indices.empty()) {
+void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& p_vertices, const std::vector<uint32_t>& p_indices) {
+    if (p_vertices.empty() || p_indices.empty()) {
         m_indexCount = 0;
         return;
     }
@@ -222,7 +222,7 @@ void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& vertices, con
     m_indexCount = static_cast<uint32_t>(p_indices.size());
 
     const VkDeviceSize vertexSize =
-        vertices.size() * sizeof(Vertex2d);
+        p_vertices.size() * sizeof(Vertex2d);
 
     const VkDeviceSize indexSize =
         p_indices.size() * sizeof(uint32_t);
@@ -271,7 +271,7 @@ void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& vertices, con
         );
     }
 
-    m_vkBuffer.UploadData(vertices.data(), vertexSize);
+    m_vkBuffer.UploadData(p_vertices.data(), vertexSize);
     m_vkBufferIndex.UploadData(p_indices.data(), indexSize);
 
     lastVertexSize = vertexSize;

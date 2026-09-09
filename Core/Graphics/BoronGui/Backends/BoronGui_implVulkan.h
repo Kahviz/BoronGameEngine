@@ -21,7 +21,7 @@ public:
     void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) override;
     void RenderAFrame(Borongui::Frame frame) override;
 
-    void UploadBatch(const std::vector<Vertex2d>& vertices, const std::vector<uint32_t>& p_indices) override;
+    void UploadBatch(const std::vector<Vertex2d>& p_vertices, const std::vector<uint32_t>& p_indices) override;
     void DrawBatch() override;
 
     static bool InitPipeline();
