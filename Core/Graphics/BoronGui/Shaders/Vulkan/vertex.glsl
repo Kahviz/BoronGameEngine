@@ -42,5 +42,5 @@ void main()
     fragLocalPos = localPos;
     fragRounding = inRounding;
     fragColor = inColor; //pc.color;
-    fragSize = pc.size;
+    fragSize = inSize;
 }

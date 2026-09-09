@@ -1,4 +1,5 @@
 #pragma once
+
 #include <array>
 #include "BoronMathLibrary.h"
 #include "GLOBALS.h"
@@ -17,18 +18,19 @@ struct Vertex2d {
     Vertex2d() = default;
 
     Vertex2d(float b, const GPUVector2& p, const GPUVector3& c, const GPUVector3& n)
-        : brightness(b), pos(p), color(c), uv{ 0.0f, 0.0f } {
+        : brightness(b), pos(p), color(c), uv{ 0.0f, 0.0f }, size(100, 100) {
     }
 
     Vertex2d(float b, const GPUVector2& p, const GPUVector3& c, const GPUVector2& uv_coords)
-        : brightness(b), pos(p), color(c), uv(uv_coords) {
+        : brightness(b), pos(p), color(c), uv(uv_coords), size(100, 100) {
     }
 
     Vertex2d(const GPUVector2& p,const GPUVector3& c)
         : pos(p),
         color(c),
         uv{ 0.0f, 0.0f },
-        brightness(1.0f)
+        brightness(1.0f),
+        size(100,100)
     {
     }
 
@@ -36,7 +38,8 @@ struct Vertex2d {
         : pos(p),
         color(1,0,0),
         uv{ 0.0f, 0.0f },
-        brightness(1.0f)
+        brightness(1.0f),
+        size(100, 100)
     {
     }
 

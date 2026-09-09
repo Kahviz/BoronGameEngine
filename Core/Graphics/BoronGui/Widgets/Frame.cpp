@@ -53,7 +53,11 @@ const std::vector<uint32_t>& Borongui::Frame::getIndices() const {
 	return m_indices;
 }
 
-const std::vector<Vertex2d>& Borongui::Frame::getVertices() const {
+std::vector<Vertex2d>& Borongui::Frame::getVertices() {
+	return m_vertices;
+}
+
+const std::vector<Vertex2d>& Borongui::Frame::getConstVertices() const {
 	return m_vertices;
 }
 

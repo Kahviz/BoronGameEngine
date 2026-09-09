@@ -310,6 +310,7 @@ bool BoronGui_implVulkan::InitPipeline() {
     );
 
     std::vector<VkPushConstantRange> pushConstants;
+
     pushConstants.push_back(commonPushConstant);
     pushConstants.push_back(globalPushConstant);
     pushConstants.push_back(guiPropertiesPushConstant);

@@ -17,10 +17,13 @@ public:
 	const float getRounding() const;
 
 	//vertices
+	std::vector<Vertex2d>& getVertices();
+	const std::vector<Vertex2d>& getConstVertices() const;
 
 	//indices
 	const std::vector<uint32_t>& getIndices() const;
-	const std::vector<Vertex2d>& getVertices() const;
+
+
 
 	void setIndices(const std::vector<uint32_t>& p_indices);
 	void setVertices(const std::vector<Vertex2d>& p_vertices);
