@@ -82,7 +82,6 @@ void BoronGui::DrawWidgets() {
 				m_indicies.push_back(vertexOffset + index);
 			}
 
-			widget->Render();
 		}
 	}
 

@@ -52,5 +52,7 @@ private:
     static VkIndexType indexType;
 
     static VkCommandBuffer m_commandBuffer;
+
+    static uint32_t m_indexCount;
 };
 #endif

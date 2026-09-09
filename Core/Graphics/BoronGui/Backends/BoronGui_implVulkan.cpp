@@ -18,6 +18,7 @@ VulkanBuffer BoronGui_implVulkan::m_vkBufferIndex{};
 VkIndexType BoronGui_implVulkan::indexType = VK_INDEX_TYPE_UINT32;
 VkCommandBuffer BoronGui_implVulkan::m_commandBuffer;
 BoronGui_implVulkan::GlobalPushConstant BoronGui_implVulkan::m_globalPushConstant{};
+uint32_t BoronGui_implVulkan::m_indexCount = 0;
 
 void BoronGui_implVulkan::BeginFrame() {
 
@@ -199,11 +200,111 @@ void BoronGui_implVulkan::RenderAFrame(Borongui::Frame frame) {
 }
 
 void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& vertices, const std::vector<uint32_t>& p_indices) {
+    if (vertices.empty() || p_indices.empty()) {
+        m_indexCount = 0;
+        return;
+    }
 
+    m_globalPushConstant.viewportSize = {
+        static_cast<float>(m_boronGuiNeeds.swapchainExtent.width),
+        static_cast<float>(m_boronGuiNeeds.swapchainExtent.height)
+    };
+
+    vkCmdPushConstants(
+        m_commandBuffer,
+        m_pipelineLayout,
+        VK_SHADER_STAGE_VERTEX_BIT,
+        sizeof(CommonPushConstant),
+        sizeof(GlobalPushConstant),
+        &m_globalPushConstant
+    );
+
+    m_indexCount = static_cast<uint32_t>(p_indices.size());
+
+    const VkDeviceSize vertexSize =
+        vertices.size() * sizeof(Vertex2d);
+
+    const VkDeviceSize indexSize =
+        p_indices.size() * sizeof(uint32_t);
+
+    static VkDeviceSize lastVertexSize = 0;
+    static VkDeviceSize lastIndexSize = 0;
+
+    const bool buffersCreated =
+        m_vkBuffer.IsCreated() &&
+        m_vkBufferIndex.IsCreated();
+
+    if (!buffersCreated) {
+
+        m_vkBuffer.Create(
+            m_boronGuiNeeds.device,
+            m_boronGuiNeeds.physicalDevice,
+            vertexSize,
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+        );
+
+        m_vkBufferIndex.Create(
+            m_boronGuiNeeds.device,
+            m_boronGuiNeeds.physicalDevice,
+            indexSize,
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+        );
+
+    }
+    else if (lastVertexSize != vertexSize ||
+        lastIndexSize != indexSize) {
+
+        m_vkBuffer.Resize(
+            vertexSize,
+            m_boronGuiNeeds.commandPool,
+            m_boronGuiNeeds.graphicsQueue
+        );
+
+        m_vkBufferIndex.Resize(
+            indexSize,
+            m_boronGuiNeeds.commandPool,
+            m_boronGuiNeeds.graphicsQueue
+        );
+    }
+
+    m_vkBuffer.UploadData(vertices.data(), vertexSize);
+    m_vkBufferIndex.UploadData(p_indices.data(), indexSize);
+
+    lastVertexSize = vertexSize;
+    lastIndexSize = indexSize;
+
+    VkBuffer vertexBuffer = m_vkBuffer.GetBuffer();
+    VkDeviceSize offset = 0;
+
+    vkCmdBindVertexBuffers(
+        m_commandBuffer,
+        0,
+        1,
+        &vertexBuffer,
+        &offset
+    );
+
+    vkCmdBindIndexBuffer(
+        m_commandBuffer,
+        m_vkBufferIndex.GetBuffer(),
+        0,
+        VK_INDEX_TYPE_UINT32
+    );
 }
 
 void BoronGui_implVulkan::DrawBatch() {
-
+    vkCmdDrawIndexed(
+        m_commandBuffer,
+        m_indexCount,
+        1,
+        0,
+        0,
+        0
+    );
 }
 
 bool BoronGui_implVulkan::InitPipeline() {
