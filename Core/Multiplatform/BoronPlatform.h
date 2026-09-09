@@ -1,13 +1,13 @@
 #pragma once
 
-#ifdef _Win32
-	#define UGE_WIN
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+	#define BGE_WIN
 #endif
 
-#ifdef _Linux
-	#define UGE_LINUX
+#if _Linux
+	#define BGE_LINUX
 #endif
 
-#ifdef _MacOS
-	#define UGE_MACOS
+#if _MacOS
+	#define BGE_MACOS
 #endif
