@@ -60,6 +60,13 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
     GIT_TAG docking
 )
+
+FetchContent_Declare(
+    enet
+    GIT_REPOSITORY https://github.com/lsalzman/enet.git
+    GIT_TAG v1.3.18
+)
+
 #GLFW
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -92,8 +99,8 @@ set(SDL_STATIC OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(glfw)
 FetchContent_MakeAvailable(BoronMathLibrary)
+FetchContent_MakeAvailable(enet)
 
-FetchContent_MakeAvailable(assimp)
 #cmake --build out/build/clang --config Debug --parallel
 if(TARGET assimp AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(assimp PRIVATE
@@ -103,6 +110,7 @@ if(TARGET assimp AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     )
 endif()
 
+FetchContent_MakeAvailable(assimp)
 FetchContent_MakeAvailable(SDL3)
 FetchContent_MakeAvailable(imgui)
 
@@ -255,7 +263,11 @@ add_executable(BoronEngine
     BoronEngine.rc
 )
 
-target_compile_options(BoronEngine PRIVATE /W4)
+if(MSVC)
+    target_compile_options(BoronEngine PRIVATE /W4)
+else()
+    target_compile_options(BoronEngine PRIVATE -Wall -Wextra)
+endif()
 
 #Include Directories
 target_include_directories(BoronEngine PRIVATE
@@ -271,6 +283,9 @@ target_include_directories(BoronEngine PRIVATE
 
     #Discord
     ${DISCORD_SDK_INCLUDE_DIR}
+
+    #Enet
+    "${enet_SOURCE_DIR}/include"
 
     #Engine
     Core/Instances/Instances/
@@ -324,10 +339,12 @@ add_library(imgui STATIC
 )
 
 target_include_directories(imgui PUBLIC
+    ${enet_SOURCE_DIR}/include
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
 )
 target_link_libraries(imgui PUBLIC
+    enet
     glfw
     Vulkan::Vulkan
 )
@@ -339,8 +356,10 @@ if(WIN32)
         glfw
         SDL3::SDL3
         imgui
+        ws2_32
+        winmm
     )
-
+    
     if(BORON_USE_DISCORD)
         target_link_libraries(BoronEngine PRIVATE
             "${DISCORD_LIB_PATH}"
