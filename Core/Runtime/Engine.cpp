@@ -24,9 +24,21 @@
 #include <random>
 #include "Texture.h"
 
+#include "Multiplatform/BoronPlatform.h"
+
 Engine::Engine()
     : window(1280, 800, "BoronEngine")
 {
+    #ifdef BGE_WIN
+        CreateInfo("Win11 detected!");
+    #endif
+    #ifdef BGE_MACOS
+        CreateInfo("MacOS detected!");
+    #endif
+    #ifdef BGE_LINUX
+        CreateInfo("Linux detected!");
+    #endif
+
     CreateWarning("========================");
     CreateWarning("BoronEngine Version: " + std::to_string(BGE_VERSION));
     CreateWarning("BoronMathLibrary Version: " + std::to_string(BORONMATHversion));
