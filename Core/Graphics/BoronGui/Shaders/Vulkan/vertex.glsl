@@ -1,7 +1,7 @@
 #version 450
 
 layout(location = 0) in vec2 inPosition;
-layout(location = 1) in vec3 inColor;
+layout(location = 1) in vec4 inColor;
 layout(location = 2) in vec2 inUV;
 layout(location = 3) in float inBrightness;
 layout(location = 4) in vec2 inSize;
@@ -22,7 +22,7 @@ layout(push_constant) uniform PushConstants {
     float rounding;
 } pc;
 
-layout(location = 0) out vec3 fragColor;
+layout(location = 0) out vec4 fragColor;
 layout(location = 1) out float fragRounding;
 layout(location = 2) out vec2 fragLocalPos;
 layout(location = 3) out vec2 fragSize;

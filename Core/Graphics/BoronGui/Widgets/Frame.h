@@ -10,10 +10,10 @@ public:
 	void Render() override;
 	bool setSize(const BML::Vec2& p_size);
 	bool setPosition(const BML::Vec2& p_position);
-	bool setColor(const BML::Vec3& p_color);
+	bool setColor(const BML::Vec4& p_color);
 	const BML::Vec2& getPosition() const;
 	const BML::Vec2& getSize() const;
-	const BML::Vec3& getColor() const;
+	const BML::Vec4& getColor() const;
 	const float getRounding() const;
 
 	//vertices
@@ -31,7 +31,7 @@ private:
 	float m_rounding = 10.0f;
 	BML::Vec2 m_size = { 0,0 };
 	BML::Vec2 m_position = { 0,0 };
-	BML::Vec3 m_color = { 0,0,0 };
+	BML::Vec4 m_color = { 0,0,0,0 };
 
     std::vector<Vertex2d> m_vertices = {
         Vertex2d({ -0.5f, -0.5f }),

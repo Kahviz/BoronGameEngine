@@ -1,6 +1,6 @@
 #version 450
 
-layout(location = 0) in vec3 fragColor;
+layout(location = 0) in vec4 fragColor;
 layout(location = 1) in float fragRounding;
 layout(location = 2) in vec2 fragLocalPos;
 layout(location = 3) in vec2 fragSize;
@@ -21,5 +21,5 @@ void main() {
     float edgeSoftness = 0.5;
     float alpha = 1.0 - smoothstep(0.0, edgeSoftness, dist);
 
-    outColor = vec4(fragColor.rgb, alpha);
+    outColor = vec4(fragColor.rgb, fragColor.a * alpha);
 }

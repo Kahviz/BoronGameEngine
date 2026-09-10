@@ -59,10 +59,11 @@ void BoronGui::DrawWidgets() {
 		uint32_t vertexOffset = static_cast<uint32_t>(m_vertices.size());
 		
 		if (auto frame = dynamic_cast<Borongui::Frame*>(widget)) {
-			GPUVector3 color = GPUVector3(frame->getColor().x() / 255.0f, frame->getColor().y() / 255.0f, frame->getColor().z() / 255.0f);
+			GPUVector4 color = GPUVector4(frame->getColor().x() / 255.0f, frame->getColor().y() / 255.0f, frame->getColor().z() / 255.0f, frame->getColor().w());
 
 			for (auto& vertex : frame->getVertices()) {
 				Vertex2d guiVertex{};
+
 				guiVertex.color = color;
 				guiVertex.pos = vertex.pos;
 				guiVertex.size = GPUVector2(frame->getSize().x(), frame->getSize().y());

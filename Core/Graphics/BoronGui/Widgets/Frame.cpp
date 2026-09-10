@@ -18,13 +18,14 @@ bool Borongui::Frame::setPosition(const BML::Vec2& p_position) {
 	return true;
 }
 
-bool Borongui::Frame::setColor(const BML::Vec3& p_color) {
+bool Borongui::Frame::setColor(const BML::Vec4& p_color) {
 	m_color = p_color;
 
-	GPUVector3 color(
+	GPUVector4 color(
 		m_color.x(),
 		m_color.y(),
-		m_color.z()
+		m_color.z(),
+		m_color.w()
 	);
 
 	for (auto& vertex : m_vertices)
@@ -41,7 +42,7 @@ const BML::Vec2& Borongui::Frame::getSize() const {
 	return m_size;
 }
 
-const BML::Vec3& Borongui::Frame::getColor() const {
+const BML::Vec4& Borongui::Frame::getColor() const {
 	return m_color;
 }
 

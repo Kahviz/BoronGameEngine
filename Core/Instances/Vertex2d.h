@@ -9,7 +9,7 @@
 
 struct Vertex2d {
     GPUVector2 pos = { 0,0 };
-    GPUVector3 color = { 0,0,0 };
+    GPUVector4 color = { 0,0,0 };
     GPUVector2 uv = { 0,0 };
     GPUVector2 size = { 0,0 };
     GPUVector2 guiPos = { 0,0 };
@@ -19,15 +19,15 @@ struct Vertex2d {
 
     Vertex2d() = default;
 
-    Vertex2d(float b, const GPUVector2& p, const GPUVector3& c, const GPUVector3& n)
+    Vertex2d(float b, const GPUVector2& p, const GPUVector4& c, const GPUVector3& n)
         : brightness(b), pos(p), color(c), uv{ 0.0f, 0.0f }, size(100, 100), guiPos(100, 100) {
     }
 
-    Vertex2d(float b, const GPUVector2& p, const GPUVector3& c, const GPUVector2& uv_coords)
+    Vertex2d(float b, const GPUVector2& p, const GPUVector4& c, const GPUVector2& uv_coords)
         : brightness(b), pos(p), color(c), uv(uv_coords), size(100, 100), guiPos(200, 100) {
     }
 
-    Vertex2d(const GPUVector2& p, const GPUVector3& c)
+    Vertex2d(const GPUVector2& p, const GPUVector4& c)
         : pos(p),
         color(c),
         uv{ 0.0f, 0.0f },
@@ -67,7 +67,7 @@ struct Vertex2d {
         // color
         attributes[1].binding = 0;
         attributes[1].location = 1;
-        attributes[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributes[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
         attributes[1].offset = offsetof(Vertex2d, color);
 
         // UV

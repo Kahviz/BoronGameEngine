@@ -470,16 +470,18 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     BoronGui::ReSizeViewport({ static_cast<float>(screen_width), static_cast<float>(screen_height) });
 
     Borongui::Frame frame{};
+
     frame.setPosition({ 100,100 });
     frame.setSize({ 200,200 });
-    frame.setColor({ 0,0,255 });
+    frame.setColor({ 0,0,255,0.5 });
 
     BoronGui::SubmitWidget(frame);
 
     Borongui::Frame frame2{};
+
     frame2.setPosition({ 400,100 });
     frame2.setSize({ 200,300 });
-    frame2.setColor({ 0,255,255 });
+    frame2.setColor({ 0,255,255,0.8 });
 
     BoronGui::SubmitWidget(frame2);
 
