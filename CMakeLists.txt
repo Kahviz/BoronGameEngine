@@ -261,7 +261,7 @@ add_executable(BoronEngine
 
     #Icon
     BoronEngine.rc
-)
+ "Core/Graphics/BoronGui/Widgets/Widget.cpp")
 
 if(MSVC)
     target_compile_options(BoronEngine PRIVATE /W4)

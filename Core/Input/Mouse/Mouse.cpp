@@ -1,43 +1,64 @@
 #include "Mouse.h"
 
-bool Mouse::s_firstmouse = true;
-BML::Vec2 Mouse::s_lastMousePos{};
-BML::Vec2 Mouse::s_mousePos{};
+bool Mouse::m_firstmouse = true;
+BML::Vec2 Mouse::m_lastMousePos{};
+BML::Vec2 Mouse::m_mousePos{};
+bool Mouse::m_leftClicked = false;
+bool Mouse::m_rightClicked = false;
 
 void Mouse::updateMouse(Window* window) {
     double mouseX;
     double mouseY;
 
+    m_leftClicked = false;
+    m_rightClicked = false;
+
     glfwGetCursorPos(window->GetWindow(), &mouseX, &mouseY);
-
-    if (s_firstmouse)
-    {
-        s_lastMousePos.setX(static_cast<float>(mouseX));
-        s_lastMousePos.setY(static_cast<float>(mouseY));
-
-        s_mousePos = s_lastMousePos;
-        s_firstmouse = false;
+    if (glfwGetMouseButton(window->GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        m_leftClicked = true;
     }
 
-    s_lastMousePos = s_mousePos;
-    s_mousePos.setX(static_cast<float>(mouseX));
-    s_mousePos.setY(static_cast<float>(mouseY));
+    if (glfwGetMouseButton(window->GetWindow(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+        m_rightClicked = true;
+    }
+
+    if (m_firstmouse)
+    {
+        m_lastMousePos.setX(static_cast<float>(mouseX));
+        m_lastMousePos.setY(static_cast<float>(mouseY));
+
+        m_mousePos = m_lastMousePos;
+        m_firstmouse = false;
+    }
+
+
+    m_lastMousePos = m_mousePos;
+    m_mousePos.setX(static_cast<float>(mouseX));
+    m_mousePos.setY(static_cast<float>(mouseY));
 }
 
 BML::Vec2 Mouse::getMousePos() {
-    return s_mousePos;
+    return m_mousePos;
 }
 
-BML::Vec2 Mouse::GetDelta() {
-    return BML::Vec2(s_mousePos - s_lastMousePos);
+BML::Vec2 Mouse::getDelta() {
+    return BML::Vec2(m_mousePos - m_lastMousePos);
 }
 
-float Mouse::GetDeltaX()
+float Mouse::getDeltaX()
 {
-    return s_mousePos.x() - s_lastMousePos.x();
+    return m_mousePos.x() - m_lastMousePos.x();
 }
 
-float Mouse::GetDeltaY()
+float Mouse::getDeltaY()
 {
-    return s_mousePos.y() - s_lastMousePos.y();
+    return m_mousePos.y() - m_lastMousePos.y();
+}
+
+bool Mouse::isLeftClicked() {
+    return m_leftClicked;
+}
+
+bool Mouse::isRightClicked() {
+    return m_rightClicked;
 }

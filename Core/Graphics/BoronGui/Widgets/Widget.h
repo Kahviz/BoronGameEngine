@@ -1,5 +1,7 @@
 #pragma once
 
+#include "BoronMathLibrary.h"
+
 namespace Borongui {
 class Widget {
 public:
@@ -7,5 +9,8 @@ public:
 
     BML::Vec2 m_size = { 0,0 };
     BML::Vec2 m_position = { 0,0 };
+
+    bool m_isHovered = false;
+    bool m_isClicked = false;
 };
 }

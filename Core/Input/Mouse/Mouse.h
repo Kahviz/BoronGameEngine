@@ -12,11 +12,15 @@ public:
 
 	static void updateMouse(Window* window);
 	static BML::Vec2 getMousePos();
-	static BML::Vec2 GetDelta();
-	static float GetDeltaX();
-	static float GetDeltaY();
+	static BML::Vec2 getDelta();
+	static float getDeltaX();
+	static float getDeltaY();
+	static bool isLeftClicked();
+	static bool isRightClicked();
 private:
-	static BML::Vec2 s_lastMousePos;
-	static BML::Vec2 s_mousePos;
-	static bool s_firstmouse;
+	static BML::Vec2 m_lastMousePos;
+	static BML::Vec2 m_mousePos;
+	static bool m_firstmouse;
+	static bool m_leftClicked;
+	static bool m_rightClicked;
 };

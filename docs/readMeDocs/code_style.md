@@ -3,6 +3,7 @@ Code style to Boron
 Use this format in:
 - in getters "getFoo()" and "getBoo()"
 - in setters "setFoo()" and "setBoo()"
+- in is functions "isFoo()" and "isBoo()"
 - in functions "Init()" and "Destroy()"
 
 - Type member variables "m_variable"

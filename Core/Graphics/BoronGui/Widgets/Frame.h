@@ -15,6 +15,10 @@ public:
 	const BML::Vec4& getColor() const;
 	const float getRounding() const;
 
+	//Hovered, clicked
+	const bool isHovered() const;
+	const bool isClicked() const;
+
 	//vertices
 	std::vector<Vertex2d>& getVertices();
 

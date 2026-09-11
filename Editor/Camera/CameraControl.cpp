@@ -42,8 +42,8 @@ void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
 
     if (glfwGetMouseButton(glfwWND, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
     {
-        float x = -Mouse::GetDeltaY() * sensitivity;
-        float y = Mouse::GetDeltaX() * sensitivity;
+        float x = -Mouse::getDeltaY() * sensitivity;
+        float y = Mouse::getDeltaX() * sensitivity;
 
         Cam.SetRotationX(std::clamp(Cam.GetRotationVector().x() + x, DegreesToRadians(-89.9f), DegreesToRadians(89.9f)));
         Cam.AdjustRotation(0.0f, y, 0.0f);
