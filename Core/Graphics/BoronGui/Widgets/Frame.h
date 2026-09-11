@@ -7,7 +7,6 @@
 namespace Borongui {
 class Frame : public Widget {
 public:
-	void Render() override;
 	bool setSize(const BML::Vec2& p_size);
 	bool setPosition(const BML::Vec2& p_position);
 	bool setColor(const BML::Vec4& p_color);

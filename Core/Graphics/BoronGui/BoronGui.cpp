@@ -8,6 +8,7 @@ std::vector<Borongui::Widget*> BoronGui::widgets{};
 
 std::vector<Vertex2d> BoronGui::m_vertices{};
 std::vector<uint32_t> BoronGui::m_indicies{};
+bool BoronGui::m_inited = false;
 
 void BoronGui::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
 	m_backend->UpdatePerFrameOBJ(p_perFrameStuct);
@@ -48,10 +49,6 @@ void BoronGui::EndFrame() {
 
 void BoronGui::ReSizeViewport(GPUVector2 p_newSize) {
 	m_backend->ReSizeViewport(p_newSize);
-}
-
-void BoronGui::RenderAFrame(Borongui::Frame& frame) {
-	m_backend->RenderAFrame(frame);
 }
 
 void BoronGui::DrawWidgets() {

@@ -14,7 +14,6 @@ public:
 	static void SubmitWidget(Borongui::Widget& p_widget);
 	static void EndFrame();
 	static void ReSizeViewport(GPUVector2 p_newSize);
-	static void RenderAFrame(Borongui::Frame& frame);
 	static void DrawWidgets();
 private:
 	static std::unique_ptr<BoronGuiBackends::Backends> m_backend;
@@ -23,5 +22,5 @@ private:
 	static std::vector<uint32_t> m_indicies;
 
 	static std::vector<Borongui::Widget*> widgets;
-	bool m_inited = false;
+	static bool m_inited;
 };

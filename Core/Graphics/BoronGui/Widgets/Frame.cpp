@@ -2,10 +2,6 @@
 #include "BoronGui.h"
 #include "GLOBALS.h"
 
-void Borongui::Frame::Render() {
-	BoronGui::RenderAFrame(*this);
-}
-
 bool Borongui::Frame::setSize(const BML::Vec2& p_size) {
 	m_size = p_size;
 
