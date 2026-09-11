@@ -7,6 +7,7 @@
 namespace Borongui {
 class Frame : public Widget {
 public:
+	void lockInitialization(bool p_value);
 	bool setSize(const BML::Vec2& p_size);
 	bool setPosition(const BML::Vec2& p_position);
 	bool setColor(const BML::Vec4& p_color);
@@ -30,6 +31,8 @@ public:
 	
 	void setIndices(const std::vector<uint32_t>& p_indices);
 private:
+	bool initLocked = false;
+
 	float m_rounding = 10.0f;
 	BML::Vec4 m_color = { 0,0,0,0 };
 

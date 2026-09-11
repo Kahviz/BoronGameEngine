@@ -12,5 +12,8 @@ public:
 
     bool m_isHovered = false;
     bool m_isClicked = false;
+    bool m_isDragging = false;
+
+    int m_zIndex = 0;
 };
 }

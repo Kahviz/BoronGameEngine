@@ -2,31 +2,42 @@
 #include "BoronGui.h"
 #include "GLOBALS.h"
 
+void Borongui::Frame::lockInitialization(bool p_value) {
+	initLocked = p_value;
+}
+
 bool Borongui::Frame::setSize(const BML::Vec2& p_size) {
-	m_size = p_size;
+	if (!initLocked) {
+		m_size = p_size;
+	}
 
 	return true;
 }
 
 bool Borongui::Frame::setPosition(const BML::Vec2& p_position) {
-	m_position = p_position;
+	if (!initLocked) {
+		m_position = p_position;
+	}
 
 	return true;
 }
 
 bool Borongui::Frame::setColor(const BML::Vec4& p_color) {
-	m_color = p_color;
+	if (!initLocked) {
+		m_color = p_color;
 
-	GPUVector4 color(
-		m_color.x(),
-		m_color.y(),
-		m_color.z(),
-		m_color.w()
-	);
+		GPUVector4 color(
+			m_color.x(),
+			m_color.y(),
+			m_color.z(),
+			m_color.w()
+		);
 
-	for (auto& vertex : m_vertices)
-		vertex.color = color;
-
+		for (auto& vertex : m_vertices) {
+			vertex.color = color;
+		}
+	}
+	
 	return true;
 }
 

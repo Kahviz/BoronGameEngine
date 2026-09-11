@@ -3,6 +3,8 @@
 #include "Logger/Logger.h"
 #include "Backends/Backends.h"
 
+#include "Mouse/Mouse.h"
+
 std::unique_ptr<BoronGuiBackends::Backends> BoronGui::m_backend{};
 std::vector<Borongui::Widget*> BoronGui::widgets{};
 
@@ -51,38 +53,96 @@ void BoronGui::ReSizeViewport(GPUVector2 p_newSize) {
 	m_backend->ReSizeViewport(p_newSize);
 }
 
+bool checkAABB(BML::Vec2 p_a, Borongui::Widget& p_widget) {
+	return (
+		p_a.x() >= p_widget.m_position.x() &&
+		p_a.x() <= p_widget.m_position.x() + p_widget.m_size.x() &&
+		p_a.y() >= p_widget.m_position.y() &&
+		p_a.y() <= p_widget.m_position.y() + p_widget.m_size.y()
+	); //Ty google <:
+}
+
 void BoronGui::DrawWidgets() {
-	for (Borongui::Widget* widget : widgets) {
-		uint32_t vertexOffset = static_cast<uint32_t>(m_vertices.size());
-		
-		if (auto frame = dynamic_cast<Borongui::Frame*>(widget)) {
-			GPUVector4 color = GPUVector4(frame->getColor().x() / 255.0f, frame->getColor().y() / 255.0f, frame->getColor().z() / 255.0f, frame->getColor().w());
+    static bool isDragging = false;
 
-			for (auto& vertex : frame->getVertices()) {
-				Vertex2d guiVertex{};
+    std::sort(widgets.begin(), widgets.end(), //z-Index sorting
+        [](Borongui::Widget* a, Borongui::Widget* b) {
+            return a->m_zIndex < b->m_zIndex;
+        }
+    );
 
-				guiVertex.color = color;
-				guiVertex.pos = vertex.pos;
-				guiVertex.size = GPUVector2(frame->getSize().x(), frame->getSize().y());
-				guiVertex.rounding = frame->getRounding();
-				guiVertex.guiPos = GPUVector2(frame->getPosition().x(), frame->getPosition().y());
+    for (Borongui::Widget* widget : widgets) {
+        widget->m_isHovered = false;
+        widget->m_isClicked = false;
 
-				vertex.color = guiVertex.color;
-				vertex.pos = guiVertex.pos;
-				vertex.size = guiVertex.size;
-				vertex.rounding = guiVertex.rounding;
-				vertex.guiPos = guiVertex.guiPos;
+        BML::Vec2 mousePos = Mouse::getMousePos();
 
-				m_vertices.push_back(guiVertex);
-			}
+        mousePos = BML::Vec2(
+            mousePos.x(),
+            screen_height - mousePos.y()
+        );
+        
+        if (checkAABB(mousePos, *widget)) {
+            widget->m_isHovered = true;
 
-			for (auto& index : frame->getIndices()) {
-				m_indicies.push_back(vertexOffset + index);
-			}
+            if (Mouse::isLeftClicked() && !isDragging) {
+                isDragging = true;
+                
+                widget->m_zIndex = 9999;
+                widget->m_isDragging = true;
+                widget->m_isClicked = true;
+            }
+        }
 
-		}
-	}
+        if (widget->m_isDragging) {
 
-	m_backend->UploadBatch(m_vertices, m_indicies);
-	m_backend->DrawBatch();
+            widget->m_position += BML::Vec2(
+                Mouse::getDelta().x(),
+                -Mouse::getDelta().y()
+            );
+
+            if (!Mouse::isLeftClicked()) {
+                widget->m_zIndex = 0;
+                widget->m_isDragging = false;
+                isDragging = false;
+            }
+        }
+
+        uint32_t vertexOffset =
+            static_cast<uint32_t>(m_vertices.size());
+
+        if (auto frame = dynamic_cast<Borongui::Frame*>(widget)) {
+                   GPUVector4 color = GPUVector4(
+                frame->getColor().x() / 255.0f,
+                frame->getColor().y() / 255.0f,
+                frame->getColor().z() / 255.0f,
+                frame->getColor().w()
+            );
+
+            for (auto& vertex : frame->getVertices()) {
+                Vertex2d guiVertex{};
+
+                guiVertex.color = color;
+                guiVertex.pos = vertex.pos;
+                guiVertex.size = GPUVector2(
+                    frame->getSize().x(),
+                    frame->getSize().y()
+                );
+                guiVertex.rounding = frame->getRounding();
+                guiVertex.guiPos = GPUVector2(
+                    frame->getPosition().x(),
+                    frame->getPosition().y()
+                );
+
+                m_vertices.push_back(guiVertex);
+            }
+
+            for (auto index : frame->getIndices()) {
+                m_indicies.push_back(vertexOffset + index);
+            }
+        }
+    }
+    
+    m_backend->UploadBatch(m_vertices, m_indicies);
+    m_backend->DrawBatch();
 }

@@ -41,6 +41,14 @@ BML::Vec2 Mouse::getMousePos() {
     return m_mousePos;
 }
 
+float Mouse::getMousePosX() {
+    return m_mousePos.x();
+}
+
+float Mouse::getMousePosY() {
+    return m_mousePos.y();
+}
+
 BML::Vec2 Mouse::getDelta() {
     return BML::Vec2(m_mousePos - m_lastMousePos);
 }

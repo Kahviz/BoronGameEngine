@@ -12,6 +12,9 @@ public:
 
 	static void updateMouse(Window* window);
 	static BML::Vec2 getMousePos();
+	static float getMousePosX();
+	static float getMousePosY();
+
 	static BML::Vec2 getDelta();
 	static float getDeltaX();
 	static float getDeltaY();
