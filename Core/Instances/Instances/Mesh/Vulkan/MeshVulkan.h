@@ -1,10 +1,11 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
 #include <vector>
 #include <Instances/Vertex.h>
 #include "GLOBALS.h"
+#include "Vulkan.h"
 
+#if VULKAN == 1
 class MeshVK
 {
 public:
@@ -31,3 +32,4 @@ private:
 
     uint32_t indexCount = 0;
 };
+#endif

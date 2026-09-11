@@ -1,7 +1,8 @@
 #pragma once
+
 #include <vector>
 #include <functional>
-#include <DirectXMath.h>
+#include "DX11.h"
 #include "GLOBALS.h"
 #include <memory>
 #include "GLFW/glfw3.h"

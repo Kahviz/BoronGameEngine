@@ -1,5 +1,6 @@
 #include "ScoreCounter.h"
 
+#if VULKAN == 1
 int ScoreCounter::ScoreDevice(VkPhysicalDevice gpu)
 {
     VkPhysicalDeviceProperties props;
@@ -31,3 +32,4 @@ int ScoreCounter::ScoreDevice(VkPhysicalDevice gpu)
 
     return score;
 }
+#endif

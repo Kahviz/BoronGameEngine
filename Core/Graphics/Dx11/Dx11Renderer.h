@@ -1,14 +1,13 @@
 #pragma once
 
 #include "GLOBALS.h"
+#include "DX11.h"
+
 #if DIRECTX11 == 1
 #include "GraphicsSettings.h"
 
-#include <d3d11.h>
-#include <DirectXMath.h>
 #include <string>
 #include "Camera/Camera.h"
-#include <wrl/client.h>
 
 class Texture;
 

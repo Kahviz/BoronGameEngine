@@ -225,6 +225,10 @@ add_executable(BoronEngine
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.h
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.cpp
 
+    #backend includers
+    Core/Graphics/Vulkan/Vulkan.h 
+    Core/Graphics/Dx11/DX11.h
+
     #Vulkan
     Core/Vulkan/VulkanBuffer/VulkanBuffer.h
     Core/Vulkan/VulkanBuffer/VulkanBuffer.cpp
@@ -253,7 +257,7 @@ add_executable(BoronEngine
 
     #Icon
     BoronEngine.rc
- "Core/Graphics/Vulkan/Vulkan.h" "Core/Graphics/Dx11/DX11.h")
+)
 
 if(WIN32)
     target_sources(BoronEngine PRIVATE
