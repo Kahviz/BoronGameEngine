@@ -17,19 +17,16 @@ public:
 
 	//vertices
 	std::vector<Vertex2d>& getVertices();
+
 	const std::vector<Vertex2d>& getConstVertices() const;
+	void setVertices(const std::vector<Vertex2d>& p_vertices);
 
 	//indices
 	const std::vector<uint32_t>& getIndices() const;
-
-
-
+	
 	void setIndices(const std::vector<uint32_t>& p_indices);
-	void setVertices(const std::vector<Vertex2d>& p_vertices);
 private:
 	float m_rounding = 10.0f;
-	BML::Vec2 m_size = { 0,0 };
-	BML::Vec2 m_position = { 0,0 };
 	BML::Vec4 m_color = { 0,0,0,0 };
 
     std::vector<Vertex2d> m_vertices = {
