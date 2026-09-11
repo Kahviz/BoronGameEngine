@@ -173,19 +173,12 @@ add_executable(BoronEngine
     Core/Camera/Camera.cpp
     Editor/Camera/CameraControl.cpp
 
-    Core/Graphics/Dx11/Dx11Adapter.h
-    Core/Graphics/Dx11/Dx11Adapter.cpp
-
     Core/Graphics/Graphics.cpp
     Core/Graphics/GraphicsBackends.h
 
     Core/Graphics/Texture/Texture.h
     Core/Graphics/Texture/Texture.cpp
 
-    Core/Instances/Instances/Mesh/DX11/MeshDX11.cpp
-    Core/Instances/Instances/Mesh/Vulkan/MeshVulkan.cpp
-
-    Core/Graphics/Dx11/Dx11Renderer.cpp
     Core/Graphics/Vulkan/VulkanRender.cpp
 
     Core/Misc/Saving/SaveProject.h
@@ -226,17 +219,16 @@ add_executable(BoronEngine
     Core/Graphics/BoronGui/Backends/Backends.h
 
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.cpp
+    Core/Graphics/BoronGui/Widgets/Widget.cpp
 
     #backends
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.h
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.cpp
 
-    Core/Graphics/BoronGui/Backends/BoronGui_implDX11.h
-    Core/Graphics/BoronGui/Backends/BoronGui_implDX11.cpp
-
     #Vulkan
     Core/Vulkan/VulkanBuffer/VulkanBuffer.h
     Core/Vulkan/VulkanBuffer/VulkanBuffer.cpp
+    Core/Instances/Instances/Mesh/Vulkan/MeshVulkan.cpp
 
     Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.h
     Core/Graphics/Vulkan/VulkanDevice/VulkanDevice.cpp
@@ -261,7 +253,18 @@ add_executable(BoronEngine
 
     #Icon
     BoronEngine.rc
- "Core/Graphics/BoronGui/Widgets/Widget.cpp")
+)
+
+if(WIN32)
+    target_sources(BoronEngine PRIVATE
+        Core/Graphics/Dx11/Dx11Adapter.h
+        Core/Graphics/Dx11/Dx11Adapter.cpp
+        Core/Instances/Instances/Mesh/DX11/MeshDX11.cpp
+        Core/Graphics/Dx11/Dx11Renderer.cpp
+        Core/Graphics/BoronGui/Backends/BoronGui_implDX11.h
+        Core/Graphics/BoronGui/Backends/BoronGui_implDX11.cpp
+    )
+endif()
 
 if(MSVC)
     target_compile_options(BoronEngine PRIVATE /W4)

@@ -21,8 +21,7 @@
 #include "backends/BoronGui_implVulkan.h"
 #include <BoronGui.h>
 
-bool VulkanRender::Init(GLFWwindow* window)
-{
+bool VulkanRender::Init(GLFWwindow* window) {
     float AspectX = (float)screen_width;
     float AspectY = (float)screen_height;
     float Aspect = AspectX / AspectY;
@@ -31,6 +30,7 @@ bool VulkanRender::Init(GLFWwindow* window)
 
     CreateInfo("Vulkan Init Started!");
     viewportTexture = std::make_unique<Texture>();
+
     if (!vkInstance.Init()) {
         CreateError("A Unexpected error happened on vkInstance.Init");
         return false;
@@ -46,12 +46,20 @@ bool VulkanRender::Init(GLFWwindow* window)
         return false;
     }
 
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(vkInstance.GetInstance(), &deviceCount, nullptr);
+
+    if (deviceCount == 0) {
+        CreateInfo("No Vulkan GPU found");
+    }
+    else {
+        CreateInfo("Vulkan GPU found");
+    }
+
     VkPhysicalDeviceProperties selectedProps;
     vkGetPhysicalDeviceProperties(vkDevice.GetPhysicalDevice(), &selectedProps);
 
-#ifdef _DEBUG
     CreateInfo("Selected GPU: ", selectedProps.deviceName);
-#endif // _DEBUG
 
     uint32_t formatCount = 0;
 
