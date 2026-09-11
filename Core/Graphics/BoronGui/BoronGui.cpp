@@ -50,7 +50,9 @@ void BoronGui::EndFrame() {
 }
 
 void BoronGui::ReSizeViewport(GPUVector2 p_newSize) {
-	m_backend->ReSizeViewport(p_newSize);
+    if (m_inited) {
+        m_backend->ReSizeViewport(p_newSize);
+    }
 }
 
 bool checkAABB(BML::Vec2 p_a, Borongui::Widget& p_widget) {
@@ -95,7 +97,6 @@ void BoronGui::DrawWidgets() {
         }
 
         if (widget->m_isDragging) {
-
             widget->m_position += BML::Vec2(
                 Mouse::getDelta().x(),
                 -Mouse::getDelta().y()

@@ -4,7 +4,6 @@
 #include "BoronMathLibrary.h"
 #include "GLOBALS.h"
 
-#if VULKAN == 1
 #include "Vulkan/vulkan.h"
 
 struct Vertex2d {
@@ -47,60 +46,61 @@ struct Vertex2d {
     {
     }
 
-    static VkVertexInputBindingDescription getBindingDescription() {
-        VkVertexInputBindingDescription bindingDescription{};
-        bindingDescription.binding = 0;
-        bindingDescription.stride = sizeof(Vertex2d);
-        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        return bindingDescription;
-    }
+    #if VULKAN == 1
+        static VkVertexInputBindingDescription getBindingDescription() {
+            VkVertexInputBindingDescription bindingDescription{};
+            bindingDescription.binding = 0;
+            bindingDescription.stride = sizeof(Vertex2d);
+            bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+            return bindingDescription;
+        }
 
-    static std::array<VkVertexInputAttributeDescription, 7> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 7> attributes{};
+        static std::array<VkVertexInputAttributeDescription, 7> getAttributeDescriptions() {
+            std::array<VkVertexInputAttributeDescription, 7> attributes{};
 
-        //pos
-        attributes[0].binding = 0;
-        attributes[0].location = 0;
-        attributes[0].format = VK_FORMAT_R32G32_SFLOAT;
-        attributes[0].offset = offsetof(Vertex2d, pos);
+            //pos
+            attributes[0].binding = 0;
+            attributes[0].location = 0;
+            attributes[0].format = VK_FORMAT_R32G32_SFLOAT;
+            attributes[0].offset = offsetof(Vertex2d, pos);
 
-        // color
-        attributes[1].binding = 0;
-        attributes[1].location = 1;
-        attributes[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-        attributes[1].offset = offsetof(Vertex2d, color);
+            // color
+            attributes[1].binding = 0;
+            attributes[1].location = 1;
+            attributes[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+            attributes[1].offset = offsetof(Vertex2d, color);
 
-        // UV
-        attributes[2].binding = 0;
-        attributes[2].location = 2;
-        attributes[2].format = VK_FORMAT_R32G32_SFLOAT;
-        attributes[2].offset = offsetof(Vertex2d, uv);
+            // UV
+            attributes[2].binding = 0;
+            attributes[2].location = 2;
+            attributes[2].format = VK_FORMAT_R32G32_SFLOAT;
+            attributes[2].offset = offsetof(Vertex2d, uv);
 
-        // brightness
-        attributes[3].binding = 0;
-        attributes[3].location = 3;
-        attributes[3].format = VK_FORMAT_R32_SFLOAT;
-        attributes[3].offset = offsetof(Vertex2d, brightness);
+            // brightness
+            attributes[3].binding = 0;
+            attributes[3].location = 3;
+            attributes[3].format = VK_FORMAT_R32_SFLOAT;
+            attributes[3].offset = offsetof(Vertex2d, brightness);
 
-        //size
-        attributes[4].binding = 0;
-        attributes[4].location = 4;
-        attributes[4].format = VK_FORMAT_R32G32_SFLOAT;
-        attributes[4].offset = offsetof(Vertex2d, size);
+            //size
+            attributes[4].binding = 0;
+            attributes[4].location = 4;
+            attributes[4].format = VK_FORMAT_R32G32_SFLOAT;
+            attributes[4].offset = offsetof(Vertex2d, size);
 
-        //rounding
-        attributes[5].binding = 0;
-        attributes[5].location = 5;
-        attributes[5].format = VK_FORMAT_R32_SFLOAT;
-        attributes[5].offset = offsetof(Vertex2d, rounding);
+            //rounding
+            attributes[5].binding = 0;
+            attributes[5].location = 5;
+            attributes[5].format = VK_FORMAT_R32_SFLOAT;
+            attributes[5].offset = offsetof(Vertex2d, rounding);
 
-        //guiPos
-        attributes[6].binding = 0;
-        attributes[6].location = 6;
-        attributes[6].format = VK_FORMAT_R32G32_SFLOAT;
-        attributes[6].offset = offsetof(Vertex2d, guiPos);
+            //guiPos
+            attributes[6].binding = 0;
+            attributes[6].location = 6;
+            attributes[6].format = VK_FORMAT_R32G32_SFLOAT;
+            attributes[6].offset = offsetof(Vertex2d, guiPos);
 
-        return attributes;
-    }
+            return attributes;
+        }
+    #endif
 };
-#endif
