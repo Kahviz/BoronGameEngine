@@ -253,7 +253,7 @@ add_executable(BoronEngine
 
     #Icon
     BoronEngine.rc
-)
+ "Core/Graphics/Vulkan/Vulkan.h" "Core/Graphics/Dx11/DX11.h")
 
 if(WIN32)
     target_sources(BoronEngine PRIVATE

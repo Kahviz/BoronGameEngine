@@ -5,7 +5,7 @@ Use this format in:
 - in setters "setFoo()" and "setBoo()"
 - in is functions "isFoo()" and "isBoo()"
 - in functions "Init()" and "Destroy()"
-
+- use if you include third party libs like #include <imgui.h> if they are from boron use #include "BoronMathLibrary.h"
 - Type member variables "m_variable"
 - Type parametre variables "p_variable"
 - Type global variables "g_variable" 

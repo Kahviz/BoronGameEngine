@@ -1,8 +1,8 @@
 #pragma once
 #include "GLOBALS.h"
+#include "Vulkan.h"
 
 #if VULKAN == 1
-#include "vulkan/vulkan.h"
 
 class VulkanBuffer {
 public:

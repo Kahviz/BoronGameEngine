@@ -1,9 +1,9 @@
 #pragma once
 
 #include "GLOBALS.h"
+#include "Vulkan.h"
 
 #if VULKAN == 1
-#include "Vulkan/vulkan.h"
 #include <filesystem>
 #include <fstream>
 #include <vector>

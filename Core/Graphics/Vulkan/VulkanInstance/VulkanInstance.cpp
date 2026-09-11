@@ -1,5 +1,6 @@
 #include "VulkanInstance.h"
 #include <iostream>
+#include "Vulkan.h"
 
 #if VULKAN == 1
 

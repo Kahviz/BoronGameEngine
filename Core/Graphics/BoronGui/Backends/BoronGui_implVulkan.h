@@ -1,8 +1,8 @@
 #pragma once
 #include "GLOBALS.h"
+#include "Vulkan.h"
 
 #if VULKAN == 1
-#include "vulkan/Vulkan.h"
 #include "VulkanBuffer.h"
 #include "Backends.h"
 #include "BoronGuiTypes.h"

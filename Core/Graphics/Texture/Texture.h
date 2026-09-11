@@ -15,9 +15,7 @@
     using Microsoft::WRL::ComPtr;
 #endif
 
-#if VULKAN == 1
-    #include "Vulkan/vulkan.h"
-#endif
+#include "Vulkan.h"
 
 class IRenderer;
 

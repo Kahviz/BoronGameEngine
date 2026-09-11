@@ -1,6 +1,5 @@
 #pragma once
-#include "BoronMathLibrary.h"
-#include "vulkan/vulkan.h"
+#include "Vulkan.h"
 
 class ScoreCounter {
 public:

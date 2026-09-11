@@ -1,7 +1,8 @@
 #pragma once
 #include <array>
 #include "BoronMathLibrary.h"
-#include "Vulkan/vulkan.h"
+#include "Vulkan.h"
+
 struct Vertex
 {
     GPUVector3 pos = { 0,0,0 };

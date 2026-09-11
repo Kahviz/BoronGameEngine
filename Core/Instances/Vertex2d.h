@@ -4,7 +4,7 @@
 #include "BoronMathLibrary.h"
 #include "GLOBALS.h"
 
-#include "Vulkan/vulkan.h"
+#include "Vulkan.h"
 
 struct Vertex2d {
     GPUVector2 pos = { 0,0 };

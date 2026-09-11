@@ -10,9 +10,7 @@
 	#include <comdef.h>
 #endif
 
-#if VULKAN == 1
-	#include "vulkan/Vulkan.h"
-#endif
+#include "Vulkan.h"
 
 #ifdef _DEBUG
 	template<typename T>
