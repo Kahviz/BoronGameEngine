@@ -43,9 +43,9 @@ void Window::SetWindowIcon(GLFWwindow* window) {
     GLFWimage images[1]{};
     int width, height, channels;
 
-    std::string fullPath = appData + "/BoronEngine/Icons/BoronEngineIcon.png";
+    fs::path fullPath = appData / "BoronEngine" / "Icons" / "BoronEngineIcon.png";
 
-    unsigned char* pixels = stbi_load(fullPath.c_str(), &width, &height, &channels, 4);
+    unsigned char* pixels = stbi_load(fullPath.string().c_str(), &width, &height, &channels, 4);
 
     if (pixels) {
         GLFWimage images[1];
@@ -57,12 +57,11 @@ void Window::SetWindowIcon(GLFWwindow* window) {
         stbi_image_free(pixels);
     }
     else {
-        CreateError("Failed to load: " + fullPath);
+        CreateError("Failed to load: " / fullPath);
     }
 }
 
-Window::~Window()
-{
+Window::~Window() {
     if (m_window) {
         glfwDestroyWindow(m_window);
     }
@@ -73,8 +72,7 @@ Window::~Window()
     }
 }
 
-BML::Vector2 Window::GetSize() const noexcept
-{
+BML::Vector2 Window::GetSize() const noexcept {
     int width, height;
     glfwGetWindowSize(m_window, &width, &height);
 

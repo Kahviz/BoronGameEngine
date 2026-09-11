@@ -9,8 +9,8 @@ namespace fs = std::filesystem;
 
 #define INEDITOR 1
 
-#define DIRECTX11 1
-#define VULKAN 0
+#define DIRECTX11 0
+#define VULKAN 1
 
 #define BGE_VERSION 1.3
 #define DEBUGFILEMAKING 0
@@ -38,11 +38,11 @@ extern float zFar;
 extern float viewport_width;
 extern float viewport_height;
 
-extern std::string appData;
-extern std::string fonts;
-extern std::string assets;
-extern std::string textures;
-extern std::string savings;
+extern fs::path appData;
+extern fs::path fonts;
+extern fs::path assets;
+extern fs::path textures;
+extern fs::path savings;
 extern std::string g_projectName;
 
 extern fs::path g_appDataTarget;

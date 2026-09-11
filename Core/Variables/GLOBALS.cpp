@@ -10,9 +10,7 @@ float zFar = 1000.0f;
 extern float viewport_width = 400.0f;
 extern float viewport_height = 200.0f;
 
-#ifdef _WIN32
-    #include <cstdlib>
-#endif
+#include <cstdlib>
 
 bool g_vSync = true;
 bool g_Running = true;
@@ -53,44 +51,44 @@ std::string GetAppDataPath() {
 }
 
 fs::path GetAppDataDir() {
-#ifdef _WIN32
-    char* appDataPath = nullptr;
-    size_t sz = 0;
-    if (_dupenv_s(&appDataPath, &sz, "APPDATA") == 0 && appDataPath != nullptr) {
-        fs::path appdatatarget = fs::path(appDataPath) / "BoronEngine";
+    #ifdef _WIN32
+        char* appDataPath = nullptr;
+        size_t sz = 0;
+        if (_dupenv_s(&appDataPath, &sz, "APPDATA") == 0 && appDataPath != nullptr) {
+            fs::path appdatatarget = fs::path(appDataPath) / "BoronEngine";
 
-        #ifdef _DEBUG
-            std::cout << "APPDATA path found: " << appdatatarget << "\n";
-        #endif // _DEBUG
+            #ifdef _DEBUG
+                std::cout << "APPDATA path found: " << appdatatarget << "\n";
+            #endif // _DEBUG
 
-        free(appDataPath);
-        return appdatatarget;
-    }
-    else {
-        CreateError("Failed to get APPDATA path");
-        if (appDataPath) free(appDataPath);
-        return fs::path();
-    }
-#else
-    const char* homeDir = getenv("HOME");
-    if (homeDir) {
-        fs::path appdatatarget = fs::path(homeDir) / ".config" / "BoronEngine";
-        std::cout << "HOME directory found: " << appdatatarget << "\n";
-        return appdatatarget;
-    }
-    else {
-        MakeAError("Failed to get HOME directory");
-        return fs::path();
-    }
-#endif
+            free(appDataPath);
+            return appdatatarget;
+        }
+        else {
+            CreateError("Failed to get APPDATA path");
+            if (appDataPath) free(appDataPath);
+            return fs::path();
+        }
+    #else
+        const char* homeDir = getenv("HOME");
+        if (homeDir) {
+            fs::path appdatatarget = fs::path(homeDir) / ".config" / "BoronEngine";
+            std::cout << "HOME directory found: " << appdatatarget << "\n";
+            return appdatatarget;
+        }
+        else {
+            MakeAError("Failed to get HOME directory");
+            return fs::path();
+        }
+    #endif
 }
 
 std::string g_projectName = "ProjectTest1";
-std::string appData = GetAppDataPath();
+fs::path appData = GetAppDataPath();
 
-std::string BoronEnginePath = appData + "\\BoronEngine";
-std::string savings = BoronEnginePath + "\\Savings";
-std::string assets = BoronEnginePath + "\\Assets";
-std::string textures = BoronEnginePath + "\\Textures";
-std::string fonts = BoronEnginePath + "\\Fonts";
+fs::path BoronEnginePath = appData / "BoronEngine";
+fs::path savings = BoronEnginePath / "Savings";
+fs::path assets = BoronEnginePath / "Assets";
+fs::path textures = BoronEnginePath / "Textures";
+fs::path fonts = BoronEnginePath / "Fonts";
 fs::path g_appDataTarget = GetAppDataDir();

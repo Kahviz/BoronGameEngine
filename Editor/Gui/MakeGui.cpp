@@ -8,10 +8,9 @@
 #include "Runtime/Engine.h"
 #include "Components.h"
 
-struct MeshButton
-{
+struct MeshButton {
     const char* label;
-    std::string path;
+    fs::path path;
     const char* name;
 };
 void CreatePlusButton(
@@ -70,9 +69,9 @@ static bool InputTextStd(const char* label, std::string& str)
 
 static MeshButton meshButtons[] =
 {
-    { "Cube",     assets + "\\Cube.obj","Cube" },
-    { "Ball",     assets + "\\Ball.obj",  "Ball" },
-    { "Cylinder", assets + "\\Cylinder.obj", "Cylinder"}
+    { "Cube",     assets / "Cube.obj","Cube" },
+    { "Ball",     assets / "Ball.obj",  "Ball" },
+    { "Cylinder", assets / "Cylinder.obj", "Cylinder"}
 };
 
 void MakeChildrenNodes(ECS& ecs, EntityECS parent)
@@ -166,8 +165,7 @@ void MakeGui::MakeIMGui(
     Engine* engine,
     EntityECS world,
     IRenderer* renderer
-)
-{ 
+){ 
     MakeStyle();
     
     if (ImGui::IsAnyItemActive()) {
@@ -291,7 +289,7 @@ void MakeGui::MakeIMGui(
 
     static Image2d plusbutton;
 
-    plusbutton.LoadImGuiImage(renderer, textures + "\\PlusIcon.png");
+    plusbutton.LoadImGuiImage(renderer, textures / "PlusIcon.png");
 
     static bool plusGuiOpen = false;
     static EntityECS selectedInst = 0;
@@ -648,19 +646,18 @@ void MakeGui::MakeIMViewPort(Window& wnd)
 }
 
 void MakeGui::CreateErrorPopUp(IRenderer* renderer, Image2d& image2d, const std::string& errormsg, const float duration) {
-    std::string fullPath = textures + "\\ErrorIcon.png";
+    fs::path fullPath = textures / "ErrorIcon.png";
 
     image2d.LoadImGuiImage(renderer, fullPath);
 
-    Image image;
+    Image image{};
     image.image2d = image2d;
     image.duration = duration;
     image.reason = errormsg;
     images.push_back(image);
 }
 
-bool MakeGui::MakeDashBoard(IRenderer* renderer)
-{
+bool MakeGui::MakeDashBoard(IRenderer* renderer){
     bool openProject = false;
     static bool showConfigWindow = false;
     static bool showProjectsWindow = false;
@@ -828,7 +825,7 @@ bool MakeGui::MakeDashBoard(IRenderer* renderer)
 
         float windowVisibleX = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 
-        for (const auto& entry : fs::directory_iterator(savings + "\\"))
+        for (const auto& entry : fs::directory_iterator(savings))
         {
             if (!entry.is_directory())
                 continue;

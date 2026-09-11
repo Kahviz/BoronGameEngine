@@ -29,7 +29,7 @@ public:
     ~Engine();
 
     int EngineRun();
-    EntityECS AddAMesh(ECS& ecs, const std::string& Path, const std::string& Name, BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath, bool UsesTexture);
+    EntityECS AddAMesh(ECS& ecs, const fs::path& Path, const std::string& Name, BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath, bool UsesTexture);
     void EngineDoFrame(Window* wnd, float deltatime);
     bool ImGuiInited = false;
 

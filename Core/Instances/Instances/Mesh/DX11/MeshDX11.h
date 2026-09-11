@@ -1,11 +1,14 @@
 #pragma once
+
+#include "GLOBALS.h"
+
 #include <d3d11.h>
 #include <vector>
 #include "Instances/Vertex.h"
 
 class MeshDX11 {
 public:
-    void Load(const std::string& file, ID3D11Device* device);
+    void Load(const fs::path& file, ID3D11Device* device);
     void Draw(ID3D11DeviceContext* ctx) const;
 
     const std::vector<uint32_t>& GetIndices() const {
@@ -15,11 +18,11 @@ public:
     const std::vector<Vertex>& GetVertices() const {
         return verts;
     }
+
     std::vector<Vertex> verts;
     std::vector<uint32_t> indices;
 private:
     ID3D11Buffer* vb = nullptr;
     ID3D11Buffer* ib = nullptr;
-    UINT indexCount = 0;
-
+    uint32_t indexCount = 0;
 };

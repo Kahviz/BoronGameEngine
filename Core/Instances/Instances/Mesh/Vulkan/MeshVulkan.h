@@ -1,12 +1,14 @@
 #pragma once
+
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <Instances/Vertex.h>
+#include "GLOBALS.h"
 
 class MeshVK
 {
 public:
-    void Load(const std::string& file, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue);
+    void Load(const fs::path& file, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue);
 
     void Draw(VkCommandBuffer cmd) const;
 

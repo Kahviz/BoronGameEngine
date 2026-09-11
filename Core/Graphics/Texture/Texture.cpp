@@ -22,8 +22,7 @@
 namespace fs = std::filesystem;
 
 #if VULKAN == 1
-
-bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
+bool Texture::LoadVK(const fs::path& path, IRenderer& renderer)
 {
     auto& vk = static_cast<VulkanAdapter&>(renderer);
 
@@ -32,7 +31,7 @@ bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
     VkPhysicalDevice physicalDevice = vk.GetPhysicalDevice();
     BGE_VK_ASSERT(device, "Device Can't Be VK_NULL_HANDLE");
     if (!fs::exists(path)) {
-        CreateError("Texture Doesn't Exist! Path: " + path);
+        CreateError("Texture Doesn't Exist! Path: " / path);
         return false;
     }
 
@@ -40,10 +39,10 @@ bool Texture::LoadVK(const std::string& path, IRenderer& renderer)
 
     stbi_set_flip_vertically_on_load(true);
 
-    stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load(path.string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
     if (!pixels) {
-        CreateError("Failed to load texture file: " + path);
+        CreateError("Failed to load texture file: " / path);
         return false;
     }
 
@@ -470,8 +469,7 @@ void Texture::SetSRV(ID3D11ShaderResourceView* srv)
     pTexture = srv;
     Loaded = true;
 }
-ID3D11ShaderResourceView* Texture::Load(std::string path, IRenderer& renderer)
-{
+ID3D11ShaderResourceView* Texture::Load(fs::path path, IRenderer& renderer) {
     auto& dx = static_cast<Dx11Adapter&>(renderer);
     Dx11Renderer* dx11Renderer = dx.GetRenderer();
 
@@ -486,7 +484,7 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, IRenderer& renderer)
     }
 
     if (!std::filesystem::exists(path)) {
-        CreateError("Texture Doesnt Exist: " + path);
+        CreateError("Texture Doesnt Exist: " / path);
         return nullptr;
     }
 
@@ -495,7 +493,7 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, IRenderer& renderer)
     stbi_set_flip_vertically_on_load(true);
 
     unsigned char* data = stbi_load(
-        path.c_str(),
+        path.string().c_str(),
         &width,
         &height,
         &channels,
@@ -503,7 +501,7 @@ ID3D11ShaderResourceView* Texture::Load(std::string path, IRenderer& renderer)
     );
 
     if (!data) {
-        CreateError("stb_image failed to load: " + path);
+        CreateError("stb_image failed to load: " / path);
         return nullptr;
     }
 

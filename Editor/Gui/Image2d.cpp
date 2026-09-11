@@ -11,8 +11,8 @@ void Image2d::Draw(ImVec2 size)
 
 bool Image2d::LoadImGuiImage(
     IRenderer* renderer,
-    const std::string& path)
-{
+    const fs::path& path
+) {
     if (m_isLoaded)
         return true;
 

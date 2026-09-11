@@ -3,11 +3,11 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-void MeshDX11::Load(const std::string& file, ID3D11Device* device)
+void MeshDX11::Load(const fs::path& file, ID3D11Device* device)
 {
-    Assimp::Importer imp;
+    Assimp::Importer imp{};
     const aiScene* scene = imp.ReadFile(
-        file,
+        file.string(),
         aiProcess_Triangulate |
         aiProcess_FlipUVs |
         aiProcess_GenNormals

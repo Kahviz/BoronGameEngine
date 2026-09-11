@@ -11,12 +11,12 @@ namespace fs = std::filesystem;
 
 void SaveProject::Save(ECS& ecs)
 {
-    std::string path = savings + "\\" + g_projectName;
-    std::string meshFilesPath = savings + "\\" + g_projectName + "\\MeshFiles";
+    fs::path path = savings / g_projectName;
+    fs::path meshFilesPath = savings / g_projectName / "MeshFiles";
 
     fs::create_directories(meshFilesPath);
 
-    std::ofstream file(path + "\\save.BGEproject");
+    std::ofstream file(path / "save.BGEproject");
 
     ecs.Each<
         BasicInfoComponent,
@@ -97,7 +97,7 @@ EntityECS AddAMesh(
     ECS& ecs,
     EntityECS world,
     Window& window,
-    const std::string& Path,
+    const fs::path& Path,
     const std::string& Name,
     BML::Vector3 pos,
     BML::Vector3 Size,
@@ -105,8 +105,7 @@ EntityECS AddAMesh(
     bool Selec,
     bool LiteralPath,
     bool UsesTexture
-)
-{
+) {
     Transform transform;
     transform.Position = pos;
     transform.Size = Size;
@@ -142,7 +141,7 @@ EntityECS AddAMesh(
     if (!LiteralPath)
     {
         objectComp.OBJmesh = Mesh::Load(
-            assets + Path,
+            assets / Path,
             window.GetGraphics().GetDevice()
         );
     }
@@ -162,7 +161,7 @@ EntityECS AddAMesh(
     if (!LiteralPath)
     {
         objectComp.OBJmesh = Mesh::Load(
-            assets + Path,
+            assets / Path,
             vk.GetDevice(),
             vk.GetPhysicalDevice(),
             vk.GetCommandPool(),
@@ -184,8 +183,8 @@ EntityECS AddAMesh(
 #if VULKAN == 1
     if (UsesTexture)
     {
-        std::string fullPath =
-            textures + "\\TestTexture.png";
+        fs::path fullPath =
+            textures / "TestTexture.png";
 
         textureComp.texture = new Texture();
 
@@ -255,7 +254,7 @@ EntityECS AddAMesh(
 void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
 {
     std::ifstream file(
-        savings + "\\" + g_projectName + "\\save.BGEproject"
+        savings / g_projectName / "save.BGEproject"
     );
 
     if (!file.is_open())
@@ -434,10 +433,10 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
                 continue;
             }
 
-            std::string meshPath =
-                savings + "\\" +
-                g_projectName +
-                "\\MeshFiles\\" +
+            fs::path meshPath =
+                savings /
+                g_projectName /
+                "MeshFiles\\" /
                 loadedMeshFile;
 
             if (!fs::exists(meshPath))

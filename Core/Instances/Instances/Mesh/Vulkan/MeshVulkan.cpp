@@ -10,7 +10,7 @@
 
 #if VULKAN == 1
 void MeshVK::Load(
-    const std::string& file,
+    const fs::path& file,
     VkDevice device,
     VkPhysicalDevice physicalDevice,
     VkCommandPool commandPool,
@@ -19,7 +19,7 @@ void MeshVK::Load(
 {
     Assimp::Importer imp;
     const aiScene* scene = imp.ReadFile(
-        file,
+        file.string(),
         aiProcess_Triangulate |
         aiProcess_FlipUVs |
         aiProcess_GenNormals |

@@ -9,7 +9,7 @@ class IRenderer;
 class Image2d {
 public:
 	void Draw(ImVec2 size);
-	bool LoadImGuiImage(IRenderer* renderer, const std::string& path);
+	bool LoadImGuiImage(IRenderer* renderer, const fs::path& path);
 
 	#if VULKAN == 1
 		VkDescriptorSet& GetTexture() { return m_descriptorSet; };

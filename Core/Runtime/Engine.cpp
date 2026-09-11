@@ -114,17 +114,15 @@ Engine::Engine()
         ImGuiInited = true;
 #endif
         ImGuiIO& io = ImGui::GetIO();
-        std::string fontPath = fonts + "\\RobotoFont.ttf";
-        ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f);
+        fs::path fontPath = fonts / "RobotoFont.ttf";
+        ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16.0f);
 
         if (font == nullptr) {
             CreateError("Could not load font, using default font");
             io.Fonts->AddFontDefault();
         }
 
-        #ifdef _DEBUG
-            CreateSuccess("ImGui initialized successfully!");
-        #endif
+        CreateSuccess("ImGui initialized successfully!");
 
         window.SetWindowIcon(window.GetWindow());
         ImGuiIO& IO = ImGui::GetIO();
@@ -214,7 +212,7 @@ int Engine::EngineRun()
     return 0;
 }
 
-EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string& Name,
+EntityECS Engine::AddAMesh(ECS& ecs, const fs::path& Path, const std::string& Name,
     BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath, bool UsesTexture)
 {
     EntityECS entity = ecs.createEntity();
@@ -254,7 +252,7 @@ EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string&
 
     if (!LiteralPath) {
         objectComp.OBJmesh = Mesh::Load(
-            assets + Path,
+            assets / Path,
             vk.GetDevice(),
             vk.GetPhysicalDevice(),
             vk.GetCommandPool(),
@@ -276,7 +274,7 @@ EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string&
 
     if (!LiteralPath) {
         objectComp.OBJmesh = Mesh::Load(
-            assets + Path,
+            assets / Path,
             device
         );
     }
@@ -287,7 +285,7 @@ EntityECS Engine::AddAMesh(ECS& ecs, const std::string& Path, const std::string&
         );
     }
 #endif
-    std::string fullPath = textures + "\\TestTexture.png";
+    fs::path fullPath = textures / "TestTexture.png";
 
     if (UsesTexture) {
         textureComp.texture = new Texture();
