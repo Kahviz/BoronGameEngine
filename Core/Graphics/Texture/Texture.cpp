@@ -147,7 +147,7 @@ bool Texture::LoadVK(const fs::path& path, IRenderer& renderer)
         return false;
     }
 
-    Loaded = true;
+    m_loaded = true;
 
     return true;
 }
@@ -428,7 +428,7 @@ void Texture::CreateRenderTarget(
         ),
         "Failed to create viewport framebuffer"
     );
-    Loaded = true;
+    m_loaded = true;
 }
 
 void Texture::DestroyRenderTarget(VkDevice device) {
@@ -459,13 +459,12 @@ void Texture::DestroyRenderTarget(VkDevice device) {
         m_imageMemory = VK_NULL_HANDLE;
     }
 
-    m_ImGuiTexture = {};
+    m_imGuiTexture = {};
 }
 #endif
 
 #if DIRECTX11 == 1
-void Texture::SetSRV(ID3D11ShaderResourceView* srv)
-{
+void Texture::SetSRV(ID3D11ShaderResourceView* srv) {
     pTexture = srv;
     Loaded = true;
 }

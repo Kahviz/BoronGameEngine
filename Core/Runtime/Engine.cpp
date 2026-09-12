@@ -384,7 +384,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
         AddAMesh(m_ecs, "Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false, false, true);
         m_console.write("Creating cube", Boron::Enums::ConsoleLineType::Info);
         cubes++;
-        std::cout << cubes << std::endl;
     }
 
     if (RctrlPressed) {

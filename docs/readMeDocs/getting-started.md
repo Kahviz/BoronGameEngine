@@ -6,7 +6,7 @@ This guide will help you build and run **BoronGameEngine**.
 
 * CMake 3.10 or newer
 * A C++23-compatible compiler
-* Vulkan SDK
+* Vulkan SDK (supported API versions: 1.0, 1.1, 1.3, 1.4)
 * Windows
 
 # Build and Run

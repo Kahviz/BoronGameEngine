@@ -60,7 +60,7 @@ bool VulkanRender::Init(GLFWwindow* window) {
     vkGetPhysicalDeviceProperties(vkDevice.GetPhysicalDevice(), &selectedProps);
 
     CreateInfo("Selected GPU: ", selectedProps.deviceName);
-
+    
     uint32_t formatCount = 0;
 
     vkGetPhysicalDeviceSurfaceFormatsKHR(vkDevice.GetPhysicalDevice(), vkDevice.GetSurface(), &formatCount, nullptr);
@@ -738,10 +738,11 @@ void VulkanRender::UpdateDescriptorSets(ECS& ecs)
     ecs.EachEntity([&](EntityECS entity) {
         maxEntityId = std::max(maxEntityId, entity);
         hasEntities = true;
-        });
+    });
 
-    if (!hasEntities)
+    if (!hasEntities) {
         return;
+    }
 
     uint32_t count = maxEntityId + 1;
 
@@ -777,8 +778,7 @@ void VulkanRender::createDescriptorSets(ECS& ecs, uint32_t count)
         {
             const Texture* texture = nullptr;
 
-            if (ecs.HasComponent<TextureComponent>(entity))
-            {
+            if (ecs.HasComponent<TextureComponent>(entity)) {
                 texture = ecs.GetComponent<TextureComponent>(entity).texture;
             }
 
@@ -910,8 +910,7 @@ void VulkanRender::updateUniformBuffer(
     BML::Vector3 Orientation,
     BML::Vector3 pos,
     BML::Int3 color
-)
-{
+){
     if (objectIndex >= m_CurrentObjectCount)
     {
         uint32_t newSize = std::max(m_CurrentObjectCount * 2, objectIndex + 1);
@@ -928,10 +927,8 @@ void VulkanRender::updateUniformBuffer(
         color.z() / 255.0f
     );
     ubo.UsesTexture = false;
-    if (ecs.HasComponent<TextureComponent>(entity))
-    {
-        const Texture* tex =
-            ecs.GetComponent<TextureComponent>(entity).texture;
+    if (ecs.HasComponent<TextureComponent>(entity)) {
+        const Texture* tex = ecs.GetComponent<TextureComponent>(entity).texture;
         ubo.UsesTexture = true;
     }
 
@@ -1902,8 +1899,7 @@ void VulkanRender::RecordViewportCommandBuffer()
     vkEndCommandBuffer(cmd);
 }
 
-void VulkanRender::initViewport()
-{
+void VulkanRender::initViewport() {
     createViewportDepthResources(1280, 720);
 
     viewportTexture->CreateRenderTarget(

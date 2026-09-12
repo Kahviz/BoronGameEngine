@@ -23,66 +23,69 @@ class Texture {
 public:
     int GetWidth() const { return m_width; }
     int GetHeight() const { return m_height; }
-#if DIRECTX11 == 1
-    Texture() : pTexture(nullptr) {}
 
-    void SetSRV(ID3D11ShaderResourceView* srv);
+    #if DIRECTX11 == 1
+        Texture() : pTexture(nullptr) {}
 
-    ID3D11ShaderResourceView* Load(fs::path path, IRenderer& renderer);
+        void SetSRV(ID3D11ShaderResourceView* srv);
 
-    ID3D11ShaderResourceView* GetSRV() const {
-        return pTexture.Get();
-    }
+        ID3D11ShaderResourceView* Load(fs::path path, IRenderer& renderer);
 
-    ID3D11ShaderResourceView* const* GetAddressOf() const {
-        return pTexture.GetAddressOf();
-    }
+        ID3D11ShaderResourceView* GetSRV() const {
+            return pTexture.Get();
+        }
 
-    const ComPtr<ID3D11ShaderResourceView>& GetTextureComPtr() const {
-        return pTexture;
-    }
+        ID3D11ShaderResourceView* const* GetAddressOf() const {
+            return pTexture.GetAddressOf();
+        }
 
-    ComPtr<ID3D11ShaderResourceView>& GetTextureComPtr() {
-        return pTexture;
-    }
-#endif
+        const ComPtr<ID3D11ShaderResourceView>& GetTextureComPtr() const {
+            return pTexture;
+        }
 
-#if VULKAN == 1
-    VkImageView GetImageView() const { return m_imageView; }
-    VkSampler GetSampler() const { return m_sampler; }
+        ComPtr<ID3D11ShaderResourceView>& GetTextureComPtr() {
+            return pTexture;
+        }
+    #endif
 
-    bool LoadVK(const fs::path& path, IRenderer& renderer);
-    void CreateImage(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
-    void TransitionImageLayout(VkCommandBuffer cmd, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-    void CopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, uint32_t width, uint32_t height);
-    void Cleanup(VkDevice device);
-    void CreateRenderTarget(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height, VkRenderPass renderPass);
-    void DestroyRenderTarget(VkDevice device);
-    ImTextureID getImGuiTexture() const { return m_ImGuiTexture; }
-    VkFramebuffer getFramebuffer() const { return m_framebuffer; }
-    VkFormat getFormat() const { return m_format; }
-    VkDescriptorSet getDescriptorSet() const {
-        if (this == nullptr)
-            return VK_NULL_HANDLE;
+    #if VULKAN == 1
+        VkImageView GetImageView() const { return m_imageView; }
+        VkSampler GetSampler() const { return m_sampler; }
 
-        return m_descriptorSet;
-    }
-    void SetImGuiTexture(ImTextureID tex) { m_ImGuiTexture = tex; }
-#endif
+        bool LoadVK(const fs::path& path, IRenderer& renderer);
+        void CreateImage(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
+        void TransitionImageLayout(VkCommandBuffer cmd, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void CopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, uint32_t width, uint32_t height);
+        void Cleanup(VkDevice device);
+        void CreateRenderTarget(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height, VkRenderPass renderPass);
+        void DestroyRenderTarget(VkDevice device);
+        ImTextureID getImGuiTexture() const { return m_imGuiTexture; }
+        VkFramebuffer getFramebuffer() const { return m_framebuffer; }
+        VkFormat getFormat() const { return m_format; }
+        VkDescriptorSet getDescriptorSet() const {
+            if (this == nullptr)
+                return VK_NULL_HANDLE;
+
+            return m_descriptorSet;
+        }
+        void SetImGuiTexture(ImTextureID tex) { m_imGuiTexture = tex; }
+    #endif
+
     bool IsLoadedConst() const {
         if (this == nullptr)
             return false;
 
-        return Loaded;
+        return m_loaded;
     }
     bool IsLoaded() const {
         if (this == nullptr)
             return false;
 
-        return Loaded;
+        return m_loaded;
     }
+
 private:
-    bool Loaded = false;
+    bool m_loaded = false;
 #if DIRECTX11 == 1
     ComPtr<ID3D11ShaderResourceView> pTexture;
 #endif
@@ -91,7 +94,7 @@ private:
     VkDeviceMemory m_imageMemory = VK_NULL_HANDLE;
     VkImageView m_imageView = VK_NULL_HANDLE;
     VkSampler m_sampler = VK_NULL_HANDLE;
-    ImTextureID m_ImGuiTexture = {};
+    ImTextureID m_imGuiTexture = {};
     VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
     VkDescriptorSet m_descriptorSet = VK_NULL_HANDLE;
