@@ -260,7 +260,7 @@ add_executable(BoronEngine
 
     #Icon
     BoronEngine.rc
-)
+ "Core/Graphics/BoronGui/BoronGuiSettings.h")
 
 if(WIN32)
     target_sources(BoronEngine PRIVATE

@@ -112,35 +112,33 @@ void BoronGui::DrawWidgets() {
         uint32_t vertexOffset =
             static_cast<uint32_t>(m_vertices.size());
 
-        if (auto frame = dynamic_cast<Borongui::Frame*>(widget)) {
-                   GPUVector4 color = GPUVector4(
-                frame->getColor().x() / 255.0f,
-                frame->getColor().y() / 255.0f,
-                frame->getColor().z() / 255.0f,
-                frame->getColor().w()
+        GPUVector4 color = GPUVector4(
+            widget->getColor().x() / 255.0f,
+            widget->getColor().y() / 255.0f,
+            widget->getColor().z() / 255.0f,
+            widget->getColor().w()
+        );
+
+        for (auto& vertex : widget->getVertices()) {
+            Vertex2d guiVertex{};
+
+            guiVertex.color = color;
+            guiVertex.pos = vertex.pos;
+            guiVertex.size = GPUVector2(
+                widget->getSize().x(),
+                widget->getSize().y()
+            );
+            guiVertex.rounding = widget->getRounding();
+            guiVertex.guiPos = GPUVector2(
+                widget->getPosition().x(),
+                widget->getPosition().y()
             );
 
-            for (auto& vertex : frame->getVertices()) {
-                Vertex2d guiVertex{};
+            m_vertices.push_back(guiVertex);
+        }
 
-                guiVertex.color = color;
-                guiVertex.pos = vertex.pos;
-                guiVertex.size = GPUVector2(
-                    frame->getSize().x(),
-                    frame->getSize().y()
-                );
-                guiVertex.rounding = frame->getRounding();
-                guiVertex.guiPos = GPUVector2(
-                    frame->getPosition().x(),
-                    frame->getPosition().y()
-                );
-
-                m_vertices.push_back(guiVertex);
-            }
-
-            for (auto index : frame->getIndices()) {
-                m_indicies.push_back(vertexOffset + index);
-            }
+        for (auto index : widget->getIndices()) {
+            m_indicies.push_back(vertexOffset + index);
         }
     }
     

@@ -7,6 +7,7 @@ namespace Borongui {
 class Widget {
 public:
     virtual ~Widget() = default;
+    virtual void updateSettings() = 0;
 
     const bool isClicked() const;
     const bool isHovered() const;

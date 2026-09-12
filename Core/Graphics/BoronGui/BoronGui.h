@@ -3,8 +3,11 @@
 #include "Widgets/Widgets.h"
 #include <vector>
 #include "Widgets/Widget.h"
+
 #include "Backends/Backends.h"
 #include "Backends/BoronGui_implVulkan.h"
+#include "Backends/BoronGui_implDX11.h"
+
 #include "BoronGuiTypes.h"
 
 class BoronGui {
