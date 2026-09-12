@@ -1,4 +1,3 @@
-// Globals.cpp
 #include "Globals.h"
 #include <string>
 #include <iostream>
@@ -12,7 +11,7 @@ extern float viewport_height = 200.0f;
 
 #include <cstdlib>
 
-bool g_vSync = true;
+bool g_vSync = false; //Limit it to the monitors refresh rate, if true
 bool g_Running = true;
 bool g_Typing = false;
 float g_FOV = 100.0f;

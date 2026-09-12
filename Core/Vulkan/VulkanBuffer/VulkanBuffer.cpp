@@ -79,7 +79,6 @@ bool VulkanBuffer::Resize(VkDeviceSize p_newSize, VkCommandPool p_commandPool, V
 
 	//New creating
 	VkDeviceSize resizeSize = p_newSize;
-	resizeSize = Min(p_newSize, m_deviceSize);
 
 	VkBufferCreateInfo vkBufferCreateInfo{};
 	vkBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -89,7 +88,7 @@ bool VulkanBuffer::Resize(VkDeviceSize p_newSize, VkCommandPool p_commandPool, V
 
 	BGE_ASSERT_VKRESULT(vkCreateBuffer(m_device, &vkBufferCreateInfo, nullptr, &m_buffer), "Failed to create buffer");
 	
-	VkMemoryRequirements memReq;
+	VkMemoryRequirements memReq{};
 	vkGetBufferMemoryRequirements(m_device, m_buffer, &memReq);
 
 	VkMemoryAllocateInfo allocInfo{};

@@ -656,16 +656,24 @@ void VulkanRender::CreateSwapchain() {
 }
 
 void VulkanRender::createUniformBuffers() {
-    m_CurrentObjectCount = 500;
+    m_CurrentObjectCount = 1000;
     ReallocateUniformBuffer(m_CurrentObjectCount);
 }
 
 void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount, ECS* ecs) {
+    std::cout
+        << "ReallocateUniformBuffer: "
+        << newObjectCount
+        << " objects, size="
+        << (dynamicAlignment * newObjectCount)
+        << " bytes\n";
+
     vkDeviceWaitIdle(vkDevice.GetDevice());
 
     if (ecs != nullptr) {
-        newObjectCount = ecs->getNumberOfEntities() + 1000;
+        newObjectCount = ecs->getNumberOfEntities() + 50;
     }
+
     m_UniformBufferSize = dynamicAlignment * newObjectCount;
     m_CurrentObjectCount = newObjectCount;
 
@@ -1134,6 +1142,8 @@ void VulkanRender::RecordShadowCommandBuffer()
     if (shadowDrawCommands.empty()) {
         return;
     }
+
+    BGE_ASSERT_VKRESULT(vkResetCommandBuffer(shadowCommandBuffer, 0), "Failed to reset shadow command buffer");
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
