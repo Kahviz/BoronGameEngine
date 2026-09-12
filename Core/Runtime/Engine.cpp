@@ -357,13 +357,6 @@ void ImGui_Impl_NewFrame() {
 }
 
 void Engine::EngineDoFrame(Window* wnd, float deltatime) {
-    static int timer = 0;
-    timer++;
-
-    if (timer % 1000 == 0) {
-        CreateInfo("FPS: ", 1.0f / deltatime);
-    }
-
     dcPresence.Update();
 
     Keyboard::Init(wnd->GetWindow());

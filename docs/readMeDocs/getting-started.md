@@ -37,4 +37,4 @@ The compiled files will be located in the `build` directory.
 4. Select the `CMakeLists.txt` file.
 5. Press **Run**.
 
-The first launch may take around 30 seconds while required resources are downloaded to `%AppData%`.
+The first launch may take around 30 seconds while required resources are downloaded to `%AppData%` and the .exe is put in the ram as all programs do.
