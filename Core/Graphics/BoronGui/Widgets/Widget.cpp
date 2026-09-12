@@ -1,5 +1,12 @@
 #include "Widget.h"
 
+int Borongui::Widget::currentzIndex = 0;
+
+Borongui::Widget::Widget() {
+	currentzIndex++;
+	m_zIndex = currentzIndex;
+}
+
 const bool Borongui::Widget::isClicked() const {
 	return m_isClicked;
 }
@@ -28,8 +35,12 @@ void Borongui::Widget::setVertices(const std::vector<Vertex2d>& p_vertices) {
 	m_vertices = p_vertices;
 }
 
-void Borongui::Widget::lockInitialization(bool p_value) {
+void Borongui::Widget::lockInitialization(const bool& p_value) {
 	initLocked = p_value;
+}
+
+void Borongui::Widget::setZIndex(const int& p_value) {
+	m_zIndex = p_value;
 }
 
 bool Borongui::Widget::setSize(const BML::Vec2& p_size) {
@@ -67,6 +78,16 @@ bool Borongui::Widget::setColor(const BML::Vec4& p_color) {
 	return true;
 }
 
+bool Borongui::Widget::setClickColor(const BML::Vec4& p_color) {
+	m_clickColor = p_color;
+	return true;
+}
+
+bool Borongui::Widget::setHoverColor(const BML::Vec4& p_color) {
+	m_hoverColor = p_color;
+	return true;
+}
+
 const BML::Vec2& Borongui::Widget::getPosition() const {
 	return m_position;
 }
@@ -79,6 +100,18 @@ const BML::Vec4& Borongui::Widget::getColor() const {
 	return m_color;
 }
 
+const BML::Vec4& Borongui::Widget::getClickColor() const {
+	return m_clickColor;
+}
+
+const BML::Vec4& Borongui::Widget::getHoverColor() const {
+	return m_hoverColor;
+}
+
 const float Borongui::Widget::getRounding() const {
 	return m_rounding;
+}
+
+int Borongui::Widget::getZIndex() {
+	return m_zIndex;
 }

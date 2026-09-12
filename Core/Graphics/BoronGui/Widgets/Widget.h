@@ -6,20 +6,28 @@
 namespace Borongui {
 class Widget {
 public:
+    Widget();
     virtual ~Widget() = default;
     virtual void updateSettings() = 0;
 
     const bool isClicked() const;
     const bool isHovered() const;
     
-    void lockInitialization(bool p_value);
+    void lockInitialization(const bool& p_value);
+    void setZIndex(const int& p_value);
     bool setSize(const BML::Vec2& p_size);
     bool setPosition(const BML::Vec2& p_position);
     bool setColor(const BML::Vec4& p_color);
+    bool setClickColor(const BML::Vec4& p_color);
+    bool setHoverColor(const BML::Vec4& p_color);
+
     const BML::Vec2& getPosition() const;
     const BML::Vec2& getSize() const;
     const BML::Vec4& getColor() const;
+    const BML::Vec4& getClickColor() const;
+    const BML::Vec4& getHoverColor() const;
     const float getRounding() const;
+    int getZIndex();
 
     //vertices
     std::vector<Vertex2d>& getVertices();
@@ -40,8 +48,13 @@ public:
     bool m_isDragging = false;
 
     int m_zIndex = 0;
+    int m_previousZIndex = 0;
 
-    BML::Vec4 m_color = { 0,0,0,0 };
+    static int currentzIndex;
+
+    BML::Vec4 m_color = { 0,0,0,1 };
+    BML::Vec4 m_hoverColor = { 255,0,0,1 };
+    BML::Vec4 m_clickColor = { 0,255,0,1 };
 
     bool initLocked = false;
 

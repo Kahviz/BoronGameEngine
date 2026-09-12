@@ -66,6 +66,9 @@ bool checkAABB(BML::Vec2 p_a, Borongui::Widget& p_widget) {
 
 void BoronGui::DrawWidgets() {
     static bool isDragging = false;
+    static bool isUsing = false;
+
+    isUsing = false;
 
     std::sort(widgets.begin(), widgets.end(), //z-Index sorting
         [](Borongui::Widget* a, Borongui::Widget* b) {
@@ -73,9 +76,10 @@ void BoronGui::DrawWidgets() {
         }
     );
 
-    for (Borongui::Widget* widget : widgets) {
+    for (auto it = widgets.rbegin(); it != widgets.rend(); ++it) { //input loop
+        Borongui::Widget* widget = *it;
+
         widget->m_isHovered = false;
-        widget->m_isClicked = false;
 
         BML::Vec2 mousePos = Mouse::getMousePos();
 
@@ -83,13 +87,14 @@ void BoronGui::DrawWidgets() {
             mousePos.x(),
             screen_height - mousePos.y()
         );
-        
-        if (checkAABB(mousePos, *widget)) {
-            widget->m_isHovered = true;
 
+        if (checkAABB(mousePos, *widget) && !isUsing) {
+            widget->m_isHovered = true;
+            isUsing = true;
             if (Mouse::isLeftClicked() && !isDragging) {
                 isDragging = true;
-                
+                CreateInfo("ss");
+                widget->m_previousZIndex = widget->m_zIndex;
                 widget->m_zIndex = 9999;
                 widget->m_isDragging = true;
                 widget->m_isClicked = true;
@@ -103,21 +108,39 @@ void BoronGui::DrawWidgets() {
             );
 
             if (!Mouse::isLeftClicked()) {
-                widget->m_zIndex = 0;
+                widget->m_zIndex = widget->m_previousZIndex;
                 widget->m_isDragging = false;
                 isDragging = false;
+                widget->m_isClicked = false;
             }
         }
+    }
+
+    std::sort(widgets.begin(), widgets.end(), //z-Index sorting
+        [](Borongui::Widget* a, Borongui::Widget* b) {
+            return a->m_zIndex < b->m_zIndex;
+        }
+    );
+
+    for (auto it = widgets.begin(); it != widgets.end(); ++it) { //rendering loop
+        Borongui::Widget* widget = *it;
 
         uint32_t vertexOffset =
             static_cast<uint32_t>(m_vertices.size());
 
-        GPUVector4 color = GPUVector4(
-            widget->getColor().x() / 255.0f,
-            widget->getColor().y() / 255.0f,
-            widget->getColor().z() / 255.0f,
-            widget->getColor().w()
+        GPUVector4 color = GPUVector4(widget->getColor().x() / 255.0f, widget->getColor().y() / 255.0f,
+            widget->getColor().z() / 255.0f, widget->getColor().w()
         );
+        if (widget->isClicked()) {
+            color = GPUVector4(widget->getClickColor().x() / 255.0f, widget->getClickColor().y() / 255.0f,
+                widget->getClickColor().z() / 255.0f, widget->getClickColor().w()
+            );
+        }
+        else if (widget->isHovered()) {
+            color = GPUVector4(widget->getHoverColor().x() / 255.0f, widget->getHoverColor().y() / 255.0f,
+                widget->getHoverColor().z() / 255.0f, widget->getHoverColor().w()
+            );
+        }
 
         for (auto& vertex : widget->getVertices()) {
             Vertex2d guiVertex{};

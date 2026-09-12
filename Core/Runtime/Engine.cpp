@@ -211,8 +211,8 @@ int Engine::EngineRun()
 }
 
 EntityECS Engine::AddAMesh(ECS& ecs, const fs::path& Path, const std::string& Name,
-    BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath, bool UsesTexture)
-{
+    BML::Vector3 pos, BML::Vector3 Size, bool Selec, bool LiteralPath, bool UsesTexture
+){
     EntityECS entity = ecs.createEntity();
 
     BasicInfoComponent basicComp;
@@ -482,7 +482,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     frame.setPosition({ 100,100 });
     frame.setSize({ 200,200 });
-    frame.setColor({ 0,0,255,0.5 });
+    frame.setColor({ 0,0,255,1 });
     frame.lockInitialization(true);
 
     BoronGui::SubmitWidget(frame);
@@ -491,7 +491,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
 
     button2.setPosition({ 400,100 });
     button2.setSize({ 200,300 });
-    button2.setColor({ 0,255,255,0.8 });
+    button2.setColor({ 0,255,255,1 });
     button2.lockInitialization(true);
     
     BoronGui::SubmitWidget(button2);
@@ -562,7 +562,11 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
         );
     #endif
 
-    m_console.update();
+    static int updateCounter = 0;
+    if (++updateCounter % 2 == 0) {
+        m_console.update();
+    }
+
     wnd->GetGraphics().EndFrame();
 
     BoronGui::EndFrame();
