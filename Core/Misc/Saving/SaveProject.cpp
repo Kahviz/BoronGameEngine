@@ -9,8 +9,7 @@
 
 namespace fs = std::filesystem;
 
-void SaveProject::Save(ECS& ecs)
-{
+void SaveProject::Save(ECS& ecs) {
     fs::path path = savings / g_projectName;
     fs::path meshFilesPath = savings / g_projectName / "MeshFiles";
 
@@ -259,7 +258,7 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
 
     if (!file.is_open())
     {
-        std::cout << "File not found\n";
+        CreateError("File not found");
         return;
     }
 
@@ -298,13 +297,11 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
         if (line == "-")
             continue;
 
-        if (line.rfind("Name:", 0) == 0)
-        {
+        if (line.rfind("Name:", 0) == 0) {
             loadedName = line.substr(6);
         }
 
-        else if (line.rfind("Position:", 0) == 0)
-        {
+        else if (line.rfind("Position:", 0) == 0) {
             std::string data = line.substr(10);
 
             std::replace(
@@ -321,8 +318,7 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
                 >> loadedPos.z();
         }
 
-        else if (line.rfind("Size:", 0) == 0)
-        {
+        else if (line.rfind("Size:", 0) == 0) {
             std::string data = line.substr(6);
 
             std::replace(
@@ -339,8 +335,7 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
                 >> loadedSize.z();
         }
 
-        else if (line.rfind("Orientation:", 0) == 0)
-        {
+        else if (line.rfind("Orientation:", 0) == 0) {
             std::string data = line.substr(13);
 
             std::replace(
@@ -356,22 +351,16 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
                 >> loadedOrientation.y()
                 >> loadedOrientation.z();
         }
-
-        else if (line.rfind("MeshFile:", 0) == 0)
-        {
+        else if (line.rfind("MeshFile:", 0) == 0) {
             loadedMeshFile = line.substr(10);
         }
-
-        else if (line.rfind("UniqueID:", 0) == 0)
-        {
+        else if (line.rfind("UniqueID:", 0) == 0) {
             loadedUniqueID =
                 static_cast<EntityECS>(
                     std::stoul(line.substr(10))
                     );
         }
-
-        else if (line.rfind("Color:", 0) == 0)
-        {
+        else if (line.rfind("Color:", 0) == 0) {
             std::string data = line.substr(6);
 
             std::replace(
@@ -389,15 +378,11 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
 
             loadedColor = BML::Int3(r, g, b);
         }
-
-        else if (line.rfind("Anchored:", 0) == 0)
-        {
+        else if (line.rfind("Anchored:", 0) == 0) {
             loadedAnchored =
                 std::stoi(line.substr(9)) != 0;
         }
-
-        else if (line.rfind("CanDraw:", 0) == 0)
-        {
+        else if (line.rfind("CanDraw:", 0) == 0) {
             loadedCanDraw =
                 std::stoi(line.substr(8)) != 0;
         }
@@ -436,7 +421,7 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
             fs::path meshPath =
                 savings /
                 g_projectName /
-                "MeshFiles\\" /
+                "MeshFiles" /
                 loadedMeshFile;
 
             if (!fs::exists(meshPath))
@@ -503,16 +488,14 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
             loadedOrientation = { 0, 0, 0 };
 
             loadedUniqueID = 0;
-            loadedParentID =
-                static_cast<EntityECS>(-1);
+            loadedParentID = static_cast<EntityECS>(-1);
 
             loadedColor = { 255, 255, 255 };
 
             loadedAnchored = true;
             loadedCanDraw = true;
 
-            loadedInstanceType =
-                Boron::Enums::InstanceType::Instance;
+            loadedInstanceType = Boron::Enums::InstanceType::Instance;
         }
     }
 
@@ -524,9 +507,7 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
 
         if (parentIt == entityIDMap.end())
         {
-            ecs.GetComponent<HierarchyComponent>(
-                pending.child
-            ).parent = world;
+            ecs.GetComponent<HierarchyComponent>(pending.child).parent = world;
 
             continue;
         }
@@ -534,8 +515,6 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
         EntityECS child = pending.child;
         EntityECS parent = parentIt->second;
 
-        ecs.GetComponent<HierarchyComponent>(
-            child
-        ).parent = parent;
+        ecs.GetComponent<HierarchyComponent>(child).parent = parent;
     }
 }

@@ -102,9 +102,7 @@ Engine::Engine()
         init_info.UseDynamicRendering = false;
         init_info.Allocator = nullptr;
         init_info.CheckVkResultFn = [](VkResult err) {
-            if (err != VK_SUCCESS) {
-                std::cerr << "Vulkan Error: " << err << std::endl;
-            }
+            BGE_ASSERT_VKRESULT(err, "");
         };
 
         if (!ImGui_ImplVulkan_Init(&init_info)) {
@@ -248,7 +246,7 @@ EntityECS Engine::AddAMesh(ECS& ecs, const fs::path& Path, const std::string& Na
 #if VULKAN == 1
     auto& vk = static_cast<VulkanAdapter&>(
         window.GetGraphics().GetRenderer()
-        );
+    );
 
     if (!LiteralPath) {
         objectComp.OBJmesh = Mesh::Load(
@@ -375,14 +373,14 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
     static int cubes = 0;
 
     if (ctrlPressed) {
-        AddAMesh(m_ecs, "\\Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false, false, true);
+        AddAMesh(m_ecs, "Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false, false, true);
         m_console.write("Creating cube", Boron::Enums::ConsoleLineType::Info);
 
         cubes++;
     }
 
     if (RctrlPressed) {
-        AddAMesh(m_ecs, "\\Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false, false);
+        AddAMesh(m_ecs, "Cylinder.obj", "Cylinder", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false,false, false);
 
         cubes++;
     }
@@ -442,8 +440,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime)
             );
 
             if (m_ecs.getNumberOfEntities() <= 2) {
-                AddAMesh(m_ecs, "\\Cube.obj", "Cube", { 0,-2,0 }, { 10,1,10 }, false, false,false);
-                AddAMesh(m_ecs, "\\Cube.obj", "Cube2", { 0,2,0 }, { 1,2,1 }, false, false,true);
+                AddAMesh(m_ecs, "Cube.obj", "Cube", { 0,-2,0 }, { 10,1,10 }, false, false,false);
+                AddAMesh(m_ecs, "Cube.obj", "Cube2", { 0,2,0 }, { 1,2,1 }, false, false, true);
             }
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);

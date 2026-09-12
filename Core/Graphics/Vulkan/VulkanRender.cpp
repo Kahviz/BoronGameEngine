@@ -470,12 +470,11 @@ void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bo
 
     vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
 
-#if INEDITOR == 0
-    CreateSuccess("Not editing...");
-    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline.GetGraphicsPipeline());
+    #if INEDITOR == 0
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline.GetGraphicsPipeline());
 
-    DrawMeshesForRecordCommandBuffer(cmd);
-#endif
+        DrawMeshesForRecordCommandBuffer(cmd);
+    #endif
 
     if (renderImGui && ImGui::GetDrawData()) {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);

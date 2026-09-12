@@ -20,8 +20,7 @@ void CreatePlusButton(
     bool& plusGuiOpen,
     float screen_w,
     float screen_h
-) 
-{
+)  {
     float aspect = screen_w / screen_h;
     float size = aspect * 8.0f;
     float padding = ImGui::GetStyle().WindowPadding.x;
