@@ -5,7 +5,7 @@
 #include "Vertex2d.h"
 
 namespace Borongui {
-class Frame : public Widget {
+class Button : public Widget {
 public:
 	void lockInitialization(bool p_value);
 	bool setSize(const BML::Vec2& p_size);

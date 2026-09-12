@@ -61,14 +61,6 @@ const std::vector<uint32_t>& Borongui::Frame::getIndices() const {
 	return m_indices;
 }
 
-const bool Borongui::Frame::isHovered() const {
-	return m_isHovered;
-}
-
-const bool Borongui::Frame::isClicked() const {
-	return m_isClicked;
-}
-
 std::vector<Vertex2d>& Borongui::Frame::getVertices() {
 	return m_vertices;
 }
