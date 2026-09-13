@@ -36,7 +36,7 @@ void Borongui::Widget::setVertices(const std::vector<Vertex2d>& p_vertices) {
 }
 
 void Borongui::Widget::lockInitialization(const bool& p_value) {
-	initLocked = p_value;
+	m_initLocked = p_value;
 }
 
 void Borongui::Widget::setZIndex(const int& p_value) {
@@ -44,7 +44,7 @@ void Borongui::Widget::setZIndex(const int& p_value) {
 }
 
 bool Borongui::Widget::setSize(const BML::Vec2& p_size) {
-	if (!initLocked) {
+	if (!m_initLocked) {
 		m_size = p_size;
 	}
 
@@ -52,15 +52,27 @@ bool Borongui::Widget::setSize(const BML::Vec2& p_size) {
 }
 
 bool Borongui::Widget::setPosition(const BML::Vec2& p_position) {
-	if (!initLocked) {
+	if (!m_initLocked) {
 		m_position = p_position;
 	}
 
 	return true;
 }
 
+bool Borongui::Widget::setLocalPosition(const BML::Vec2& p_position) {
+	if (m_parent == nullptr) {
+		return false;
+	}
+
+	if (!m_initLocked) {
+		m_position = p_position + m_parent->getPosition();
+	}
+
+	return true;
+}
+
 bool Borongui::Widget::setColor(const BML::Vec4& p_color) {
-	if (!initLocked) {
+	if (!m_initLocked) {
 		m_color = p_color;
 
 		GPUVector4 color(
@@ -114,4 +126,19 @@ const float Borongui::Widget::getRounding() const {
 
 int Borongui::Widget::getZIndex() {
 	return m_zIndex;
+}
+
+std::vector<Borongui::Widget*>& Borongui::Widget::getChildren() {
+	return m_children;
+}
+
+const std::vector<Borongui::Widget*>& Borongui::Widget::getConstChildren() const {
+	return m_children;
+}
+
+void Borongui::Widget::setParent(Borongui::Widget& p_parent) {
+	if (!m_initLocked) {
+		p_parent.m_children.push_back(this);
+		m_parent = &p_parent;
+	}
 }

@@ -83,17 +83,15 @@ void BoronGui::DrawWidgets() {
 
         BML::Vec2 mousePos = Mouse::getMousePos();
 
-        mousePos = BML::Vec2(
-            mousePos.x(),
-            screen_height - mousePos.y()
-        );
+        mousePos = BML::Vec2(mousePos.x(), screen_height - mousePos.y());
 
         if (checkAABB(mousePos, *widget) && !isUsing) {
             widget->m_isHovered = true;
             isUsing = true;
+
             if (Mouse::isLeftClicked() && !isDragging) {
                 isDragging = true;
-                CreateInfo("ss");
+
                 widget->m_previousZIndex = widget->m_zIndex;
                 widget->m_zIndex = 9999;
                 widget->m_isDragging = true;
@@ -102,10 +100,12 @@ void BoronGui::DrawWidgets() {
         }
 
         if (widget->m_isDragging) {
-            widget->m_position += BML::Vec2(
-                Mouse::getDelta().x(),
-                -Mouse::getDelta().y()
-            );
+            BML::Vec2 moveDist = BML::Vec2(Mouse::getDelta().x(), -Mouse::getDelta().y());
+            widget->m_position += moveDist;
+
+            for (Borongui::Widget* children : widget->getChildren()) {
+                children->m_position += moveDist;
+            }
 
             if (!Mouse::isLeftClicked()) {
                 widget->m_zIndex = widget->m_previousZIndex;

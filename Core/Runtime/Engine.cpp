@@ -483,17 +483,18 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     frame.setPosition({ 100,100 });
     frame.setSize({ 200,200 });
     frame.setColor({ 0,0,255,1 });
-    frame.lockInitialization(true);
-
-    BoronGui::SubmitWidget(frame);
 
     static Borongui::Button button2{};
-
-    button2.setPosition({ 400,100 });
-    button2.setSize({ 200,300 });
+    button2.setParent(frame);
+    
+    button2.setPosition({ 10,10 });
+    button2.setSize({ 200,200 });
     button2.setColor({ 0,255,255,1 });
+
+    frame.lockInitialization(true);
     button2.lockInitialization(true);
     
+    BoronGui::SubmitWidget(frame);
     BoronGui::SubmitWidget(button2);
     
     makeGui.RenderPopUps(deltatime); //Here last so thay be rendered always and on top of everything

@@ -17,6 +17,7 @@ public:
     void setZIndex(const int& p_value);
     bool setSize(const BML::Vec2& p_size);
     bool setPosition(const BML::Vec2& p_position);
+    bool setLocalPosition(const BML::Vec2& p_position);
     bool setColor(const BML::Vec4& p_color);
     bool setClickColor(const BML::Vec4& p_color);
     bool setHoverColor(const BML::Vec4& p_color);
@@ -40,6 +41,12 @@ public:
 
     void setIndices(const std::vector<uint32_t>& p_indices);
 
+    //children
+    std::vector<Borongui::Widget*>& getChildren();
+    const std::vector<Borongui::Widget*>& getConstChildren() const;
+
+    void setParent(Borongui::Widget& p_parent);
+
     BML::Vec2 m_size = { 0,0 };
     BML::Vec2 m_position = { 0,0 };
 
@@ -56,7 +63,7 @@ public:
     BML::Vec4 m_hoverColor = { 255,0,0,1 };
     BML::Vec4 m_clickColor = { 0,255,0,1 };
 
-    bool initLocked = false;
+    bool m_initLocked = false;
 
     float m_rounding = 10.0f;
     
@@ -71,5 +78,9 @@ public:
         0, 1, 2,
         2, 3, 0
     };
+
+    std::vector<Widget*> m_children{};
+
+    Borongui::Widget* m_parent = nullptr;
 };
 }

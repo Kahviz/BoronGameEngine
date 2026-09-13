@@ -1,6 +1,7 @@
 #include "VulkanInstance.h"
 #include <iostream>
 #include "Vulkan.h"
+#include "BGE_ASSERTS.h"
 
 #if VULKAN == 1
 
@@ -29,10 +30,7 @@ bool VulkanInstance::Init() {
     instInfo.ppEnabledExtensionNames = extensions;
     instInfo.enabledLayerCount = 0;
 
-    if (vkCreateInstance(&instInfo, nullptr, &instance) != VK_SUCCESS) {
-        CreateError("Vulkan instance creation failed!");
-        return false;
-    }
+    BGE_ASSERT_VKRESULT(vkCreateInstance(&instInfo, nullptr, &instance), "Vulkan instance creation failed!");
 
     CreateError("Vulkan instance created");
 
