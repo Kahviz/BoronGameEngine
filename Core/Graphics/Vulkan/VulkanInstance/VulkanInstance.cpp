@@ -38,4 +38,4 @@ bool VulkanInstance::Init() {
 
     return true;
 }
-#endif // VULKAN == 1
+#endif
