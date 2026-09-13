@@ -487,8 +487,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     static Borongui::Button button2{};
     button2.setParent(frame);
     
-    button2.setPosition({ 10,10 });
-    button2.setSize({ 200,200 });
+    button2.setLocalPosition({ 50,50 });
+    button2.setSize({ 100,100 });
     button2.setColor({ 0,255,255,1 });
 
     frame.lockInitialization(true);
