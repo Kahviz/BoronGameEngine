@@ -224,6 +224,11 @@ add_executable(BoronEngine
     Core/Graphics/BoronGui/Widgets/Button.cpp
     Core/Graphics/BoronGui/Widgets/Button.h
 
+    Core/Graphics/BoronGui/BoronGuiSettings.h 
+
+    Core/Graphics/BoronGui/Layout/VerticalLayout.h
+    Core/Graphics/BoronGui/Layout/VerticalLayout.cpp
+
     #backends
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.h
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.cpp
@@ -260,7 +265,7 @@ add_executable(BoronEngine
 
     #Icon
     BoronEngine.rc
- "Core/Graphics/BoronGui/BoronGuiSettings.h")
+)
 
 if(WIN32)
     target_sources(BoronEngine PRIVATE

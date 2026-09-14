@@ -10,6 +10,8 @@
 
 #include "BoronGuiTypes.h"
 
+#include "Layout/VerticalLayout.h"
+
 class BoronGui {
 public:
 	static void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct);

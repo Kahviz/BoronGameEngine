@@ -18,6 +18,9 @@ public:
     bool setSize(const BML::Vec2& p_size);
     bool setPosition(const BML::Vec2& p_position);
     bool setLocalPosition(const BML::Vec2& p_position);
+    bool setLocalPositionX(const float& p_x);
+    bool setLocalPositionY(const float& p_y, const bool& p_force = false);
+
     bool setColor(const BML::Vec4& p_color);
     bool setClickColor(const BML::Vec4& p_color);
     bool setHoverColor(const BML::Vec4& p_color);
@@ -53,6 +56,8 @@ public:
     bool m_isHovered = false;
     bool m_isClicked = false;
     bool m_isDragging = false;
+
+    bool m_canDrag = true;
 
     int m_zIndex = 0;
     int m_previousZIndex = 0;

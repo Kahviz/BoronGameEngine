@@ -215,15 +215,15 @@ EntityECS Engine::AddAMesh(ECS& ecs, const fs::path& Path, const std::string& Na
 ){
     EntityECS entity = ecs.createEntity();
 
-    BasicInfoComponent basicComp;
-    ColorComponent colorComp;
-    TransformComponent transformComp;
-    PhysicsComponent physicsComp;
-    ObjectComponent objectComp;
-    EditorSettingsComponent editorComp;
-    HierarchyComponent hierarcyComp;
-    TextureComponent textureComp;
-    InstanceTypeComponent instTypeComp;
+    BasicInfoComponent basicComp{};
+    ColorComponent colorComp{};
+    TransformComponent transformComp{};
+    PhysicsComponent physicsComp{};
+    ObjectComponent objectComp{};
+    EditorSettingsComponent editorComp{};
+    HierarchyComponent hierarcyComp{};
+    TextureComponent textureComp{};
+    InstanceTypeComponent instTypeComp{};
 
     instTypeComp.InstanceType = Boron::Enums::InstanceType::Instance;
 
@@ -477,7 +477,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
 
     BoronGui::ReSizeViewport({ static_cast<float>(screen_width), static_cast<float>(screen_height) });
 
-
     static Borongui::Frame frame{};
 
     frame.setPosition({ 100,100 });
@@ -487,13 +486,19 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     static Borongui::Button button2{};
     button2.setParent(frame);
     
-    button2.setLocalPosition({ 50,50 });
     button2.setSize({ 100,100 });
     button2.setColor({ 0,255,255,1 });
-
+    
     frame.lockInitialization(true);
     button2.lockInitialization(true);
-    
+
+    Borongui::VerticalLayout verticalLayout{};
+
+    verticalLayout.setOwner(frame);
+    verticalLayout.setPadding(frame.getSize().y() / 4);
+    verticalLayout.add(button2);
+    verticalLayout.update();
+
     BoronGui::SubmitWidget(frame);
     BoronGui::SubmitWidget(button2);
     

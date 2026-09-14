@@ -2,6 +2,8 @@
 
 int Borongui::Widget::currentzIndex = 0;
 
+//use bge_assert here
+
 Borongui::Widget::Widget() {
 	currentzIndex++;
 	m_zIndex = currentzIndex;
@@ -66,6 +68,29 @@ bool Borongui::Widget::setLocalPosition(const BML::Vec2& p_position) {
 
 	if (!m_initLocked) {
 		m_position = p_position + m_parent->getPosition();
+	}
+
+	return true;
+}
+bool Borongui::Widget::setLocalPositionX(const float& p_x) {
+	if (m_parent == nullptr) {
+		return false;
+	}
+
+	if (!m_initLocked) {
+		m_position.x() = p_x + m_parent->getPosition().x();
+	}
+
+	return true;
+}
+
+bool Borongui::Widget::setLocalPositionY(const float& p_y, const bool& p_force) {
+	if (m_parent == nullptr) {
+		return false;
+	}
+
+	if (!m_initLocked || p_force) {
+		m_position.y() = p_y + m_parent->getPosition().y();
 	}
 
 	return true;

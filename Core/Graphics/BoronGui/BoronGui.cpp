@@ -100,14 +100,20 @@ void BoronGui::DrawWidgets() {
         }
 
         if (widget->m_isDragging) {
-            BML::Vec2 moveDist = BML::Vec2(Mouse::getDelta().x(), -Mouse::getDelta().y());
-            widget->m_position += moveDist;
+            bool stopDragging = !Mouse::isLeftClicked();
+            if (widget->m_canDrag) {
+                BML::Vec2 moveDist = BML::Vec2(Mouse::getDelta().x(), -Mouse::getDelta().y());
+                widget->m_position += moveDist;
 
-            for (Borongui::Widget* children : widget->getChildren()) {
-                children->m_position += moveDist;
+                for (Borongui::Widget* children : widget->getChildren()) {
+                    children->m_position += moveDist;
+                }
+            }
+            else {
+                stopDragging = true;
             }
 
-            if (!Mouse::isLeftClicked()) {
+            if (stopDragging) {
                 widget->m_zIndex = widget->m_previousZIndex;
                 widget->m_isDragging = false;
                 isDragging = false;

@@ -466,8 +466,9 @@ void Texture::DestroyRenderTarget(VkDevice device) {
 #if DIRECTX11 == 1
 void Texture::SetSRV(ID3D11ShaderResourceView* srv) {
     pTexture = srv;
-    Loaded = true;
+    m_loaded = true;
 }
+
 ID3D11ShaderResourceView* Texture::Load(fs::path path, IRenderer& renderer) {
     auto& dx = static_cast<Dx11Adapter&>(renderer);
     Dx11Renderer* dx11Renderer = dx.GetRenderer();
@@ -545,7 +546,7 @@ ID3D11ShaderResourceView* Texture::Load(fs::path path, IRenderer& renderer) {
     }
 
     pTexture = srv;
-    Loaded = true;
+    m_loaded = true;
 
     return srv;
 }
