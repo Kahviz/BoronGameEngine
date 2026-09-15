@@ -10,6 +10,7 @@ std::vector<Borongui::Widget*> BoronGui::widgets{};
 
 std::vector<Vertex2d> BoronGui::m_vertices{};
 std::vector<uint32_t> BoronGui::m_indicies{};
+
 bool BoronGui::m_inited = false;
 
 void BoronGui::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
@@ -101,23 +102,25 @@ void BoronGui::DrawWidgets() {
 
         if (widget->m_isDragging) {
             bool stopDragging = !Mouse::isLeftClicked();
+
+            if (stopDragging) {
+                widget->m_isClicked = false;
+            }
+
             if (widget->m_canDrag) {
-                BML::Vec2 moveDist = BML::Vec2(Mouse::getDelta().x(), -Mouse::getDelta().y());
+                BML::Vec2 moveDist = BML::Vec2(Mouse::getDelta().x(),-Mouse::getDelta().y());
+
                 widget->m_position += moveDist;
 
-                for (Borongui::Widget* children : widget->getChildren()) {
-                    children->m_position += moveDist;
+                for (Borongui::Widget* child : widget->getChildren()) {
+                    child->m_position += moveDist;
                 }
-            }
-            else {
-                stopDragging = true;
             }
 
             if (stopDragging) {
                 widget->m_zIndex = widget->m_previousZIndex;
                 widget->m_isDragging = false;
                 isDragging = false;
-                widget->m_isClicked = false;
             }
         }
     }

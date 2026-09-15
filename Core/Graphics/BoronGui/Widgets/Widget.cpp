@@ -2,8 +2,6 @@
 
 int Borongui::Widget::currentzIndex = 0;
 
-//use bge_assert here and fix if not canDrag = true that you can still click it!
-
 Borongui::Widget::Widget() {
 	currentzIndex++;
 	m_zIndex = currentzIndex;
