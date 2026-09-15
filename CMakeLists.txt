@@ -229,6 +229,9 @@ add_executable(BoronEngine
     Core/Graphics/BoronGui/Layout/VerticalLayout.h
     Core/Graphics/BoronGui/Layout/VerticalLayout.cpp
 
+    Core/Graphics/BoronGui/Layout/HorizontalLayout.h
+    Core/Graphics/BoronGui/Layout/HorizontalLayout.cpp 
+
     #backends
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.h
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.cpp

@@ -499,6 +499,13 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     verticalLayout.add(button2);
     verticalLayout.update();
 
+    Borongui::HorizontalLayout horizontalLayout{};
+
+    horizontalLayout.setOwner(frame);
+    horizontalLayout.setPadding(frame.getSize().x() / 4);
+    horizontalLayout.add(button2);
+    horizontalLayout.update();
+
     BoronGui::SubmitWidget(frame);
     BoronGui::SubmitWidget(button2);
     

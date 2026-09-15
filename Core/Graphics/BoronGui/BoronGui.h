@@ -11,6 +11,7 @@
 #include "BoronGuiTypes.h"
 
 #include "Layout/VerticalLayout.h"
+#include "Layout/HorizontalLayout.h"
 
 class BoronGui {
 public:

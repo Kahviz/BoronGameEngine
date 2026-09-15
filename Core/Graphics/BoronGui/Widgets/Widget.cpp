@@ -2,7 +2,7 @@
 
 int Borongui::Widget::currentzIndex = 0;
 
-//use bge_assert here
+//use bge_assert here and fix if not canDrag = true that you can still click it!
 
 Borongui::Widget::Widget() {
 	currentzIndex++;
@@ -72,12 +72,12 @@ bool Borongui::Widget::setLocalPosition(const BML::Vec2& p_position) {
 
 	return true;
 }
-bool Borongui::Widget::setLocalPositionX(const float& p_x) {
+bool Borongui::Widget::setLocalPositionX(const float& p_x, const bool& p_force) {
 	if (m_parent == nullptr) {
 		return false;
 	}
 
-	if (!m_initLocked) {
+	if (!m_initLocked || p_force) {
 		m_position.x() = p_x + m_parent->getPosition().x();
 	}
 
