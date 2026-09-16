@@ -94,8 +94,8 @@ bool Borongui::Widget::setLocalPositionY(const float& p_y, const bool& p_force) 
 	return true;
 }
 
-bool Borongui::Widget::setColor(const BML::Vec4& p_color) {
-	if (!m_initLocked) {
+bool Borongui::Widget::setColor(const BML::Vec4& p_color, const bool& p_force) {
+	if (!m_initLocked || p_force) {
 		m_color = p_color;
 
 		GPUVector4 color(

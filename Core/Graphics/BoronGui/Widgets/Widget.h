@@ -21,7 +21,7 @@ public:
     bool setLocalPositionX(const float& p_x, const bool& p_force = false);
     bool setLocalPositionY(const float& p_y, const bool& p_force = false);
 
-    bool setColor(const BML::Vec4& p_color);
+    bool setColor(const BML::Vec4& p_color, const bool& p_force = false));
     bool setClickColor(const BML::Vec4& p_color);
     bool setHoverColor(const BML::Vec4& p_color);
 
