@@ -43,28 +43,28 @@ void Borongui::Widget::setZIndex(const int& p_value) {
 	m_zIndex = p_value;
 }
 
-bool Borongui::Widget::setSize(const BML::Vec2& p_size) {
-	if (!m_initLocked) {
+bool Borongui::Widget::setSize(const BML::Vec2& p_size, const bool& p_force = false) {
+	if (!m_initLocked || p_force) {
 		m_size = p_size;
 	}
 
 	return true;
 }
 
-bool Borongui::Widget::setPosition(const BML::Vec2& p_position) {
-	if (!m_initLocked) {
+bool Borongui::Widget::setPosition(const BML::Vec2& p_position, const bool& p_force = false) {
+	if (!m_initLocked || p_force) {
 		m_position = p_position;
 	}
 
 	return true;
 }
 
-bool Borongui::Widget::setLocalPosition(const BML::Vec2& p_position) {
+bool Borongui::Widget::setLocalPosition(const BML::Vec2& p_position, const bool& p_force = false) {
 	if (m_parent == nullptr) {
 		return false;
 	}
 
-	if (!m_initLocked) {
+	if (!m_initLocked || p_force) {
 		m_position = p_position + m_parent->getPosition();
 	}
 

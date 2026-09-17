@@ -15,13 +15,13 @@ public:
     
     void lockInitialization(const bool& p_value);
     void setZIndex(const int& p_value);
-    bool setSize(const BML::Vec2& p_size);
-    bool setPosition(const BML::Vec2& p_position);
-    bool setLocalPosition(const BML::Vec2& p_position);
+    bool setSize(const BML::Vec2& p_size, const bool& p_force = false);
+    bool setPosition(const BML::Vec2& p_position, const bool& p_force = false);
+    bool setLocalPosition(const BML::Vec2& p_position, const bool& p_force = false);
     bool setLocalPositionX(const float& p_x, const bool& p_force = false);
     bool setLocalPositionY(const float& p_y, const bool& p_force = false);
 
-    bool setColor(const BML::Vec4& p_color, const bool& p_force = false));
+    bool setColor(const BML::Vec4& p_color, const bool& p_force = false);
     bool setClickColor(const BML::Vec4& p_color);
     bool setHoverColor(const BML::Vec4& p_color);
 
