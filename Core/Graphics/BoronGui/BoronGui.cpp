@@ -80,6 +80,10 @@ void BoronGui::DrawWidgets() {
     for (auto it = widgets.rbegin(); it != widgets.rend(); ++it) { //input loop
         Borongui::Widget* widget = *it;
 
+        if (!widget->m_enabled) {
+            return;
+        }
+
         widget->m_isHovered = false;
 
         BML::Vec2 mousePos = Mouse::getMousePos();
@@ -134,8 +138,11 @@ void BoronGui::DrawWidgets() {
     for (auto it = widgets.begin(); it != widgets.end(); ++it) { //rendering loop
         Borongui::Widget* widget = *it;
 
-        uint32_t vertexOffset =
-            static_cast<uint32_t>(m_vertices.size());
+        if (!widget->m_visible || !widget->m_enabled) {
+            continue;
+        }
+
+        uint32_t vertexOffset = static_cast<uint32_t>(m_vertices.size());
 
         GPUVector4 color = GPUVector4(widget->getColor().x() / 255.0f, widget->getColor().y() / 255.0f,
             widget->getColor().z() / 255.0f, widget->getColor().w()

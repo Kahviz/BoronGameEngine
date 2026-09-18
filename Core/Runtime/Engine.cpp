@@ -453,7 +453,6 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     wnd->GetGraphics().ClearSceneBuffer(0.1f, 0.1f, 0.1f);
 #endif
 
-
 #if INEDITOR == 1
     if (InProject && ImGuiInited) {
         makeGui.MakeIMGui(
@@ -487,7 +486,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     
     button2.setSize({ 100,100 });
     button2.setColor({ 0,255,255,1 });
-    
+    button2.setVisible(false);
+
     frame.lockInitialization(true);
     button2.lockInitialization(true);
 

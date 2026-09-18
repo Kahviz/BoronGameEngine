@@ -59,6 +59,12 @@ public:
 
     bool m_canDrag = true;
 
+    bool setEnabled(const bool& p_enabled);
+    bool setVisible(const bool& p_enabled);
+
+    bool m_visible = true;
+    bool m_enabled = true;
+
     int m_zIndex = 0;
     int m_previousZIndex = 0;
 

@@ -661,13 +661,6 @@ void VulkanRender::createUniformBuffers() {
 }
 
 void VulkanRender::ReallocateUniformBuffer(uint32_t newObjectCount, ECS* ecs) {
-    std::cout
-        << "ReallocateUniformBuffer: "
-        << newObjectCount
-        << " objects, size="
-        << (dynamicAlignment * newObjectCount)
-        << " bytes\n";
-
     vkDeviceWaitIdle(vkDevice.GetDevice());
 
     if (ecs != nullptr) {

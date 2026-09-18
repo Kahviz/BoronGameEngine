@@ -166,3 +166,15 @@ void Borongui::Widget::setParent(Borongui::Widget& p_parent) {
 		m_parent = &p_parent;
 	}
 }
+
+bool Borongui::Widget::setEnabled(const bool& p_enabled) {
+	m_enabled = p_enabled;
+
+	return true;
+}
+
+bool Borongui::Widget::setVisible(const bool& p_enabled) {
+	m_visible = p_enabled;
+
+	return true;
+}
