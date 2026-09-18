@@ -11,14 +11,14 @@ void Borongui::HorizontalLayout::setOwner(Borongui::Widget& p_owner) {
 }
 
 void Borongui::HorizontalLayout::update() {
-	float padding = m_startingPoint;
+	float padding = m_padding;
 
 	for (auto& child : m_childs) {
 		child->m_canDrag = false;
 
-		padding += m_padding;
+		padding += m_spacing;
 
-		float x = m_owner->getSize().x() / 2.0f - padding;
+		float x = m_owner->getSize().x() / 2.0f - m_spacing;
 
 		child->setLocalPositionX(x, true);
 	}
@@ -37,6 +37,6 @@ void Borongui::HorizontalLayout::setPadding(const float& p_padding) {
 	m_padding = p_padding;
 }
 
-void Borongui::HorizontalLayout::setStartingPoint(const float& p_startingPoint) {
-	m_startingPoint = p_startingPoint;
+void Borongui::HorizontalLayout::setSpacing(const float& p_spacing) {
+	m_spacing = p_spacing;
 }

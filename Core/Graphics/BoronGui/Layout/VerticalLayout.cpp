@@ -11,14 +11,14 @@ void Borongui::VerticalLayout::setOwner(Borongui::Widget& p_owner) {
 }
 
 void Borongui::VerticalLayout::update() {
-	float padding = m_startingPoint;
+	float padding = m_padding;
 
 	for (auto& child : m_childs) {
 		child->m_canDrag = false;
 
-		padding += m_padding;
+		padding += m_spacing;
 
-		float y = m_owner->getSize().y() / 2.0f - padding;
+		float y = m_owner->getSize().y() / 2.0f - m_spacing;
 
 		child->setLocalPositionY(y, true);
 	}
@@ -37,6 +37,6 @@ void Borongui::VerticalLayout::setPadding(const float& p_padding) {
 	m_padding = p_padding;
 }
 
-void Borongui::VerticalLayout::setStartingPoint(const float& p_startingPoint) {
-	m_startingPoint = p_startingPoint;
+void Borongui::VerticalLayout::setSpacing(const float& p_spacing) {
+	m_spacing = p_spacing;
 }

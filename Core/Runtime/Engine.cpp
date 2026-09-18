@@ -157,8 +157,7 @@ Engine::~Engine()
     }
 }
 
-int Engine::EngineRun()
-{
+int Engine::EngineRun() {
     GLFWwindow* glfwWND = window.GetWindow();
 
     using clock = std::chrono::high_resolution_clock;
@@ -495,14 +494,14 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     Borongui::VerticalLayout verticalLayout{};
 
     verticalLayout.setOwner(frame);
-    verticalLayout.setPadding(frame.getSize().y() / 4);
+    verticalLayout.setSpacing(frame.getSize().y() / 4);
     verticalLayout.add(button2);
     verticalLayout.update();
 
     Borongui::HorizontalLayout horizontalLayout{};
 
     horizontalLayout.setOwner(frame);
-    horizontalLayout.setPadding(frame.getSize().x() / 4);
+    horizontalLayout.setSpacing(frame.getSize().x() / 4);
     horizontalLayout.add(button2);
     horizontalLayout.update();
 
