@@ -481,6 +481,13 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     frame.setSize({ 200,200 });
     frame.setColor({ 0,0,255,1 });
 
+    static Borongui::Frame frame2{};
+
+    frame2.setPosition({ 200,100 });
+    frame2.setSize({ 200,200 });
+    frame2.setColor({ 0,0,255,1 });
+    frame2.bringFront();
+
     static Borongui::Button button2{};
     button2.setParent(frame);
     
@@ -490,6 +497,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
 
     frame.lockInitialization(true);
     button2.lockInitialization(true);
+    frame2.lockInitialization(true);
 
     Borongui::VerticalLayout verticalLayout{};
 
@@ -506,6 +514,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     horizontalLayout.update();
 
     BoronGui::SubmitWidget(frame);
+    BoronGui::SubmitWidget(frame2);
     BoronGui::SubmitWidget(button2);
     
     makeGui.RenderPopUps(deltatime); //Here last so thay be rendered always and on top of everything

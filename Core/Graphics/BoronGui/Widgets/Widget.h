@@ -48,6 +48,13 @@ public:
     std::vector<Borongui::Widget*>& getChildren();
     const std::vector<Borongui::Widget*>& getConstChildren() const;
 
+    //enabled visible
+    bool setEnabled(const bool& p_enabled);
+    bool setVisible(const bool& p_enabled);
+
+    //bring to front
+    void bringFront();
+
     void setParent(Borongui::Widget& p_parent);
 
     BML::Vec2 m_size = { 0,0 };
@@ -59,8 +66,7 @@ public:
 
     bool m_canDrag = true;
 
-    bool setEnabled(const bool& p_enabled);
-    bool setVisible(const bool& p_enabled);
+    bool m_bringToFront = false;
 
     bool m_visible = true;
     bool m_enabled = true;

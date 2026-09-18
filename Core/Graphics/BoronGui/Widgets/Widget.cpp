@@ -160,6 +160,10 @@ const std::vector<Borongui::Widget*>& Borongui::Widget::getConstChildren() const
 	return m_children;
 }
 
+void Borongui::Widget::bringFront() {
+	m_bringToFront = true;
+}
+
 void Borongui::Widget::setParent(Borongui::Widget& p_parent) {
 	if (!m_initLocked) {
 		p_parent.m_children.push_back(this);

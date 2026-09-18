@@ -71,8 +71,20 @@ void BoronGui::DrawWidgets() {
 
     isUsing = false;
 
-    std::sort(widgets.begin(), widgets.end(), //z-Index sorting
+    int biggestZindex = -1;
+
+    for (Borongui::Widget* widget : widgets) {
+        if (widget->m_zIndex > biggestZindex) {
+            biggestZindex = widget->m_zIndex;
+        }
+    }
+
+    std::sort(widgets.begin(), widgets.end(),
         [](Borongui::Widget* a, Borongui::Widget* b) {
+            if (a->m_bringToFront != b->m_bringToFront) {
+                return !a->m_bringToFront;
+            }
+
             return a->m_zIndex < b->m_zIndex;
         }
     );
