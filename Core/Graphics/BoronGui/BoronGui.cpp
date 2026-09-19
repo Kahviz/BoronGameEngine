@@ -175,16 +175,10 @@ void BoronGui::DrawWidgets() {
 
             guiVertex.color = color;
             guiVertex.pos = vertex.pos;
-            guiVertex.size = GPUVector2(
-                widget->getSize().x(),
-                widget->getSize().y()
-            );
+            guiVertex.size = GPUVector2(widget->getSize().x(),widget->getSize().y());
             guiVertex.rounding = widget->getRounding();
-            guiVertex.guiPos = GPUVector2(
-                widget->getPosition().x(),
-                widget->getPosition().y()
-            );
-
+            guiVertex.guiPos = GPUVector2(widget->getPosition().x(), widget->getPosition().y());
+            
             m_vertices.push_back(guiVertex);
         }
 

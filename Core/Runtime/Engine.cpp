@@ -468,11 +468,10 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     }
     else {
         if (makeGui.MakeDashBoard(&graphics.GetRenderer())) {
-            CreateInfo("Opened a project");
+            CreateInfo("Opened a project!");
             InProject = true;
         }
     }
-
 
     BoronGui::ReSizeViewport({ static_cast<float>(screen_width), static_cast<float>(screen_height) });
 
