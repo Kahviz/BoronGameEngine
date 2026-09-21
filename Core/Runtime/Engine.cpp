@@ -489,6 +489,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     frame2.bringFront();
 
     static Borongui::Button button2{};
+
     button2.setParent(frame);
     
     button2.setSize({ 100,100 });
