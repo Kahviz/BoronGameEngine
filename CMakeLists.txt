@@ -23,7 +23,7 @@ endif()
 
 message(STATUS "Using Vulkan SDK at: ${Vulkan_INCLUDE_DIRS}")
 
-##Fetch
+#Fetch
 include(FetchContent)
 
 #GLFW
@@ -80,18 +80,6 @@ set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
-
-if(TARGET assimp AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(assimp PRIVATE
-        -Wno-error
-        -Wno-unsafe-buffer-usage
-        -Wno-padded
-        -Wno-switch-default
-        -Wno-nrvo
-        -Wno-unique-object-duplication
-        -Wno-nontrivial-memcall
-    )
-endif()
 
 #SDL3
 set(SDL_SHARED ON CACHE BOOL "" FORCE)
@@ -218,7 +206,6 @@ add_executable(BoronEngine
 
     Core/Graphics/BoronGui/Backends/Backends.h
 
-    Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.cpp
     Core/Graphics/BoronGui/Widgets/Widget.cpp
 
     Core/Graphics/BoronGui/Widgets/Button.cpp
@@ -366,6 +353,7 @@ target_link_libraries(imgui PUBLIC
     glfw
     Vulkan::Vulkan
 )
+
 #Link
 if(WIN32)
     target_link_libraries(BoronEngine PRIVATE
