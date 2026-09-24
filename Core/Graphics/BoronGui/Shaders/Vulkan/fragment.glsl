@@ -1,5 +1,7 @@
 #version 450
 
+layout(binding = 0) uniform sampler2D texSampler;
+
 layout(location = 0) in vec4 fragColor;
 layout(location = 1) in float fragRounding;
 layout(location = 2) in vec2 fragLocalPos;
