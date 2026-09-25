@@ -12,6 +12,7 @@ struct Vertex2d {
     GPUVector2 uv = { 0,0 };
     GPUVector2 size = { 0,0 };
     GPUVector2 guiPos = { 0,0 };
+    uint32_t textureID = 0;
 
     float brightness = 0.0f;
     float rounding = 10.0f;
@@ -55,8 +56,8 @@ struct Vertex2d {
             return bindingDescription;
         }
 
-        static std::array<VkVertexInputAttributeDescription, 7> getAttributeDescriptions() {
-            std::array<VkVertexInputAttributeDescription, 7> attributes{};
+        static std::array<VkVertexInputAttributeDescription, 8> getAttributeDescriptions() {
+            std::array<VkVertexInputAttributeDescription, 8> attributes{};
 
             //pos
             attributes[0].binding = 0;
@@ -99,6 +100,12 @@ struct Vertex2d {
             attributes[6].location = 6;
             attributes[6].format = VK_FORMAT_R32G32_SFLOAT;
             attributes[6].offset = offsetof(Vertex2d, guiPos);
+
+            //textureID
+            attributes[7].binding = 0;
+            attributes[7].location = 7;
+            attributes[7].format = VK_FORMAT_R32_UINT;
+            attributes[7].offset = offsetof(Vertex2d, textureID);
 
             return attributes;
         }

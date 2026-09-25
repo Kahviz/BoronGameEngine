@@ -110,7 +110,7 @@ void BoronGui::DrawWidgets() {
                 isDragging = true;
 
                 widget->m_previousZIndex = widget->m_zIndex;
-                widget->m_zIndex = 9999;
+                widget->m_zIndex = biggestZindex;
                 widget->m_isDragging = true;
                 widget->m_isClicked = true;
             }
@@ -178,7 +178,8 @@ void BoronGui::DrawWidgets() {
             guiVertex.size = GPUVector2(widget->getSize().x(),widget->getSize().y());
             guiVertex.rounding = widget->getRounding();
             guiVertex.guiPos = GPUVector2(widget->getPosition().x(), widget->getPosition().y());
-            
+            guiVertex.textureID = 1;
+
             m_vertices.push_back(guiVertex);
         }
 

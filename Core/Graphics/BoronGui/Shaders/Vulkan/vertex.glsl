@@ -6,8 +6,8 @@ layout(location = 2) in vec2 inUV;
 layout(location = 3) in float inBrightness;
 layout(location = 4) in vec2 inSize;
 layout(location = 5) in float inRounding;
-
 layout(location = 6) in vec2 inGuiPosition;
+layout(location = 7) in uint inTextureID;
 
 //pos color UV brightness
 layout(push_constant) uniform PushConstants {
@@ -27,6 +27,7 @@ layout(location = 1) out float fragRounding;
 layout(location = 2) out vec2 fragLocalPos;
 layout(location = 3) out vec2 fragSize;
 layout(location = 4) out vec2 uv;
+layout(location = 5) out flat uint textureID;
 
 void main() {
     vec2 pixelPosition =
@@ -46,4 +47,5 @@ void main() {
     fragColor = inColor;
     fragSize = inSize;
     uv = inUV;
+    textureID = inTextureID;
 }
