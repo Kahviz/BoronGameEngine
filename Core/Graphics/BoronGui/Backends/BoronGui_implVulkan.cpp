@@ -80,7 +80,7 @@ void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& p_vertices, c
         m_commandBuffer,
         m_pipelineLayout,
         VK_SHADER_STAGE_VERTEX_BIT,
-        sizeof(CommonPushConstant),
+        0,
         sizeof(GlobalPushConstant),
         &m_globalPushConstant
     );
@@ -267,24 +267,14 @@ bool BoronGui_implVulkan::InitPipeline() {
     colorBlending.attachmentCount = 1;
     colorBlending.pAttachments = &colorBlendAttachment;
 
-    //PushConstants
-    VkPushConstantRange commonPushConstant = CreatePushConstantRange(
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(CommonPushConstant)
-    );
-
+    //PushConstant
     VkPushConstantRange globalPushConstant = CreatePushConstantRange(
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(CommonPushConstant), sizeof(GlobalPushConstant)
-    );
-
-    VkPushConstantRange guiPropertiesPushConstant = CreatePushConstantRange(
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(CommonPushConstant) + sizeof(GlobalPushConstant), sizeof(GuiPropertiesPushConstant)
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GlobalPushConstant)
     );
 
     std::vector<VkPushConstantRange> pushConstants;
 
-    pushConstants.push_back(commonPushConstant);
     pushConstants.push_back(globalPushConstant);
-    pushConstants.push_back(guiPropertiesPushConstant);
 
     VkDescriptorSetLayoutBinding textureBinding{};
     textureBinding.binding = 0;

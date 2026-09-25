@@ -25,18 +25,8 @@ public:
 
     static bool InitPipeline();
 private:
-    struct CommonPushConstant {
-        GPUVector4 color{};
-        GPUVector2 pos{};
-        GPUVector2 size{};
-    };
-
     struct GlobalPushConstant {
         GPUVector2 viewportSize{};
-    };
-
-    struct GuiPropertiesPushConstant {
-        float rounding = 10.0f;
     };
 
     static GlobalPushConstant m_globalPushConstant;
