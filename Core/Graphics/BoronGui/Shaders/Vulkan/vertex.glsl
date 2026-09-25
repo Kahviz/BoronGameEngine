@@ -26,9 +26,9 @@ layout(location = 0) out vec4 fragColor;
 layout(location = 1) out float fragRounding;
 layout(location = 2) out vec2 fragLocalPos;
 layout(location = 3) out vec2 fragSize;
+layout(location = 4) out vec2 uv;
 
-void main()
-{
+void main() {
     vec2 pixelPosition =
         inGuiPosition +
         (inPosition + vec2(0.5)) * inSize;
@@ -45,4 +45,5 @@ void main()
     fragRounding = inRounding;
     fragColor = inColor;
     fragSize = inSize;
+    uv = inUV;
 }

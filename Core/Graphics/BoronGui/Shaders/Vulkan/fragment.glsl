@@ -6,6 +6,7 @@ layout(location = 0) in vec4 fragColor;
 layout(location = 1) in float fragRounding;
 layout(location = 2) in vec2 fragLocalPos;
 layout(location = 3) in vec2 fragSize;
+layout(location = 4) in vec2 uv;
 
 layout(location = 0) out vec4 outColor;
 
