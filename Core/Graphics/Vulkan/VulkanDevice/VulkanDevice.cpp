@@ -1,7 +1,7 @@
 #include "VulkanDevice.h"
 #include <iostream>
+#include "BGE_ASSERTS.h"
 
-//Does physical device, device jobs
 #if VULKAN == 1
 bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)
 {
@@ -38,13 +38,10 @@ bool VulkanDevice::Init(GLFWwindow* window, VkInstance& instance)
         CreateError("No suitable GPU found");
         return false;
     }
-    if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
-        CreateError("Surface creation failed");
-        return false;
-    }
+
+    BGE_ASSERT_VKRESULT(glfwCreateWindowSurface(instance, window, nullptr, &surface), "Surface creation failed!");
 
     CreateSuccess("Surface Created");
-
 
     uint32_t queueFamilyCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);

@@ -175,8 +175,7 @@ void BoronGui_implVulkan::DrawBatch() {
 
 bool BoronGui_implVulkan::InitPipeline() {
     CreateInfo("Initing VulkanPipeline!");
-    //if desc here it would be
-
+    
     auto vertShaderCode = ReadShader(VertexShader);
     auto fragShaderCode = ReadShader(FragmentShader);
 

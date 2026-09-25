@@ -65,15 +65,8 @@ bool Texture::LoadVK(const fs::path& path, IRenderer& renderer)
     );
 
     void* data = nullptr;
-    VkResult result = vkMapMemory(device, stagingMemory, 0, imageSize, 0, &data);
 
-    if (result != VK_SUCCESS || !data) {
-        CreateError("Failed to map staging memory!");
-        stbi_image_free(pixels);
-        vkDestroyBuffer(device, stagingBuffer, nullptr);
-        vkFreeMemory(device, stagingMemory, nullptr);
-        return false;
-    }
+    BGE_ASSERT_VKRESULT(vkMapMemory(device, stagingMemory, 0, imageSize, 0, &data), "Failed to map staging memory!");
 
     memcpy(data, pixels, static_cast<size_t>(imageSize));
     vkUnmapMemory(device, stagingMemory);
@@ -120,11 +113,7 @@ bool Texture::LoadVK(const fs::path& path, IRenderer& renderer)
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(device, &viewInfo, nullptr, &m_imageView) != VK_SUCCESS) {
-        CreateError("Failed to create image view!");
-        Cleanup(device);
-        return false;
-    }
+    BGE_ASSERT_VKRESULT(vkCreateImageView(device, &viewInfo, nullptr, &m_imageView), "Failed to create image view!");
 
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -141,11 +130,7 @@ bool Texture::LoadVK(const fs::path& path, IRenderer& renderer)
     samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
-    if (vkCreateSampler(device, &samplerInfo, nullptr, &m_sampler) != VK_SUCCESS) {
-        CreateError("Failed to create sampler!");
-        Cleanup(device);
-        return false;
-    }
+    BGE_ASSERT_VKRESULT(vkCreateSampler(device, &samplerInfo, nullptr, &m_sampler), "Failed to create sampler!");
 
     m_loaded = true;
 

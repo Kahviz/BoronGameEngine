@@ -43,10 +43,7 @@ std::vector<char> ReadShader(const uint32_t(&shader)[N])
 {
     const char* data = reinterpret_cast<const char*>(shader);
 
-    return std::vector<char>(
-        data,
-        data + N * sizeof(uint32_t)
-    );
+    return std::vector<char>(data, data + N * sizeof(uint32_t));
 }
 
 inline VkShaderModule CreateShaderModule(VkDevice device, const std::vector<char>& code) {
@@ -57,7 +54,7 @@ inline VkShaderModule CreateShaderModule(VkDevice device, const std::vector<char
 
     VkShaderModule shaderModule = VK_NULL_HANDLE;
     BGE_ASSERT_VKRESULT(vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule), "Failed to create shader module!");
-
+    
     return shaderModule;
 }
 
