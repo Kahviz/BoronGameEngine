@@ -34,10 +34,22 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
     viewport.maxDepth = 1.0f;
 
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
     VkRect2D scissor{};
     scissor.extent = { m_boronGuiNeeds.swapchainExtent.width, m_boronGuiNeeds.swapchainExtent.height };
 
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+    vkCmdBindDescriptorSets(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        m_pipelineLayout,
+        0,
+        1,
+        nullptr,//here would be the texture
+        0,
+        nullptr
+    );
 }
 
 void BoronGui_implVulkan::EndFrame() {
