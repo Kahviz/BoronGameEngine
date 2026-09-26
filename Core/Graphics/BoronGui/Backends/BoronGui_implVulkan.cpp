@@ -40,6 +40,7 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
 
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+    /*
     vkCmdBindDescriptorSets(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -50,6 +51,7 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
         0,
         nullptr
     );
+    */
 }
 
 void BoronGui_implVulkan::EndFrame() {
