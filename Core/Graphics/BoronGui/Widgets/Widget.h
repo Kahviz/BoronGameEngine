@@ -3,6 +3,9 @@
 #include "BoronMathLibrary.h"
 #include "Vertex2d.h"
 
+#include <filesystem>
+namespace fs = std::filesystem; //[ADD] add this to its own file
+
 namespace Borongui {
 class Widget {
 public:
@@ -15,6 +18,7 @@ public:
     
     void lockInitialization(const bool& p_value);
     void setZIndex(const int& p_value);
+    void loadTexture(const fs::path& p_path);
     bool setSize(const BML::Vec2& p_size, const bool& p_force = false);
     bool setPosition(const BML::Vec2& p_position, const bool& p_force = false);
     bool setLocalPosition(const BML::Vec2& p_position, const bool& p_force = false);
@@ -75,6 +79,8 @@ public:
     int m_previousZIndex = 0;
 
     static int currentzIndex;
+
+    uint32_t m_textureID = 0;
 
     BML::Vec4 m_color = { 0,0,0,1 };
     BML::Vec4 m_hoverColor = { 255,0,0,1 };

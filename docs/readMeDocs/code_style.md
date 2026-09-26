@@ -9,5 +9,8 @@ Use this format in:
 - Type member variables "m_variable"
 - Type parametre variables "p_variable"
 - Type global variables "g_variable" 
+- Type static variables "s_variable" 
+- use attribute syntax like: [[unlikely]], [[likely]], [[nodiscard]] and [[deprecated]]
 
 - Use camelCase
+- if you see that my (Kahviz_) written code doesnt have those its because the code_style has been changed a lot in this year

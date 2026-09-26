@@ -1,5 +1,7 @@
 #include "Widget.h"
 
+#include "GuiTexture/GuiTextureManager.h"
+
 int Borongui::Widget::currentzIndex = 0;
 
 Borongui::Widget::Widget() {
@@ -41,6 +43,10 @@ void Borongui::Widget::lockInitialization(const bool& p_value) {
 
 void Borongui::Widget::setZIndex(const int& p_value) {
 	m_zIndex = p_value;
+}
+
+void Borongui::Widget::loadTexture(const fs::path& p_path) {
+	m_textureID = GuiTextureManager::genNewTextureID();
 }
 
 bool Borongui::Widget::setSize(const BML::Vec2& p_size, const bool& p_force) {
