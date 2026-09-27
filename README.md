@@ -44,6 +44,7 @@ Website: https://boronengine.netlify.app/
 
 You can also join the BoronEngine Discord server through the website.
 
+The docs are in https://kahviz.github.io/BoronDocs/
 ## Support the Project
 
 **Star** this repository – it helps a lot!  
