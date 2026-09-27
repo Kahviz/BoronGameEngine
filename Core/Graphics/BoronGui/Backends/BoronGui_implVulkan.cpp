@@ -40,6 +40,7 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
 
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+
     /*
     vkCmdBindDescriptorSets(
         commandBuffer,
