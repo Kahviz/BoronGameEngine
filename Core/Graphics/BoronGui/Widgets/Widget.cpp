@@ -1,6 +1,7 @@
 #include "Widget.h"
 
 #include "GuiTexture/GuiTextureManager.h"
+#include <Texture.h>
 
 int Borongui::Widget::currentzIndex = 0;
 
@@ -45,7 +46,18 @@ void Borongui::Widget::setZIndex(const int& p_value) {
 	m_zIndex = p_value;
 }
 
-void Borongui::Widget::loadTexture(const fs::path& p_path) {
+void Borongui::Widget::loadTexture(const fs::path& p_path, IRenderer& p_renderer) {
+	Texture texture{};
+
+	#if VULKAN == 1
+		texture.LoadVK(p_path, p_renderer); //[ADD] a function which is just load it picks between vk and dx11
+	#endif
+	#if DIRECTX11 == 1
+
+	#endif
+
+	GuiTextureManager::getTextures().push_back(texture);
+
 	m_textureID = GuiTextureManager::genNewTextureID();
 }
 

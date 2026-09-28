@@ -487,6 +487,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     frame2.setSize({ 200,200 });
     frame2.setColor({ 0,0,255,1 });
     frame2.bringFront();
+    frame2.loadTexture(textures / "TestTexture.png", wnd->GetGraphics().GetRenderer());
 
     static Borongui::Button button2{}; 
 

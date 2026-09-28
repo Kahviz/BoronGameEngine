@@ -2,6 +2,7 @@
 
 #include "BoronMathLibrary.h"
 #include "Vertex2d.h"
+#include "IRenderer.h"
 
 #include <filesystem>
 namespace fs = std::filesystem; //[ADD] add this to its own file
@@ -18,7 +19,7 @@ public:
     
     void lockInitialization(const bool& p_value);
     void setZIndex(const int& p_value);
-    void loadTexture(const fs::path& p_path);
+    void loadTexture(const fs::path& p_path, IRenderer& p_renderer);
     bool setSize(const BML::Vec2& p_size, const bool& p_force = false);
     bool setPosition(const BML::Vec2& p_position, const bool& p_force = false);
     bool setLocalPosition(const BML::Vec2& p_position, const bool& p_force = false);

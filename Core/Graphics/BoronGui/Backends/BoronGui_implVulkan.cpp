@@ -39,8 +39,7 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
     scissor.extent = { m_boronGuiNeeds.swapchainExtent.width, m_boronGuiNeeds.swapchainExtent.height };
 
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-
+    
     /*
     vkCmdBindDescriptorSets(
         commandBuffer,

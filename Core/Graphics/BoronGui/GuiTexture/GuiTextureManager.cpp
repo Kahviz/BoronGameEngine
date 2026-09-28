@@ -2,10 +2,15 @@
 #include "Logger/Logger.h"
 
 uint32_t GuiTextureManager::s_currentTextureID = 0;
+std::vector<Texture> GuiTextureManager::s_textures{};
 
 [[nodiscard]]
 const uint32_t& GuiTextureManager::getCurrentTextureID() {
     return s_currentTextureID;
+}
+
+std::vector<Texture>& GuiTextureManager::getTextures() {
+    return s_textures;
 }
 
 [[nodiscard]]
