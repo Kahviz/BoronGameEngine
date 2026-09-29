@@ -148,8 +148,7 @@ void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& p_vertices, c
         m_vkBuffer.IsCreated() &&
         m_vkBufferIndex.IsCreated();
 
-    if (!buffersCreated) {
-
+    if (!buffersCreated) [[unlikely]] {
         m_vkBuffer.Create(
             m_boronGuiNeeds.device,
             m_boronGuiNeeds.physicalDevice,
@@ -169,9 +168,7 @@ void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& p_vertices, c
         );
 
     }
-    else if (lastVertexSize != vertexSize ||
-        lastIndexSize != indexSize) {
-
+    else if (lastVertexSize != vertexSize || lastIndexSize != indexSize) [[unlikely]] {
         m_vkBuffer.Resize(
             vertexSize,
             m_boronGuiNeeds.commandPool,

@@ -22,3 +22,8 @@ uint32_t GuiTextureManager::genNewTextureID() {
 
     return  s_currentTextureID++;
 }
+
+[[nodiscard]]
+const size_t& GuiTextureManager::getTextureCount() {
+    return s_textures.size();
+}
