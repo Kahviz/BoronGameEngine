@@ -14,8 +14,7 @@ public:
 
     virtual bool Init(GLFWwindow* window) = 0;
     virtual void CleanUp() = 0;
-    virtual void DrawFrame(float dt,
-        ECS& ecs) = 0;
+    virtual void DrawFrame(float dt, ECS& ecs) = 0;
     virtual void EndFrame() = 0;
     virtual void ClearBuffer(float r, float g, float b) = 0;
     virtual Camera& GetCamera() = 0;

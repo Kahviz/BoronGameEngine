@@ -43,5 +43,7 @@ private:
     static VkCommandBuffer m_commandBuffer;
 
     static uint32_t m_indexCount;
+
+    static VkDescriptorSet m_textureDescriptorSet;
 };
 #endif

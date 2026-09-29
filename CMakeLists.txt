@@ -255,7 +255,7 @@ add_executable(BoronEngine
 
     Core/Graphics/Vulkan/VulkanAdapter.h
     Core/Graphics/Vulkan/VulkanAdapter.cpp
-
+    
     #Icon
     BoronEngine.rc
 )

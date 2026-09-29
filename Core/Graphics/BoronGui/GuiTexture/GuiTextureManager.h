@@ -3,9 +3,12 @@
 #include <stdint.h>
 #include <vector>
 #include "Texture.h"
+#include "GLOBALS.h"
 
 class GuiTextureManager {
 public:
+	virtual ~GuiTextureManager() = default;
+
 	static const uint32_t& getCurrentTextureID();
 	static std::vector<Texture>& getTextures();
 	static uint32_t genNewTextureID();

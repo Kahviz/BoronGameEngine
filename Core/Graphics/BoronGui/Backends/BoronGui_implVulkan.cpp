@@ -1,12 +1,16 @@
 #include "BoronGui_implVulkan.h"
-#include <Logger/Logger.h>
 
 #if VULKAN == 1
+#include <Logger/Logger.h>
+
 #include "Shaders/Vulkan/FragmentShader.h"
 #include "Shaders/Vulkan/VertexShader.h"
+
 #include "Vulkan/VulkanHelpers.h"
+
 #include "Vertex2d.h"
 #include "Widgets/Widgets.h"
+#include "GuiTexture/GuiTextureManager.h"
 
 BoronGuiNeeds BoronGui_implVulkan::m_boronGuiNeeds{};
 VkShaderModule BoronGui_implVulkan::m_vertShaderModule = VK_NULL_HANDLE;
@@ -19,6 +23,7 @@ VkIndexType BoronGui_implVulkan::indexType = VK_INDEX_TYPE_UINT32;
 VkCommandBuffer BoronGui_implVulkan::m_commandBuffer;
 BoronGui_implVulkan::GlobalPushConstant BoronGui_implVulkan::m_globalPushConstant{};
 uint32_t BoronGui_implVulkan::m_indexCount = 0;
+VkDescriptorSet BoronGui_implVulkan::m_textureDescriptorSet{};
 
 void BoronGui_implVulkan::BeginFrame() {
 
@@ -39,19 +44,48 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
     scissor.extent = { m_boronGuiNeeds.swapchainExtent.width, m_boronGuiNeeds.swapchainExtent.height };
 
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-    
-    /*
+
+    std::vector<VkDescriptorImageInfo> descriptorImageInfos{};
+
+    for (const auto& texture : GuiTextureManager::getTextures()) {
+        VkDescriptorImageInfo imageInfo{};
+
+        imageInfo.imageView = texture.GetImageView();
+        imageInfo.sampler = texture.GetSampler();
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        descriptorImageInfos.push_back(imageInfo);
+    }
+
+    VkWriteDescriptorSet writeDescriptorSet{};
+
+    writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    writeDescriptorSet.descriptorCount = descriptorImageInfos.size();
+    writeDescriptorSet.dstBinding = 0;
+    writeDescriptorSet.dstSet = m_textureDescriptorSet;
+    writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    writeDescriptorSet.pImageInfo = descriptorImageInfos.data();
+
+    if (descriptorImageInfos.size() >= 0 && m_textureDescriptorSet != VK_NULL_HANDLE) {
+        vkUpdateDescriptorSets(
+            m_boronGuiNeeds.device,
+            1,
+            &writeDescriptorSet,
+            0,
+            0
+        );
+    }
+
     vkCmdBindDescriptorSets(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         m_pipelineLayout,
         0,
         1,
-        nullptr,//here would be the texture
+        &m_textureDescriptorSet,
         0,
         nullptr
     );
-    */
 }
 
 void BoronGui_implVulkan::EndFrame() {
@@ -292,7 +326,7 @@ bool BoronGui_implVulkan::InitPipeline() {
     VkDescriptorSetLayoutBinding textureBinding{};
     textureBinding.binding = 0;
     textureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    textureBinding.descriptorCount = 1;
+    textureBinding.descriptorCount = 100;
     textureBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
