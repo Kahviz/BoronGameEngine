@@ -24,6 +24,7 @@ VkCommandBuffer BoronGui_implVulkan::m_commandBuffer;
 BoronGui_implVulkan::GlobalPushConstant BoronGui_implVulkan::m_globalPushConstant{};
 uint32_t BoronGui_implVulkan::m_indexCount = 0;
 VkDescriptorSet BoronGui_implVulkan::m_textureDescriptorSet{};
+VkDescriptorPool BoronGui_implVulkan::m_descriptorPool{};
 
 void BoronGui_implVulkan::BeginFrame() {
 
@@ -66,7 +67,7 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
     writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     writeDescriptorSet.pImageInfo = descriptorImageInfos.data();
 
-    if (descriptorImageInfos.size() >= 0 && m_textureDescriptorSet != VK_NULL_HANDLE) {
+    if (!descriptorImageInfos.empty() && m_textureDescriptorSet != VK_NULL_HANDLE) {
         vkUpdateDescriptorSets(
             m_boronGuiNeeds.device,
             1,
@@ -94,6 +95,30 @@ void BoronGui_implVulkan::EndFrame() {
 void BoronGui_implVulkan::Init() {
 	CreateInfo("Init func");
     InitPipeline();
+    createDescriptorPool(100);
+}
+
+void BoronGui_implVulkan::createDescriptorPool(uint32_t p_maxObjects) {
+    std::array<VkDescriptorPoolSize, 1> poolSizes{};
+
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    poolSizes[0].descriptorCount = p_maxObjects;
+
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.pPoolSizes = poolSizes.data();
+    poolInfo.maxSets = 1;
+
+    BGE_ASSERT_VKRESULT(
+        vkCreateDescriptorPool(
+            m_boronGuiNeeds.device,
+            &poolInfo,
+            nullptr,
+            &m_descriptorPool
+        ),
+        "Failed to create descriptor pool"
+    );
 }
 
 const BoronGuiNeeds& BoronGui_implVulkan::GetGuiNeeds() {
@@ -334,6 +359,17 @@ bool BoronGui_implVulkan::InitPipeline() {
     VkDescriptorSetLayout textureLayout{};
 
     BGE_ASSERT_VKRESULT(vkCreateDescriptorSetLayout(m_boronGuiNeeds.device, &layoutInfo, nullptr, &textureLayout),"Failed to create descriptor!");
+
+    VkDescriptorSetAllocateInfo vkDescriptorSetAllocateInfo{};
+
+    vkDescriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    vkDescriptorSetAllocateInfo.pNext = nullptr;
+    vkDescriptorSetAllocateInfo.descriptorPool = m_descriptorPool;
+    vkDescriptorSetAllocateInfo.descriptorSetCount = 1;
+    vkDescriptorSetAllocateInfo.pSetLayouts = &textureLayout;
+
+    //BGE_ASSERT_VKRESULT(vkAllocateDescriptorSets(m_boronGuiNeeds.device, &vkDescriptorSetAllocateInfo, &m_textureDescriptorSet),
+    //   "Failed to allocate for descriptors");
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

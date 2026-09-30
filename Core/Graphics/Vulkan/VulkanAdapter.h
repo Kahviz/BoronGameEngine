@@ -29,7 +29,12 @@ public:
     std::vector<VkImageView> GetSwapChainImageViews() const;
     VkInstance& GetInstance() const;
     uint32_t GetGraphicsFamilyIndex() const;
+
     VkDescriptorPool& GetImGuiPool() const;
+
+    VkDescriptorPool& getDescriptorPool();
+    std::unique_ptr<VulkanRender>& getRenderer();
+
     VkRenderPass GetRenderPass() const;
     VkExtent2D GetSwapchainExtent();
 

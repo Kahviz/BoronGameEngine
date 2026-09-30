@@ -107,6 +107,14 @@ VkDescriptorPool& VulkanAdapter::GetImGuiPool() const
     return renderer->GetImGuiPool();
 }
 
+VkDescriptorPool& VulkanAdapter::getDescriptorPool() {
+    return renderer->getDescriptorPool();
+}
+
+std::unique_ptr<VulkanRender>& VulkanAdapter::getRenderer() {
+    return renderer;
+}
+
 VkRenderPass VulkanAdapter::GetRenderPass() const
 {
     return renderer->GetRenderPass();

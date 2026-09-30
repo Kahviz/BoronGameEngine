@@ -13,6 +13,7 @@ public:
     static void BeginFrame();
     static void SetupRenderState(VkCommandBuffer commandBuffer);
     static void EndFrame();
+    static void createDescriptorPool(uint32_t p_maxObjects);
     static const BoronGuiNeeds& GetGuiNeeds();
 
     void Init() override;
@@ -45,5 +46,7 @@ private:
     static uint32_t m_indexCount;
 
     static VkDescriptorSet m_textureDescriptorSet;
+
+    static VkDescriptorPool m_descriptorPool;
 };
 #endif

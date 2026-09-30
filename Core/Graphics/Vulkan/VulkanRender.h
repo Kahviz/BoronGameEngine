@@ -97,7 +97,10 @@ public:
 
     VkPipeline GetPipeline() { return vkPipeline.GetGraphicsPipeline(); };
     VkInstance& GetInstance() { return vkInstance.GetInstance(); };
+
     VkDescriptorPool& GetImGuiPool() { return imguiPool; };
+    VkDescriptorPool& getDescriptorPool() { return descriptorPool; };
+
     std::vector<VkCommandBuffer> GetCommandBuffers() { return vkCommandBuffer.GetCommandBuffers(); };
     uint32_t GetGraphicsFamilyIndex() { return vkDevice.GetFamilyIndex(); };
     std::vector<VkImageView> GetSwapChainImageViews() { return vkSwapchain.GetSwapchainImageViews(); };
