@@ -72,18 +72,10 @@ inline void CreateInfo(const T& printable, const U& printable2) {
 
 template <typename T>
 inline void ProfilerInformation(const T& printable) {
-    #if PRINTDEBUGINFO == 1
-        #ifdef _DEBUG
-            BoronLog::Print("\033[1;32m", "Profiler: ", printable);
-        #endif
-    #endif
+    BoronLog::Print("\033[1;32m", "Profiler: ", printable);
 }
 
 template <typename T, typename U>
 inline void ProfilerInformation(const T& printable, const U& printable2) {
-    #if PRINTDEBUGINFO == 1
-        #ifdef _DEBUG
-            BoronLog::Print("\033[1;32m", "Profiler: ", printable, printable2);
-        #endif
-    #endif
+    BoronLog::Print("\033[1;32m", "Profiler: ", printable, printable2);
 }
