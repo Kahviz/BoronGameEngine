@@ -23,5 +23,11 @@ void main() {
 
     float edgeSoftness = 0.5;
     float alpha = 1.0 - smoothstep(0.0, edgeSoftness, dist);
-    outColor = texture(textures[textureID], uv);
+
+    if (textureID == 0) {
+        outColor = vec4(fragColor.rgb, fragColor.a * alpha);
+    }
+    else {
+        outColor = texture(textures[textureID], uv);
+    }
 }

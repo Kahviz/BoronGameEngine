@@ -1,7 +1,7 @@
 #include "GuiTextureManager.h"
 #include "Logger/Logger.h"
 
-uint32_t GuiTextureManager::s_currentTextureID = 0;
+uint32_t GuiTextureManager::s_currentTextureID = 1;
 std::vector<Texture> GuiTextureManager::s_textures{};
 
 [[nodiscard]]

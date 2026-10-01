@@ -73,6 +73,7 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
     writeDescriptorSet.dstSet = s_textureDescriptorSet;
     writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     writeDescriptorSet.pImageInfo = descriptorImageInfos.data();
+    writeDescriptorSet.dstArrayElement = 1;
 
     if (!descriptorImageInfos.empty() && s_textureDescriptorSet != VK_NULL_HANDLE) {
         vkUpdateDescriptorSets(
