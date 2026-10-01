@@ -6,8 +6,8 @@
 
 class SaveProject {
 public:
-	static void Save(ECS& ecs);
-	static void Load(ECS& ecs, Window& window, EntityECS world);
+	static void Save(ECS& p_ecs);
+	static void Load(ECS& p_ecs, Window& p_window, EntityECS p_world);
 private:
 
 };

@@ -9,7 +9,7 @@
 
 namespace fs = std::filesystem;
 
-void SaveProject::Save(ECS& ecs) {
+void SaveProject::Save(ECS& p_ecs) {
     fs::path path = savings / g_projectName;
     fs::path meshFilesPath = savings / g_projectName / "MeshFiles";
 
@@ -17,7 +17,7 @@ void SaveProject::Save(ECS& ecs) {
 
     std::ofstream file(path / "save.BGEproject");
 
-    ecs.Each<
+    p_ecs.Each<
         BasicInfoComponent,
         TransformComponent,
         PhysicsComponent,
@@ -44,8 +44,7 @@ void SaveProject::Save(ECS& ecs) {
                 fs::path(meshFilesPath) /
                 (newName + from.extension().string());
 
-            if (from.lexically_normal() != to.lexically_normal())
-            {
+            if (from != to) {
                 fs::copy_file(
                     from,
                     to,
@@ -250,22 +249,19 @@ EntityECS AddAMesh(
 }
 
 
-void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
-{
+void SaveProject::Load(ECS& p_ecs, Window& p_window, EntityECS p_world) {
     std::ifstream file(
         savings / g_projectName / "save.BGEproject"
     );
 
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         CreateError("File not found");
         return;
     }
 
-    struct PendingParent
-    {
-        EntityECS child;
-        EntityECS oldParent;
+    struct PendingParent {
+        EntityECS child{};
+        EntityECS oldParent{};
     };
 
     std::vector<PendingParent> pendingParents;
@@ -289,11 +285,9 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
     bool loadedAnchored = true;
     bool loadedCanDraw = true;
 
-    Boron::Enums::InstanceType loadedInstanceType =
-        Boron::Enums::InstanceType::Object;
+    Boron::Enums::InstanceType loadedInstanceType = Boron::Enums::InstanceType::Object;
 
-    while (std::getline(file, line))
-    {
+    while (std::getline(file, line)) {
         if (line == "-")
             continue;
 
@@ -386,22 +380,19 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
             loadedCanDraw =
                 std::stoi(line.substr(8)) != 0;
         }
-        else if (line.rfind("ParentID:", 0) == 0)
-        {
+        else if (line.rfind("ParentID:", 0) == 0) {
             loadedParentID =
                 static_cast<EntityECS>(
                     std::stoul(line.substr(10))
                     );
         }
-        else if (line.rfind("InstanceType:", 0) == 0)
-        {
+        else if (line.rfind("InstanceType:", 0) == 0) {
             int value = std::stoi(line.substr(14));
 
             loadedInstanceType =
                 static_cast<Boron::Enums::InstanceType>(value);
         }
-        else if (line == "END")
-        {
+        else if (line == "END") {
             if (loadedInstanceType != Boron::Enums::InstanceType::Object &&
                 loadedInstanceType != Boron::Enums::InstanceType::Instance)
             {
@@ -424,8 +415,7 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
                 "MeshFiles" /
                 loadedMeshFile;
 
-            if (!fs::exists(meshPath))
-            {
+            if (!fs::exists(meshPath)) {
                 std::cerr
                     << "Mesh does not exist: "
                     << meshPath
@@ -435,9 +425,9 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
             }
 
             EntityECS entity = AddAMesh(
-                ecs,
-                world,
-                window,
+                p_ecs,
+                p_world,
+                p_window,
                 meshPath,
                 loadedName,
                 loadedPos,
@@ -448,28 +438,20 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
                 false
             );
 
-            if (entity == 0)
+            if (entity == 0) {
                 continue;
+            }
 
             entityIDMap[loadedUniqueID] = entity;
 
-            auto& transform =
-                ecs.GetComponent<TransformComponent>(entity);
+            auto& transform = p_ecs.GetComponent<TransformComponent>(entity);
+            transform.transform.Orientation = loadedOrientation;
 
-            transform.transform.Orientation =
-                loadedOrientation;
+            auto& physics = p_ecs.GetComponent<PhysicsComponent>(entity);
+            physics.anchored = loadedAnchored;
 
-            auto& physics =
-                ecs.GetComponent<PhysicsComponent>(entity);
-
-            physics.anchored =
-                loadedAnchored;
-
-            auto& object =
-                ecs.GetComponent<ObjectComponent>(entity);
-
-            object.canDraw =
-                loadedCanDraw;
+            auto& object = p_ecs.GetComponent<ObjectComponent>(entity);
+            object.canDraw = loadedCanDraw;
 
             if (loadedParentID !=
                 static_cast<EntityECS>(-1))
@@ -477,7 +459,8 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
                 pendingParents.push_back({
                     entity,
                     loadedParentID
-                    });
+                    }
+                );
             }
 
             loadedName.clear();
@@ -501,13 +484,12 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
 
     file.close();
 
-    for (const PendingParent& pending : pendingParents)
-    {
+    for (const PendingParent& pending : pendingParents) {
         auto parentIt = entityIDMap.find(pending.oldParent);
 
         if (parentIt == entityIDMap.end())
         {
-            ecs.GetComponent<HierarchyComponent>(pending.child).parent = world;
+            p_ecs.GetComponent<HierarchyComponent>(pending.child).parent = p_world;
 
             continue;
         }
@@ -515,6 +497,6 @@ void SaveProject::Load(ECS& ecs, Window& window, EntityECS world)
         EntityECS child = pending.child;
         EntityECS parent = parentIt->second;
 
-        ecs.GetComponent<HierarchyComponent>(child).parent = parent;
+        p_ecs.GetComponent<HierarchyComponent>(child).parent = parent;
     }
 }
