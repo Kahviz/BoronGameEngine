@@ -13,9 +13,14 @@ public:
     static void BeginFrame();
     static void SetupRenderState(VkCommandBuffer commandBuffer);
     static void EndFrame();
+    static void resizeDescriptorPool(uint32_t p_newMaxTextures);
+    static void destroyDescriptorPool();
     static void createDescriptorPool(uint32_t p_maxObjects);
-    static const BoronGuiNeeds& GetGuiNeeds();
-
+    static void createTextureDescriptorSet();
+    static void resizeTextureDescriptorSet();
+    static void updateTextureDescriptors();
+    static const BoronGuiNeeds& getGuiNeeds();
+    static void allocateDescriptorSet();
     void Init() override;
     void ReSizeViewport(GPUVector2 p_newSize) override;
     void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) override;
@@ -30,23 +35,25 @@ private:
         GPUVector2 viewportSize{};
     };
 
-    static GlobalPushConstant m_globalPushConstant;
-    static VkShaderModule m_vertShaderModule;
-    static VkShaderModule m_fragShaderModule;
-    static BoronGuiNeeds m_boronGuiNeeds;
-    static VkPipelineLayout m_pipelineLayout;
-    static VkPipeline m_graphicsPipeline;
-    static VulkanBuffer m_vkBuffer;
-    static VulkanBuffer m_vkBufferIndex;
+    static GlobalPushConstant s_globalPushConstant;
+    static VkShaderModule s_vertShaderModule;
+    static VkShaderModule s_fragShaderModule;
+    static BoronGuiNeeds s_boronGuiNeeds;
+    static VkPipelineLayout s_pipelineLayout;
+    static VkPipeline s_graphicsPipeline;
+    static VulkanBuffer s_vkBuffer;
+    static VulkanBuffer s_vkBufferIndex;
 
-    static VkIndexType indexType;
+    static VkIndexType s_indexType;
 
-    static VkCommandBuffer m_commandBuffer;
+    static VkCommandBuffer s_commandBuffer;
 
-    static uint32_t m_indexCount;
+    static uint32_t s_indexCount;
+    static uint32_t s_currentObjectCount;
+    static VkDescriptorSet s_textureDescriptorSet;
 
-    static VkDescriptorSet m_textureDescriptorSet;
+    static VkDescriptorPool s_descriptorPool;
 
-    static VkDescriptorPool m_descriptorPool;
+    static VkDescriptorSetLayout s_textureLayout;
 };
 #endif

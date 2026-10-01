@@ -47,6 +47,16 @@ struct Vertex2d {
     {
     }
 
+    Vertex2d(const GPUVector2& p, const GPUVector2& uv_coords)
+        : pos(p),
+        color(1,0,0),
+        uv{ uv_coords },
+        brightness(1.0f),
+        size(100, 100),
+        guiPos(100, 100)
+    {
+    }
+
     #if VULKAN == 1
         static VkVertexInputBindingDescription getBindingDescription() {
             VkVertexInputBindingDescription bindingDescription{};

@@ -110,8 +110,7 @@ inline VkCommandBuffer BeginSingleTimeCommands(VkCommandPool commandPool,VkDevic
     return commandBuffer;
 }
 
-inline void EndSingleTimeCommands(VkCommandBuffer commandBuffer,VkQueue graphicsQueue, VkDevice device, VkCommandPool commandPool)
-{
+inline void EndSingleTimeCommands(VkCommandBuffer commandBuffer,VkQueue graphicsQueue, VkDevice device, VkCommandPool commandPool) {
     vkEndCommandBuffer(commandBuffer);
 
     VkSubmitInfo submitInfo{};

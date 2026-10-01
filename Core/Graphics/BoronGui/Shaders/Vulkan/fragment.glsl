@@ -1,13 +1,12 @@
 #version 450
 
-layout(binding = 0) uniform sampler2D texSampler;
-
+layout(set = 0, binding = 0) uniform sampler2D textures[1024];
 layout(location = 0) in vec4 fragColor;
 layout(location = 1) in float fragRounding;
 layout(location = 2) in vec2 fragLocalPos;
 layout(location = 3) in vec2 fragSize;
 layout(location = 4) in vec2 uv;
-layout(location = 5) in flat uint textureID;
+layout(location = 5) flat in uint textureID;
 
 layout(location = 0) out vec4 outColor;
 
@@ -24,6 +23,5 @@ void main() {
 
     float edgeSoftness = 0.5;
     float alpha = 1.0 - smoothstep(0.0, edgeSoftness, dist);
-
-    outColor = vec4(fragColor.rgb, fragColor.a * alpha);
+    outColor = texture(textures[textureID], uv);
 }

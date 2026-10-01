@@ -19,7 +19,7 @@ public:
     
     void lockInitialization(const bool& p_value);
     void setZIndex(const int& p_value);
-    void loadTexture(const fs::path& p_path, IRenderer& p_renderer);
+    void loadTexture(const fs::path& p_path, IRenderer& p_renderer, const bool& p_lock = true);
     bool setSize(const BML::Vec2& p_size, const bool& p_force = false);
     bool setPosition(const BML::Vec2& p_position, const bool& p_force = false);
     bool setLocalPosition(const BML::Vec2& p_position, const bool& p_force = false);
@@ -76,6 +76,8 @@ public:
     bool m_visible = true;
     bool m_enabled = true;
 
+    bool m_textureLoaded = false;
+
     int m_zIndex = 0;
     int m_previousZIndex = 0;
 
@@ -92,10 +94,10 @@ public:
     float m_rounding = 10.0f;
     
     std::vector<Vertex2d> m_vertices = {
-        Vertex2d({ -0.5f, -0.5f }),
-        Vertex2d({ 0.5f, -0.5f }),
-        Vertex2d({ 0.5f, 0.5f }),
-        Vertex2d({ -0.5f, 0.5f })
+        Vertex2d({ -0.5f, -0.5f },GPUVector2{0, 0}),
+        Vertex2d({ 0.5f, -0.5f },GPUVector2{1, 0}),
+        Vertex2d({ 0.5f,  0.5f },GPUVector2{1,1}),
+        Vertex2d({ -0.5f,  0.5f },GPUVector2{0,1})
     };
 
     std::vector<uint32_t> m_indices = {

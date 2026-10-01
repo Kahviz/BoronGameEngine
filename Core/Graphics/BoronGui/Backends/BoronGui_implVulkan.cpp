@@ -12,37 +12,44 @@
 #include "Widgets/Widgets.h"
 #include "GuiTexture/GuiTextureManager.h"
 
-BoronGuiNeeds BoronGui_implVulkan::m_boronGuiNeeds{};
-VkShaderModule BoronGui_implVulkan::m_vertShaderModule = VK_NULL_HANDLE;
-VkShaderModule BoronGui_implVulkan::m_fragShaderModule = VK_NULL_HANDLE;
-VkPipelineLayout BoronGui_implVulkan::m_pipelineLayout = VK_NULL_HANDLE;
-VkPipeline BoronGui_implVulkan::m_graphicsPipeline = VK_NULL_HANDLE;
-VulkanBuffer BoronGui_implVulkan::m_vkBuffer{};
-VulkanBuffer BoronGui_implVulkan::m_vkBufferIndex{};
-VkIndexType BoronGui_implVulkan::indexType = VK_INDEX_TYPE_UINT32;
-VkCommandBuffer BoronGui_implVulkan::m_commandBuffer;
-BoronGui_implVulkan::GlobalPushConstant BoronGui_implVulkan::m_globalPushConstant{};
-uint32_t BoronGui_implVulkan::m_indexCount = 0;
-VkDescriptorSet BoronGui_implVulkan::m_textureDescriptorSet{};
-VkDescriptorPool BoronGui_implVulkan::m_descriptorPool{};
+BoronGuiNeeds BoronGui_implVulkan::s_boronGuiNeeds{};
+VkShaderModule BoronGui_implVulkan::s_vertShaderModule = VK_NULL_HANDLE;
+VkShaderModule BoronGui_implVulkan::s_fragShaderModule = VK_NULL_HANDLE;
+VkPipelineLayout BoronGui_implVulkan::s_pipelineLayout = VK_NULL_HANDLE;
+VkPipeline BoronGui_implVulkan::s_graphicsPipeline = VK_NULL_HANDLE;
+VulkanBuffer BoronGui_implVulkan::s_vkBuffer{};
+VulkanBuffer BoronGui_implVulkan::s_vkBufferIndex{};
+VkIndexType BoronGui_implVulkan::s_indexType = VK_INDEX_TYPE_UINT32;
+VkCommandBuffer BoronGui_implVulkan::s_commandBuffer;
+BoronGui_implVulkan::GlobalPushConstant BoronGui_implVulkan::s_globalPushConstant{};
+uint32_t BoronGui_implVulkan::s_indexCount = 0;
+uint32_t BoronGui_implVulkan::s_currentObjectCount = 1024;
+VkDescriptorSet BoronGui_implVulkan::s_textureDescriptorSet{};
+VkDescriptorPool BoronGui_implVulkan::s_descriptorPool{};
+VkDescriptorSetLayout BoronGui_implVulkan::s_textureLayout{};
 
 void BoronGui_implVulkan::BeginFrame() {
 
 }
 
 void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, s_graphicsPipeline);
+
+    /*if (GuiTextureManager::getTextureCount() != s_currentObjectCount) {
+        resizeDescriptorPool(GuiTextureManager::getTextureCount());
+        resizeTextureDescriptorSet();
+    }*/
 
     VkViewport viewport{};
-    viewport.height = m_boronGuiNeeds.swapchainExtent.height;
-    viewport.width = m_boronGuiNeeds.swapchainExtent.width;
+    viewport.height = s_boronGuiNeeds.swapchainExtent.height;
+    viewport.width = s_boronGuiNeeds.swapchainExtent.width;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
     VkRect2D scissor{};
-    scissor.extent = { m_boronGuiNeeds.swapchainExtent.width, m_boronGuiNeeds.swapchainExtent.height };
+    scissor.extent = { s_boronGuiNeeds.swapchainExtent.width, s_boronGuiNeeds.swapchainExtent.height };
 
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
@@ -63,13 +70,13 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
     writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     writeDescriptorSet.descriptorCount = descriptorImageInfos.size();
     writeDescriptorSet.dstBinding = 0;
-    writeDescriptorSet.dstSet = m_textureDescriptorSet;
+    writeDescriptorSet.dstSet = s_textureDescriptorSet;
     writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     writeDescriptorSet.pImageInfo = descriptorImageInfos.data();
 
-    if (!descriptorImageInfos.empty() && m_textureDescriptorSet != VK_NULL_HANDLE) {
+    if (!descriptorImageInfos.empty() && s_textureDescriptorSet != VK_NULL_HANDLE) {
         vkUpdateDescriptorSets(
-            m_boronGuiNeeds.device,
+            s_boronGuiNeeds.device,
             1,
             &writeDescriptorSet,
             0,
@@ -80,10 +87,10 @@ void BoronGui_implVulkan::SetupRenderState(VkCommandBuffer commandBuffer) {
     vkCmdBindDescriptorSets(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        m_pipelineLayout,
+        s_pipelineLayout,
         0,
         1,
-        &m_textureDescriptorSet,
+        &s_textureDescriptorSet,
         0,
         nullptr
     );
@@ -93,15 +100,95 @@ void BoronGui_implVulkan::EndFrame() {
 }
 
 void BoronGui_implVulkan::Init() {
-	CreateInfo("Init func");
+	CreateInfo("Initing BoronGui Vulkan backend!");
+    
+    createDescriptorPool(s_currentObjectCount);
+    createTextureDescriptorSet();
+    allocateDescriptorSet();
     InitPipeline();
-    createDescriptorPool(100);
+}
+
+void BoronGui_implVulkan::resizeDescriptorPool(uint32_t p_newMaxTextures) {
+    s_currentObjectCount = p_newMaxTextures;
+
+    if (s_descriptorPool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(s_boronGuiNeeds.device, s_descriptorPool, nullptr);
+    }
+
+    std::array<VkDescriptorPoolSize, 1> poolSizes{};
+
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSizes[0].descriptorCount = p_newMaxTextures;
+
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.pPoolSizes = poolSizes.data();
+    poolInfo.maxSets = 1;
+
+    BGE_ASSERT_VKRESULT(
+        vkCreateDescriptorPool(
+            s_boronGuiNeeds.device,
+            &poolInfo,
+            nullptr,
+            &s_descriptorPool
+        ),
+        "Failed to create descriptor pool"
+    );
+
+    allocateDescriptorSet();
+}
+
+void BoronGui_implVulkan::destroyDescriptorPool() {
+    if (s_descriptorPool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(s_boronGuiNeeds.device, s_descriptorPool, nullptr);
+        s_descriptorPool = VK_NULL_HANDLE;
+    }
+}
+
+void BoronGui_implVulkan::createTextureDescriptorSet() {
+    VkDescriptorSetLayoutBinding textureBinding{};
+    textureBinding.binding = 0;
+    textureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    textureBinding.descriptorCount = s_currentObjectCount;
+    textureBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &textureBinding;
+
+    BGE_ASSERT_VKRESULT(vkCreateDescriptorSetLayout(s_boronGuiNeeds.device, &layoutInfo, nullptr, &s_textureLayout), "Failed to create descriptor!");
+}
+
+void BoronGui_implVulkan::resizeTextureDescriptorSet() {
+    if (s_textureLayout != VK_NULL_HANDLE) {
+        vkDestroyDescriptorSetLayout(s_boronGuiNeeds.device, s_textureLayout, nullptr);
+        s_textureLayout = VK_NULL_HANDLE;
+    }
+
+    VkDescriptorSetLayoutBinding textureBinding{};
+    textureBinding.binding = 0;
+    textureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    textureBinding.descriptorCount = s_currentObjectCount;
+    textureBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &textureBinding;
+
+    BGE_ASSERT_VKRESULT(vkCreateDescriptorSetLayout(s_boronGuiNeeds.device, &layoutInfo, nullptr, &s_textureLayout), "Failed to create descriptor!");
+}
+
+void BoronGui_implVulkan::updateTextureDescriptors() {
+    
 }
 
 void BoronGui_implVulkan::createDescriptorPool(uint32_t p_maxObjects) {
     std::array<VkDescriptorPoolSize, 1> poolSizes{};
 
-    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     poolSizes[0].descriptorCount = p_maxObjects;
 
     VkDescriptorPoolCreateInfo poolInfo{};
@@ -112,53 +199,68 @@ void BoronGui_implVulkan::createDescriptorPool(uint32_t p_maxObjects) {
 
     BGE_ASSERT_VKRESULT(
         vkCreateDescriptorPool(
-            m_boronGuiNeeds.device,
+            s_boronGuiNeeds.device,
             &poolInfo,
             nullptr,
-            &m_descriptorPool
+            &s_descriptorPool
         ),
         "Failed to create descriptor pool"
     );
+
+    s_currentObjectCount = p_maxObjects;
 }
 
-const BoronGuiNeeds& BoronGui_implVulkan::GetGuiNeeds() {
-	return m_boronGuiNeeds;
+const BoronGuiNeeds& BoronGui_implVulkan::getGuiNeeds() {
+	return s_boronGuiNeeds;
+}
+
+void BoronGui_implVulkan::allocateDescriptorSet() {
+    VkDescriptorSetAllocateInfo vkDescriptorSetAllocateInfo{};
+
+    vkDescriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    vkDescriptorSetAllocateInfo.pNext = nullptr;
+    vkDescriptorSetAllocateInfo.descriptorPool = s_descriptorPool;
+    vkDescriptorSetAllocateInfo.descriptorSetCount = 1;
+    vkDescriptorSetAllocateInfo.pSetLayouts = &s_textureLayout;
+
+    BGE_ASSERT_VKRESULT(vkAllocateDescriptorSets(s_boronGuiNeeds.device, &vkDescriptorSetAllocateInfo, &s_textureDescriptorSet),
+        "Failed to allocate for descriptors");
 }
 
 void BoronGui_implVulkan::ReSizeViewport(GPUVector2 p_newSize) {
-    m_boronGuiNeeds.swapchainExtent.width = static_cast<uint32_t>(p_newSize.x);
-    m_boronGuiNeeds.swapchainExtent.height = static_cast<uint32_t>(p_newSize.y);
+    s_boronGuiNeeds.swapchainExtent.width = static_cast<uint32_t>(p_newSize.x);
+    s_boronGuiNeeds.swapchainExtent.height = static_cast<uint32_t>(p_newSize.y);
 }
 
 void BoronGui_implVulkan::SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
-    m_boronGuiNeeds = p_boronGuiNeeds;
+    s_boronGuiNeeds = p_boronGuiNeeds;
 }
 
 void BoronGui_implVulkan::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
-    m_commandBuffer = p_perFrameStuct.commandBuffer;
+    s_commandBuffer = p_perFrameStuct.commandBuffer;
 }
 
 void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& p_vertices, const std::vector<uint32_t>& p_indices) {
     if (p_vertices.empty() || p_indices.empty()) {
-        m_indexCount = 0;
+        s_indexCount = 0;
         return;
     }
 
-    m_globalPushConstant.viewportSize = {
-        static_cast<float>(m_boronGuiNeeds.swapchainExtent.width),
-        static_cast<float>(m_boronGuiNeeds.swapchainExtent.height)
+    s_globalPushConstant.viewportSize = {
+        static_cast<float>(s_boronGuiNeeds.swapchainExtent.width),
+        static_cast<float>(s_boronGuiNeeds.swapchainExtent.height)
     };
 
     vkCmdPushConstants(
-        m_commandBuffer,
-        m_pipelineLayout,
+        s_commandBuffer,
+        s_pipelineLayout,
         VK_SHADER_STAGE_VERTEX_BIT,
         0,
         sizeof(GlobalPushConstant),
-        &m_globalPushConstant
+        &s_globalPushConstant
     );
 
-    m_indexCount = static_cast<uint32_t>(p_indices.size());
+    s_indexCount = static_cast<uint32_t>(p_indices.size());
 
     const VkDeviceSize vertexSize =
         p_vertices.size() * sizeof(Vertex2d);
@@ -170,22 +272,22 @@ void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& p_vertices, c
     static VkDeviceSize lastIndexSize = 0;
 
     const bool buffersCreated =
-        m_vkBuffer.IsCreated() &&
-        m_vkBufferIndex.IsCreated();
+        s_vkBuffer.IsCreated() &&
+        s_vkBufferIndex.IsCreated();
 
     if (!buffersCreated) [[unlikely]] {
-        m_vkBuffer.Create(
-            m_boronGuiNeeds.device,
-            m_boronGuiNeeds.physicalDevice,
+        s_vkBuffer.Create(
+            s_boronGuiNeeds.device,
+            s_boronGuiNeeds.physicalDevice,
             vertexSize,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         );
 
-        m_vkBufferIndex.Create(
-            m_boronGuiNeeds.device,
-            m_boronGuiNeeds.physicalDevice,
+        s_vkBufferIndex.Create(
+            s_boronGuiNeeds.device,
+            s_boronGuiNeeds.physicalDevice,
             indexSize,
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
@@ -194,30 +296,30 @@ void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& p_vertices, c
 
     }
     else if (lastVertexSize != vertexSize || lastIndexSize != indexSize) [[unlikely]] {
-        m_vkBuffer.Resize(
+        s_vkBuffer.Resize(
             vertexSize,
-            m_boronGuiNeeds.commandPool,
-            m_boronGuiNeeds.graphicsQueue
+            s_boronGuiNeeds.commandPool,
+            s_boronGuiNeeds.graphicsQueue
         );
 
-        m_vkBufferIndex.Resize(
+        s_vkBufferIndex.Resize(
             indexSize,
-            m_boronGuiNeeds.commandPool,
-            m_boronGuiNeeds.graphicsQueue
+            s_boronGuiNeeds.commandPool,
+            s_boronGuiNeeds.graphicsQueue
         );
     }
 
-    m_vkBuffer.UploadData(p_vertices.data(), vertexSize);
-    m_vkBufferIndex.UploadData(p_indices.data(), indexSize);
+    s_vkBuffer.UploadData(p_vertices.data(), vertexSize);
+    s_vkBufferIndex.UploadData(p_indices.data(), indexSize);
 
     lastVertexSize = vertexSize;
     lastIndexSize = indexSize;
 
-    VkBuffer vertexBuffer = m_vkBuffer.GetBuffer();
+    VkBuffer vertexBuffer = s_vkBuffer.GetBuffer();
     VkDeviceSize offset = 0;
 
     vkCmdBindVertexBuffers(
-        m_commandBuffer,
+        s_commandBuffer,
         0,
         1,
         &vertexBuffer,
@@ -225,8 +327,8 @@ void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& p_vertices, c
     );
 
     vkCmdBindIndexBuffer(
-        m_commandBuffer,
-        m_vkBufferIndex.GetBuffer(),
+        s_commandBuffer,
+        s_vkBufferIndex.GetBuffer(),
         0,
         VK_INDEX_TYPE_UINT32
     );
@@ -234,8 +336,8 @@ void BoronGui_implVulkan::UploadBatch(const std::vector<Vertex2d>& p_vertices, c
 
 void BoronGui_implVulkan::DrawBatch() {
     vkCmdDrawIndexed(
-        m_commandBuffer,
-        m_indexCount,
+        s_commandBuffer,
+        s_indexCount,
         1,
         0,
         0,
@@ -249,19 +351,19 @@ bool BoronGui_implVulkan::InitPipeline() {
     auto vertShaderCode = ReadShader(VertexShader);
     auto fragShaderCode = ReadShader(FragmentShader);
 
-    m_vertShaderModule = CreateShaderModule(m_boronGuiNeeds.device, vertShaderCode);
-    m_fragShaderModule = CreateShaderModule(m_boronGuiNeeds.device, fragShaderCode);
+    s_vertShaderModule = CreateShaderModule(s_boronGuiNeeds.device, vertShaderCode);
+    s_fragShaderModule = CreateShaderModule(s_boronGuiNeeds.device, fragShaderCode);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = m_vertShaderModule;
+    vertShaderStageInfo.module = s_vertShaderModule;
     vertShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
     fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = m_fragShaderModule;
+    fragShaderStageInfo.module = s_fragShaderModule;
     fragShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
@@ -326,9 +428,6 @@ bool BoronGui_implVulkan::InitPipeline() {
     colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
     colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
     colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-    colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -344,41 +443,15 @@ bool BoronGui_implVulkan::InitPipeline() {
     std::vector<VkPushConstantRange> pushConstants;
 
     pushConstants.push_back(globalPushConstant);
-
-    VkDescriptorSetLayoutBinding textureBinding{};
-    textureBinding.binding = 0;
-    textureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    textureBinding.descriptorCount = 100;
-    textureBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &textureBinding;
-
-    VkDescriptorSetLayout textureLayout{};
-
-    BGE_ASSERT_VKRESULT(vkCreateDescriptorSetLayout(m_boronGuiNeeds.device, &layoutInfo, nullptr, &textureLayout),"Failed to create descriptor!");
-
-    VkDescriptorSetAllocateInfo vkDescriptorSetAllocateInfo{};
-
-    vkDescriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    vkDescriptorSetAllocateInfo.pNext = nullptr;
-    vkDescriptorSetAllocateInfo.descriptorPool = m_descriptorPool;
-    vkDescriptorSetAllocateInfo.descriptorSetCount = 1;
-    vkDescriptorSetAllocateInfo.pSetLayouts = &textureLayout;
-
-    //BGE_ASSERT_VKRESULT(vkAllocateDescriptorSets(m_boronGuiNeeds.device, &vkDescriptorSetAllocateInfo, &m_textureDescriptorSet),
-    //   "Failed to allocate for descriptors");
-
+    
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &textureLayout;
+    pipelineLayoutInfo.pSetLayouts = &s_textureLayout;
     pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
     pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
 
-    BGE_ASSERT_VKRESULT(vkCreatePipelineLayout(m_boronGuiNeeds.device, &pipelineLayoutInfo, nullptr, &m_pipelineLayout), "Failed to create pipeline layout!");
+    BGE_ASSERT_VKRESULT(vkCreatePipelineLayout(s_boronGuiNeeds.device, &pipelineLayoutInfo, nullptr, &s_pipelineLayout), "Failed to create pipeline layout!");
 
     VkPipelineDynamicStateCreateInfo dynamicState{};
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -403,11 +476,11 @@ bool BoronGui_implVulkan::InitPipeline() {
     pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
-    pipelineInfo.layout = m_pipelineLayout;
-    pipelineInfo.renderPass = m_boronGuiNeeds.renderPass;
+    pipelineInfo.layout = s_pipelineLayout;
+    pipelineInfo.renderPass = s_boronGuiNeeds.renderPass;
     pipelineInfo.subpass = 0;
 
-    BGE_ASSERT_VKRESULT(vkCreateGraphicsPipelines(m_boronGuiNeeds.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline), "Failed to create graphics pipeline!");
+    BGE_ASSERT_VKRESULT(vkCreateGraphicsPipelines(s_boronGuiNeeds.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &s_graphicsPipeline), "Failed to create graphics pipeline!");
 
     return true;
 }

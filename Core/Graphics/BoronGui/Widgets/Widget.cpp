@@ -46,8 +46,14 @@ void Borongui::Widget::setZIndex(const int& p_value) {
 	m_zIndex = p_value;
 }
 
-void Borongui::Widget::loadTexture(const fs::path& p_path, IRenderer& p_renderer) {
+void Borongui::Widget::loadTexture(const fs::path& p_path, IRenderer& p_renderer, const bool& p_lock) {
+	if (p_lock && m_textureLoaded) {
+		return;
+	}
+
 	Texture texture{};
+
+	CreateWarning("Load");
 
 	#if VULKAN == 1
 		texture.LoadVK(p_path, p_renderer); //[ADD] a function which is just load it picks between vk and dx11
@@ -59,6 +65,8 @@ void Borongui::Widget::loadTexture(const fs::path& p_path, IRenderer& p_renderer
 	GuiTextureManager::getTextures().push_back(texture);
 
 	m_textureID = GuiTextureManager::genNewTextureID();
+
+	m_textureLoaded = true;
 }
 
 bool Borongui::Widget::setSize(const BML::Vec2& p_size, const bool& p_force) {
