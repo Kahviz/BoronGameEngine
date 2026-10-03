@@ -5,9 +5,11 @@
 std::shared_ptr<Mesh> Mesh::Load(const fs::path& p_file, MeshStruct& p_meshStruct) {
     static std::unordered_map<fs::path, std::shared_ptr<Mesh>> Cache;
 
-    auto it = Cache.find(p_file);
+    const auto path = p_file.lexically_normal();
+
+    auto it = Cache.find(path);
+
     if (it != Cache.end()) {
-        it->second->getIsCached() = true;
         return it->second;
     }
 

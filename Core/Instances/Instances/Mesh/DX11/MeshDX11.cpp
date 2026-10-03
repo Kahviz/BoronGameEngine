@@ -13,8 +13,9 @@ void MeshBackend::LoadMesh(const fs::path& p_file, MeshStruct& p_meshStruct) {
         aiProcess_GenNormals
     );
 
-    if (!scene || !scene->HasMeshes())
-        throw std::runtime_error("Failed to load model: " + std::string(imp.GetErrorString()));
+    if (!scene || !scene->HasMeshes()) {
+        CreateError("Failed to load model: " + std::string(imp.GetErrorString()));
+    }
 
     aiMesh* m = scene->mMeshes[0];
     if (!m || m->mNumVertices == 0) {

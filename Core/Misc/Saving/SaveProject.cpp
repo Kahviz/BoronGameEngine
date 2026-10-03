@@ -17,6 +17,8 @@ void SaveProject::Save(ECS& p_ecs) {
 
     std::ofstream file(path / "save.BGEproject");
 
+    std::unordered_map<fs::path, fs::path> savedMeshes{};
+
     p_ecs.Each<
         BasicInfoComponent,
         TransformComponent,
@@ -33,23 +35,31 @@ void SaveProject::Save(ECS& p_ecs) {
             ObjectComponent& object,
             HierarchyComponent& hierarchy,
             InstanceTypeComponent& instanceType,
-            ColorComponent& colorComp
-            )
+            ColorComponent& colorComp)
         {
-            fs::path from = object.OBJmesh->getMeshPath();
+            fs::path from = object.OBJmesh->getMeshPath().lexically_normal();
 
-            std::string newName = std::to_string(entity);
+            fs::path to;
 
-            fs::path to =
-                fs::path(meshFilesPath) /
-                (newName + from.extension().string());
+            auto it = savedMeshes.find(from);
 
-            if (from != to) {
-                fs::copy_file(
-                    from,
-                    to,
-                    fs::copy_options::overwrite_existing
-                );
+            if (it != savedMeshes.end()) {
+                to = it->second;
+            }
+            else {
+                std::string newName = std::to_string(entity);
+
+                to = fs::path(meshFilesPath) / (newName + from.extension().string());
+
+                if (from.lexically_normal() != to.lexically_normal()) {
+                    fs::copy_file(
+                        from,
+                        to,
+                        fs::copy_options::overwrite_existing
+                    );
+                }
+
+                savedMeshes.emplace(from, to);
             }
 
             file << "-\n";
@@ -57,32 +67,21 @@ void SaveProject::Save(ECS& p_ecs) {
             file << "Name: " << basic.Name << "\n";
             file << "Anchored: " << physics.anchored << "\n";
 
-            file << "Size: "
-                << transform.transform.Size << "\n";
+            file << "Size: " << transform.transform.Size << "\n";
+            file << "Orientation: " << transform.transform.Orientation << "\n";
+            file << "Position: " << transform.transform.Position << "\n";
 
-            file << "Orientation: "
-                << transform.transform.Orientation << "\n";
+            file << "Color: " << colorComp.color << "\n";
 
-            file << "Position: "
-                << transform.transform.Position << "\n";
+            file << "CanDraw: " << object.canDraw << "\n";
 
-            file << "Color: "
-                << colorComp.color << "\n";
-
-            file << "CanDraw: "
-                << object.canDraw << "\n";
-
-            file << "UniqueID: "
-                << entity << "\n";
+            file << "UniqueID: " << entity << "\n";
 
             file << "ParentID: " << hierarchy.parent << "\n";
 
-            file << "MeshFile: "
-                << to.filename().string() << "\n";
+            file << "MeshFile: " << to.filename().string() << "\n";
 
-            file << "InstanceType: "
-                << static_cast<int>(instanceType.InstanceType)
-                << '\n';
+            file << "InstanceType: " << static_cast<int>(instanceType.InstanceType) << '\n';
 
             file << "END\n";
         }

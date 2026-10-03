@@ -1,1 +1,2 @@
 1.10.2026 FPS IN RELEASE: 579.28fps
+3.10.2026 Made object caching in saving/loading like 5x speed in loading/saving
