@@ -11,8 +11,8 @@
 class MeshBackend : public Mesh
 {
 public:
-    std::shared_ptr<Mesh> LoadMesh(const fs::path& file, MeshStruct& p_meshStruct);
-    void Draw(MeshDrawStruct& p_meshDrawStruct) override;
+    void LoadMesh(const fs::path& file, MeshStruct& p_meshStruct);
+    void Draw(MeshDrawStruct& p_meshDrawStruct) const override;
 
     VkBuffer indexBuffer = VK_NULL_HANDLE;
     VkBuffer vertexBuffer = VK_NULL_HANDLE;

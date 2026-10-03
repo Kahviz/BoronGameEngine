@@ -10,7 +10,7 @@
 #include "Logger/Logger.h"
 
 #if VULKAN == 1
-std::shared_ptr<Mesh> MeshBackend::LoadMesh(const fs::path& file, MeshStruct& p_meshStruct) {
+void MeshBackend::LoadMesh(const fs::path& file, MeshStruct& p_meshStruct) {
     Assimp::Importer imp{};
     const aiScene* scene = imp.ReadFile(
         file.string(),
@@ -79,7 +79,7 @@ std::shared_ptr<Mesh> MeshBackend::LoadMesh(const fs::path& file, MeshStruct& p_
         throw std::runtime_error("Mesh has no indices");
 
     VkDeviceSize vSize = sizeof(Vertex) * getVertices().size();
-    VkDeviceSize iSize = sizeof(uint32_t) * getVertices().size();
+    VkDeviceSize iSize = sizeof(uint32_t) * getIndices().size();
 
     //Staging buffers
     VkBuffer vStaging, iStaging;
@@ -159,7 +159,7 @@ std::shared_ptr<Mesh> MeshBackend::LoadMesh(const fs::path& file, MeshStruct& p_
     vkFreeMemory(p_meshStruct.device, iStagingMem, nullptr);
 }
 
-void MeshBackend::Draw(MeshDrawStruct& p_meshDrawStruct) {
+void MeshBackend::Draw(MeshDrawStruct& p_meshDrawStruct) const {
     VkBuffer vbs[] = { vertexBuffer };
     VkDeviceSize offsets[] = { 0 };
 
