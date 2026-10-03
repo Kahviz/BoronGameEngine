@@ -1,6 +1,7 @@
 #include "MeshVulkan.h"
 
 #include "GLOBALS.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -9,15 +10,8 @@
 #include "Logger/Logger.h"
 
 #if VULKAN == 1
-void MeshVK::Load(
-    const fs::path& file,
-    VkDevice device,
-    VkPhysicalDevice physicalDevice,
-    VkCommandPool commandPool,
-    VkQueue graphicsQueue
-)
-{
-    Assimp::Importer imp;
+std::shared_ptr<Mesh> MeshBackend::LoadMesh(const fs::path& file, MeshStruct& p_meshStruct) {
+    Assimp::Importer imp{};
     const aiScene* scene = imp.ReadFile(
         file.string(),
         aiProcess_Triangulate |
@@ -27,67 +21,65 @@ void MeshVK::Load(
         aiProcess_OptimizeMeshes
     );
 
-    if (!scene || !scene->HasMeshes())
-        throw std::runtime_error("Failed to load model: " + std::string(imp.GetErrorString()));
-
-
+    if (!scene || !scene->HasMeshes()) {
+        CreateError("Failed to load model: ", imp.GetErrorString());
+    }
+    
     aiMesh* m = scene->mMeshes[0];
-    if (!m || m->mNumVertices == 0)
-        throw std::runtime_error("Invalid mesh data");
+    if (!m || m->mNumVertices == 0) {
+        CreateError("Invalid mesh data");
+    }
 
     if (!m->HasNormals())
         throw std::runtime_error("Mesh has no normals");
 
-    verts.resize(m->mNumVertices);
+    getVerticesMod().resize(m->mNumVertices);
     for (uint32_t i = 0; i < m->mNumVertices; ++i)
     {
-        verts[i].brightness = 1.0f;
+        getVerticesMod()[i].brightness = 1.0f;
 
-        verts[i].pos = {
+        getVerticesMod()[i].pos = {
             m->mVertices[i].x,
             m->mVertices[i].y,
             m->mVertices[i].z
         };
 
-        verts[i].normal = {
+        getVerticesMod()[i].normal = {
             m->mNormals[i].x,
             m->mNormals[i].y,
             m->mNormals[i].z
         };
 
-        verts[i].color = { 1, 1, 1 };
-        if (m->HasTextureCoords(0))
-        {
-            verts[i].uv = {
+        getVerticesMod()[i].color = { 1, 1, 1 };
+        if (m->HasTextureCoords(0)) {
+            getVerticesMod()[i].uv = {
                 m->mTextureCoords[0][i].x,
                 m->mTextureCoords[0][i].y
             };
         }
-        else
-        {
-            CreateError("No uv");
-            verts[i].uv = { 0.0f, 0.0f };
+        else {
+            CreateError("No uv:s!");
+            getVerticesMod()[i].uv = { 0.0f, 0.0f };
         }
     }
 
-    indices.reserve(m->mNumFaces * 3);
-    for (uint32_t i = 0; i < m->mNumFaces; ++i)
-    {
+    getIndicesMod().reserve(m->mNumFaces * 3);
+    for (uint32_t i = 0; i < m->mNumFaces; ++i) {
         const aiFace& face = m->mFaces[i];
         if (face.mNumIndices != 3)
             continue;
 
-        indices.push_back(face.mIndices[0]);
-        indices.push_back(face.mIndices[1]);
-        indices.push_back(face.mIndices[2]);
+        getIndicesMod().push_back(face.mIndices[0]);
+        getIndicesMod().push_back(face.mIndices[1]);
+        getIndicesMod().push_back(face.mIndices[2]);
     }
 
-    indexCount = static_cast<uint32_t>(indices.size());
+    indexCount = static_cast<uint32_t>(getIndicesMod().size());
     if (indexCount == 0)
         throw std::runtime_error("Mesh has no indices");
 
-    VkDeviceSize vSize = sizeof(Vertex) * verts.size();
-    VkDeviceSize iSize = sizeof(uint32_t) * indices.size();
+    VkDeviceSize vSize = sizeof(Vertex) * getVertices().size();
+    VkDeviceSize iSize = sizeof(uint32_t) * getVertices().size();
 
     //Staging buffers
     VkBuffer vStaging, iStaging;
@@ -99,7 +91,7 @@ void MeshVK::Load(
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         vStaging,
         vStagingMem,
-        device, physicalDevice
+        p_meshStruct.device, p_meshStruct.physicalDevice
     );
 
     CreateBuffer(
@@ -108,18 +100,18 @@ void MeshVK::Load(
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         iStaging,
         iStagingMem,
-        device,
-        physicalDevice
+        p_meshStruct.device,
+        p_meshStruct.physicalDevice
     );
 
     void* data;
-    vkMapMemory(device, vStagingMem, 0, vSize, 0, &data);
-    memcpy(data, verts.data(), (size_t)vSize);
-    vkUnmapMemory(device, vStagingMem);
+    vkMapMemory(p_meshStruct.device, vStagingMem, 0, vSize, 0, &data);
+    memcpy(data, getVertices().data(), (size_t)vSize);
+    vkUnmapMemory(p_meshStruct.device, vStagingMem);
 
-    vkMapMemory(device, iStagingMem, 0, iSize, 0, &data);
-    memcpy(data, indices.data(), (size_t)iSize);
-    vkUnmapMemory(device, iStagingMem);
+    vkMapMemory(p_meshStruct.device, iStagingMem, 0, iSize, 0, &data);
+    memcpy(data, getIndices().data(), (size_t)iSize);
+    vkUnmapMemory(p_meshStruct.device, iStagingMem);
 
     CreateBuffer(
         vSize,
@@ -127,8 +119,8 @@ void MeshVK::Load(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         vertexBuffer,
         vertexMemory,
-        device,
-        physicalDevice
+        p_meshStruct.device,
+        p_meshStruct.physicalDevice
     );
 
     CreateBuffer(
@@ -137,42 +129,42 @@ void MeshVK::Load(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         indexBuffer,
         indexMemory,
-        device,
-        physicalDevice
+        p_meshStruct.device,
+        p_meshStruct.physicalDevice
     );
 
     CopyBuffer(
         vStaging,        // src
         vertexBuffer,    // dst
         vSize,           // size
-        commandPool,     // cmdp
-        device,          // device
-        graphicsQueue    // gQ
+        p_meshStruct.commandPool,     // cmdp
+        p_meshStruct.device,          // device
+        p_meshStruct.graphicsQueue    // gQ
     );
+
     CopyBuffer(
         iStaging,
         indexBuffer,
         iSize,
-        commandPool,
-        device,
-        graphicsQueue
+        p_meshStruct.commandPool,
+        p_meshStruct.device,
+        p_meshStruct.graphicsQueue
     );
 
 
-    vkDestroyBuffer(device, vStaging, nullptr);
-    vkFreeMemory(device, vStagingMem, nullptr);
+    vkDestroyBuffer(p_meshStruct.device, vStaging, nullptr);
+    vkFreeMemory(p_meshStruct.device, vStagingMem, nullptr);
 
-    vkDestroyBuffer(device, iStaging, nullptr);
-    vkFreeMemory(device, iStagingMem, nullptr);
+    vkDestroyBuffer(p_meshStruct.device, iStaging, nullptr);
+    vkFreeMemory(p_meshStruct.device, iStagingMem, nullptr);
 }
 
-void MeshVK::Draw(VkCommandBuffer cmd) const
-{
+void MeshBackend::Draw(MeshDrawStruct& p_meshDrawStruct) {
     VkBuffer vbs[] = { vertexBuffer };
     VkDeviceSize offsets[] = { 0 };
 
-    vkCmdBindVertexBuffers(cmd, 0, 1, vbs, offsets);
-    vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-    vkCmdDrawIndexed(cmd, indexCount, 1, 0, 0, 0);
+    vkCmdBindVertexBuffers(p_meshDrawStruct.commandBuffer, 0, 1, vbs, offsets);
+    vkCmdBindIndexBuffer(p_meshDrawStruct.commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdDrawIndexed(p_meshDrawStruct.commandBuffer, indexCount, 1, 0, 0, 0);
 }
 #endif

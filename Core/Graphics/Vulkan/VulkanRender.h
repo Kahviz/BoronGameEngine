@@ -19,6 +19,7 @@
 #include "Instances/Vertex.h"
 #include <unordered_map>
 #include "Mesh/Mesh.h"
+#include "Mesh/Vulkan/MeshVulkan.h"
 #include <Camera/Camera.h>
 
 #include "ECS.h"
@@ -118,10 +119,12 @@ private:
         BML::Matrix4x4 lightSpaceMatrix;
         BML::Matrix4x4 model;
     };
+    
     struct ShadowDrawCommand {
-        const MeshVK* mesh = nullptr;
+        const std::shared_ptr<Mesh>* mesh = nullptr;
         BML::Matrix4x4 modelMatrix{};
     };
+
     BML::Matrix4x4 lightSpaceMatrix;
 
     std::vector<ShadowDrawCommand> shadowDrawCommands;
@@ -135,7 +138,7 @@ private:
     Camera m_Camera;
 
     struct DrawCommand {
-        const MeshVK* mesh = nullptr;
+        const std::shared_ptr<Mesh>* mesh = nullptr;
         bool usesTexture = false;
         uint32_t objectIndex = 0;
         BML::Matrix4x4 modelMatrix = {};
@@ -158,7 +161,7 @@ private:
     VkViewport viewport{};
     VkRect2D scissor = {};
 
-    std::unordered_map<const Mesh*, std::unique_ptr<MeshVK>> meshCache = {};
+    std::unordered_map<const Mesh*, std::unique_ptr<MeshBackend>> meshCache = {};
     std::vector<DrawCommand> drawCommands = {};
     std::vector<uint32_t> drawObjectIndices = {};
 

@@ -1,130 +1,60 @@
 #pragma once
+
 #include <vector>
 #include <string>
-#include <stdexcept>
-#include "GLOBALS.h"
-
-#include "DX11/MeshDX11.h"
-#include "Vulkan/MeshVulkan.h"
-#include "BoronMathLibrary.h"
-#include <Instances/Vertex.h>
 #include <unordered_map>
 #include <memory>
+#include <stdexcept>
+
+#include "GLOBALS.h"
+
+#include "BoronMathLibrary.h"
+#include "Instances/Vertex.h"
+
 #include "Logger/Logger.h"
+
+#include "Vulkan.h"
+#include "DX11.h"
 
 class Mesh
 {
 public:
-    #if DIRECTX11 == 1
-        static std::shared_ptr<Mesh> Load(const fs::path& file, ID3D11Device* device) {
-            static std::unordered_map<fs::path, std::shared_ptr<Mesh>> Cache;
+    virtual void Draw(MeshDrawStruct& p_meshDrawStruct) const = 0;
 
-            auto it = Cache.find(file);
-            if (it != Cache.end())
-            {
-                it->second->GetIsCached() = true;
-                return it->second;
-            }
+    static std::shared_ptr<Mesh> Load(const fs::path& p_file, MeshStruct& p_meshStruct);
 
-            auto mesh = std::make_shared<Mesh>();
-            mesh->GetMeshPath() = file;
-
-            std::string name = std::filesystem::path(file).filename().string();
-
-            mesh->GetMeshFileName() = name;
-
-            mesh->DM.Load(file, device);
-
-            Cache.emplace(file, mesh);
-
-            return mesh;
-        }
-        void DrawForDX11(ID3D11DeviceContext* ctx) const {
-            DM.Draw(ctx);
-        };
-    #endif
-    
-    #if VULKAN == 1
-        static std::shared_ptr<Mesh> Load(
-            const fs::path& file,
-            VkDevice device,
-            VkPhysicalDevice phyDevice,
-            VkCommandPool cmdPool,
-            VkQueue gfxQueue
-        )
-        {
-            static std::unordered_map<fs::path, std::shared_ptr<Mesh>> Cache;
-
-            auto it = Cache.find(file);
-            if (it != Cache.end())
-            {
-                it->second->GetIsCached() = true;
-                return it->second;
-            }
-
-            auto mesh = std::make_shared<Mesh>();
-            mesh->GetMeshPath() = file;
-
-            std::string name = std::filesystem::path(file).filename().string();
-
-            mesh->GetMeshFileName() = name;
-
-            mesh->VM.Load(file, device, phyDevice, cmdPool, gfxQueue);
-
-            Cache.emplace(file, mesh);
-
-            return mesh;
-        }
-
-        void DrawForVulkan(VkCommandBuffer cb)
-        {
-            VM.Draw(cb);
-        }
-
-    #endif
-
-    const std::vector<uint32_t>& GetIndices() const {
-        #if VULKAN == 1
-            return VM.GetIndices();
-        #endif
-
-        #if DIRECTX11 == 1
-            return DM.GetIndices();
-        #endif
-
-        return {};
+    std::string& getMeshFileName() {
+        return m_meshFileName;
     }
 
-    const std::vector<Vertex>& GetVertices() const {
-        #if VULKAN == 1
-            return VM.GetVertices();
-        #endif
-
-        #if DIRECTX11 == 1
-            return DM.GetVertices();
-        #endif
-    }
-    #if VULKAN == 1
-        MeshVK VM;
-    #endif
-
-    #if DIRECTX11 == 1
-        MeshDX11 DM;
-    #endif
-
-    std::string& GetMeshFileName() {
-        return MeshFileName;
+    fs::path& getMeshPath() {
+        return m_meshPath;
     }
 
-    fs::path& GetMeshPath() {
-        return MeshPath;
+    bool& getIsCached() {
+        return m_cached;
     }
 
-    bool& GetIsCached() {
-        return cached;
+    const std::vector<uint32_t>& getIndices() const {
+        return m_indices;
+    }
+
+    const std::vector<Vertex>& getVertices() const {
+        return m_verts;
+    }
+
+    std::vector<uint32_t>& getIndicesMod() {
+        return m_indices;
+    }
+
+    std::vector<Vertex>& getVerticesMod() {
+        return m_verts;
     }
 private:
-    fs::path MeshPath = "NULL";
-    std::string MeshFileName = "NULL";
-    bool cached = false;
+    fs::path m_meshPath = "NULL";
+    std::string m_meshFileName = "NULL";
+    bool m_cached = false;
+
+    std::vector<Vertex> m_verts{};
+    std::vector<uint32_t> m_indices{};
 };

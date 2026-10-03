@@ -258,7 +258,7 @@ add_executable(BoronEngine
     
     #Icon
     BoronEngine.rc
-)
+  "Core/Instances/Instances/Mesh/Mesh.cpp")
 
 if(WIN32)
     target_sources(BoronEngine PRIVATE

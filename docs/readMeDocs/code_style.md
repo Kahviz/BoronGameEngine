@@ -2,6 +2,7 @@ Code style to Boron
 
 Use this format in:
 - in getters "getFoo()" and "getBoo()"
+- in non const getters "getFooMod()" and "getBooMod()"
 - in setters "setFoo()" and "setBoo()"
 - in is functions "isFoo()" and "isBoo()"
 - in functions "Init()" and "Destroy()"

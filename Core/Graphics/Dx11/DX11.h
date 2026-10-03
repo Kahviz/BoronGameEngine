@@ -11,4 +11,13 @@
 
 	//Imgui
 	#include "backends/imgui_impl_dx11.h"
+
+	//structs
+	struct MeshStruct {
+		ID3D11Device* device{};
+	};
+
+	struct MeshDrawStruct {
+		ID3D11DeviceContext* ctx{};
+	};
 #endif

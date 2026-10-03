@@ -36,7 +36,7 @@ void SaveProject::Save(ECS& p_ecs) {
             ColorComponent& colorComp
             )
         {
-            fs::path from = object.OBJmesh->GetMeshPath();
+            fs::path from = object.OBJmesh->getMeshPath();
 
             std::string newName = std::to_string(entity);
 
@@ -135,63 +135,52 @@ EntityECS AddAMesh(
 
     hierarcyComp.parent = world;
 
+    MeshStruct meshStruct{};
+
 #if DIRECTX11 == 1
-    if (!LiteralPath)
-    {
+    meshStruct = { window.GetGraphics().GetDevice() };
+
+    if (!LiteralPath) {
         objectComp.OBJmesh = Mesh::Load(
             assets / Path,
-            window.GetGraphics().GetDevice()
+            meshStruct
         );
     }
-    else
-    {
+    else {
         objectComp.OBJmesh = Mesh::Load(
             Path,
-            window.GetGraphics().GetDevice()
+            meshStruct
         );
     }
 #endif
+    fs::path meshPath = LiteralPath ? Path : assets / Path;
 
-#if VULKAN == 1
-    auto& vk =
-        static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
+    #if VULKAN == 1
+        auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
             
-    if (!LiteralPath)
-    {
-        objectComp.OBJmesh = Mesh::Load(
-            assets / Path,
+        meshStruct = {
             vk.GetDevice(),
             vk.GetPhysicalDevice(),
             vk.GetCommandPool(),
             vk.GetGraphicsQueue()
-        );
-    }
-    else
-    {
-        objectComp.OBJmesh = Mesh::Load(
-            Path,
-            vk.GetDevice(),
-            vk.GetPhysicalDevice(),
-            vk.GetCommandPool(),
-            vk.GetGraphicsQueue()
-        );
-    }
+        };
+    #endif
 
-#endif
-#if VULKAN == 1
-    if (UsesTexture)
-    {
-        fs::path fullPath =
-            textures / "TestTexture.png";
+    objectComp.OBJmesh->Load(meshPath, meshStruct);
 
-        textureComp.texture = new Texture();
+    #if VULKAN == 1
+        if (UsesTexture)
+        {
+            fs::path fullPath = textures / "TestTexture.png";
 
-        textureComp.texture->LoadVK(
-            fullPath,
-            vk
-        );
-    }
-#endif
+            textureComp.texture = new Texture();
+
+            textureComp.texture->LoadVK(
+                fullPath,
+                vk
+            );
+        }
+    #endif
 
     ecs.AddComponent(
         entity,

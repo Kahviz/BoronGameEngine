@@ -434,7 +434,9 @@ void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
         );
 
         if (drawCmd.mesh) {
-            drawCmd.mesh->Draw(cmd);
+            MeshDrawStruct meshDrawStruct{};
+            meshDrawStruct.commandBuffer = cmd;
+            drawCmd.mesh->get()->Draw(meshDrawStruct);
         }
     }
 }
@@ -976,7 +978,7 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity)
         CreateError("OBJmesh is NULL");
         return false;
     }
-    cmd.mesh = &mesh.OBJmesh->VM;
+    cmd.mesh = &mesh.OBJmesh;
     cmd.objectIndex = entity;
     cmd.usesTexture = ecs.HasComponent<TextureComponent>(entity)
         && ecs.GetComponent<TextureComponent>(entity).texture != nullptr
@@ -1127,8 +1129,7 @@ void VulkanRender::PrintInfo() {
     CreateInfo("Checked all the shadowResources");
 }
 
-void VulkanRender::RecordShadowCommandBuffer()
-{
+void VulkanRender::RecordShadowCommandBuffer() {
     if (shadowDrawCommands.empty()) {
         return;
     }
@@ -1169,8 +1170,7 @@ void VulkanRender::RecordShadowCommandBuffer()
     scissor.extent = { SHADOW_MAP_SIZE, SHADOW_MAP_SIZE };
     vkCmdSetScissor(shadowCommandBuffer, 0, 1, &scissor);
 
-    for (const auto& cmd : shadowDrawCommands)
-    {
+    for (const auto& cmd : shadowDrawCommands) {
         ShadowPushConstants pc{};
         pc.lightSpaceMatrix = lightSpaceMatrix;
         pc.model = cmd.modelMatrix;
@@ -1182,7 +1182,9 @@ void VulkanRender::RecordShadowCommandBuffer()
             0, sizeof(ShadowPushConstants), &pc
         );
 
-        cmd.mesh->Draw(shadowCommandBuffer);
+        MeshDrawStruct meshDrawStruct{};
+        meshDrawStruct.commandBuffer = shadowCommandBuffer;
+        cmd.mesh->get()->Draw(meshDrawStruct);
     }
 
     vkCmdEndRenderPass(shadowCommandBuffer);

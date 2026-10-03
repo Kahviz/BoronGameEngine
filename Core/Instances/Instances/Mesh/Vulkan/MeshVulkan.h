@@ -1,28 +1,19 @@
 #pragma once
 
 #include <vector>
-#include <Instances/Vertex.h>
+#include <memory>
+
 #include "GLOBALS.h"
 #include "Vulkan.h"
+#include "Mesh/Mesh.h"
 
 #if VULKAN == 1
-class MeshVK
+class MeshBackend : public Mesh
 {
 public:
-    void Load(const fs::path& file, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue);
+    std::shared_ptr<Mesh> LoadMesh(const fs::path& file, MeshStruct& p_meshStruct);
+    void Draw(MeshDrawStruct& p_meshDrawStruct) override;
 
-    void Draw(VkCommandBuffer cmd) const;
-
-    const std::vector<uint32_t>& GetIndices() const {
-        return indices;
-    }
-
-    const std::vector<Vertex>& GetVertices() const {
-        return verts;
-    }
-
-    std::vector<Vertex> verts;
-    std::vector<uint32_t> indices;
     VkBuffer indexBuffer = VK_NULL_HANDLE;
     VkBuffer vertexBuffer = VK_NULL_HANDLE;
 private:

@@ -228,7 +228,8 @@ void Dx11Renderer::RenderShadowMap(ECS& ecs)
                 pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
                 pContext->VSSetConstantBuffers(1, 1, pShadowCB.GetAddressOf());
 
-                mesh->DrawForDX11(pContext.Get());
+                MeshDrawStruct meshDrawStruct(pContext.Get());
+                mesh->Draw(meshDrawStruct);
             }
         }
     );
@@ -881,7 +882,8 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs)
                 pContext->IASetInputLayout(pLayout.Get());
                 pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-                mesh->DrawForDX11(pContext.Get());
+                MeshDrawStruct meshDrawStruct(pContext.Get());
+                mesh->Draw(meshDrawStruct);
             }
         }
     );

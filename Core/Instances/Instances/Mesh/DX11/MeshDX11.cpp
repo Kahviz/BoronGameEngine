@@ -3,11 +3,11 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-void MeshDX11::Load(const fs::path& file, ID3D11Device* device)
-{
+#if DIRECTX11 == 1
+void MeshBackend::LoadMesh(const fs::path& p_file, MeshStruct& p_meshStruct) {
     Assimp::Importer imp{};
     const aiScene* scene = imp.ReadFile(
-        file.string(),
+        p_file.string(),
         aiProcess_Triangulate |
         aiProcess_FlipUVs |
         aiProcess_GenNormals
@@ -17,74 +17,78 @@ void MeshDX11::Load(const fs::path& file, ID3D11Device* device)
         throw std::runtime_error("Failed to load model: " + std::string(imp.GetErrorString()));
 
     aiMesh* m = scene->mMeshes[0];
-    if (!m || m->mNumVertices == 0)
-        throw std::runtime_error("Invalid mesh data");
+    if (!m || m->mNumVertices == 0) {
+        CreateError("Invalid mesh data");
+    }
 
-    if (!m->HasNormals())
-        throw std::runtime_error("Mesh has no normals");
+    if (!m->HasNormals()) {
+        CreateError("Mesh has no normals!");
+    }
 
     //Vertices
-    verts.resize(m->mNumVertices);
+    getVerticesMod().resize(m->mNumVertices);
+
     for (UINT i = 0; i < m->mNumVertices; ++i)
     {
-        verts[i].brightness = 1.0f;
+        getVerticesMod()[i].brightness = 1.0f;
 
-        verts[i].pos = {
+        getVerticesMod()[i].pos = {
             m->mVertices[i].x,
             m->mVertices[i].y,
             m->mVertices[i].z
         };
 
-        verts[i].color = { 1, 1, 1 };
+        getVerticesMod()[i].color = { 1, 1, 1 };
 
-        verts[i].normal = {
+        getVerticesMod()[i].normal = {
             m->mNormals[i].x,
             m->mNormals[i].y,
             m->mNormals[i].z
         };
 
-        if (m->HasTextureCoords(0))
-        {
-            verts[i].uv = {
+        if (m->HasTextureCoords(0)) {
+            getVerticesMod()[i].uv = {
                 m->mTextureCoords[0][i].x,
                 m->mTextureCoords[0][i].y
             };
         }
-        else
-        {
-            verts[i].uv = { 0.0f, 0.0f };
+        else {
+            getVerticesMod()[i].uv = { 0.0f, 0.0f };
         }
     }
 
-    indices.clear();
-    indices.reserve(m->mNumFaces * 3);
+    getIndicesMod().clear();
+    getIndicesMod().reserve(m->mNumFaces * 3);
 
-    for (UINT i = 0; i < m->mNumFaces; ++i)
-    {
+    for (UINT i = 0; i < m->mNumFaces; ++i) {
         const aiFace& face = m->mFaces[i];
-        if (face.mNumIndices != 3)
-            continue;
 
-        indices.push_back(face.mIndices[0]);
-        indices.push_back(face.mIndices[1]);
-        indices.push_back(face.mIndices[2]);
+        if (face.mNumIndices != 3) {
+            continue;
+        }
+
+        getIndicesMod().push_back(face.mIndices[0]);
+        getIndicesMod().push_back(face.mIndices[1]);
+        getIndicesMod().push_back(face.mIndices[2]);
     }
 
-    indexCount = static_cast<UINT>(indices.size());
+    indexCount = static_cast<UINT>(getIndicesMod().size());
 
-    if (indexCount == 0)
-        throw std::runtime_error("Mesh has no indices");
+    if (indexCount == 0) {
+        CreateError("Mesh has no indices");
+    }
 
     D3D11_BUFFER_DESC vbd{};
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbd.ByteWidth = sizeof(Vertex) * static_cast<UINT>(verts.size());
+    vbd.ByteWidth = sizeof(Vertex) * static_cast<UINT>(getIndicesMod().size());
     vbd.Usage = D3D11_USAGE_DEFAULT;
 
     D3D11_SUBRESOURCE_DATA vsd{};
-    vsd.pSysMem = verts.data();
+    vsd.pSysMem = getVerticesMod().data();
 
-    if (FAILED(device->CreateBuffer(&vbd, &vsd, &vb)))
-        throw std::runtime_error("Failed to create Vertex buffer");
+    if (FAILED(p_meshStruct.device->CreateBuffer(&vbd, &vsd, &vb))) {
+        CreateError("Failed to create Vertex buffer");
+    }
 
     D3D11_BUFFER_DESC ibd{};
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -92,19 +96,20 @@ void MeshDX11::Load(const fs::path& file, ID3D11Device* device)
     ibd.Usage = D3D11_USAGE_DEFAULT;
 
     D3D11_SUBRESOURCE_DATA isd{};
-    isd.pSysMem = indices.data();
+    isd.pSysMem = getIndicesMod().data();
 
-    if (FAILED(device->CreateBuffer(&ibd, &isd, &ib)))
-        throw std::runtime_error("Failed to create index buffer");
+    if (FAILED(p_meshStruct.device->CreateBuffer(&ibd, &isd, &ib))) {
+        CreateError("Failed to create index buffer");
+    }
 }
 
-void MeshDX11::Draw(ID3D11DeviceContext* ctx) const
-{
+void MeshBackend::Draw(MeshDrawStruct& p_meshDrawStruct) const {
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
 
-    ctx->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
-    ctx->IASetIndexBuffer(ib, DXGI_FORMAT_R32_UINT, 0);
-    ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    ctx->DrawIndexed(indexCount, 0, 0);
+    p_meshDrawStruct.ctx->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
+    p_meshDrawStruct.ctx->IASetIndexBuffer(ib, DXGI_FORMAT_R32_UINT, 0);
+    p_meshDrawStruct.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    p_meshDrawStruct.ctx->DrawIndexed(indexCount, 0, 0);
 }
+#endif

@@ -247,38 +247,39 @@ EntityECS Engine::AddAMesh(ECS& ecs, const fs::path& Path, const std::string& Na
         window.GetGraphics().GetRenderer()
     );
 
+    MeshStruct meshStruct{};
+    meshStruct = {
+        vk.GetDevice(),
+        vk.GetPhysicalDevice(),
+        vk.GetCommandPool(),
+        vk.GetGraphicsQueue()
+    };
     if (!LiteralPath) {
         objectComp.OBJmesh = Mesh::Load(
             assets / Path,
-            vk.GetDevice(),
-            vk.GetPhysicalDevice(),
-            vk.GetCommandPool(),
-            vk.GetGraphicsQueue()
+            meshStruct
         );
     }
     else {
         objectComp.OBJmesh = Mesh::Load(
             Path,
-            vk.GetDevice(),
-            vk.GetPhysicalDevice(),
-            vk.GetCommandPool(),
-            vk.GetGraphicsQueue()
+            meshStruct
         );
     }
 #endif
 #if DIRECTX11 == 1
     auto* device = window.GetGraphics().GetDevice();
-
+    MeshStruct meshStruct(device);
     if (!LiteralPath) {
         objectComp.OBJmesh = Mesh::Load(
             assets / Path,
-            device
+            meshStruct
         );
     }
     else {
         objectComp.OBJmesh = Mesh::Load(
             Path,
-            device
+            meshStruct
         );
     }
 #endif
