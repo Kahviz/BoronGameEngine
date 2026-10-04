@@ -37,7 +37,7 @@ FetchContent_Declare(
 FetchContent_Declare(
     BoronMathLibrary
     GIT_REPOSITORY https://github.com/Kahviz/BoronMathLibrary
-    GIT_TAG master
+    GIT_TAG 0.07
 )
 
 #Assimp
