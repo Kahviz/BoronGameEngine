@@ -28,6 +28,9 @@ void main() {
         outColor = vec4(fragColor.rgb, fragColor.a * alpha);
     }
     else {
-        outColor = texture(textures[textureID], uv);
+        vec4 color = texture(textures[textureID], uv);
+
+        color.a *= alpha;
+        outColor = color;
     }
 }
