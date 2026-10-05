@@ -136,8 +136,20 @@ EntityECS AddAMesh(
 
     MeshStruct meshStruct{};
 
-#if DIRECTX11 == 1
-    meshStruct = { window.GetGraphics().GetDevice() };
+    #if DIRECTX11 == 1
+        meshStruct = { window.GetGraphics().GetDevice() };
+    #endif
+    
+    #if VULKAN == 1
+        auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
+            
+        meshStruct = {
+            vk.GetDevice(),
+            vk.GetPhysicalDevice(),
+            vk.GetCommandPool(),
+            vk.GetGraphicsQueue()
+        };
+    #endif
 
     if (!LiteralPath) {
         objectComp.OBJmesh = Mesh::Load(
@@ -151,21 +163,6 @@ EntityECS AddAMesh(
             meshStruct
         );
     }
-#endif
-    fs::path meshPath = LiteralPath ? Path : assets / Path;
-
-    #if VULKAN == 1
-        auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
-            
-        meshStruct = {
-            vk.GetDevice(),
-            vk.GetPhysicalDevice(),
-            vk.GetCommandPool(),
-            vk.GetGraphicsQueue()
-        };
-    #endif
-
-    objectComp.OBJmesh->Load(meshPath, meshStruct);
 
     #if VULKAN == 1
         if (UsesTexture)
@@ -276,13 +273,13 @@ void SaveProject::Load(ECS& p_ecs, Window& p_window, EntityECS p_world) {
     Boron::Enums::InstanceType loadedInstanceType = Boron::Enums::InstanceType::Object;
 
     while (std::getline(file, line)) {
-        if (line == "-")
+        if (line == "-") {
             continue;
+        }
 
         if (line.rfind("Name:", 0) == 0) {
             loadedName = line.substr(6);
         }
-
         else if (line.rfind("Position:", 0) == 0) {
             std::string data = line.substr(10);
 
@@ -299,7 +296,6 @@ void SaveProject::Load(ECS& p_ecs, Window& p_window, EntityECS p_world) {
                 >> loadedPos.y()
                 >> loadedPos.z();
         }
-
         else if (line.rfind("Size:", 0) == 0) {
             std::string data = line.substr(6);
 

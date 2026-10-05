@@ -974,10 +974,12 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity)
     );
 
     DrawCommand cmd{};
+
     if (!mesh.OBJmesh) {
         CreateError("OBJmesh is NULL");
         return false;
     }
+
     cmd.mesh = &mesh.OBJmesh;
     cmd.objectIndex = entity;
     cmd.usesTexture = ecs.HasComponent<TextureComponent>(entity)
@@ -1213,8 +1215,7 @@ void VulkanRender::ClearBuffer(float r, float b, float g) {
     clearValues[1].depthStencil = { 1.0f, 0 };
 }
 
-void VulkanRender::DrawFrame(ECS& ecs,float deltaTime)
-{
+void VulkanRender::DrawFrame(ECS& ecs,float deltaTime) {
     uint32_t maxObjectIndex = 0;
     bool hasEntities = false;
 
@@ -1293,8 +1294,8 @@ void VulkanRender::DrawFrame(ECS& ecs,float deltaTime)
         shadowSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         shadowSubmitInfo.commandBufferCount = 1;
         shadowSubmitInfo.pCommandBuffers = &shadowCommandBuffer;
+
         BGE_ASSERT_VKRESULT(vkQueueSubmit(vkDevice.GetGraphicsQueue(), 1, &shadowSubmitInfo, VK_NULL_HANDLE), "Failed to submit shadow");
-        BGE_ASSERT_VKRESULT(vkQueueWaitIdle(vkDevice.GetGraphicsQueue()), "Failed to wait");
 
         VkCommandBuffer transitionCmd = BeginSingleTimeCommands();
 
