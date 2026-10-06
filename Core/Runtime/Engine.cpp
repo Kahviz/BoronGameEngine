@@ -188,14 +188,12 @@ int Engine::EngineRun() {
 
     BoronGui::InitBoronGui(boronGuiNeeds);
 
-    while (!glfwWindowShouldClose(glfwWND))
-    {
+    while (!glfwWindowShouldClose(glfwWND)) {
         glfwPollEvents();
 
         auto now = clock::now();
 
-        float deltaTime =
-            std::chrono::duration<float>(now - lastFrameTime).count();
+        float deltaTime = std::chrono::duration<float>(now - lastFrameTime).count();
 
         lastFrameTime = now;
 
@@ -243,9 +241,7 @@ EntityECS Engine::AddAMesh(ECS& ecs, const fs::path& Path, const std::string& Na
     physicsComp.anchored = true;
 
 #if VULKAN == 1
-    auto& vk = static_cast<VulkanAdapter&>(
-        window.GetGraphics().GetRenderer()
-    );
+    auto& vk = static_cast<VulkanAdapter&>(window.GetGraphics().GetRenderer());
 
     MeshStruct meshStruct{};
     meshStruct = {

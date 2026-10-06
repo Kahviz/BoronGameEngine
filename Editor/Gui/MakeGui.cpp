@@ -13,6 +13,7 @@ struct MeshButton {
     fs::path path;
     const char* name;
 };
+
 void CreatePlusButton(
     EntityECS target,
     EntityECS& selectedInst,
@@ -66,8 +67,7 @@ static bool InputTextStd(const char* label, std::string& str)
     return false;
 }
 
-static MeshButton meshButtons[] =
-{
+static MeshButton meshButtons[] = {
     { "Cube",     assets / "Cube.obj","Cube" },
     { "Ball",     assets / "Ball.obj",  "Ball" },
     { "Cylinder", assets / "Cylinder.obj", "Cylinder"}
@@ -75,28 +75,30 @@ static MeshButton meshButtons[] =
 
 void MakeChildrenNodes(ECS& ecs, EntityECS parent)
 {
-    ecs.Each<HierarchyComponent, BasicInfoComponent, EditorSettingsComponent>(
+    ecs.Each<BasicInfoComponent, HierarchyComponent, EditorSettingsComponent>(
         [&](EntityECS entity,
             HierarchyComponent& hierarchy,
             BasicInfoComponent& basic,
             EditorSettingsComponent& editor)
         {
-            if (hierarchy.parent != parent)
+            if (hierarchy.parent != parent) {
                 return;
+            }
 
-            ImGuiTreeNodeFlags flags =
-                ImGuiTreeNodeFlags_OpenOnArrow;
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
 
-            if (editor.selected)
+            if (editor.selected) {
                 flags |= ImGuiTreeNodeFlags_Selected;
+            }
 
             bool hasChildren = false;
-
+            
             ecs.Each<HierarchyComponent>(
                 [&](EntityECS child, HierarchyComponent& childHierarchy)
                 {
-                    if (childHierarchy.parent == entity)
+                    if (childHierarchy.parent == entity) {
                         hasChildren = true;
+                    }
                 }
             );
 
@@ -242,8 +244,7 @@ void MakeGui::MakeIMGui(
             ImGui::SameLine();
             InputTextStd("##Name", basicInfoComp.Name);
 
-            if (ImGui::CollapsingHeader("Transform"))
-            {
+            if (ImGui::CollapsingHeader("Transform")) {
                 MakeFloat3Edit(entity, "Position", transformComp.transform.Position);
                 MakeFloat3Edit(entity, "Orientation", transformComp.transform.Orientation);
                 MakeFloat3Edit(entity, "Size", transformComp.transform.Size);
@@ -395,10 +396,8 @@ void MakeGui::MakeIMGui(
         ImGui::SetNextWindowPos(ImVec2(0, screen_h - screen_h / 4.0f), ImGuiCond_Always);
     }
 
-    if (ImGui::Begin("Console", nullptr))
-    {
-        for (const ConsoleLine& line : engine->m_console.getConsoleLog())
-        {
+    if (ImGui::Begin("Console", nullptr)) {
+        for (const ConsoleLine& line : engine->m_console.getConsoleLog()) {
             bool usedCustomColor = false;
 
             if (line.type == Boron::Enums::ConsoleLineType::Error) {
@@ -555,8 +554,7 @@ void MakeGui::MakeIMGui(
     ImGui::End();
 }
 
-void MakeGui::MakeIMViewPort(Window& wnd)
-{
+void MakeGui::MakeIMViewPort(Window& wnd) {
     ImGuiIO& io = ImGui::GetIO();
 
     float screen_w = io.DisplaySize.x;
@@ -570,11 +568,8 @@ void MakeGui::MakeIMViewPort(Window& wnd)
     float viewportX = 0.0f;
     float viewportY = mainTabHeight;
 
-    float viewportWidth =
-        screen_w - rightPanelWidth;
-
-    float viewportHeight =
-        screen_h - mainTabHeight - consoleHeight;
+    float viewportWidth = screen_w - rightPanelWidth;
+    float viewportHeight = screen_h - mainTabHeight - consoleHeight;
 
     BML::Vector2 windowSize = wnd.GetSize();
 
@@ -596,24 +591,17 @@ void MakeGui::MakeIMViewPort(Window& wnd)
         lastWindowSize = windowSize;
     }
 
-    ImGui::Begin(
-        "Viewport",
-        nullptr
-    );
+    ImGui::Begin("Viewport", nullptr);
 
     ImVec2 size = ImGui::GetContentRegionAvail();
     static ImVec2 lastSize(0.0f, 0.0f);
 
-    if (size.x != lastSize.x || size.y != lastSize.y)
-    {
+    if (size.x != lastSize.x || size.y != lastSize.y) {
         int width = static_cast<int>(size.x);
         int height = static_cast<int>(size.y);
 
-        if (width > 0 && height > 0)
-        {
-            wnd.GetGraphics()
-                .GetRenderer()
-                .ReSizeViewport(width, height);
+        if (width > 0 && height > 0) {
+            wnd.GetGraphics().GetRenderer().ReSizeViewport(width, height);
         }
 
         lastSize = size;

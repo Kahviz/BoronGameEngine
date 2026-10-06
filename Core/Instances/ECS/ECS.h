@@ -15,58 +15,43 @@ public:
 	void destroyEntity(EntityECS entity);
 
 	template<typename T>
-	void AddComponent(EntityECS entity, const T& component)
-	{
+	void AddComponent(EntityECS entity, const T& component) {
 		m_componentManager->GetStorage<T>().Add(entity, component);
 	}
 
 	template<typename T>
-	void RemoveComponent(EntityECS entity)
-	{
+	void RemoveComponent(EntityECS entity) {
 	}
 
 	template<typename T>
-	bool HasComponent(EntityECS entity)
-	{
+	bool HasComponent(EntityECS entity) {
 		return m_componentManager->GetStorage<T>().Has(entity);
 	}
 
 	template<typename T>
-	inline T& GetComponent(EntityECS entity)
-	{
+	inline T& GetComponent(EntityECS entity) {
 		return m_componentManager->GetStorage<T>().Get(entity);
 	}
 
 	template<typename Func>
-	void EachEntity(Func&& function)
-	{
-		for (EntityECS entity = 0;
-			entity < m_currentHandleID + 1;
-			++entity)
-		{
+	void EachEntity(Func&& function) {
+		for (EntityECS entity = 0; entity < m_currentHandleID + 1; ++entity) {
 			function(entity);
 		}
 	}
 
 	template<typename... Components, typename Func>
-	void Each(Func&& function)
-	{
-		static_assert(
-			sizeof...(Components) > 0,
-			"ECS::Each requires at least one component"
-			);
+	void Each(Func&& function) {
+		static_assert(sizeof...(Components) > 0,"ECS::Each requires at least one component");
 
-		using FirstComponent =
-			std::tuple_element_t<0, std::tuple<Components...>>;
+		using FirstComponent = std::tuple_element_t<0, std::tuple<Components...>>;
 
-		auto& storage =
-			m_componentManager->GetStorage<FirstComponent>();
+		auto& storage = m_componentManager->GetStorage<FirstComponent>();
 
 		storage.ForEach(
 			[&](EntityECS entity, FirstComponent&)
 			{
-				if ((HasComponent<Components>(entity) && ...))
-				{
+				if ((HasComponent<Components>(entity) && ...)) {
 					function(
 						entity,
 						static_cast<Components&>(

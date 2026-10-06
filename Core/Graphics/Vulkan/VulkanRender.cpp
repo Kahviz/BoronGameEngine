@@ -444,10 +444,10 @@ void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
 void VulkanRender::RecordCommandBuffer(uint32_t imageIndex, bool renderImGui, bool usesTexture) {
     CurrentimageIndex = imageIndex;
     VkCommandBuffer cmd = vkCommandBuffer.GetCommandBuffers()[imageIndex];
-    vkResetCommandBuffer(cmd, 0);
+    BGE_ASSERT_VKRESULT(vkResetCommandBuffer(cmd, 0), "Failed to reset commandbuffer");
 
     VkCommandBufferBeginInfo beginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-    vkBeginCommandBuffer(cmd, &beginInfo);
+    BGE_ASSERT_VKRESULT(vkBeginCommandBuffer(cmd, &beginInfo),"Failed to begin commandbuffer");
 
     VkViewport viewport{};
     viewport.x = 0.0f;
