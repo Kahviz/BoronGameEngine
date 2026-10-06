@@ -32,9 +32,11 @@ Engine::Engine()
     #ifdef BGE_WIN
         CreateInfo("Win11 detected!");
     #endif
+
     #ifdef BGE_MACOS
         CreateInfo("MacOS detected!");
     #endif
+
     #ifdef BGE_LINUX
         CreateInfo("Linux detected!");
     #endif

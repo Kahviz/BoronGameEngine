@@ -73,9 +73,8 @@ static MeshButton meshButtons[] = {
     { "Cylinder", assets / "Cylinder.obj", "Cylinder"}
 };
 
-void MakeChildrenNodes(ECS& ecs, EntityECS parent)
-{
-    ecs.Each<BasicInfoComponent, HierarchyComponent, EditorSettingsComponent>(
+void MakeChildrenNodes(ECS& ecs, EntityECS parent) {
+    ecs.Each<HierarchyComponent, BasicInfoComponent, EditorSettingsComponent>(
         [&](EntityECS entity,
             HierarchyComponent& hierarchy,
             BasicInfoComponent& basic,
@@ -943,10 +942,12 @@ void MakeGui::RenderPopUps(float deltatime)
 
         it->duration -= deltatime;
 
-        if (it->duration <= 0.0f)
+        if (it->duration <= 0.0f) {
             it = images.erase(it);
-        else
+        }
+        else {
             ++it;
+        }
 
         renderIndex++;
     }
