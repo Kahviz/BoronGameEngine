@@ -81,7 +81,7 @@ void MeshBackend::LoadMesh(const fs::path& p_file, MeshStruct& p_meshStruct) {
 
     D3D11_BUFFER_DESC vbd{};
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbd.ByteWidth = sizeof(Vertex) * static_cast<UINT>(getIndicesMod().size());
+    vbd.ByteWidth = sizeof(Vertex) * static_cast<UINT>(getVertices().size());
     vbd.Usage = D3D11_USAGE_DEFAULT;
 
     D3D11_SUBRESOURCE_DATA vsd{};

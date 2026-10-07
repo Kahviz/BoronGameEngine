@@ -18,16 +18,14 @@
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
-struct LightingCB
-{
+struct LightingCB {
     BML::Vector3 lightpos;     // 12
     float Brightness;      // 4
     BML::Vector3 WorldPos;     // 12
     float lightRange;      // 4
 };
 
-void Dx11Renderer::InitDx11Renderer(HWND hWnd)
-{
+void Dx11Renderer::InitDx11Renderer(HWND hWnd) {
     CreateDeviceAndSwapChain(screen_width, screen_height, hWnd);
     CreateViewport(screen_width, screen_height);
     CreateDepthStencil(screen_width, screen_height);
@@ -81,14 +79,14 @@ void Dx11Renderer::CreateShadowResources()
     shadowDesc.Usage = D3D11_USAGE_DEFAULT;
     shadowDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
-    BGE_ASSERT_HRESULT(pDevice->CreateTexture2D(&shadowDesc, nullptr, &pShadowMap),"Failed to create shadowmap texture");
+    BGE_ASSERT_HRESULT(pDevice->CreateTexture2D(&shadowDesc, nullptr, &pShadowMap), "Failed to create shadowmap texture");
 
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
     dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
     dsvDesc.Texture2D.MipSlice = 0;
 
-    BGE_ASSERT_HRESULT(pDevice->CreateDepthStencilView(pShadowMap.Get(), &dsvDesc, &pShadowDSV),"");
+    BGE_ASSERT_HRESULT(pDevice->CreateDepthStencilView(pShadowMap.Get(), &dsvDesc, &pShadowDSV), "");
 
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
@@ -532,11 +530,11 @@ void Dx11Renderer::CompileShaders()
     }
 
     D3D11_INPUT_ELEMENT_DESC ied[] = {
-        {"POSITION",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR",      0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD",   0, DXGI_FORMAT_R32G32_FLOAT,    0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"BRIGHTNESS", 0, DXGI_FORMAT_R32_FLOAT,       0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        { "POSITION",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR",      0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "NORMAL",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD",   0, DXGI_FORMAT_R32G32_FLOAT,    0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "BRIGHTNESS", 0, DXGI_FORMAT_R32_FLOAT,       0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
     hr = pDevice->CreateInputLayout(
@@ -756,19 +754,19 @@ ID3D11DeviceContext* Dx11Renderer::GetpContext() noexcept
     return pContext.Get();
 }
 
-void Dx11Renderer::EndFrame()
-{
-    if (!pSwap) return;
+void Dx11Renderer::EndFrame() {
+    if (!pSwap) {
+        return;
+    }
 
     HRESULT hr = pSwap->Present(g_vSync, 0);
 
     if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
-        throw std::runtime_error("DirectX device lost");
+        CreateError("DirectX device lost");
     }
 }
 
-void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs)
-{
+void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
     RenderShadowMap(ecs);
     SetShadowMapToShader();
 
@@ -779,6 +777,24 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs)
     LightingCB lcb = {};
     lcb.lightpos = BML::Vector3(lightpos.x, lightpos.y, lightpos.z);
     lcb.lightRange = 20.0f;
+
+    // Camera Matrix
+    BML::Matrix4x4 mat = camera.GetViewMatrix();
+    BML::Matrix4x4 projMat = camera.GetProjectionMatrix();
+
+    XMMATRIX proj = XMMATRIX(
+        XMVectorSet(projMat(0, 0), projMat(0, 1), projMat(0, 2), projMat(0, 3)),
+        XMVectorSet(projMat(1, 0), projMat(1, 1), projMat(1, 2), projMat(1, 3)),
+        XMVectorSet(projMat(2, 0), projMat(2, 1), projMat(2, 2), projMat(2, 3)),
+        XMVectorSet(projMat(3, 0), projMat(3, 1), projMat(3, 2), projMat(3, 3))
+    );
+
+    XMMATRIX view = XMMATRIX(
+        XMVectorSet(mat(0, 0), mat(1, 0), mat(2, 0), mat(3, 0)),
+        XMVectorSet(mat(0, 1), mat(1, 1), mat(2, 1), mat(3, 1)),
+        XMVectorSet(mat(0, 2), mat(1, 2), mat(2, 2), mat(3, 2)),
+        XMVectorSet(mat(0, 3), mat(1, 3), mat(2, 3), mat(3, 3))
+    );
 
     ecs.Each<TextureComponent, ObjectComponent, TransformComponent, ColorComponent>(
         [&](EntityECS entity, TextureComponent& textureComponent, ObjectComponent& objectComponent, TransformComponent& transformComponent, ColorComponent& colorComponent)
@@ -817,24 +833,6 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs)
                 XMMATRIX rotation = XMMatrixRotationRollPitchYaw(Orientation.x(), Orientation.y(), Orientation.z());
                 XMMATRIX translation = XMMatrixTranslation(pos.x(), pos.y(), pos.z());
                 XMMATRIX world = scale * rotation * translation;
-
-                // Camera Matrix
-                BML::Matrix4x4 mat = camera.GetViewMatrix();
-                BML::Matrix4x4 projMat = camera.GetProjectionMatrix();
-
-                XMMATRIX proj = XMMATRIX(
-                    XMVectorSet(projMat(0, 0), projMat(0, 1), projMat(0, 2), projMat(0, 3)),
-                    XMVectorSet(projMat(1, 0), projMat(1, 1), projMat(1, 2), projMat(1, 3)),
-                    XMVectorSet(projMat(2, 0), projMat(2, 1), projMat(2, 2), projMat(2, 3)),
-                    XMVectorSet(projMat(3, 0), projMat(3, 1), projMat(3, 2), projMat(3, 3))
-                );
-
-                XMMATRIX view = XMMATRIX(
-                    XMVectorSet(mat(0, 0), mat(1, 0), mat(2, 0), mat(3, 0)),
-                    XMVectorSet(mat(0, 1), mat(1, 1), mat(2, 1), mat(3, 1)),
-                    XMVectorSet(mat(0, 2), mat(1, 2), mat(2, 2), mat(3, 2)),
-                    XMVectorSet(mat(0, 3), mat(1, 3), mat(2, 3), mat(3, 3))
-                );
                 XMMATRIX worldViewProj = world * view * proj;
 
                 // VS constant buffer
@@ -889,8 +887,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs)
     );
 }
 
-void Dx11Renderer::ClearSceneBuffer(float r, float g, float b)
-{
+void Dx11Renderer::ClearSceneBuffer(float r, float g, float b) {
     if (!pContext || !pSceneRTV || !pSceneDepthStencilView)
         return;
 
@@ -906,8 +903,7 @@ void Dx11Renderer::ClearSceneBuffer(float r, float g, float b)
     );
 }
 
-void Dx11Renderer::ClearBuffer(float r, float g, float b)
-{
+void Dx11Renderer::ClearBuffer(float r, float g, float b) {
     if (!pContext || !pTarget || !pDepthStencilView)
         return;
 
