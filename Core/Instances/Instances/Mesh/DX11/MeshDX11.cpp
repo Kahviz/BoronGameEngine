@@ -105,12 +105,19 @@ void MeshBackend::LoadMesh(const fs::path& p_file, MeshStruct& p_meshStruct) {
 }
 
 void MeshBackend::Draw(MeshDrawStruct& p_meshDrawStruct) const {
+    static D3D_PRIMITIVE_TOPOLOGY lastTopology{};
+    D3D_PRIMITIVE_TOPOLOGY currentTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST; // Default topology, its for future that it can be changed
+
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
 
     p_meshDrawStruct.ctx->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
     p_meshDrawStruct.ctx->IASetIndexBuffer(ib, DXGI_FORMAT_R32_UINT, 0);
-    p_meshDrawStruct.ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    if (lastTopology != currentTopology) {
+        p_meshDrawStruct.ctx->IASetPrimitiveTopology(currentTopology);
+        lastTopology = currentTopology; 
+    }
     p_meshDrawStruct.ctx->DrawIndexed(indexCount, 0, 0);
 }
 #endif

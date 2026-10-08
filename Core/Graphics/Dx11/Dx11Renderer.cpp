@@ -19,10 +19,10 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 struct LightingCB {
-    BML::Vector3 lightpos;     // 12
-    float Brightness;      // 4
-    BML::Vector3 WorldPos;     // 12
-    float lightRange;      // 4
+    BML::Vector3 lightpos{};     // 12
+    float Brightness{};      // 4
+    BML::Vector3 WorldPos{};     // 12
+    float lightRange{};      // 4
 };
 
 void Dx11Renderer::InitDx11Renderer(HWND hWnd) {
@@ -67,8 +67,7 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd) {
     BGE_ASSERT_HRESULT(pDevice->CreateSamplerState(&shadowSamp, &pShadowSampler), "Failed to create Samplerstate");
 }
 
-void Dx11Renderer::CreateShadowResources()
-{
+void Dx11Renderer::CreateShadowResources() {
     D3D11_TEXTURE2D_DESC shadowDesc = {};
     shadowDesc.Width = SHADOW_MAP_SIZE;
     shadowDesc.Height = SHADOW_MAP_SIZE;
@@ -114,8 +113,7 @@ void Dx11Renderer::CreateShadowResources()
     BGE_ASSERT_HRESULT(pDevice->CreateBuffer(&cbd, nullptr, &pShadowCB), "Failed to create shadow constant buffer");
 }
 
-void Dx11Renderer::SetShadowMapToShader()
-{
+void Dx11Renderer::SetShadowMapToShader() {
     ID3D11ShaderResourceView* shadowSRV = pShadowSRV.Get();
     pContext->PSSetShaderResources(2, 1, &shadowSRV);
 
@@ -123,8 +121,7 @@ void Dx11Renderer::SetShadowMapToShader()
     pContext->PSSetSamplers(1, 1, &shadowSampler);
 }
 
-void Dx11Renderer::RenderShadowMap(ECS& ecs)
-{
+void Dx11Renderer::RenderShadowMap(ECS& ecs) {
     XMVECTOR lightPosition = XMLoadFloat3(&lightpos);
     XMVECTOR lightTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
     XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -206,7 +203,8 @@ void Dx11Renderer::RenderShadowMap(ECS& ecs)
 
                 XMMATRIX scale = XMMatrixScaling(transformComponent.transform.Size.x(), transformComponent.transform.Size.y(), transformComponent.transform.Size.z());
                 XMMATRIX rotation = XMMatrixRotationRollPitchYaw(
-                    transformComponent.transform.Orientation.x(), transformComponent.transform.Orientation.y(), transformComponent.transform.Orientation.z());
+                    transformComponent.transform.Orientation.x(), transformComponent.transform.Orientation.y(), transformComponent.transform.Orientation.z()
+                );
                 XMMATRIX translation = XMMatrixTranslation(transformComponent.transform.Position.x(), transformComponent.transform.Position.y(), transformComponent.transform.Position.z());
                 XMMATRIX world = scale * rotation * translation;
 
@@ -249,8 +247,7 @@ void Dx11Renderer::RenderShadowMap(ECS& ecs)
     if (oldDSV) oldDSV->Release();
 }
 
-void Dx11Renderer::SetRenderTargetToScene()
-{
+void Dx11Renderer::SetRenderTargetToScene() {
     pContext->OMSetRenderTargets(
         1,
         pSceneRTV.GetAddressOf(),
@@ -390,8 +387,7 @@ void Dx11Renderer::CreateRenderTarget()
     if (FAILED(hr)) throw std::runtime_error("Failed to create render target view");
 }
 
-void Dx11Renderer::CreateConstantBuffers()
-{
+void Dx11Renderer::CreateConstantBuffers() {
     // VS constant buffer
     D3D11_BUFFER_DESC cbd = {};
     cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -802,17 +798,23 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
             ID3D11PixelShader* selectedPS = pPSNoTexture.Get();
 
             Texture* tex = textureComponent.texture;
-            bool hasTexture = tex->IsLoaded();
 
-            if (hasTexture) {
-                selectedPS = pPSTexture.Get();
-                ID3D11ShaderResourceView* textureSRV = tex->GetTextureComPtr().Get();
-                pContext->PSSetShaderResources(0, 1, &textureSRV);
+            bool hasTexture = tex->IsLoaded();
+            static bool lastHasTexture = tex->IsLoaded();
+
+            if (lastHasTexture != hasTexture) {
+                if (hasTexture) {
+                    selectedPS = pPSTexture.Get();
+                    ID3D11ShaderResourceView* textureSRV = tex->GetTextureComPtr().Get();
+                    pContext->PSSetShaderResources(0, 1, &textureSRV);
+                }
+                else {
+                    ID3D11ShaderResourceView* nullSRV = nullptr;
+                    pContext->PSSetShaderResources(0, 1, &nullSRV);
+                }
             }
-            else {
-                ID3D11ShaderResourceView* nullSRV = nullptr;
-                pContext->PSSetShaderResources(0, 1, &nullSRV);
-            }
+
+            lastHasTexture = hasTexture;
 
             pContext->VSSetShader(pVS.Get(), nullptr, 0);
             pContext->PSSetShader(selectedPS, nullptr, 0);
@@ -848,7 +850,9 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 
                 D3D11_MAPPED_SUBRESOURCE msrVS;
                 HRESULT hr = pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
-                if (FAILED(hr)) throw std::runtime_error("Failed to map VS constant buffer");
+                if (FAILED(hr)) {
+                    CreateError("Failed to map VS constant buffer");
+                }
                 memcpy(msrVS.pData, &cb, sizeof(cb));
                 pContext->Unmap(pConstantBuffer.Get(), 0);
 
@@ -858,7 +862,11 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 
                 D3D11_MAPPED_SUBRESOURCE msrColor;
                 hr = pContext->Map(pColorBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrColor);
-                if (FAILED(hr)) throw std::runtime_error("Failed to map color buffer");
+
+                if (FAILED(hr)) {
+                    CreateError("Failed to map color buffer");
+                }
+
                 memcpy(msrColor.pData, &pcb, sizeof(pcb));
                 pContext->Unmap(pColorBuffer.Get(), 0);
 
@@ -868,8 +876,13 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 
                 D3D11_MAPPED_SUBRESOURCE msrLighting;
                 hr = pContext->Map(pLightingBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrLighting);
-                if (FAILED(hr)) throw std::runtime_error("Failed to map lighting buffer");
+
+                if (FAILED(hr)) {
+                    CreateError("Failed to map lighting buffer");
+                }
+
                 memcpy(msrLighting.pData, &lcbPerMesh, sizeof(lcbPerMesh));
+
                 pContext->Unmap(pLightingBuffer.Get(), 0);
 
                 pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
