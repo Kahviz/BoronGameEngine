@@ -6,3 +6,4 @@ V. 6.10.2026 FPS: 832.67
 D 7.10.2026 FPS: 375
 D 7.10.2026 FPS: 437, optimized
 D 8.10.2026 FPS: 989.53, optimized so shader changes only when needed and made IASetPrimitiveTopology cached
+D 9.10.2026 FPS: 1055.10

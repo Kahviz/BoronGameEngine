@@ -34,6 +34,7 @@ class Dx11Renderer
 {
 public:
     void InitDx11Renderer(HWND hWnd);
+    void DrawShadowMap(ECS& p_ecs, const XMMATRIX& p_lightView, const XMMATRIX& p_lightProj);
     void SetRenderTargetToScene();
     void SetRenderTargetToBackBuffer();
 

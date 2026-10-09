@@ -792,6 +792,9 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
         XMVectorSet(mat(0, 3), mat(1, 3), mat(2, 3), mat(3, 3))
     );
 
+    pContext->VSSetShader(pVS.Get(), nullptr, 0);
+    pContext->PSSetShader(pPSNoTexture.Get(), nullptr, 0);
+
     ecs.Each<TextureComponent, ObjectComponent, TransformComponent, ColorComponent>(
         [&](EntityECS entity, TextureComponent& textureComponent, ObjectComponent& objectComponent, TransformComponent& transformComponent, ColorComponent& colorComponent)
         {
@@ -812,12 +815,11 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
                     ID3D11ShaderResourceView* nullSRV = nullptr;
                     pContext->PSSetShaderResources(0, 1, &nullSRV);
                 }
+
+                pContext->PSSetShader(selectedPS, nullptr, 0);
             }
 
             lastHasTexture = hasTexture;
-
-            pContext->VSSetShader(pVS.Get(), nullptr, 0);
-            pContext->PSSetShader(selectedPS, nullptr, 0);
 
             ID3D11SamplerState* samplers[] = { pSampler.Get(), pShadowSampler.Get() };
             pContext->PSSetSamplers(0, 2, samplers);
@@ -917,8 +919,9 @@ void Dx11Renderer::ClearSceneBuffer(float r, float g, float b) {
 }
 
 void Dx11Renderer::ClearBuffer(float r, float g, float b) {
-    if (!pContext || !pTarget || !pDepthStencilView)
+    if (!pContext || !pTarget || !pDepthStencilView) {
         return;
+    }
 
     const float color[] = { r, g, b, 1.0f };
 
