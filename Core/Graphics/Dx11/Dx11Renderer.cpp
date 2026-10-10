@@ -763,7 +763,14 @@ void Dx11Renderer::EndFrame() {
 }
 
 void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
-    RenderShadowMap(ecs);
+    static int counter = 0;
+    counter++;
+
+    if (counter >= SHADOW_MAP_UPDATE_INTERVAL) {
+        counter = 0;
+        RenderShadowMap(ecs);
+    }
+
     SetShadowMapToShader();
 
     const float lightSpeed = 0.1f;
