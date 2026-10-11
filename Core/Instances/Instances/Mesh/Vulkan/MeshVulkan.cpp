@@ -30,12 +30,12 @@ void MeshBackend::LoadMesh(const fs::path& file, MeshStruct& p_meshStruct) {
         CreateError("Invalid mesh data");
     }
 
-    if (!m->HasNormals())
-        throw std::runtime_error("Mesh has no normals");
+    if (!m->HasNormals()) {
+        CreateError("Mesh has no normals");
+    }
 
     getVerticesMod().resize(m->mNumVertices);
-    for (uint32_t i = 0; i < m->mNumVertices; ++i)
-    {
+    for (uint32_t i = 0; i < m->mNumVertices; ++i) {
         getVerticesMod()[i].brightness = 1.0f;
 
         getVerticesMod()[i].pos = {

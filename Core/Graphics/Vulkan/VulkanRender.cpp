@@ -744,8 +744,8 @@ void VulkanRender::UpdateDescriptorSets(ECS& ecs)
     createDescriptorPool(count);
     createDescriptorSets(ecs, count);
 }
-void VulkanRender::createDescriptorSets(ECS& ecs, uint32_t count)
-{
+
+void VulkanRender::createDescriptorSets(ECS& ecs, uint32_t count) {
     descriptorSets.resize(count);
 
     std::vector<VkDescriptorSetLayout> layouts(
@@ -950,8 +950,7 @@ void VulkanRender::updateUniformBuffer(
     memcpy(dst, &ubo, sizeof(ubo));
 }
 
-bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity)
-{
+bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity) {
     if (!ecs.HasComponent<TransformComponent>(entity) ||
         !ecs.HasComponent<ColorComponent>(entity) ||
         !ecs.HasComponent<ObjectComponent>(entity))
@@ -1229,8 +1228,7 @@ void VulkanRender::DrawFrame(ECS& ecs,float deltaTime) {
 
     if (hasEntities && maxObjectIndex >= m_CurrentObjectCount)
     {
-        const uint32_t newSize =
-            Max(m_CurrentObjectCount * 2, maxObjectIndex + 1);
+        const uint32_t newSize = Max(m_CurrentObjectCount * 2, maxObjectIndex + 1);
 
         ReallocateUniformBuffer(newSize,&ecs);
     }
@@ -1274,6 +1272,7 @@ void VulkanRender::DrawFrame(ECS& ecs,float deltaTime) {
         center,
         BML::Vector3(0, 1, 0)
     );
+
     float OrthoSize = 20.0f;
     BML::Matrix4x4 lightProj = CreateOrthographic(-OrthoSize, OrthoSize, -OrthoSize, OrthoSize, 0.1f, 80.0f);
     lightSpaceMatrix = lightProj * lightView;
@@ -1287,7 +1286,13 @@ void VulkanRender::DrawFrame(ECS& ecs,float deltaTime) {
         shadowDrawCommands.push_back(shadowCmd);
     }
 
-    RecordShadowCommandBuffer();
+    static int counter = 0;
+    counter++;
+
+    if (counter >= SHADOW_MAP_UPDATE_INTERVAL) {
+        RecordShadowCommandBuffer();
+        counter = 0;
+    }
 
     if (!shadowDrawCommands.empty()) {
         VkSubmitInfo shadowSubmitInfo{};
