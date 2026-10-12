@@ -2,8 +2,7 @@
 #include "Components.h"
 
 //Server
-bool Physics::ApplyPhysics(ECS& ecs,EntityECS entity, float deltatime)
-{
+bool Physics::ApplyPhysics(ECS& p_ecs,EntityECS p_entity, float p_deltatime) {
     if (g_Running) {
         TransformComponent& transformComp = ecs.GetComponent<TransformComponent>(entity);
         PhysicsComponent& physicsComp = ecs.GetComponent<PhysicsComponent>(entity);

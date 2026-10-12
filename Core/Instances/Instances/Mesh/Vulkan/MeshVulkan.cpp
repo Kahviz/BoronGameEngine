@@ -35,6 +35,7 @@ void MeshBackend::LoadMesh(const fs::path& file, MeshStruct& p_meshStruct) {
     }
 
     getVerticesMod().resize(m->mNumVertices);
+
     for (uint32_t i = 0; i < m->mNumVertices; ++i) {
         getVerticesMod()[i].brightness = 1.0f;
 
