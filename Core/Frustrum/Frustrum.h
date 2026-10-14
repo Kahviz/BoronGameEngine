@@ -16,6 +16,7 @@ namespace FrustumSpace {
 class Frustum {
 public:
     FrustumSpace::Frustum& getFrustrum();
+    void setFrustrum(const FrustumSpace::Frustum& p_frustrum);
 private:
     
 };
