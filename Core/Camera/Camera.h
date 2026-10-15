@@ -7,13 +7,13 @@ public:
     Camera();
     void SetProjectionValues(float fovDegrees, float aspectRatio, float nearZ, float farZ);
 
-    const BML::Matrix4x4& GetViewMatrix() const;
-    const BML::Matrix4x4& GetProjectionMatrix() const;
+    const BML::Matrix4x4& getViewMatrix() const;
+    const BML::Matrix4x4& getProjectionMatrix() const;
 
-    const BML::Vector4& GetPositionVector() const;
-    const BML::Vector3& GetPositionVector3() const;
-    const BML::Vector4& GetRotationVector() const;
-    const BML::Vector3& GetRotationVector3() const;
+    const BML::Vector4& getPositionVector() const;
+    const BML::Vector3& getPositionVector3() const;
+    const BML::Vector4& getRotationVector() const;
+    const BML::Vector3& getRotationVector3() const;
 
     void SetPosition(const BML::Vector4& pos);
     void SetPosition(float x, float y, float z);
@@ -27,9 +27,9 @@ public:
     void AdjustRotation(const BML::Vector4& rot);
     void AdjustRotation(float x, float y, float z);
 
-    BML::Vector3 GetForward() const;
-    BML::Vector3 GetRight() const;
-    BML::Vector3 GetUp() const;
+    BML::Vector3 getForward() const;
+    BML::Vector3 getRight() const;
+    BML::Vector3 getUp() const;
     void UpdateViewMatrix();
 
 private:

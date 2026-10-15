@@ -13,13 +13,12 @@ void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
     float sensitivity = 0.002f;
 
     Camera& Cam = wnd.GetGraphics().GetCamera();
-    BML::Vector3 forward = Cam.GetForward();
-    BML::Vector3 right = Cam.GetRight();
+    BML::Vector3 forward = Cam.getForward();
+    BML::Vector3 right = Cam.getRight();
 
     GLFWwindow* glfwWND = wnd.GetWindow();
 
-    if (Keyboard::isHeld(glfwWND, Boron::Keys::LeftShift))
-    {
+    if (Keyboard::isHeld(glfwWND, Boron::Keys::LeftShift)) {
         speed = 100.0f * deltaTime;
     }
 
@@ -45,7 +44,7 @@ void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
         float x = -Mouse::getDeltaY() * sensitivity;
         float y = Mouse::getDeltaX() * sensitivity;
 
-        Cam.SetRotationX(std::clamp(Cam.GetRotationVector().x() + x, DegreesToRadians(-89.9f), DegreesToRadians(89.9f)));
+        Cam.SetRotationX(std::clamp(Cam.getRotationVector().x() + x, DegreesToRadians(-89.9f), DegreesToRadians(89.9f)));
         Cam.AdjustRotation(0.0f, y, 0.0f);
     }
 
@@ -53,10 +52,9 @@ void CameraControl::MakeCameraControls(Window& wnd, float deltaTime)
 
 BML::Matrix4x4 CameraControl::GetViewMatrix(const Camera& cam)
 {
-    return cam.GetViewMatrix();
+    return cam.getViewMatrix();
 }
 
-BML::Matrix4x4 CameraControl::GetProjectionMatrix(const Camera& cam, float aspectRatio)
-{
-    return cam.GetProjectionMatrix();
+BML::Matrix4x4 CameraControl::GetProjectionMatrix(const Camera& cam, float aspectRatio) {
+    return cam.getProjectionMatrix();
 }

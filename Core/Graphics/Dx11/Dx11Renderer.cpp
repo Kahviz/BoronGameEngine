@@ -782,8 +782,8 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
     lcb.lightRange = 20.0f;
 
     // Camera Matrix
-    BML::Matrix4x4 mat = camera.GetViewMatrix();
-    BML::Matrix4x4 projMat = camera.GetProjectionMatrix();
+    BML::Matrix4x4 mat = camera.getViewMatrix();
+    BML::Matrix4x4 projMat = camera.getProjectionMatrix();
 
     XMMATRIX proj = XMMATRIX(
         XMVectorSet(projMat(0, 0), projMat(0, 1), projMat(0, 2), projMat(0, 3)),

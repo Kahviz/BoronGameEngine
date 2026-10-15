@@ -16,14 +16,14 @@ void Camera::SetProjectionValues(float fovDegrees, float aspectRatio, float near
     this->projectionMatrix = Matrix4x4PerspectiveFovLH(fovRadians, aspectRatio, nearZ, farZ);
 }
 
-const BML::Matrix4x4& Camera::GetViewMatrix() const {
+const BML::Matrix4x4& Camera::getViewMatrix() const {
     return this->viewMatrix;
 }
-const BML::Matrix4x4& Camera::GetProjectionMatrix() const { return this->projectionMatrix; }
-const BML::Vector4& Camera::GetPositionVector() const { return this->posVector; }
-const BML::Vector3& Camera::GetPositionVector3() const { return this->pos; }
-const BML::Vector4& Camera::GetRotationVector() const { return this->rotVector; }
-const BML::Vector3& Camera::GetRotationVector3() const { return this->rot; }
+const BML::Matrix4x4& Camera::getProjectionMatrix() const { return this->projectionMatrix; }
+const BML::Vector4& Camera::getPositionVector() const { return this->posVector; }
+const BML::Vector3& Camera::getPositionVector3() const { return this->pos; }
+const BML::Vector4& Camera::getRotationVector() const { return this->rotVector; }
+const BML::Vector3& Camera::getRotationVector3() const { return this->rot; }
 
 void Camera::SetPosition(const BML::Vector4& pos)
 {
@@ -108,7 +108,7 @@ void Camera::AdjustRotation(float x, float y, float z)
     this->UpdateViewMatrix();
 }
 
-BML::Vector3 Camera::GetForward() const
+BML::Vector3 Camera::getForward() const
 {
     float pitch = rot.x();  // X
     float yaw = rot.y();    // Y
@@ -123,8 +123,7 @@ BML::Vector3 Camera::GetForward() const
     return forward;
 }
 
-BML::Vector3 Camera::GetRight() const
-{
+BML::Vector3 Camera::getRight() const {
     float yaw = rot.y();
 
     BML::Vector3 right;
@@ -137,17 +136,15 @@ BML::Vector3 Camera::GetRight() const
     return right;
 }
 
-BML::Vector3 Camera::GetUp() const
-{
+BML::Vector3 Camera::getUp() const {
     return BML::Vector3(0.0f, 1.0f, 0.0f);
 }
 
-void Camera::UpdateViewMatrix()
-{
+void Camera::UpdateViewMatrix() {
     BML::Vector3 eye = pos;
-    BML::Vector3 forwardDir = GetForward();
+    BML::Vector3 forwardDir = getForward();
     BML::Vector3 target = eye + forwardDir;
-    BML::Vector3 up = GetUp();
+    BML::Vector3 up = getUp();
 
     BML::Vector3 zaxis = (target - eye);
     zaxis.normalize();

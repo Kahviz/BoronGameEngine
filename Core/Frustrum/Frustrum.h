@@ -9,13 +9,20 @@ namespace FrustumSpace {
     };
 
     struct Frustum {
-        Plane planes[6];
+        Plane topFace;
+        Plane bottomFace;
+
+        Plane rightFace;
+        Plane leftFace;
+
+        Plane farFace;
+        Plane nearFace;
     } m_frustrum;
 }
 
 class Frustum {
 public:
-    FrustumSpace::Frustum& getFrustrum();
+    const FrustumSpace::Frustum& getFrustrum();
     void setFrustrum(const FrustumSpace::Frustum& p_frustrum);
 private:
     

@@ -927,7 +927,7 @@ void VulkanRender::updateUniformBuffer(
         ubo.UsesTexture = true;
     }
 
-    ubo.view = m_Camera.GetViewMatrix().transposed();
+    ubo.view = m_Camera.getViewMatrix().transposed();
     float aspect = -1.0f;
 
     #if INEDITOR == 1
