@@ -2,7 +2,7 @@
 #include "Frustrum.h"
 #include "Frustrum.h"
 
-FrustumSpace::Frustum& Frustum::getFrustrum() {
+[[nodiscard]] FrustumSpace::Frustum& Frustum::getFrustrum() {
 	return FrustumSpace::m_frustrum;
 }
 
