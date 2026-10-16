@@ -3,10 +3,8 @@
 #include <string>
 #include <Logger/Logger.h>
 
-namespace ImGui
-{
-    inline void SliderFloatAndInputFloat(const char* name, float& value)
-    {
+namespace ImGui {
+    inline void SliderFloatAndInputFloat(const char* name, float& value) {
         std::string sliderId = std::string(name) + "##Slider";
         std::string inputId = std::string(name) + "##Input";
 
@@ -14,6 +12,7 @@ namespace ImGui
         ImGui::InputFloat(inputId.c_str(), &value);
     }
 }
+
 void Style::CreateImGuiStyle() {
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4* colors = style.Colors;
@@ -29,7 +28,7 @@ void Style::CreateImGuiStyle() {
         colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.08f, 0.08f, 1.0f);
         colors[ImGuiCol_Tab] = ImVec4(0.12f, 0.12f, 0.12f, 1.0f);
         colors[ImGuiCol_TabHovered] = ImVec4(0.18f, 0.18f, 0.18f, 1.0f);
-        colors[ImGuiCol_TabActive] = ImVec4(0.22f, 0.22f, 0.22f, 1.0f);
+        colors[ImGuiCol_TabSelected] = ImVec4(0.22f, 0.22f, 0.22f, 1.0f);
         colors[ImGuiCol_FrameBg] = ImVec4(0.055f, 0.055f, 0.055f, 1.0f);
         colors[ImGuiCol_FrameBgHovered] = ImVec4(0.065f, 0.065f, 0.065f, 1.0f);
         colors[ImGuiCol_FrameBgActive] = ImVec4(0.075f, 0.075f, 0.075f, 1.0f);
@@ -38,8 +37,7 @@ void Style::CreateImGuiStyle() {
         colors[ImGuiCol_Header] = ImVec4(0.06f, 0.06f, 0.06f, 1.0f);
         colors[ImGuiCol_HeaderHovered] = ImVec4(0.08f, 0.08f, 0.08f, 1.0f);
         colors[ImGuiCol_HeaderActive] = ImVec4(0.10f, 0.10f, 0.10f, 1.0f);
-    }
-    if (theme == Boron::Editor::ThemeType::Light) { //Impostor Theme
+    }else if (theme == Boron::Editor::ThemeType::Light) { //Impostor Theme
         colors[ImGuiCol_ButtonHovered] = ImVec4(0.45f, 0.45f, 0.45f, 1.0f);
         colors[ImGuiCol_Button] = ImVec4(0.50f, 0.50f, 0.50f, 1.0f);
         colors[ImGuiCol_ButtonActive] = ImVec4(0.40f, 0.40f, 0.40f, 1.0f);
@@ -50,7 +48,7 @@ void Style::CreateImGuiStyle() {
         colors[ImGuiCol_TitleBgActive] = ImVec4(0.45f, 0.45f, 0.45f, 1.0f);
         colors[ImGuiCol_Tab] = ImVec4(0.48f, 0.48f, 0.48f, 1.0f);
         colors[ImGuiCol_TabHovered] = ImVec4(0.40f, 0.40f, 0.40f, 1.0f);
-        colors[ImGuiCol_TabActive] = ImVec4(0.35f, 0.35f, 0.35f, 1.0f);
+        colors[ImGuiCol_TabSelected] = ImVec4(0.35f, 0.35f, 0.35f, 1.0f);
         colors[ImGuiCol_FrameBg] = ImVec4(0.54f, 0.54f, 0.54f, 1.0f);
         colors[ImGuiCol_FrameBgHovered] = ImVec4(0.48f, 0.48f, 0.48f, 1.0f);
         colors[ImGuiCol_FrameBgActive] = ImVec4(0.42f, 0.42f, 0.42f, 1.0f);

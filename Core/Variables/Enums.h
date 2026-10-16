@@ -19,6 +19,12 @@ namespace Boron {
             Warning = 2,
             Error = 3
         };
+
+        enum class VolumeType : uint8_t {
+            None = 0,
+            Sphere = 1,
+            Cube = 2
+        };
 	}
     
 	namespace Editor {

@@ -936,6 +936,7 @@ void VulkanRender::updateUniformBuffer(
     #if INEDITOR == 0
         aspect = (float)screen_width / (float)screen_height;
     #endif
+
     ubo.proj = CreateVulkanPerspective(
         45.0f * PI / 180.0f,
         aspect,
