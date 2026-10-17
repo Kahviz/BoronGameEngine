@@ -5,7 +5,6 @@
 
 int screen_width = 800;
 int screen_height = 400;
-float zFar = 1000.0f;
 extern float viewport_width = 400.0f;
 extern float viewport_height = 200.0f;
 

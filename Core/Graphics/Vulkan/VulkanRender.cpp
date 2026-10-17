@@ -19,14 +19,14 @@
 #include "Components.h"
 #include "Texture.h"
 #include "backends/BoronGui_implVulkan.h"
-#include <BoronGui.h>
+#include "BoronGui.h"
+#include "Camera/Camera.h"
 
 bool VulkanRender::Init(GLFWwindow* window) {
     float AspectX = (float)screen_width;
     float AspectY = (float)screen_height;
     float Aspect = AspectX / AspectY;
-
-    m_Camera.SetProjectionValues(g_FOV, Aspect, 0.0f, 1000.0f);
+    m_Camera.SetProjectionValues(g_FOV, Aspect, ZNEAR, ZFAR);
 
     CreateInfo("Vulkan Init Started!");
     viewportTexture = std::make_unique<Texture>();
@@ -387,8 +387,7 @@ uint32_t VulkanRender::GetImageIndex() {
 }
 
 void VulkanRender::DrawMeshesForRecordCommandBuffer(VkCommandBuffer& cmd) {
-    for (const auto& drawCmd : drawCommands)
-    {
+    for (const auto& drawCmd : drawCommands) {
         bool hasTexture = drawCmd.usesTexture;
 
         if (hasTexture)
@@ -933,15 +932,18 @@ void VulkanRender::updateUniformBuffer(
     #if INEDITOR == 1
         aspect = (float)viewport_width / (float)viewport_height;
     #endif
+
     #if INEDITOR == 0
         aspect = (float)screen_width / (float)screen_height;
     #endif
+
+    FRUSTRUM.createFrustumFromCamera(m_Camera, aspect, g_FOV, ZNEAR, ZFAR);
 
     ubo.proj = CreateVulkanPerspective(
         45.0f * PI / 180.0f,
         aspect,
         0.1f,
-        zFar
+        ZFAR
     );
 
     ubo.lightSpaceMatrix = lightSpaceMatrix;
@@ -960,18 +962,20 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity) {
         return false;
     }
     auto& transform = ecs.GetComponent<TransformComponent>(entity);
+
+    SphereVolume sphereVolume = {};
+    sphereVolume.m_pos = transform.transform.Position;
+
+    sphereVolume.m_radius = std::max({ transform.transform.Size.x(),transform.transform.Size.y(),transform.transform.Size.z() });
+
+    if (!FRUSTRUM.intersects(sphereVolume)) {
+        return true;
+    } //FrustrumCulling
+
     auto& color = ecs.GetComponent<ColorComponent>(entity);
     auto& mesh = ecs.GetComponent<ObjectComponent>(entity);
 
-    updateUniformBuffer(
-        ecs,
-        entity,
-        entity,
-        transform.transform.Size,
-        transform.transform.Orientation,
-        transform.transform.Position,
-        color.color
-    );
+    updateUniformBuffer(ecs, entity, entity, transform.transform.Size, transform.transform.Orientation, transform.transform.Position, color.color);
 
     DrawCommand cmd{};
 
@@ -1215,7 +1219,7 @@ void VulkanRender::ClearBuffer(float r, float b, float g) {
     clearValues[1].depthStencil = { 1.0f, 0 };
 }
 
-void VulkanRender::DrawFrame(ECS& ecs,float deltaTime) {
+void VulkanRender::DrawFrame(ECS& ecs, float deltaTime) {
     uint32_t maxObjectIndex = 0;
     bool hasEntities = false;
 
@@ -1227,8 +1231,7 @@ void VulkanRender::DrawFrame(ECS& ecs,float deltaTime) {
         }
     );
 
-    if (hasEntities && maxObjectIndex >= m_CurrentObjectCount)
-    {
+    if (hasEntities && maxObjectIndex >= m_CurrentObjectCount) {
         const uint32_t newSize = Max(m_CurrentObjectCount * 2, maxObjectIndex + 1);
 
         ReallocateUniformBuffer(newSize,&ecs);

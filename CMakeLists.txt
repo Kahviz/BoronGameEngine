@@ -258,7 +258,15 @@ add_executable(BoronEngine
     
     #Icon
     BoronEngine.rc
-  "Core/Instances/Instances/Mesh/Mesh.cpp" "Core/Frustrum/Frustrum.h" "Core/BoronPhysics/Volume/Volume.h" "Core/BoronPhysics/Volume/SphereVolume.h")
+
+    #Unsorted
+    Core/Instances/Instances/Mesh/Mesh.cpp
+    Core/Frustrum/Frustrum.h
+    Core/Frustrum/Frustrum.cpp
+    Core/BoronPhysics/Volume/Volume.h
+    Core/BoronPhysics/Volume/SphereVolume.h
+    Core/BoronPhysics/Volume/SphereVolume.cpp
+)
 
 if(WIN32)
     target_sources(BoronEngine PRIVATE

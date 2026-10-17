@@ -1,6 +1,8 @@
 #pragma once
 
-#include <BoronMath/Boronmath.h>
+#include "BoronMath/Boronmath.h"
+#include "BoronPhysics/Volume/SphereVolume.h"
+#include "Camera/Camera.h"
 
 namespace FrustumSpace {
     struct Plane {
@@ -17,13 +19,17 @@ namespace FrustumSpace {
 
         Plane farFace;
         Plane nearFace;
-    } m_frustrum;
+    };
+
+    inline Frustum m_frustrum{};
 }
 
 class Frustum {
 public:
     const FrustumSpace::Frustum& getFrustrum();
     void setFrustrum(const FrustumSpace::Frustum& p_frustrum);
+    void createFrustumFromCamera(const Camera& p_camera, float p_aspect, float p_fovY, float p_zNear, float p_zFar);
+    bool intersects(const SphereVolume& p_sphere) const;
 private:
     
 };

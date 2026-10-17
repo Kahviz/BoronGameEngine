@@ -34,7 +34,6 @@ namespace fs = std::filesystem;
 
 extern int screen_width;
 extern int screen_height;
-extern float zFar;
 extern float viewport_width;
 extern float viewport_height;
 
