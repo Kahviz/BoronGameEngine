@@ -137,7 +137,9 @@ BML::Vector3 Camera::getRight() const {
 }
 
 BML::Vector3 Camera::getUp() const {
-    return BML::Vector3(0.0f, 1.0f, 0.0f);
+    BML::Vector3 up = getForward().cross(getRight());
+    up.normalize();
+    return up;
 }
 
 void Camera::UpdateViewMatrix() {

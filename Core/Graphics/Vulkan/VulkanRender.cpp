@@ -920,6 +920,7 @@ void VulkanRender::updateUniformBuffer(
         color.y() / 255.0f,
         color.z() / 255.0f
     );
+
     ubo.UsesTexture = false;
     if (ecs.HasComponent<TextureComponent>(entity)) {
         const Texture* tex = ecs.GetComponent<TextureComponent>(entity).texture;
@@ -937,12 +938,12 @@ void VulkanRender::updateUniformBuffer(
         aspect = (float)screen_width / (float)screen_height;
     #endif
 
-    FRUSTRUM.createFrustumFromCamera(m_Camera, aspect, g_FOV, ZNEAR, ZFAR);
+    FRUSTRUM.createFrustumFromCamera(m_Camera, aspect, tanf(FOVY * 0.5f), ZNEAR, ZFAR);
 
     ubo.proj = CreateVulkanPerspective(
-        45.0f * PI / 180.0f,
+        tanf(FOVY * 0.5f),
         aspect,
-        0.1f,
+        ZNEAR,
         ZFAR
     );
 
@@ -963,19 +964,19 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity) {
     }
     auto& transform = ecs.GetComponent<TransformComponent>(entity);
 
-    SphereVolume sphereVolume = {};
-    sphereVolume.m_pos = transform.transform.Position;
-
-    sphereVolume.m_radius = std::max({ transform.transform.Size.x(),transform.transform.Size.y(),transform.transform.Size.z() });
-
-    if (!FRUSTRUM.intersects(sphereVolume)) {
-        return true;
-    } //FrustrumCulling
-
     auto& color = ecs.GetComponent<ColorComponent>(entity);
     auto& mesh = ecs.GetComponent<ObjectComponent>(entity);
 
     updateUniformBuffer(ecs, entity, entity, transform.transform.Size, transform.transform.Orientation, transform.transform.Position, color.color);
+
+    SphereVolume sphereVolume = {};
+    sphereVolume.m_pos = transform.transform.Position;
+
+    sphereVolume.m_radius = std::max({ transform.transform.Size.x(),transform.transform.Size.y(),transform.transform.Size.z()}) * 1.1f;
+
+    if (!FRUSTRUM.intersects(sphereVolume)) {
+        return true;
+    }
 
     DrawCommand cmd{};
 
@@ -990,11 +991,7 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity) {
         && ecs.GetComponent<TextureComponent>(entity).texture != nullptr
         && ecs.GetComponent<TextureComponent>(entity).texture->IsLoaded();
 
-    cmd.modelMatrix = createModelMatrix(
-        transform.transform.Orientation,
-        transform.transform.Size,
-        transform.transform.Position
-    );
+    cmd.modelMatrix = createModelMatrix(transform.transform.Orientation, transform.transform.Size, transform.transform.Position);
 
     drawCommands.push_back(cmd);
 

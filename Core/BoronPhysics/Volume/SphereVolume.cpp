@@ -9,11 +9,8 @@ const Boron::Enums::VolumeType& SphereVolume::getType() {
 }
 
 bool SphereVolume::contains(const BML::Vec3& p_point) const {
-    const float dx = p_point.x() - m_pos.x();
-    const float dy = p_point.y() - m_pos.y();
-    const float dz = p_point.z() - m_pos.z();
-
-    float distSquared = dx * dx + dy * dy + dz * dz;
+    const BML::Vec3 diff = p_point - m_pos;
+    const float distSquared = diff.dot(diff);
 
     return distSquared <= m_radius * m_radius;
 }

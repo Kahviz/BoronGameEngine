@@ -6,6 +6,7 @@
 inline uint32_t SHADOW_MAP_SIZE = 8076;
 inline int SHADOW_MAP_UPDATE_INTERVAL = 2;
 inline float ZFAR = 1000.0f;
-inline float ZNEAR = 0.0f;
+inline float ZNEAR = 0.1f;
+inline float FOVY = 90.0f * PI / 180.0f;
 
 inline Frustum FRUSTRUM = {};
