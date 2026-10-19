@@ -38,6 +38,4 @@ public:
 
     void createFrustumFromCamera(const Camera& p_camera, float p_aspect, float p_fovY, float p_zNear, float p_zFar);
     bool intersects(const SphereVolume& p_sphere) const;
-private:
-    
 };
