@@ -801,7 +801,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 
     pContext->VSSetShader(pVS.Get(), nullptr, 0);
     pContext->PSSetShader(pPSNoTexture.Get(), nullptr, 0);
-
+     
     ecs.Each<TextureComponent, ObjectComponent, TransformComponent, ColorComponent>(
         [&](EntityECS entity, TextureComponent& textureComponent, ObjectComponent& objectComponent, TransformComponent& transformComponent, ColorComponent& colorComponent)
         {
