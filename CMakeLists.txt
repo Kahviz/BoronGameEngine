@@ -266,7 +266,7 @@ add_executable(BoronEngine
     Core/BoronPhysics/Volume/Volume.h
     Core/BoronPhysics/Volume/SphereVolume.h
     Core/BoronPhysics/Volume/SphereVolume.cpp
-)
+ "Core/BoronPhysics/Volume/CubeVolume.cpp" "Core/BoronPhysics/Volume/SphereVolume (2).h")
 
 if(WIN32)
     target_sources(BoronEngine PRIVATE
