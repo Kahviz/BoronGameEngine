@@ -8,7 +8,7 @@ public:
     SphereVolume() = default;
     ~SphereVolume() override = default;
 
-    const Boron::Enums::VolumeType& getType() override;
+    const Boron::Enums::VolumeType& getType() const override;
     bool contains(const BML::Vec3& p_point) const override;
     bool intersects(const Volume& p_other) const override;
 

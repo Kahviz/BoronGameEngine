@@ -9,7 +9,7 @@ public:
 	Volume() = default;
 	virtual ~Volume() = default;
 
-	virtual const Boron::Enums::VolumeType& getType() = 0;
+	virtual const Boron::Enums::VolumeType& getType() const = 0;
 	virtual bool contains(const BML::Vec3& point) const = 0;
 	virtual bool intersects(const Volume& other) const = 0;
 
