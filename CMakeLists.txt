@@ -266,7 +266,10 @@ add_executable(BoronEngine
     Core/BoronPhysics/Volume/Volume.h
     Core/BoronPhysics/Volume/SphereVolume.h
     Core/BoronPhysics/Volume/SphereVolume.cpp
- "Core/BoronPhysics/Volume/CubeVolume.cpp" "Core/BoronPhysics/Volume/SphereVolume (2).h")
+
+    Core/BoronPhysics/Volume/CubeVolume.cpp
+    Core/BoronPhysics/Volume/CubeVolume.h
+)
 
 if(WIN32)
     target_sources(BoronEngine PRIVATE
@@ -449,7 +452,6 @@ endforeach()
 
 #Compile shaders
 if(WIN32)
-
     list(LENGTH SHADER_FILES SHADER_COUNT)
 
     foreach(index RANGE ${SHADER_COUNT})
@@ -505,4 +507,3 @@ endif()
 if(MSVC)
     set(CMAKE_VS_NO_COMPILE_BATCHING ON)
 endif()
-
