@@ -11,4 +11,7 @@ public:
     const Boron::Enums::VolumeType& getType() const override;
     bool contains(const BML::Vec3& p_point) const override;
     bool intersects(const Volume& p_other) const override;
+
+    BML::Vec2 m_size{};
+    BML::Vec3 m_pos{};
 };
