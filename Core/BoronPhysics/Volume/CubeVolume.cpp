@@ -21,7 +21,7 @@ bool CubeVolume::intersects(const Volume& p_other) const {
 
     const CubeVolume& other = static_cast<const CubeVolume&>(p_other);
 
-    return std::abs(m_position.x - other.m_position.x) <= m_halfExtents.x + other.m_halfExtents.x &&
-        std::abs(m_position.y - other.m_position.y) <= m_halfExtents.y + other.m_halfExtents.y &&
-        std::abs(m_position.z - other.m_position.z) <= m_halfExtents.z + other.m_halfExtents.z;
+    return std::abs(m_pos.x() - other.m_pos.x()) <= m_pos.x() + other.m_pos.x() / 2 &&
+        std::abs(m_pos.y() - other.m_pos.y()) <= m_pos.y() + other.m_pos.y() / 2 &&
+        std::abs(m_pos.z() - other.m_pos.z()) <= m_pos.z() + other.m_pos.z() / 2;
 }
