@@ -1,9 +1,12 @@
 #pragma once
 
+#include <iostream>
+
 #include "BoronMath/Boronmath.h"
 #include "BoronPhysics/Volume/SphereVolume.h"
+#include "BoronPhysics/Volume/CubeVolume.h"
+
 #include "Camera/Camera.h"
-#include <iostream>
 
 namespace FrustumSpace {
     struct Plane {
@@ -38,4 +41,5 @@ public:
 
     void createFrustumFromCamera(const Camera& p_camera, float p_aspect, float p_fovY, float p_zNear, float p_zFar);
     bool intersects(const SphereVolume& p_sphere) const;
+    bool intersects(const CubeVolume& p_sphere) const;
 };

@@ -88,3 +88,7 @@ bool Frustum::intersects(const SphereVolume& p_sphere) const {
 
     return true;
 }
+
+bool Frustum::intersects(const CubeVolume& p_sphere) const {
+    return true;
+}

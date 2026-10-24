@@ -6,16 +6,16 @@ const Boron::Enums::VolumeType& CubeVolume::getType() const {
 
 bool CubeVolume::contains(const BML::Vec3& p_point) const {
     return
-        p_point.x >= m_position.x - m_halfExtents.x &&
-        p_point.x <= m_position.x + m_halfExtents.x &&
-        p_point.y >= m_position.y - m_halfExtents.y &&
-        p_point.y <= m_position.y + m_halfExtents.y &&
-        p_point.z >= m_position.z - m_halfExtents.z &&
-        p_point.z <= m_position.z + m_halfExtents.z; //thx google
+        p_point.x() >= m_pos.x() - m_size.x() / 2 &&
+        p_point.x() <= m_pos.x() + m_size.x() / 2 &&
+        p_point.y() >= m_pos.y() - m_size.y() / 2 &&
+        p_point.y() <= m_pos.y() + m_size.y() / 2 &&
+        p_point.z() >= m_pos.z() - m_size.z() / 2 &&
+        p_point.z() <= m_pos.z() + m_size.z() / 2;
 }
 
 bool CubeVolume::intersects(const Volume& p_other) const {
-    if (p_other.getType() != VolumeType::Cube) {
+    if (p_other.getType() != Boron::Enums::VolumeType::Cube) {
         return false;
     }
 
