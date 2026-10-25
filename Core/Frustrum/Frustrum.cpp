@@ -89,6 +89,33 @@ bool Frustum::intersects(const SphereVolume& p_sphere) const {
     return true;
 }
 
-bool Frustum::intersects(const CubeVolume& p_sphere) const {
+bool Frustum::intersects(const CubeVolume& p_cube) const {
+    const BML::Vec3 center = p_cube.m_pos;
+    const auto& size = p_cube.m_size;
+
+    const auto& frustum = FrustumSpace::m_frustrum;
+
+    const FrustumSpace::Plane* planes[] = {
+        &frustum.topFace,
+        &frustum.bottomFace,
+        &frustum.rightFace,
+        &frustum.leftFace,
+        &frustum.farFace,
+        &frustum.nearFace
+    };
+
+    for (const auto* plane : planes) {
+        const float distance = plane->normal.dot(center) - plane->distance;
+
+        const float radius =
+            std::abs(plane->normal.x()) * size.x() / 2.0f +
+            std::abs(plane->normal.y()) * size.y() / 2.0f +
+            std::abs(plane->normal.z()) * size.z() / 2.0f;
+
+        if (distance < -radius) {
+            return false;
+        }
+    }
+
     return true;
 }
