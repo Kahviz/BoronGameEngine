@@ -969,10 +969,10 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity) {
 
     updateUniformBuffer(ecs, entity, entity, transform.transform.Size, transform.transform.Orientation, transform.transform.Position, color.color);
 
-    SphereVolume sphereVolume = {};
+    CubeVolume sphereVolume = {};
     sphereVolume.m_pos = transform.transform.Position;
 
-    sphereVolume.m_radius = std::max({ transform.transform.Size.x(),transform.transform.Size.y(),transform.transform.Size.z()}) * 1.1f;
+    sphereVolume.m_size = transform.transform.Size;
 
     if (!FRUSTRUM.intersects(sphereVolume)) {
         return true;
