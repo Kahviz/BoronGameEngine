@@ -35,7 +35,8 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd) {
     float AspectX = screen_width;
     float AspectY = screen_height;
     float Aspect = AspectX / AspectY;
-    camera.SetProjectionValues(g_FOV, Aspect, zNear, 1000.0f);
+
+    camera.SetProjectionValues(FOVY, Aspect, ZFAR, ZFAR);
 
     CreateConstantBuffers();
     CreateShadowResources();
@@ -801,10 +802,31 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 
     pContext->VSSetShader(pVS.Get(), nullptr, 0);
     pContext->PSSetShader(pPSNoTexture.Get(), nullptr, 0);
-     
+    
+    float aspect = -1.0f;
+
+    #if INEDITOR == 1
+        aspect = (float)viewport_width / (float)viewport_height;
+    #endif
+
+    #if INEDITOR == 0
+        aspect = (float)screen_width / (float)screen_height;
+    #endif
+
+    FRUSTRUM.createFrustumFromCamera(camera, aspect, FOVY * 1.3f, ZNEAR, ZFAR);
+
     ecs.Each<TextureComponent, ObjectComponent, TransformComponent, ColorComponent>(
         [&](EntityECS entity, TextureComponent& textureComponent, ObjectComponent& objectComponent, TransformComponent& transformComponent, ColorComponent& colorComponent)
         {
+            CubeVolume cubeVolume = {};
+
+            cubeVolume.m_pos = transformComponent.transform.Position;
+            cubeVolume.m_size = transformComponent.transform.Size;
+
+            if (!FRUSTRUM.intersects(cubeVolume)) {
+                return true;
+            }
+
             ID3D11PixelShader* selectedPS = pPSNoTexture.Get();
 
             Texture* tex = textureComponent.texture;
