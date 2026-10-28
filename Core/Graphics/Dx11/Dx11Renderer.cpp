@@ -736,18 +736,15 @@ Dx11Renderer::~Dx11Renderer()
 {
 }
 
-Camera& Dx11Renderer::GetCamera()
-{
+Camera& Dx11Renderer::GetCamera() {
     return camera;
 }
 
-ID3D11Device* Dx11Renderer::GetDevice() noexcept
-{
+ID3D11Device* Dx11Renderer::GetDevice() noexcept {
     return pDevice.Get();
 }
 
-ID3D11DeviceContext* Dx11Renderer::GetpContext() noexcept
-{
+ID3D11DeviceContext* Dx11Renderer::GetpContext() noexcept {
     return pContext.Get();
 }
 
@@ -813,7 +810,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
         aspect = (float)screen_width / (float)screen_height;
     #endif
 
-    FRUSTRUM.createFrustumFromCamera(camera, aspect, FOVY * 1.3f, ZNEAR, ZFAR);
+    FRUSTRUM.createFrustumFromCamera(camera, aspect, FOVY * 1.5f, ZNEAR, ZFAR);
 
     ecs.Each<TextureComponent, ObjectComponent, TransformComponent, ColorComponent>(
         [&](EntityECS entity, TextureComponent& textureComponent, ObjectComponent& objectComponent, TransformComponent& transformComponent, ColorComponent& colorComponent)
