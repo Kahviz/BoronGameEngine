@@ -810,7 +810,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
         aspect = (float)screen_width / (float)screen_height;
     #endif
 
-    FRUSTRUM.createFrustumFromCamera(camera, aspect, FOVY * 1.5f, ZNEAR, ZFAR);
+    FRUSTRUM.createFrustumFromCamera(camera, aspect, FOVY * 1.3f, ZNEAR, ZFAR);
 
     ecs.Each<TextureComponent, ObjectComponent, TransformComponent, ColorComponent>(
         [&](EntityECS entity, TextureComponent& textureComponent, ObjectComponent& objectComponent, TransformComponent& transformComponent, ColorComponent& colorComponent)
@@ -878,9 +878,11 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 
                 D3D11_MAPPED_SUBRESOURCE msrVS;
                 HRESULT hr = pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
+
                 if (FAILED(hr)) {
                     CreateError("Failed to map VS constant buffer");
                 }
+
                 memcpy(msrVS.pData, &cb, sizeof(cb));
                 pContext->Unmap(pConstantBuffer.Get(), 0);
 

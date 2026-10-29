@@ -938,7 +938,7 @@ void VulkanRender::updateUniformBuffer(
         aspect = (float)screen_width / (float)screen_height;
     #endif
 
-    FRUSTRUM.createFrustumFromCamera(m_Camera, aspect, tanf(FOVY * 0.5f), ZNEAR, ZFAR);
+    FRUSTRUM.createFrustumFromCamera(m_Camera, aspect, FOVY * 1.3f, ZNEAR, ZFAR);
 
     ubo.proj = CreateVulkanPerspective(
         tanf(FOVY * 0.5f),
