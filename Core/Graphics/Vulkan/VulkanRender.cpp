@@ -962,6 +962,7 @@ bool VulkanRender::RenderAMesh(ECS& ecs, EntityECS entity) {
         CreateError("Missing rendering component");
         return false;
     }
+
     auto& transform = ecs.GetComponent<TransformComponent>(entity);
 
     auto& color = ecs.GetComponent<ColorComponent>(entity);
