@@ -11,6 +11,7 @@
 class BoronGui_implDX11 : public BoronGuiBackends::Backends {
 public:
     void Init() override;
+    void InitGraphics();
     void ReSizeViewport(GPUVector2 p_newSize) override;
     void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) override;
     void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) override;

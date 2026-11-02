@@ -4,6 +4,11 @@
 #if DIRECTX11 == 1
 void BoronGui_implDX11::Init() {
 	CreateInfo("Initing BoronGui DX11 backend!");
+	InitGraphics();
+}
+
+void BoronGui_implDX11::InitGraphics() {
+	
 }
 
 void BoronGui_implDX11::ReSizeViewport(GPUVector2 p_newSize) {
