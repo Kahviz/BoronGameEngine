@@ -3,19 +3,22 @@
 #include "GLOBALS.h"
 #include "BoronMathLibrary.h"
 
+#include "GraphicsBackends.h"
+
 #if DIRECTX11 == 1
     struct PerFrameStuct {
-
+        ID3D11RenderTargetView* renderTargetView = nullptr;
     };
 
     struct BoronGuiNeeds {
+        ID3D11Device* device = nullptr;
+        ID3D11DeviceContext* deviceContext = nullptr;
 
+        IDXGISwapChain* swapChain = nullptr;
     };
 #endif
 
 #if VULKAN == 1
-#include "Vulkan.h"
-
 struct PerFrameStuct {
     VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
 };
