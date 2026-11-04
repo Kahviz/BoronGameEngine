@@ -1,6 +1,8 @@
 #include "BoronGui_implDX11.h"
 #include "Backends.h"
 
+BoronGuiNeeds BoronGui_implDX11::s_boronGuiNeeds{};
+
 #if DIRECTX11 == 1
 void BoronGui_implDX11::Init() {
 	CreateInfo("Initing BoronGui DX11 backend!");
@@ -16,7 +18,7 @@ void BoronGui_implDX11::ReSizeViewport(GPUVector2 p_newSize) {
 }
 
 void BoronGui_implDX11::SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
-
+	s_boronGuiNeeds = p_boronGuiNeeds;
 }
 
 void BoronGui_implDX11::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {

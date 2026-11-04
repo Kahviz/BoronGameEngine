@@ -19,6 +19,6 @@ public:
     void UploadBatch(const std::vector<Vertex2d>& p_vertices, const std::vector<uint32_t>& p_indices) override;
     void DrawBatch() override;
 private:
-
+    static BoronGuiNeeds s_boronGuiNeeds;
 };
 #endif
