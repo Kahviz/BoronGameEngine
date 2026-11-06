@@ -11,7 +11,22 @@ void BoronGui_implDX11::Init() {
 }
 
 void BoronGui_implDX11::InitGraphics() {
-	
+    HRESULT hr = D3D11CreateDevice(
+        nullptr,
+        D3D_DRIVER_TYPE_HARDWARE,
+        nullptr,
+        D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+        nullptr,
+        0,
+        D3D11_SDK_VERSION,
+        &s_boronGuiNeeds.device,
+        nullptr,
+        &s_boronGuiNeeds.deviceContext
+    );
+
+    BGE_ASSERT_HRESULT(hr, "Failed to create DX11 device!");
+
+    CreateInfo("DX11 Device created successfully!");
 }
 
 void BoronGui_implDX11::ReSizeViewport(GPUVector2 p_newSize) {
