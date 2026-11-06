@@ -34,7 +34,6 @@ class Dx11Renderer
 {
 public:
     void InitDx11Renderer(HWND hWnd);
-    void DrawShadowMap(ECS& p_ecs, const XMMATRIX& p_lightView, const XMMATRIX& p_lightProj);
     void SetRenderTargetToScene();
     void SetRenderTargetToBackBuffer();
 
@@ -60,7 +59,7 @@ public:
     ID3D11ShaderResourceView* GetSceneSRV();
     ID3D11RenderTargetView* GetBackBufferRTV();
     ID3D11RenderTargetView* GetMainTarget() { return pTarget.Get(); }
-
+    IDXGISwapChain* getSwapchain();
     ID3D11DepthStencilView* GetDepthStencil() { return pDepthStencilView.Get(); }
     Texture* GetViewport() { return viewportTexture.get(); }
     //Shadows
@@ -121,8 +120,7 @@ private:
     ComPtr<ID3D11SamplerState> pShadowSampler;
     ComPtr<ID3D11Buffer> pShadowCB;
 
-    struct ShadowCB
-    {
+    struct ShadowCB {
         XMMATRIX lightViewProj;
         XMFLOAT3 lightPos;
         float padding;

@@ -97,16 +97,16 @@ ID3D11DepthStencilView* Dx11Adapter::GetDepthStencil() noexcept
 {
     return renderer->GetDepthStencil();
 }
-Texture* Dx11Adapter::GetViewport()
-{
+Texture* Dx11Adapter::GetViewport(){
     return renderer->GetViewport();
 }
-void Dx11Adapter::CleanUp()
-{
+
+void Dx11Adapter::CleanUp() {
     
 }
 void Dx11Adapter::ReSizeViewport(int width, int height)
 {
     renderer->ReSizeViewport(width, height);
 }
+
 #endif

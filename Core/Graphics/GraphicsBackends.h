@@ -16,4 +16,5 @@
 	#include "DX11.h"
 	using Microsoft::WRL::ComPtr;
 	#include "Dx11Renderer.h"
+	#include "Dx11Adapter.h"
 #endif

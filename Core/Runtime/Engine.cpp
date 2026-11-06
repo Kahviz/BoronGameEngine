@@ -188,6 +188,14 @@ int Engine::EngineRun() {
         boronGuiNeeds.renderPass = vk.GetRenderPass();
     #endif
 
+    #if DIRECTX11 == 1
+        auto& dx = static_cast<Dx11Adapter&>(window.GetGraphics().GetRenderer());
+
+        boronGuiNeeds.device = dx.GetDevice();
+        boronGuiNeeds.deviceContext = dx.GetContext();
+        boronGuiNeeds.swapChain = dx.GetRenderer()->getSwapchain();
+    #endif
+
     BoronGui::InitBoronGui(boronGuiNeeds);
 
     while (!glfwWindowShouldClose(glfwWND)) {

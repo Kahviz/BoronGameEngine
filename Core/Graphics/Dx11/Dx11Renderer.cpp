@@ -260,8 +260,7 @@ void Dx11Renderer::SetRenderTargetToBackBuffer() {
     pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
 }
 
-void Dx11Renderer::CreateDeviceAndSwapChain(int width, int height, HWND hWnd)
-{
+void Dx11Renderer::CreateDeviceAndSwapChain(int width, int height, HWND hWnd) {
     DXGI_SWAP_CHAIN_DESC scd = {};
     scd.BufferDesc.Width = width;
     scd.BufferDesc.Height = height;
@@ -322,7 +321,7 @@ void Dx11Renderer::CreateDeviceAndSwapChain(int width, int height, HWND hWnd)
         );
 
         if (FAILED(hr))
-            throw std::runtime_error("Failed to create D3D11 device and context");
+            CreateError("Failed to create D3D11 device and context");
     }
 }
 
@@ -726,6 +725,10 @@ ID3D11ShaderResourceView* Dx11Renderer::GetSceneSRV() {
 ID3D11RenderTargetView* Dx11Renderer::GetBackBufferRTV()
 {
     return pTarget.Get();
+}
+
+IDXGISwapChain* Dx11Renderer::getSwapchain() {
+    return pSwap.Get();
 }
 
 Dx11Renderer::Dx11Renderer()

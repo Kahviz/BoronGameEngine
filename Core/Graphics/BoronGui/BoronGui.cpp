@@ -26,7 +26,8 @@ void BoronGui::InitBoronGui(BoronGuiNeeds& p_boronGuiNeeds) {
 	#endif
 
 	#if DIRECTX11 == 1
-
+        m_backend = std::make_unique<BoronGui_implDX11>();
+        Inited = true;
 	#endif
 
 	if (Inited) {
