@@ -507,3 +507,7 @@ endif()
 if(MSVC)
     set(CMAKE_VS_NO_COMPILE_BATCHING ON)
 endif()
+
+target_compile_definitions(BoronEngine PRIVATE
+    BORONGUI_SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/Core/Graphics/BoronGui/Shaders"
+)
