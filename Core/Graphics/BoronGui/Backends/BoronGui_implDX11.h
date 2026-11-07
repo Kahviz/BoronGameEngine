@@ -20,5 +20,6 @@ public:
     void DrawBatch() override;
 private:
     static BoronGuiNeeds s_boronGuiNeeds;
+    static ComPtr<ID3D11Buffer> s_vertexBuffer;
 };
 #endif
