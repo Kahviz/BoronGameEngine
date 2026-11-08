@@ -47,8 +47,9 @@ void BoronGui_implDX11::InitShaders() {
     ComPtr<ID3DBlob> errorBlob;
 
     std::filesystem::path vertexShaderPath = std::filesystem::path(BORONGUI_SHADER_DIR) / "DX11" / "VertexShader.hlsl";
+    std::filesystem::path pixelShaderPath = std::filesystem::path(BORONGUI_SHADER_DIR) / "DX11" / "PixelShader.hlsl";
 
-    HRESULT hr = D3DCompileFromFile(
+    BGE_ASSERT_HRESULT(D3DCompileFromFile(
         vertexShaderPath.c_str(),
         nullptr,
         D3D_COMPILE_STANDARD_FILE_INCLUDE,
@@ -58,22 +59,19 @@ void BoronGui_implDX11::InitShaders() {
         0,
         &s_vertexShaderBlob,
         &errorBlob
-    );
+    ), "Failed to compile vertexShader");
 
-    if (FAILED(hr)) {
-        CreateError(std::format("Shader HRESULT: 0x{:08X}", (uint32_t)hr));
-
-        if (errorBlob) {
-            CreateError( (const char*)errorBlob->GetBufferPointer());
-        }
-
-        return;
-    }
-
-    if (!s_vertexShaderBlob) {
-        CreateError("Shader Blob is nullptr!");
-        return;
-    }
+    BGE_ASSERT_HRESULT(D3DCompileFromFile(
+        pixelShaderPath.c_str(),
+        nullptr,
+        D3D_COMPILE_STANDARD_FILE_INCLUDE,
+        "main",
+        "ps_5_0",
+        0,
+        0,
+        &s_pixelShaderBlob,
+        &errorBlob
+    ),"Failed to compile pixerShader");
 
     BGE_ASSERT_HRESULT(
         s_boronGuiNeeds.device->CreateVertexShader(
@@ -82,11 +80,22 @@ void BoronGui_implDX11::InitShaders() {
             nullptr,
             &s_vertexShader
         ),
-        "Failed to create Vertex Shader!"
+        "Failed to create vertexShader!"
+    );
+
+    BGE_ASSERT_HRESULT(
+        s_boronGuiNeeds.device->CreatePixelShader(
+            s_pixelShaderBlob->GetBufferPointer(),
+            s_pixelShaderBlob->GetBufferSize(),
+            nullptr,
+            &s_pixelShader
+        ),
+        "Failed to create pixelShader!"
     );
 
     CreateInfo("Vertex Shader compiled successfully!");
 }
+
 void BoronGui_implDX11::InitGraphics() {
     if (!s_boronGuiNeeds.device || !s_boronGuiNeeds.deviceContext) {
         CreateError("DX11 Device or Context is nullptr!");
