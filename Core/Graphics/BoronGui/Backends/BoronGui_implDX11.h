@@ -24,6 +24,7 @@ public:
 private:
     static BoronGuiNeeds s_boronGuiNeeds;
     static ComPtr<ID3D11Buffer> s_vertexBuffer;
+    static ComPtr<ID3D11Buffer> s_indexBuffer;
     static ComPtr<ID3D11InputLayout> s_inputLayout;
 
     static ComPtr<ID3D11VertexShader> s_vertexShader;

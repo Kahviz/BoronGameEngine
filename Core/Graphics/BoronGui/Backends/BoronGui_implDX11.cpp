@@ -7,6 +7,8 @@
 BoronGuiNeeds BoronGui_implDX11::s_boronGuiNeeds{};
 
 ComPtr<ID3D11Buffer> BoronGui_implDX11::s_vertexBuffer{};
+ComPtr<ID3D11Buffer> BoronGui_implDX11::s_indexBuffer{};
+
 ComPtr<ID3D11InputLayout> BoronGui_implDX11::s_inputLayout{};
 
 ComPtr<ID3D11VertexShader> BoronGui_implDX11::s_vertexShader{};
@@ -91,18 +93,31 @@ void BoronGui_implDX11::InitGraphics() {
         return;
     }
 
-    D3D11_BUFFER_DESC bufferDesc{};
+    D3D11_BUFFER_DESC vertexBufferDesc{};
 
-    bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    bufferDesc.ByteWidth = sizeof(Vertex2d) * 1000;
-    bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    vertexBufferDesc.ByteWidth = sizeof(Vertex2d) * 1000;
+    vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     BGE_ASSERT_HRESULT(s_boronGuiNeeds.device->CreateBuffer(
-        &bufferDesc,
+        &vertexBufferDesc,
         nullptr,
         &s_vertexBuffer
     ), "Failed to create vertexBuffer");
+
+    D3D11_BUFFER_DESC indexBufferDesc{};
+
+    indexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    indexBufferDesc.ByteWidth = sizeof(uint32_t) * 1000;
+    indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    indexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    BGE_ASSERT_HRESULT(s_boronGuiNeeds.device->CreateBuffer(
+        &indexBufferDesc,
+        nullptr,
+        &s_indexBuffer
+    ), "Failed to create indexBuffer");
 
     CreateInfo("BoronGui DX11 graphics init!");
 }
