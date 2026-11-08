@@ -2,6 +2,9 @@
 #include "GLOBALS.h"
 
 #if DIRECTX11 == 1
+#pragma comment(lib,"d3d11.lib")
+#pragma comment(lib,"d3dcompiler.lib")
+
 #include "GraphicsBackends.h"
 #include "Texture.h"
 
@@ -11,9 +14,7 @@
 #include <stdexcept>
 
 #include "Components.h"
-
-#pragma comment(lib,"d3d11.lib")
-#pragma comment(lib,"d3dcompiler.lib")
+#include "BoronGui.h"
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -931,12 +932,16 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
             }
         }
     );
+
+    SetRenderTargetToBackBuffer();
+    BoronGui::DrawWidgets();
 }
 
 void Dx11Renderer::ClearSceneBuffer(float r, float g, float b) {
-    if (!pContext || !pSceneRTV || !pSceneDepthStencilView)
+    if (!pContext || !pSceneRTV || !pSceneDepthStencilView) {
         return;
-
+    }
+    
     const float color[] = { r, g, b, 1.0f };
 
     pContext->ClearRenderTargetView(pSceneRTV.Get(), color);

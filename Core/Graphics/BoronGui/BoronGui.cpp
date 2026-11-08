@@ -35,6 +35,8 @@ void BoronGui::InitBoronGui(BoronGuiNeeds& p_boronGuiNeeds) {
 		m_backend->Init();
 
 		CreateInfo("Initing BoronGui");
+
+        m_inited = true;
 	}
 }
 
@@ -94,7 +96,7 @@ void BoronGui::DrawWidgets() {
         Borongui::Widget* widget = *it;
 
         if (!widget->m_enabled) {
-            return;
+            continue;
         }
 
         widget->m_isHovered = false;

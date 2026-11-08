@@ -16,11 +16,17 @@ public:
     void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) override;
     void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) override;
 
+    void SetScissorRect(const BML::Vec2& p_pos, const BML::Vec2& p_size);
+
     void UploadBatch(const std::vector<Vertex2d>& p_vertices, const std::vector<uint32_t>& p_indices) override;
     void DrawBatch() override;
 
     void InitInputLayout();
     void InitShaders();
+
+    void CreateBlendState();
+    void CreateRasterizerState();
+    void ReSizeViewport(const BML::Vec2& p_newSize);
 private:
     static BoronGuiNeeds s_boronGuiNeeds;
     static ComPtr<ID3D11Buffer> s_vertexBuffer;
@@ -32,5 +38,10 @@ private:
 
     static ComPtr<ID3DBlob> s_vertexShaderBlob;
     static ComPtr<ID3DBlob> s_pixelShaderBlob;
+
+    static UINT s_indexCount;
+
+    static ComPtr<ID3D11BlendState> s_blendState;
+    static ComPtr<ID3D11RasterizerState> s_rasterizerState;
 };
 #endif

@@ -486,45 +486,9 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
 
     frame.setPosition({ 100,100 });
     frame.setSize({ 200,200 });
-    frame.setColor({ 0,0,255,1 });
-
-    static Borongui::Frame frame2{};
-
-    frame2.setPosition({ 200,100 });
-    frame2.setSize({ 200,200 });
-    frame2.setColor({ 0,0,255,1 });
-    frame2.bringFront();
-    frame2.loadTexture(textures / "TestTexture.png", wnd->GetGraphics().GetRenderer());
-
-    static Borongui::Button button2{}; 
-
-    button2.setParent(frame);
-    
-    button2.setSize({ 100,100 });
-    button2.setColor({ 0,255,255,1 });
-    button2.setVisible(true);
-
-    frame.lockInitialization(true);
-    button2.lockInitialization(true);
-    frame2.lockInitialization(true);
-
-    Borongui::VerticalLayout verticalLayout{};
-
-    verticalLayout.setOwner(frame);
-    verticalLayout.setSpacing(frame.getSize().y() / 4);
-    verticalLayout.add(button2);
-    verticalLayout.update();
-
-    Borongui::HorizontalLayout horizontalLayout{};
-
-    horizontalLayout.setOwner(frame);
-    horizontalLayout.setSpacing(frame.getSize().x() / 4);
-    horizontalLayout.add(button2);
-    horizontalLayout.update();
+    frame.setColor({ 0,255,0,1 });
 
     BoronGui::SubmitWidget(frame);
-    BoronGui::SubmitWidget(frame2);
-    BoronGui::SubmitWidget(button2);
     
     makeGui.RenderPopUps(deltatime); //Here last so thay be rendered always and on top of everything
 #endif
