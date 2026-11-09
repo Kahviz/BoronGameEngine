@@ -42,7 +42,8 @@ void BoronGui_implDX11::Init() {
 void BoronGui_implDX11::InitInputLayout() {
     D3D11_INPUT_ELEMENT_DESC layout[] = {
          { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, pos), D3D11_INPUT_PER_VERTEX_DATA, 0},
-         { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(Vertex2d, color), D3D11_INPUT_PER_VERTEX_DATA, 0}
+         { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(Vertex2d, color), D3D11_INPUT_PER_VERTEX_DATA, 0},
+         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, uv), D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
     
     BGE_ASSERT_HRESULT(
