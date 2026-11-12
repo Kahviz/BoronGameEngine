@@ -11,6 +11,8 @@
 class BoronGui_implDX11 : public BoronGuiBackends::Backends {
 public:
     void Init() override;
+    void CreateViewportConstantBuffer();
+    void UpdateViewportConstantBuffer(GPUVector2 p_size);
     void InitGraphics();
     void ReSizeViewport(GPUVector2 p_newSize) override;
     void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) override;
@@ -43,5 +45,6 @@ private:
 
     static ComPtr<ID3D11BlendState> s_blendState;
     static ComPtr<ID3D11RasterizerState> s_rasterizerState;
+    static ComPtr<ID3D11Buffer> s_viewportConstantBuffer;
 };
 #endif

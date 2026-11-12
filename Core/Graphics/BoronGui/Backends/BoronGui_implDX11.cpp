@@ -23,6 +23,8 @@ ComPtr<ID3D11RasterizerState> BoronGui_implDX11::s_rasterizerState{};
 
 UINT BoronGui_implDX11::s_indexCount{};
 
+ComPtr<ID3D11Buffer> BoronGui_implDX11::s_viewportConstantBuffer{};
+
 #if DIRECTX11 == 1
 void BoronGui_implDX11::Init() {
     CreateInfo("Initing BoronGui DX11 backend!");
@@ -32,11 +34,51 @@ void BoronGui_implDX11::Init() {
         return;
     }
 
+    CreateViewportConstantBuffer();
     InitShaders();
     InitGraphics();
     CreateRasterizerState();
     CreateBlendState();
     InitInputLayout();
+}
+
+void BoronGui_implDX11::CreateViewportConstantBuffer() {
+    D3D11_BUFFER_DESC desc{};
+
+    desc.Usage = D3D11_USAGE_DYNAMIC;
+    desc.ByteWidth = sizeof(GPUVector2);
+    desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    BGE_ASSERT_HRESULT(
+        s_boronGuiNeeds.device->CreateBuffer(
+            &desc,
+            nullptr,
+            &s_viewportConstantBuffer
+        ), "Failed to create Viewport Constant Buffer!"
+    );
+}
+
+void BoronGui_implDX11::UpdateViewportConstantBuffer(GPUVector2 p_size) {
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+
+    BGE_ASSERT_HRESULT(
+        s_boronGuiNeeds.deviceContext->Map(
+            s_viewportConstantBuffer.Get(),
+            0,
+            D3D11_MAP_WRITE_DISCARD,
+            0,
+            &mapped
+        ), "Failed to map Viewport Constant Buffer!"
+    );
+
+    memcpy(mapped.pData, &p_size, sizeof(GPUVector2));
+
+    s_boronGuiNeeds.deviceContext->Unmap(s_viewportConstantBuffer.Get(), 0);
+
+    ID3D11Buffer* buffer = s_viewportConstantBuffer.Get();
+
+    s_boronGuiNeeds.deviceContext->VSSetConstantBuffers(0, 1, &buffer);
 }
 
 void BoronGui_implDX11::InitInputLayout() {
@@ -45,8 +87,8 @@ void BoronGui_implDX11::InitInputLayout() {
          { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(Vertex2d, color), D3D11_INPUT_PER_VERTEX_DATA, 0},
          { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, uv), D3D11_INPUT_PER_VERTEX_DATA, 0 },
          { "size", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, size), D3D11_INPUT_PER_VERTEX_DATA, 0},
-         { "guiPos", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, guiPos),D3D11_INPUT_PER_VERTEX_DATA, 0 },
-         { "textureID", 0, DXGI_FORMAT_R32_UINT, 0, offsetof(Vertex2d, textureID), D3D11_INPUT_PER_VERTEX_DATA, 0 }
+         { "textureID", 0, DXGI_FORMAT_R32_UINT, 0, offsetof(Vertex2d, textureID), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+         { "GUIPOS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, guiPos),D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
     
     BGE_ASSERT_HRESULT(
@@ -195,6 +237,8 @@ void BoronGui_implDX11::ReSizeViewport(GPUVector2 p_newSize) {
     viewport.MaxDepth = 1.0f;
 
     s_boronGuiNeeds.deviceContext->RSSetViewports(1, &viewport);
+
+    UpdateViewportConstantBuffer(p_newSize);
 }
 
 void BoronGui_implDX11::UploadBatch(const std::vector<Vertex2d>& p_vertices, const std::vector<uint32_t>& p_indices) {
@@ -269,6 +313,7 @@ void BoronGui_implDX11::DrawBatch() {
     UINT stride = sizeof(Vertex2d);
     UINT offset = 0;
 
+    s_boronGuiNeeds.deviceContext->VSSetConstantBuffers(0, 1, &s_viewportConstantBuffer);
     s_boronGuiNeeds.deviceContext->RSSetState(s_rasterizerState.Get());
 
     s_boronGuiNeeds.deviceContext->OMSetBlendState(s_blendState.Get(), nullptr, 0xFFFFFFFF);
