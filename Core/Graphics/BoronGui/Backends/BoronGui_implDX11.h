@@ -46,5 +46,7 @@ private:
     static ComPtr<ID3D11BlendState> s_blendState;
     static ComPtr<ID3D11RasterizerState> s_rasterizerState;
     static ComPtr<ID3D11Buffer> s_viewportConstantBuffer;
+
+    static GPUVector2 s_viewportSize;
 };
 #endif

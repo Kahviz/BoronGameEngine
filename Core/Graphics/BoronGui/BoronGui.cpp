@@ -113,7 +113,7 @@ void BoronGui::DrawWidgets() {
                 isDragging = true;
 
                 widget->m_previousZIndex = widget->m_zIndex;
-                widget->m_zIndex = biggestZindex;
+                widget->m_zIndex = biggestZindex + 1;
                 widget->m_isDragging = true;
                 widget->m_isClicked = true;
             }

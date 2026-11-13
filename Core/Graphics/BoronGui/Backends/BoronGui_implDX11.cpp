@@ -4,6 +4,7 @@
 
 #include "Backends.h"
 
+#if DIRECTX11 == 1
 BoronGuiNeeds BoronGui_implDX11::s_boronGuiNeeds{};
 
 ComPtr<ID3D11Buffer> BoronGui_implDX11::s_vertexBuffer{};
@@ -25,7 +26,8 @@ UINT BoronGui_implDX11::s_indexCount{};
 
 ComPtr<ID3D11Buffer> BoronGui_implDX11::s_viewportConstantBuffer{};
 
-#if DIRECTX11 == 1
+GPUVector2 BoronGui_implDX11::s_viewportSize{};
+
 void BoronGui_implDX11::Init() {
     CreateInfo("Initing BoronGui DX11 backend!");
 
@@ -35,6 +37,11 @@ void BoronGui_implDX11::Init() {
     }
 
     CreateViewportConstantBuffer();
+
+    if (s_viewportSize.x > 0 && s_viewportSize.y > 0) {
+        UpdateViewportConstantBuffer(s_viewportSize);
+    }
+
     InitShaders();
     InitGraphics();
     CreateRasterizerState();
@@ -46,31 +53,43 @@ void BoronGui_implDX11::CreateViewportConstantBuffer() {
     D3D11_BUFFER_DESC desc{};
 
     desc.Usage = D3D11_USAGE_DYNAMIC;
-    desc.ByteWidth = sizeof(GPUVector2);
+    desc.ByteWidth = 16;
     desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    BGE_ASSERT_HRESULT(
-        s_boronGuiNeeds.device->CreateBuffer(
-            &desc,
-            nullptr,
-            &s_viewportConstantBuffer
-        ), "Failed to create Viewport Constant Buffer!"
+    HRESULT hr = s_boronGuiNeeds.device->CreateBuffer(
+        &desc,
+        nullptr,
+        s_viewportConstantBuffer.GetAddressOf()
     );
+
+    if (FAILED(hr)) {
+        CreateError("CreateBuffer failed!");
+        return;
+    }
+
+    assert(s_viewportConstantBuffer.Get() != nullptr);
+
+    CreateInfo("Viewport Constant Buffer created!");
 }
 
 void BoronGui_implDX11::UpdateViewportConstantBuffer(GPUVector2 p_size) {
-    D3D11_MAPPED_SUBRESOURCE mapped{};
+    s_viewportSize = p_size;
 
-    BGE_ASSERT_HRESULT(
-        s_boronGuiNeeds.deviceContext->Map(
-            s_viewportConstantBuffer.Get(),
-            0,
-            D3D11_MAP_WRITE_DISCARD,
-            0,
-            &mapped
-        ), "Failed to map Viewport Constant Buffer!"
-    );
+    if (s_viewportConstantBuffer.Get() == nullptr) {
+        CreateInfo("s_viewportConstantBuffer.Get() == nullptr");
+        return;
+    }
+
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    
+    BGE_ASSERT_HRESULT(s_boronGuiNeeds.deviceContext->Map(
+        s_viewportConstantBuffer.Get(),
+        0,
+        D3D11_MAP_WRITE_DISCARD,
+        0,
+        &mapped
+    ), "Failed to map Viewport Constant Buffer");
 
     memcpy(mapped.pData, &p_size, sizeof(GPUVector2));
 
@@ -204,16 +223,14 @@ void BoronGui_implDX11::InitGraphics() {
         &s_indexBuffer
     ), "Failed to create indexBuffer");
 
-    CreateInfo("BoronGui DX11 graphics init!");
+    CreateInfo("BoronGui DX11 graphics init");
 }
 
 void BoronGui_implDX11::SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
 	s_boronGuiNeeds = p_boronGuiNeeds;
 }
 
-void BoronGui_implDX11::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
-
-}
+void BoronGui_implDX11::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {}
 
 void BoronGui_implDX11::SetScissorRect(const BML::Vec2& p_pos, const BML::Vec2& p_size) {
     D3D11_RECT rect{};
@@ -313,7 +330,9 @@ void BoronGui_implDX11::DrawBatch() {
     UINT stride = sizeof(Vertex2d);
     UINT offset = 0;
 
-    s_boronGuiNeeds.deviceContext->VSSetConstantBuffers(0, 1, &s_viewportConstantBuffer);
+    ID3D11Buffer* cb = s_viewportConstantBuffer.Get();
+    s_boronGuiNeeds.deviceContext->VSSetConstantBuffers(0, 1, &cb);
+
     s_boronGuiNeeds.deviceContext->RSSetState(s_rasterizerState.Get());
 
     s_boronGuiNeeds.deviceContext->OMSetBlendState(s_blendState.Get(), nullptr, 0xFFFFFFFF);
@@ -330,3 +349,15 @@ void BoronGui_implDX11::DrawBatch() {
     s_boronGuiNeeds.deviceContext->DrawIndexed(s_indexCount, 0, 0);
 }
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
