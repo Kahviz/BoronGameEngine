@@ -105,9 +105,11 @@ void BoronGui_implDX11::InitInputLayout() {
          { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, pos), D3D11_INPUT_PER_VERTEX_DATA, 0},
          { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(Vertex2d, color), D3D11_INPUT_PER_VERTEX_DATA, 0},
          { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, uv), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-         { "size", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, size), D3D11_INPUT_PER_VERTEX_DATA, 0},
-         { "textureID", 0, DXGI_FORMAT_R32_UINT, 0, offsetof(Vertex2d, textureID), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-         { "GUIPOS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, guiPos),D3D11_INPUT_PER_VERTEX_DATA, 0 }
+         { "BRIGHTNESS", 0, DXGI_FORMAT_R32_FLOAT, 0, offsetof(Vertex2d, brightness), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+         { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, size), D3D11_INPUT_PER_VERTEX_DATA, 0},
+         { "GUIPOS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, guiPos),D3D11_INPUT_PER_VERTEX_DATA, 0 },
+         { "ROUNDING", 0, DXGI_FORMAT_R32_FLOAT, 0, offsetof(Vertex2d, rounding), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+         { "TEXTUREID", 0, DXGI_FORMAT_R32_UINT, 0, offsetof(Vertex2d, textureID), D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
     
     BGE_ASSERT_HRESULT(
@@ -157,8 +159,7 @@ void BoronGui_implDX11::InitShaders() {
             s_vertexShaderBlob->GetBufferSize(),
             nullptr,
             &s_vertexShader
-        ),
-        "Failed to create vertexShader!"
+        ), "Failed to create vertexShader!"
     );
 
     BGE_ASSERT_HRESULT(
@@ -167,8 +168,7 @@ void BoronGui_implDX11::InitShaders() {
             s_pixelShaderBlob->GetBufferSize(),
             nullptr,
             &s_pixelShader
-        ),
-        "Failed to create pixelShader!"
+        ), "Failed to create pixelShader!"
     );
 
     CreateInfo("Vertex Shader compiled successfully!");
@@ -351,13 +351,4 @@ void BoronGui_implDX11::DrawBatch() {
 #endif
 
 
-
-
-
-
-
-
-
-
-
-
+//Do a destroy func because the members are static
