@@ -348,6 +348,10 @@ void BoronGui_implDX11::DrawBatch() {
 
     s_boronGuiNeeds.deviceContext->DrawIndexed(s_indexCount, 0, 0);
 }
+
+void BoronGui_implDX11::Destroy() {
+
+}
 #endif
 
 
