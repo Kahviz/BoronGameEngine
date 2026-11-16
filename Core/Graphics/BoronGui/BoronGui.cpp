@@ -53,9 +53,21 @@ void BoronGui::EndFrame() {
 	widgets.clear();
 }
 
+void BoronGui::Destroy() {
+    if (m_inited) {
+        m_backend->Destroy();
+    }
+    else {
+        CreateWarning("Cannot destroy borongui because its not inited");
+    }
+}
+
 void BoronGui::ReSizeViewport(GPUVector2 p_newSize) {
     if (m_inited) {
         m_backend->ReSizeViewport(p_newSize);
+    }
+    else {
+        CreateWarning("Cannot resize viewport because its not inited");
     }
 }
 
@@ -195,3 +207,6 @@ void BoronGui::DrawWidgets() {
     m_backend->UploadBatch(m_vertices, m_indicies);
     m_backend->DrawBatch();
 }
+
+
+

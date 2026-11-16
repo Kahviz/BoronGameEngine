@@ -19,6 +19,7 @@ public:
 	static void InitBoronGui(BoronGuiNeeds& p_boronGuiNeeds);
 	static void SubmitWidget(Borongui::Widget& p_widget);
 	static void EndFrame();
+	static void Destroy();
 	static void ReSizeViewport(GPUVector2 p_newSize);
 	static void DrawWidgets();
 private:

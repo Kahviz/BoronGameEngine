@@ -17,13 +17,12 @@ public:
     void ReSizeViewport(GPUVector2 p_newSize) override;
     void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) override;
     void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) override;
+    void Destroy() override;
 
     void SetScissorRect(const BML::Vec2& p_pos, const BML::Vec2& p_size);
 
     void UploadBatch(const std::vector<Vertex2d>& p_vertices, const std::vector<uint32_t>& p_indices) override;
     void DrawBatch() override;
-
-    void Destroy();
 
     void InitInputLayout();
     void InitShaders();

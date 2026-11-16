@@ -10,6 +10,7 @@ namespace BoronGuiBackends {
 		virtual ~Backends() = default;
 		virtual void ReSizeViewport(GPUVector2 p_newSize) = 0;
 		virtual void Init() = 0;
+		virtual void Destroy() = 0;
 		virtual void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) = 0;
 		virtual void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) = 0;
 		virtual void UploadBatch(const std::vector<Vertex2d>& p_vertices, const std::vector<uint32_t>& p_indices) = 0;

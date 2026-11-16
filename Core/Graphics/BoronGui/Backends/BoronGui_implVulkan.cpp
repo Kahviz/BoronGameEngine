@@ -109,6 +109,10 @@ void BoronGui_implVulkan::Init() {
     InitPipeline();
 }
 
+void BoronGui_implVulkan::Destroy() {
+    CreateInfo("Destroy() called succelsful");
+}
+
 void BoronGui_implVulkan::resizeDescriptorPool(uint32_t p_newMaxTextures) {
     s_currentObjectCount = p_newMaxTextures;
 

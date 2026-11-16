@@ -214,6 +214,8 @@ int Engine::EngineRun() {
 
     profiler.PrintInformation();
     
+    BoronGui::Destroy();
+
     return 0;
 }
 

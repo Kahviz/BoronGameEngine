@@ -350,9 +350,24 @@ void BoronGui_implDX11::DrawBatch() {
 }
 
 void BoronGui_implDX11::Destroy() {
+    s_boronGuiNeeds = {};
+    s_vertexBuffer.Reset();
+    s_indexBuffer.Reset();
+    s_inputLayout.Reset();
 
+    s_vertexShader.Reset();
+    s_pixelShader.Reset();
+
+    s_vertexShaderBlob.Reset();
+    s_pixelShaderBlob.Reset();
+
+    s_indexCount = 0;
+
+    s_blendState.Reset();
+    s_rasterizerState.Reset();
+    s_viewportConstantBuffer.Reset();
+
+    s_viewportSize = {};
+    CreateInfo("Destroy() called succelsful");
 }
 #endif
-
-
-//Do a destroy func because the members are static
