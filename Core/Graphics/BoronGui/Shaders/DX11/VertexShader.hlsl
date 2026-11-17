@@ -9,6 +9,7 @@ struct VS_INPUT {
     float2 uv : TEXCOORD;
     float2 size : SIZE;
     float2 guiPos : GUIPOS;
+    float rounding : ROUNDING;
 };
 
 struct VS_OUTPUT {
@@ -16,6 +17,7 @@ struct VS_OUTPUT {
     float4 color : COLOR;
     float2 uv : TEXCOORD;
     float2 size : SIZE;
+    float rounding : ROUNDING;
 };
 
 VS_OUTPUT main(VS_INPUT input) {
@@ -31,5 +33,7 @@ VS_OUTPUT main(VS_INPUT input) {
     output.color = input.color;
     output.uv = input.uv;
     output.size = input.size;
+    output.rounding = input.rounding;
+    
     return output;
 }

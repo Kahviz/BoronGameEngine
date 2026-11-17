@@ -28,6 +28,8 @@ ComPtr<ID3D11Buffer> BoronGui_implDX11::s_viewportConstantBuffer{};
 
 GPUVector2 BoronGui_implDX11::s_viewportSize{};
 
+std::vector<ID3D11ShaderResourceView*> BoronGui_implDX11::s_textures{};
+
 void BoronGui_implDX11::Init() {
     CreateInfo("Initing BoronGui DX11 backend!");
 

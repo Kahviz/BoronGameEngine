@@ -49,5 +49,7 @@ private:
     static ComPtr<ID3D11Buffer> s_viewportConstantBuffer;
 
     static GPUVector2 s_viewportSize;
+
+    static std::vector<ID3D11ShaderResourceView*> s_textures;
 };
 #endif
