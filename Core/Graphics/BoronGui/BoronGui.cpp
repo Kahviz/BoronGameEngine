@@ -207,6 +207,3 @@ void BoronGui::DrawWidgets() {
     m_backend->UploadBatch(m_vertices, m_indicies);
     m_backend->DrawBatch();
 }
-
-
-
