@@ -10,6 +10,7 @@ struct VS_INPUT {
     float2 size : SIZE;
     float2 guiPos : GUIPOS;
     float rounding : ROUNDING;
+    nointerpolation uint textureID : TEXTUREID;
 };
 
 struct VS_OUTPUT {
@@ -18,6 +19,7 @@ struct VS_OUTPUT {
     float2 uv : TEXCOORD;
     float2 size : SIZE;
     float rounding : ROUNDING;
+    nointerpolation uint textureID : TEXTUREID;
 };
 
 VS_OUTPUT main(VS_INPUT input) {
@@ -34,6 +36,7 @@ VS_OUTPUT main(VS_INPUT input) {
     output.uv = input.uv;
     output.size = input.size;
     output.rounding = input.rounding;
+    output.textureID = input.textureID;
     
     return output;
 }

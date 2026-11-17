@@ -4,6 +4,7 @@ struct PS_INPUT {
     float2 uv : TEXCOORD;
     float2 size : SIZE;
     float rounding : ROUNDING;
+    nointerpolation uint textureID : TEXTUREID;
 };
 
 float RoundedBoxSDF(float2 centerPos, float2 halfSize, float radius) {
