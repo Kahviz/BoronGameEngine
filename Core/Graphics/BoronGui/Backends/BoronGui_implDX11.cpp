@@ -3,6 +3,7 @@
 #include <filesystem>
 
 #include "Backends.h"
+#include "GuiTexture/GuiTextureManager.h"
 
 #if DIRECTX11 == 1
 BoronGuiNeeds BoronGui_implDX11::s_boronGuiNeeds{};
@@ -307,6 +308,10 @@ void BoronGui_implDX11::UploadBatch(const std::vector<Vertex2d>& p_vertices, con
     s_boronGuiNeeds.deviceContext->Unmap(s_indexBuffer.Get(), 0);
 
     s_indexCount = static_cast<UINT>(p_indices.size());
+
+    for (const Texture& texture : GuiTextureManager::getTextures()) {
+        s_textures.push_back(texture.GetSRV());
+    }
 }
 
 void BoronGui_implDX11::ReSizeViewport(const BML::Vec2& p_newSize) {
@@ -333,6 +338,9 @@ void BoronGui_implDX11::DrawBatch() {
     UINT offset = 0;
 
     ID3D11Buffer* cb = s_viewportConstantBuffer.Get();
+
+    s_boronGuiNeeds.deviceContext->PSSetShaderResources(0,static_cast<UINT>(s_textures.size()), s_textures.data());
+
     s_boronGuiNeeds.deviceContext->VSSetConstantBuffers(0, 1, &cb);
 
     s_boronGuiNeeds.deviceContext->RSSetState(s_rasterizerState.Get());
