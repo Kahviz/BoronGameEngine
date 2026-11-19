@@ -173,6 +173,10 @@ const float Borongui::Widget::getRounding() const {
 	return m_rounding;
 }
 
+void Borongui::Widget::setRounding(const float& p_rounding) {
+	m_rounding = p_rounding;
+}
+
 int Borongui::Widget::getZIndex() {
 	return m_zIndex;
 }

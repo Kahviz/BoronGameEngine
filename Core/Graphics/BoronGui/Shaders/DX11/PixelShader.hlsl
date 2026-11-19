@@ -1,4 +1,4 @@
-Texture2D textures[16] : register(t0);
+Texture2DArray textures : register(t0);
 SamplerState textureSampler : register(s0);
 
 struct PS_INPUT {
@@ -16,16 +16,22 @@ float RoundedBoxSDF(float2 centerPos, float2 halfSize, float radius) {
     return length(max(q, 0.0f)) + min(max(q.x, q.y), 0.0f) - radius;
 }
 
-float4 main(PS_INPUT input) : SV_TARGET {
-    float4 texColor = textures[0].Sample(textureSampler, input.uv);
+float4 main(PS_INPUT input) : SV_TARGET {    
+    float4 texColor = textures.Sample(textureSampler, float3(input.uv, input.textureID));
 
     float2 centerPos = (input.uv - 0.5f) * input.size;
-
     float2 halfSize = input.size * 0.5f;
 
-    float distance = RoundedBoxSDF(centerPos, halfSize, input.rounding);
+    float distance = RoundedBoxSDF(centerPos, halfSize, clamp(input.rounding, 0.0f, min(halfSize.x, halfSize.y)));
 
-    float alpha = 1.0f - smoothstep(0.0f, 1.0f, distance);
+    float aa = max(fwidth(distance), 0.0001f);
 
-    return texColor;
+    float alpha = 1.0f - smoothstep(-aa, aa, distance);
+        
+    if (input.textureID == 0) {
+        return input.color * alpha;
+    }
+    else {
+        return texColor * alpha;
+    }
 }

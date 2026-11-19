@@ -35,7 +35,10 @@ public:
     const BML::Vec4& getColor() const;
     const BML::Vec4& getClickColor() const;
     const BML::Vec4& getHoverColor() const;
+
     const float getRounding() const;
+    void setRounding(const float& p_rounding);
+
     int getZIndex();
 
     //vertices
