@@ -1,8 +1,7 @@
 #include "Camera.h"
 #include "GLOBALS.h"
 
-Camera::Camera()
-{
+Camera::Camera() {
     this->pos = BML::Vector3(0.0f, 0.0f, 0.0f);
     this->posVector = Vector3ToVector4(this->pos);
     this->rot = BML::Vector3(0.0f, 0.0f, 0.0f);
@@ -10,8 +9,7 @@ Camera::Camera()
     this->UpdateViewMatrix();
 }
 
-void Camera::SetProjectionValues(float fovDegrees, float aspectRatio, float nearZ, float farZ)
-{
+void Camera::SetProjectionValues(float fovDegrees, float aspectRatio, float nearZ, float farZ) {
     float fovRadians = DegreesToRadians(fovDegrees);
     this->projectionMatrix = Matrix4x4PerspectiveFovLH(fovRadians, aspectRatio, nearZ, farZ);
 }
@@ -25,22 +23,19 @@ const BML::Vector3& Camera::getPositionVector3() const { return this->pos; }
 const BML::Vector4& Camera::getRotationVector() const { return this->rotVector; }
 const BML::Vector3& Camera::getRotationVector3() const { return this->rot; }
 
-void Camera::SetPosition(const BML::Vector4& pos)
-{
+void Camera::SetPosition(const BML::Vector4& pos) {
     StoreVector3(&this->pos, pos);
     this->posVector = pos;
     this->UpdateViewMatrix();
 }
 
-void Camera::SetPosition(float x, float y, float z)
-{
+void Camera::SetPosition(float x, float y, float z) {
     this->pos = BML::Vector3(x, y, z);
     this->posVector = Vector3ToVector4(this->pos);
     this->UpdateViewMatrix();
 }
 
-void Camera::AdjustPosition(const BML::Vector4& pos)
-{
+void Camera::AdjustPosition(const BML::Vector4& pos) {
     this->posVector.x() += pos.x();
     this->posVector.y() += pos.y();
     this->posVector.z() += pos.z();
@@ -48,8 +43,7 @@ void Camera::AdjustPosition(const BML::Vector4& pos)
     this->UpdateViewMatrix();
 }
 
-void Camera::AdjustPosition(float x, float y, float z)
-{
+void Camera::AdjustPosition(float x, float y, float z) {
     BML::Vector3 vec3 = { x,y,z };
 
     this->pos += vec3;
@@ -58,40 +52,37 @@ void Camera::AdjustPosition(float x, float y, float z)
     this->UpdateViewMatrix();
 }
 
-void Camera::SetRotation(const BML::Vector4& rot)
-{
+void Camera::SetRotation(const BML::Vector4& rot) {
     this->rotVector = rot;
     StoreVector3(&this->rot, rot);
     this->UpdateViewMatrix();
 }
 
-void Camera::SetRotation(float x, float y, float z)
-{
+void Camera::SetRotation(float x, float y, float z) {
     this->rot = BML::Vector3(x, y, z);
     this->rotVector = Vector3ToVector4(this->rot);
     this->UpdateViewMatrix();
 }
-void Camera::SetRotationX(float x)
-{
+
+void Camera::SetRotationX(float x) {
     this->rot.x() = x;
     this->rotVector = Vector3ToVector4(this->rot);
     this->UpdateViewMatrix();
 }
-void Camera::SetRotationY(float y)
-{
+
+void Camera::SetRotationY(float y) {
     this->rot.y() = y;
     this->rotVector = Vector3ToVector4(this->rot);
     this->UpdateViewMatrix();
 }
-void Camera::SetRotationZ(float z)
-{
+
+void Camera::SetRotationZ(float z) {
     this->rot.z() = z;
     this->rotVector = Vector3ToVector4(this->rot);
     this->UpdateViewMatrix();
 }
 
-void Camera::AdjustRotation(const BML::Vector4& rot)
-{
+void Camera::AdjustRotation(const BML::Vector4& rot) {
     this->rotVector.x() += rot.x();
     this->rotVector.y() += rot.y();
     this->rotVector.z() += rot.z();
@@ -99,8 +90,7 @@ void Camera::AdjustRotation(const BML::Vector4& rot)
     this->UpdateViewMatrix();
 }
 
-void Camera::AdjustRotation(float x, float y, float z)
-{
+void Camera::AdjustRotation(float x, float y, float z) {
     this->rot.x() += x;
     this->rot.y() += y;
     this->rot.z() += z;
@@ -108,8 +98,7 @@ void Camera::AdjustRotation(float x, float y, float z)
     this->UpdateViewMatrix();
 }
 
-BML::Vector3 Camera::getForward() const
-{
+BML::Vector3 Camera::getForward() const {
     float pitch = rot.x();  // X
     float yaw = rot.y();    // Y
 
