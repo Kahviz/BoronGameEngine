@@ -14,6 +14,7 @@ public:
     void CreateViewportConstantBuffer();
     void UpdateViewportConstantBuffer(GPUVector2 p_size);
     void InitGraphics();
+    void CreateSamplerState();
     void ReSizeViewport(GPUVector2 p_newSize) override;
     void SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) override;
     void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) override;
@@ -51,5 +52,6 @@ private:
     static GPUVector2 s_viewportSize;
 
     static std::vector<ID3D11ShaderResourceView*> s_textures;
+    static ComPtr<ID3D11SamplerState> s_samplerState;
 };
 #endif

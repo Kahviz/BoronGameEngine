@@ -54,10 +54,11 @@ void Borongui::Widget::loadTexture(const fs::path& p_path, IRenderer& p_renderer
 	Texture texture{};
 
 	#if VULKAN == 1
-		texture.LoadVK(p_path, p_renderer); //[ADD] a function which is just load it picks between vk and dx11
+		texture.LoadVK(p_path, p_renderer);
 	#endif
+	
 	#if DIRECTX11 == 1
-
+		texture.Load(p_path, p_renderer);
 	#endif
 
 	GuiTextureManager::getTextures().push_back(texture);

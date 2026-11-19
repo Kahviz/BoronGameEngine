@@ -30,12 +30,13 @@ ComPtr<ID3D11Buffer> BoronGui_implDX11::s_viewportConstantBuffer{};
 GPUVector2 BoronGui_implDX11::s_viewportSize{};
 
 std::vector<ID3D11ShaderResourceView*> BoronGui_implDX11::s_textures{};
+ComPtr<ID3D11SamplerState> BoronGui_implDX11::s_samplerState{};
 
 void BoronGui_implDX11::Init() {
     CreateInfo("Initing BoronGui DX11 backend!");
 
     if (!s_boronGuiNeeds.device || !s_boronGuiNeeds.deviceContext) {
-        CreateError("DX11 Device or Context is nullptr!");
+        CreateError("DX11 Device or Context is nullptr");
         return;
     }
 
@@ -45,6 +46,7 @@ void BoronGui_implDX11::Init() {
         UpdateViewportConstantBuffer(s_viewportSize);
     }
 
+    CreateSamplerState();
     InitShaders();
     InitGraphics();
     CreateRasterizerState();
@@ -52,6 +54,35 @@ void BoronGui_implDX11::Init() {
     InitInputLayout();
 }
 
+void BoronGui_implDX11::CreateSamplerState() {
+    D3D11_SAMPLER_DESC desc{};
+
+    desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+
+    desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+    desc.MipLODBias = 0.0f;
+    desc.MaxAnisotropy = 1;
+
+    desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+
+    desc.BorderColor[0] = 0.0f;
+    desc.BorderColor[1] = 0.0f;
+    desc.BorderColor[2] = 0.0f;
+    desc.BorderColor[3] = 0.0f;
+
+    desc.MinLOD = 0.0f;
+    desc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    BGE_ASSERT_HRESULT(
+        s_boronGuiNeeds.device->CreateSamplerState(
+            &desc,
+            &s_samplerState
+        ), "Failed to create samplerState"
+    );
+}
 void BoronGui_implDX11::CreateViewportConstantBuffer() {
     D3D11_BUFFER_DESC desc{};
 
@@ -60,20 +91,15 @@ void BoronGui_implDX11::CreateViewportConstantBuffer() {
     desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    HRESULT hr = s_boronGuiNeeds.device->CreateBuffer(
+    BGE_ASSERT_HRESULT(s_boronGuiNeeds.device->CreateBuffer(
         &desc,
         nullptr,
         s_viewportConstantBuffer.GetAddressOf()
-    );
-
-    if (FAILED(hr)) {
-        CreateError("CreateBuffer failed!");
-        return;
-    }
+    ), "CreateBuffer failed");
 
     assert(s_viewportConstantBuffer.Get() != nullptr);
 
-    CreateInfo("Viewport Constant Buffer created!");
+    CreateInfo("Viewport Constant Buffer created");
 }
 
 void BoronGui_implDX11::UpdateViewportConstantBuffer(GPUVector2 p_size) {
@@ -108,7 +134,6 @@ void BoronGui_implDX11::InitInputLayout() {
          { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, pos), D3D11_INPUT_PER_VERTEX_DATA, 0},
          { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(Vertex2d, color), D3D11_INPUT_PER_VERTEX_DATA, 0},
          { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, uv), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-         { "BRIGHTNESS", 0, DXGI_FORMAT_R32_FLOAT, 0, offsetof(Vertex2d, brightness), D3D11_INPUT_PER_VERTEX_DATA, 0 },
          { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, size), D3D11_INPUT_PER_VERTEX_DATA, 0},
          { "GUIPOS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(Vertex2d, guiPos),D3D11_INPUT_PER_VERTEX_DATA, 0 },
          { "ROUNDING", 0, DXGI_FORMAT_R32_FLOAT, 0, offsetof(Vertex2d, rounding), D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -263,6 +288,7 @@ void BoronGui_implDX11::ReSizeViewport(GPUVector2 p_newSize) {
 
 void BoronGui_implDX11::UploadBatch(const std::vector<Vertex2d>& p_vertices, const std::vector<uint32_t>& p_indices) {
     s_indexCount = 0;
+    s_textures.clear();
 
     D3D11_MAPPED_SUBRESOURCE mappedVertex{};
     D3D11_MAPPED_SUBRESOURCE mappedIndex{};
@@ -339,6 +365,8 @@ void BoronGui_implDX11::DrawBatch() {
 
     ID3D11Buffer* cb = s_viewportConstantBuffer.Get();
 
+    s_boronGuiNeeds.deviceContext->PSSetSamplers(0, 1, s_samplerState.GetAddressOf());
+
     s_boronGuiNeeds.deviceContext->PSSetShaderResources(0,static_cast<UINT>(s_textures.size()), s_textures.data());
 
     s_boronGuiNeeds.deviceContext->VSSetConstantBuffers(0, 1, &cb);
@@ -361,6 +389,7 @@ void BoronGui_implDX11::DrawBatch() {
 
 void BoronGui_implDX11::Destroy() {
     s_boronGuiNeeds = {};
+
     s_vertexBuffer.Reset();
     s_indexBuffer.Reset();
     s_inputLayout.Reset();
@@ -376,8 +405,11 @@ void BoronGui_implDX11::Destroy() {
     s_blendState.Reset();
     s_rasterizerState.Reset();
     s_viewportConstantBuffer.Reset();
+    s_samplerState.Reset();
 
     s_viewportSize = {};
-    CreateInfo("Destroy() called succelsful");
+    s_textures.clear();
+
+    CreateInfo("Destroy() called succelsfully");
 }
 #endif
