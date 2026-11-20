@@ -15,7 +15,5 @@ namespace BoronGuiBackends {
 		virtual void UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) = 0;
 		virtual void UploadBatch(const std::vector<Vertex2d>& p_vertices, const std::vector<uint32_t>& p_indices) = 0;
 		virtual void DrawBatch() = 0;
-	private:
-
 	};
 };

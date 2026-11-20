@@ -197,8 +197,7 @@ void Dx11Renderer::RenderShadowMap(ECS& ecs) {
             if (objectComponent.canDraw) {
                 const Mesh* mesh = objectComponent.OBJmesh.get();
 
-                if (!mesh)
-                {
+                if (!mesh) {
                     CreateError("Object has no mesh?!?");
                     return;
                 }
@@ -220,7 +219,9 @@ void Dx11Renderer::RenderShadowMap(ECS& ecs) {
 
                 D3D11_MAPPED_SUBRESOURCE msrVS;
                 pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrVS);
+
                 memcpy(msrVS.pData, &cb, sizeof(cb));
+
                 pContext->Unmap(pConstantBuffer.Get(), 0);
 
                 pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
@@ -239,22 +240,27 @@ void Dx11Renderer::RenderShadowMap(ECS& ecs) {
 
     pContext->VSSetShader(oldVS, &oldVSInstances, oldVSNumInstances);
     pContext->PSGetShader(&oldPS, &oldPSInstances, &oldPSNumInstances);
-    if (oldVS) oldVS->Release();
-    if (oldPS) oldPS->Release();
+
+    if (oldVS) {
+        oldVS->Release();
+    }
+
+    if (oldPS) {
+        oldPS->Release();
+    }
 
     if (oldRTV) {
         pContext->OMSetRenderTargets(1, &oldRTV, oldDSV);
         oldRTV->Release();
     }
-    if (oldDSV) oldDSV->Release();
+
+    if (oldDSV) {
+        oldDSV->Release();
+    }
 }
 
 void Dx11Renderer::SetRenderTargetToScene() {
-    pContext->OMSetRenderTargets(
-        1,
-        pSceneRTV.GetAddressOf(),
-        pSceneDepthStencilView.Get()
-    );
+    pContext->OMSetRenderTargets(1, pSceneRTV.GetAddressOf(), pSceneDepthStencilView.Get());
 }
 
 void Dx11Renderer::SetRenderTargetToBackBuffer() {
@@ -342,8 +348,7 @@ void Dx11Renderer::CreateViewport(int width, int height)
     pContext->RSSetViewports(1, &vp);
 }
 
-void Dx11Renderer::CreateDepthStencil(int width, int height)
-{
+void Dx11Renderer::CreateDepthStencil(int width, int height) {
     D3D11_TEXTURE2D_DESC depthDesc = {};
     depthDesc.Width = width;
     depthDesc.Height = height;
@@ -373,7 +378,9 @@ void Dx11Renderer::CreateDepthStencil(int width, int height)
     dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
 
     hr = pDevice->CreateDepthStencilState(&dsDesc, &pDepthStencilState);
-    if (FAILED(hr)) throw std::runtime_error("Failed to create depth stencil state");
+    if (FAILED(hr)) {
+        CreateError("Failed to create depth stencil state");
+    }
 
     pContext->OMSetDepthStencilState(pDepthStencilState.Get(), 1);
 }
@@ -757,14 +764,12 @@ void Dx11Renderer::EndFrame() {
         return;
     }
 
-    HRESULT hr = pSwap->Present(g_vSync, 0);
-
-    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
-        CreateError("DirectX device lost");
-    }
+    BGE_ASSERT_HRESULT(pSwap->Present(g_vSync, 0), "DirectX device lost");
 }
 
 void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
+    pContext->OMSetDepthStencilState(pDepthStencilState.Get(), 0);
+
     static int counter = 0;
     counter++;
 
@@ -804,7 +809,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
     pContext->VSSetShader(pVS.Get(), nullptr, 0);
     pContext->PSSetShader(pPSNoTexture.Get(), nullptr, 0);
     
-    float aspect = -1.0f;
+    float aspect = 1.0f;
 
     #if INEDITOR == 1
         aspect = (float)viewport_width / (float)viewport_height;
@@ -946,12 +951,7 @@ void Dx11Renderer::ClearSceneBuffer(float r, float g, float b) {
 
     pContext->ClearRenderTargetView(pSceneRTV.Get(), color);
 
-    pContext->ClearDepthStencilView(
-        pSceneDepthStencilView.Get(),
-        D3D11_CLEAR_DEPTH,
-        1.0f,
-        0
-    );
+    pContext->ClearDepthStencilView(pSceneDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 void Dx11Renderer::ClearBuffer(float r, float g, float b) {

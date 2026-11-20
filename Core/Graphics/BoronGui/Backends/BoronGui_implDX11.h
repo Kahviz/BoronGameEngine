@@ -31,6 +31,7 @@ public:
     void CreateBlendState();
     void CreateRasterizerState();
     void ReSizeViewport(const BML::Vec2& p_newSize);
+    void CreateDepthStencilState();
 private:
     static BoronGuiNeeds s_boronGuiNeeds;
     static ComPtr<ID3D11Buffer> s_vertexBuffer;
@@ -53,5 +54,7 @@ private:
 
     static std::vector<ID3D11ShaderResourceView*> s_textures;
     static ComPtr<ID3D11SamplerState> s_samplerState;
+
+    static ComPtr<ID3D11DepthStencilState> s_depthStencilState;
 };
 #endif

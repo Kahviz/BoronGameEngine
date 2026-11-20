@@ -13,8 +13,8 @@ public:
     void LoadMesh(const fs::path& p_file, MeshStruct& p_meshStruct);
     void Draw(MeshDrawStruct& p_meshDrawStruct) const override;
 private:
-    ID3D11Buffer* vb = nullptr;
-    ID3D11Buffer* ib = nullptr;
-    uint32_t indexCount = 0;
+    ID3D11Buffer* m_vb = nullptr;
+    ID3D11Buffer* m_ib = nullptr;
+    uint32_t m_indexCount = 0;
 };
 #endif

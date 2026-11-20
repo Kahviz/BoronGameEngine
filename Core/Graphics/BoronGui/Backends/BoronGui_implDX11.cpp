@@ -32,6 +32,8 @@ GPUVector2 BoronGui_implDX11::s_viewportSize{};
 std::vector<ID3D11ShaderResourceView*> BoronGui_implDX11::s_textures{};
 ComPtr<ID3D11SamplerState> BoronGui_implDX11::s_samplerState{};
 
+ComPtr<ID3D11DepthStencilState> BoronGui_implDX11::s_depthStencilState{};
+
 void BoronGui_implDX11::Init() {
     CreateInfo("Initing BoronGui DX11 backend!");
 
@@ -46,6 +48,7 @@ void BoronGui_implDX11::Init() {
         UpdateViewportConstantBuffer(s_viewportSize);
     }
 
+    CreateDepthStencilState();
     CreateSamplerState();
     InitShaders();
     InitGraphics();
@@ -152,7 +155,7 @@ void BoronGui_implDX11::InitInputLayout() {
 }
 
 void BoronGui_implDX11::InitShaders() {
-    ComPtr<ID3DBlob> errorBlob;
+    ComPtr<ID3DBlob> errorBlob{};
 
     std::filesystem::path vertexShaderPath = std::filesystem::path(BORONGUI_SHADER_DIR) / "DX11" / "VertexShader.hlsl";
     std::filesystem::path pixelShaderPath = std::filesystem::path(BORONGUI_SHADER_DIR) / "DX11" / "PixelShader.hlsl";
@@ -203,18 +206,27 @@ void BoronGui_implDX11::InitShaders() {
 }
 
 void BoronGui_implDX11::CreateBlendState() {
-    D3D11_BLEND_DESC blendDesc{};
+    D3D11_BLEND_DESC desc{};
+    desc.RenderTarget[0].BlendEnable = TRUE;
 
-    blendDesc.RenderTarget[0].BlendEnable = true;
-    blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-    blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-    blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
 
-    BGE_ASSERT_HRESULT(s_boronGuiNeeds.device->CreateBlendState(&blendDesc, &s_blendState),"Failed to create Blend State");
+    desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+    desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+
+    desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    desc.AlphaToCoverageEnable = FALSE;
+    desc.IndependentBlendEnable = FALSE;
+
+    BGE_ASSERT_HRESULT(
+        s_boronGuiNeeds.device->CreateBlendState(
+            &desc, &s_blendState
+        ), "Failed to create BlendState"
+    );
 }
 
 void BoronGui_implDX11::CreateRasterizerState() {
@@ -258,7 +270,9 @@ void BoronGui_implDX11::SetBoronGuiNeeds(BoronGuiNeeds& p_boronGuiNeeds) {
 	s_boronGuiNeeds = p_boronGuiNeeds;
 }
 
-void BoronGui_implDX11::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {}
+void BoronGui_implDX11::UpdatePerFrameOBJ(PerFrameStuct& p_perFrameStuct) {
+
+}
 
 void BoronGui_implDX11::SetScissorRect(const BML::Vec2& p_pos, const BML::Vec2& p_size) {
     D3D11_RECT rect{};
@@ -301,11 +315,11 @@ void BoronGui_implDX11::UploadBatch(const std::vector<Vertex2d>& p_vertices, con
         return;
     }
 
-    if (p_vertices.size() > 1000) { //for now
+    if (p_vertices.size() > 1000) {
         return;
     }
 
-    if (p_indices.size() > 1000) { //for now
+    if (p_indices.size() > 1000) {
         return;
     }
 
@@ -353,8 +367,26 @@ void BoronGui_implDX11::ReSizeViewport(const BML::Vec2& p_newSize) {
     s_boronGuiNeeds.deviceContext->RSSetViewports(1, &viewport);
 }
 
+void BoronGui_implDX11::CreateDepthStencilState() {
+    D3D11_DEPTH_STENCIL_DESC desc{};
+
+    desc.DepthEnable = FALSE;
+    desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    desc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+
+    desc.StencilEnable = FALSE;
+
+    BGE_ASSERT_HRESULT(
+        s_boronGuiNeeds.device->CreateDepthStencilState(
+            &desc,
+            &s_depthStencilState
+        ), "Failed to create BoronGui DepthStencilState"
+    );
+}
+
 void BoronGui_implDX11::DrawBatch() {
     if (s_indexCount == 0) {
+        CreateWarning("IndexCount is 0");
         return;
     }
 
@@ -364,6 +396,8 @@ void BoronGui_implDX11::DrawBatch() {
     UINT offset = 0;
 
     ID3D11Buffer* cb = s_viewportConstantBuffer.Get();
+
+    s_boronGuiNeeds.deviceContext->OMSetDepthStencilState(s_depthStencilState.Get(), 0);
 
     s_boronGuiNeeds.deviceContext->PSSetSamplers(0, 1, s_samplerState.GetAddressOf());
 
@@ -388,28 +422,29 @@ void BoronGui_implDX11::DrawBatch() {
 }
 
 void BoronGui_implDX11::Destroy() {
-    s_boronGuiNeeds = {};
-
-    s_vertexBuffer.Reset();
-    s_indexBuffer.Reset();
-    s_inputLayout.Reset();
+    s_textures.clear();
 
     s_vertexShader.Reset();
     s_pixelShader.Reset();
 
-    s_vertexShaderBlob.Reset();
-    s_pixelShaderBlob.Reset();
+    s_boronGuiNeeds = {};
+    s_viewportSize = {};
 
     s_indexCount = 0;
+
+    s_vertexBuffer.Reset();
+    s_indexBuffer.Reset();
+
+    s_inputLayout.Reset();
+
+    s_vertexShaderBlob.Reset();
+    s_pixelShaderBlob.Reset();
 
     s_blendState.Reset();
     s_rasterizerState.Reset();
     s_viewportConstantBuffer.Reset();
     s_samplerState.Reset();
 
-    s_viewportSize = {};
-    s_textures.clear();
-
-    CreateInfo("Destroy() called succelsfully");
+    CreateInfo("Destroy called succelsfully");
 }
 #endif

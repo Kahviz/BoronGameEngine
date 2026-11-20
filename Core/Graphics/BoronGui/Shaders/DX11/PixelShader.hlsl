@@ -16,7 +16,7 @@ float RoundedBoxSDF(float2 centerPos, float2 halfSize, float radius) {
     return length(max(q, 0.0f)) + min(max(q.x, q.y), 0.0f) - radius;
 }
 
-float4 main(PS_INPUT input) : SV_TARGET {    
+float4 main(PS_INPUT input) : SV_TARGET {
     float4 texColor = textures.Sample(textureSampler, float3(input.uv, input.textureID));
 
     float2 centerPos = (input.uv - 0.5f) * input.size;
@@ -31,7 +31,8 @@ float4 main(PS_INPUT input) : SV_TARGET {
     if (input.textureID == 0) {
         return input.color * alpha;
     }
-    else {
+    else
+    {
         return texColor * alpha;
     }
 }

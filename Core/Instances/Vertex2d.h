@@ -8,7 +8,7 @@
 
 struct Vertex2d {
     GPUVector2 pos = { 0,0 };
-    GPUVector4 color = { 0,0,0 };
+    GPUVector4 color = { 0,0,0,1 };
     GPUVector2 uv = { 0,0 };
     GPUVector2 size = { 0,0 };
     GPUVector2 guiPos = { 0,0 };
@@ -39,7 +39,7 @@ struct Vertex2d {
 
     Vertex2d(const GPUVector2& p)
         : pos(p),
-        color(1,0,0),
+        color(1,0,0,1),
         uv{ 0.0f, 0.0f },
         brightness(1.0f),
         size(100, 100),
@@ -49,11 +49,11 @@ struct Vertex2d {
 
     Vertex2d(const GPUVector2& p, const GPUVector2& uv_coords)
         : pos(p),
-        color(1,0,0),
+        color(1,0,0,1),
         uv{ uv_coords },
         brightness(1.0f),
         size(100, 100),
-        guiPos(100, 100)
+        guiPos(0, 0)
     {
     }
 

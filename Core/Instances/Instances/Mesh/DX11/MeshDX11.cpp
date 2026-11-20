@@ -73,9 +73,9 @@ void MeshBackend::LoadMesh(const fs::path& p_file, MeshStruct& p_meshStruct) {
         getIndicesMod().push_back(face.mIndices[2]);
     }
 
-    indexCount = static_cast<UINT>(getIndicesMod().size());
+    m_indexCount = static_cast<UINT>(getIndicesMod().size());
 
-    if (indexCount == 0) {
+    if (m_indexCount == 0) {
         CreateError("Mesh has no indices");
     }
 
@@ -87,37 +87,38 @@ void MeshBackend::LoadMesh(const fs::path& p_file, MeshStruct& p_meshStruct) {
     D3D11_SUBRESOURCE_DATA vsd{};
     vsd.pSysMem = getVerticesMod().data();
 
-    if (FAILED(p_meshStruct.device->CreateBuffer(&vbd, &vsd, &vb))) {
+    if (FAILED(p_meshStruct.device->CreateBuffer(&vbd, &vsd, &m_vb))) {
         CreateError("Failed to create Vertex buffer");
     }
 
     D3D11_BUFFER_DESC ibd{};
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    ibd.ByteWidth = sizeof(uint32_t) * indexCount;
+    ibd.ByteWidth = sizeof(uint32_t) * m_indexCount;
     ibd.Usage = D3D11_USAGE_DEFAULT;
 
     D3D11_SUBRESOURCE_DATA isd{};
     isd.pSysMem = getIndicesMod().data();
 
-    if (FAILED(p_meshStruct.device->CreateBuffer(&ibd, &isd, &ib))) {
+    if (FAILED(p_meshStruct.device->CreateBuffer(&ibd, &isd, &m_ib))) {
         CreateError("Failed to create index buffer");
     }
 }
 
 void MeshBackend::Draw(MeshDrawStruct& p_meshDrawStruct) const {
     static D3D_PRIMITIVE_TOPOLOGY lastTopology{};
-    D3D_PRIMITIVE_TOPOLOGY currentTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST; // Default topology, its for future that it can be changed
+    D3D_PRIMITIVE_TOPOLOGY currentTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
     UINT stride = sizeof(Vertex);
     UINT offset = 0;
 
-    p_meshDrawStruct.ctx->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
-    p_meshDrawStruct.ctx->IASetIndexBuffer(ib, DXGI_FORMAT_R32_UINT, 0);
+    p_meshDrawStruct.ctx->IASetVertexBuffers(0, 1, &m_vb, &stride, &offset);
+    p_meshDrawStruct.ctx->IASetIndexBuffer(m_ib, DXGI_FORMAT_R32_UINT, 0);
 
     if (lastTopology != currentTopology) {
         p_meshDrawStruct.ctx->IASetPrimitiveTopology(currentTopology);
         lastTopology = currentTopology; 
     }
-    p_meshDrawStruct.ctx->DrawIndexed(indexCount, 0, 0);
+
+    p_meshDrawStruct.ctx->DrawIndexed(m_indexCount, 0, 0);
 }
 #endif

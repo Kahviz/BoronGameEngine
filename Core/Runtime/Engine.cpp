@@ -457,73 +457,71 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
             Init = true;
         }
     }
-#if INEDITOR == 1
-    wnd->GetGraphics().SetRenderTargetToScene();
-    wnd->GetGraphics().ClearSceneBuffer(0.1f, 0.1f, 0.1f);
-#endif
+    #if INEDITOR == 1
+        wnd->GetGraphics().SetRenderTargetToScene();
+        wnd->GetGraphics().ClearSceneBuffer(0.1f, 0.1f, 0.1f);
+    #endif
 
-#if INEDITOR == 1
-    if (InProject && ImGuiInited) {
-        makeGui.MakeIMGui(
-            m_ecs,
-            *wnd,
-            reinterpret_cast<float*>(&Color3),
-            false,
-            this,
-            world,
-            &graphics.GetRenderer()
-        );
-        makeGui.MakeIMViewPort(*wnd);
-    }
-    else {
-        if (makeGui.MakeDashBoard(&graphics.GetRenderer())) {
-            CreateInfo("Opened a project!");
-            InProject = true;
-        }
-    }
-
-    BoronGui::ReSizeViewport({ static_cast<float>(screen_width), static_cast<float>(screen_height) });
-
-    static Borongui::Frame frame{};
-
-    frame.setPosition({ 100,100 });
-    frame.setSize({ 200,200 });
-    frame.setColor({ 0,255,0,1 });
-    frame.setRounding(20);
-    frame.lockInitialization(true);
-
-    frame.loadTexture(textures / "TestTexture.png", graphics.GetRenderer());
-
-    BoronGui::SubmitWidget(frame);
-
-    static Borongui::Frame frame2{};
-
-    frame2.setPosition({ 200,100 });
-    frame2.setSize({ 200,200 });
-    frame2.setColor({ 255,0,0,1 });
-    frame2.lockInitialization(true);
-
-    BoronGui::SubmitWidget(frame2);
-    
-    makeGui.RenderPopUps(deltatime); //Here last so thay be rendered always and on top of everything
-#endif
-
-#if VULKAN == 1
-    m_ecs.Each<TransformComponent, ObjectComponent>(
-        [&](EntityECS entity,
-            TransformComponent& transform,
-            ObjectComponent& object)
-        {
-            if (!object.canDraw)
-                return;
-
-            wnd->GetGraphics().RenderAMesh(
+    #if INEDITOR == 1
+        if (InProject && ImGuiInited) {
+            makeGui.MakeIMGui(
                 m_ecs,
-                entity
+                *wnd,
+                reinterpret_cast<float*>(&Color3),
+                false,
+                this,
+                world,
+                &graphics.GetRenderer()
             );
+            makeGui.MakeIMViewPort(*wnd);
         }
-    );
-#endif
+        else {
+            if (makeGui.MakeDashBoard(&graphics.GetRenderer())) {
+                CreateInfo("Opened a project!");
+                InProject = true;
+            }
+        }
+
+        BoronGui::ReSizeViewport({ static_cast<float>(screen_width), static_cast<float>(screen_height) });
+
+        static Borongui::Frame frame{};
+
+        frame.setPosition({ 100,100 });
+        frame.setSize({ 200,200 });
+        frame.setColor({ 0,255,0,0.5f });
+        frame.lockInitialization(true);
+
+        BoronGui::SubmitWidget(frame);
+
+        static Borongui::Frame frame2{};
+
+        frame2.setPosition({ 200,100 });
+        frame2.setSize({ 200,200 });
+        frame2.setColor({ 255,0,0,0.5f });
+        frame2.lockInitialization(true);
+
+        BoronGui::SubmitWidget(frame2);
+    
+        makeGui.RenderPopUps(deltatime); //Here last so thay be rendered always and on top of everything
+    #endif
+
+    #if VULKAN == 1
+        m_ecs.Each<TransformComponent, ObjectComponent>(
+            [&](EntityECS entity,
+                TransformComponent& transform,
+                ObjectComponent& object)
+            {
+                if (!object.canDraw)
+                    return;
+
+                wnd->GetGraphics().RenderAMesh(
+                    m_ecs,
+                    entity
+                );
+            }
+        );
+    #endif
+
     //Physics
     std::thread physicsThread([&]() {
         m_ecs.Each<PhysicsComponent>(

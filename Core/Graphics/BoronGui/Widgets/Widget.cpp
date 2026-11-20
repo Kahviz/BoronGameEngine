@@ -124,12 +124,9 @@ bool Borongui::Widget::setColor(const BML::Vec4& p_color, const bool& p_force) {
 	if (!m_initLocked || p_force) {
 		m_color = p_color;
 
-		GPUVector4 color(
-			m_color.x(),
-			m_color.y(),
-			m_color.z(),
-			m_color.w()
-		);
+		GPUVector4 color(m_color.x(), m_color.y(), m_color.z(), m_color.w());
+
+		std::cout << color << std::endl;
 
 		for (auto& vertex : m_vertices) {
 			vertex.color = color;
@@ -141,11 +138,13 @@ bool Borongui::Widget::setColor(const BML::Vec4& p_color, const bool& p_force) {
 
 bool Borongui::Widget::setClickColor(const BML::Vec4& p_color) {
 	m_clickColor = p_color;
+
 	return true;
 }
 
 bool Borongui::Widget::setHoverColor(const BML::Vec4& p_color) {
 	m_hoverColor = p_color;
+
 	return true;
 }
 
