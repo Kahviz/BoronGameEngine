@@ -1,15 +1,16 @@
 #include "Console.h"
+
 #include <iostream>
 #include <chrono>
 #include <ctime>
 #include <sstream>
 #include <iomanip>
 
-void Console::write(std::string text, Boron::Enums::ConsoleLineType type)
-{
+void Console::Write(std::string p_text, Boron::Enums::ConsoleLineType p_type) {
 	if (m_consoleLog.size() >= m_maxConsoleSize) {
 		m_consoleLog.erase(m_consoleLog.begin());
 	}
+
 	std::time_t now = std::time(nullptr);
 	std::tm localTime = *std::localtime(&now);
 
@@ -22,23 +23,31 @@ void Console::write(std::string text, Boron::Enums::ConsoleLineType type)
 		<< "]: ";
 
 	ConsoleLine consoleLine;
-	consoleLine.text = text;
+	consoleLine.text = p_text;
 	consoleLine.timestamp = stream.str();
-	consoleLine.type = type;
+	consoleLine.type = p_type;
 
 	m_consoleLog.push_back(consoleLine);
 
-	writed = true;
-}
-
-void Console::setMaxConsoleSize(const int& maxConsoleSize)
-{
-	m_maxConsoleSize = maxConsoleSize;
-}
-
-void Console::update()
-{
-	if (writed) {
-		writed = false;
+	if (!m_writed) {
+		m_writed = true;
 	}
+}
+
+void Console::setMaxConsoleSize(const int& p_maxConsoleSize) {
+	m_maxConsoleSize = p_maxConsoleSize;
+}
+
+void Console::Update() {
+	if (m_writed) {
+		m_writed = false;
+	}
+}
+
+const std::vector<ConsoleLine>& Console::getConsoleLog() {
+	return m_consoleLog;
+}
+
+bool Console::isWrited() {
+	return m_writed;
 }

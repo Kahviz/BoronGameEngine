@@ -222,6 +222,9 @@ add_executable(BoronEngine
     Core/Graphics/BoronGui/GuiTexture/GuiTextureManager.h
     Core/Graphics/BoronGui/GuiTexture/GuiTextureManager.cpp
 
+    Core/Graphics/BoronGui/Font/Font.h 
+    Core/Graphics/BoronGui/Font/Font.cpp
+
     #backends
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.h
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.cpp
@@ -322,8 +325,6 @@ target_include_directories(BoronEngine PRIVATE
     Editor/Camera/
     Core/Services/
 
-    Libs/STBIcons/
-
     Core/Input/
 
     #Vulkan
@@ -333,7 +334,6 @@ target_include_directories(BoronEngine PRIVATE
     ${boronmathlibrary_SOURCE_DIR}
 
     #Vulkan
-
     Core/Vulkan/VulkanBuffer/
 )
 
@@ -361,6 +361,7 @@ target_include_directories(imgui PUBLIC
     ${enet_SOURCE_DIR}/include
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
+    lib/stb_truetype
 )
 target_link_libraries(imgui PUBLIC
     enet

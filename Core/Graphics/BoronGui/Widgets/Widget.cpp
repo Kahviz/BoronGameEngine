@@ -126,8 +126,6 @@ bool Borongui::Widget::setColor(const BML::Vec4& p_color, const bool& p_force) {
 
 		GPUVector4 color(m_color.x(), m_color.y(), m_color.z(), m_color.w());
 
-		std::cout << color << std::endl;
-
 		for (auto& vertex : m_vertices) {
 			vertex.color = color;
 		}

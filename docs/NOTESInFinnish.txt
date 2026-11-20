@@ -4,3 +4,4 @@ Jos Tulee Byte Error poista "using namespace std"
 --Jos näkyy 2d kato että ied (DX11) on oikein
 --Jos Uus shader ei toimi kato että CMakeList.txt compiletaan se
 --Jos ei suostu compilee mee project configure BoronGameEngine
+--Lines of code: powershell -NoProfile -Command "$files=Get-ChildItem -Recurse -File -Include *.cpp,*.h,*.hpp,*.c,*.cs,*.hlsl,*.glsl,*.vert,*.frag,*.inl; ($files | Get-Content | Measure-Object -Line).Lines"

@@ -235,12 +235,11 @@ EntityECS AddAMesh(
 
 
 void SaveProject::Load(ECS& p_ecs, Window& p_window, EntityECS p_world) {
-    std::ifstream file(
-        savings / g_projectName / "save.BGEproject"
-    );
+    CreateInfo("Loading project path: ", savings / g_projectName / "save.BGEproject");
+    std::ifstream file(savings / g_projectName / "save.BGEproject");
 
     if (!file.is_open()) {
-        CreateError("File not found");
+        CreateInfo("File not found");
         return;
     }
 

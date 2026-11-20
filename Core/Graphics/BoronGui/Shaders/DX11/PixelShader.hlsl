@@ -31,8 +31,7 @@ float4 main(PS_INPUT input) : SV_TARGET {
     if (input.textureID == 0) {
         return input.color * alpha;
     }
-    else
-    {
+    else {
         return texColor * alpha;
     }
 }

@@ -26,9 +26,10 @@
 - **SDL3** – Controller input / rumble  
 - **ImGui** – Graphical user interface  (Im making my own gui lib)
 - **stb_image** – Image loading (icons, textures)
-- **BoronMathLibrary ( BML )** -simd-Math and non simd-math
+- **BoronMathLibrary ( BML )** - Simd-Math and non simd-math
 - **Discord RPC** - Rich presence
-  
+- **stb_truetype** – TrueType font loading and glyph rasterization (text rendering).
+
 ## Guides
 - [Getting started](docs/readMeDocs/getting-started.md) - install, build, run BoronEngine
 - [Switching renderer](docs/readMeDocs/getting-started.md) - change the renderer

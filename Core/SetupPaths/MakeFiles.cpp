@@ -343,7 +343,7 @@ void MakeFiles::MakeAPPDATAFolders() {
     }
 
     #ifdef _DEBUG
-        std::cout << "No errors during the creation of UGE appdata folder\n\n";
+        std::cout << "No errors during the creation of BGE appdata folder\n\n"; //Here was the last UGE (Untilited Game Engine) :C
     #endif
 #endif
 }

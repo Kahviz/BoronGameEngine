@@ -383,7 +383,8 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
 
     if (ctrlPressed) {
         AddAMesh(m_ecs, "Cube.obj", "Cube", { GetRandomFloat(-50,50),GetRandomFloat(-50,50),GetRandomFloat(-50,50) }, { 1,1,1 }, false, false, true);
-        m_console.write("Creating cube", Boron::Enums::ConsoleLineType::Info);
+        m_console.Write("Creating cube", Boron::Enums::ConsoleLineType::Info);
+
         cubes++;
     }
 
@@ -412,13 +413,13 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
         if (!Init) {
             CreateSuccess("Initing World");
 
-            BasicInfoComponent basicInfoComp;
+            BasicInfoComponent basicInfoComp{};
             basicInfoComp.Name = "World";
 
-            InstanceTypeComponent instTypeComp;
+            InstanceTypeComponent instTypeComp{};
             instTypeComp.InstanceType = Boron::Enums::InstanceType::World;
 
-            EditorSettingsComponent editorComp;
+            EditorSettingsComponent editorComp{};
             editorComp.isVisibleInExplorer = true;
             editorComp.selected = false;
 
@@ -502,7 +503,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
 
         BoronGui::SubmitWidget(frame2);
     
-        makeGui.RenderPopUps(deltatime); //Here last so thay be rendered always and on top of everything
+        makeGui.RenderPopUps(deltatime);
     #endif
 
     #if VULKAN == 1
@@ -528,7 +529,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
             [&](EntityECS entity, PhysicsComponent& physicsComp)
             {
                 if (physicsComp.anchored)
-                    return;
+                    
 
                 physics.ApplyPhysics(m_ecs, entity, deltatime);
             }
@@ -571,7 +572,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
 
     static int updateCounter = 0;
     if (++updateCounter % 2 == 0) {
-        m_console.update();
+        m_console.Update();
     }
 
     wnd->GetGraphics().EndFrame();
