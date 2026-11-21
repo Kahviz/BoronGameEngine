@@ -324,8 +324,8 @@ void MakeFiles::MakeAPPDATAFolders() {
     else {
         #ifdef _DEBUG
             #if DEBUGFILEMAKING == 1
-                std::cout << "ERROR: AssetTemplateFolder DOES NOT EXIST or is not a directory!\n";
-                std::cout << "\nContents of parent directory:\n";
+                CreateError("AssetTemplateFolder DOES NOT EXIST or is not a directory");
+                CreateError("Contents of parent directory : ");
             #endif 
             
         #endif
@@ -338,12 +338,11 @@ void MakeFiles::MakeAPPDATAFolders() {
                 #endif 
                 
             #endif
-            
         }
     }
 
     #ifdef _DEBUG
-        std::cout << "No errors during the creation of BGE appdata folder\n\n"; //Here was the last UGE (Untilited Game Engine) :C
+        CreateSuccess("No errors during the creation of BGE appdata folder"); //Here was the last UGE (Untilited Game Engine) :C
     #endif
 #endif
 }

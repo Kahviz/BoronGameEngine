@@ -233,7 +233,6 @@ EntityECS AddAMesh(
     return entity;
 }
 
-
 void SaveProject::Load(ECS& p_ecs, Window& p_window, EntityECS p_world) {
     CreateInfo("Loading project path: ", savings / g_projectName / "save.BGEproject");
     std::ifstream file(savings / g_projectName / "save.BGEproject");

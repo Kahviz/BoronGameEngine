@@ -1,14 +1,23 @@
 #include "Engine.h"
+
+//Borongui
+#include "BoronGui.h"
+#include "Font/Font.h"
+
 #include <stdexcept>
 #include <chrono>
 #include <iostream>
+#include <thread>
+#include <random>
+
+#include <GLFW/glfw3native.h>
+#include <backends/imgui_impl_glfw.h>
+
 #include "GLOBALS.h"
 #include "Camera/CameraControl.h"
 #include "BGE_ASSERTS.h"
-#include "BoronGui.h"
-#include <thread>
 
-#ifdef _WIN32
+#ifdef BGE_WIN
     #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
 
@@ -16,12 +25,8 @@
     #include "backends/BoronGui_implVulkan.h"
 #endif
 
-#include <GLFW/glfw3native.h>
-
-#include "backends/imgui_impl_glfw.h"
 #include "GraphicsBackends.h"
 #include "Components.h"
-#include <random>
 #include "Texture.h"
 
 #include "Multiplatform/BoronPlatform.h"
@@ -50,6 +55,12 @@ Engine::Engine()
     m_ecs.init(&m_componentManager);
 
     if (!ImGuiInited) {
+        Borongui::Font boronFont{};
+
+        fs::path fontPath = fonts / "RobotoFont.ttf";
+
+        boronFont.Load(fontPath.string());
+
         std::cout << "ImGui version: " << IMGUI_VERSION << std::endl;
         IMGUI_CHECKVERSION();
         ImGuiContext* context = ImGui::CreateContext();
@@ -114,7 +125,6 @@ Engine::Engine()
         ImGuiInited = true;
 #endif
         ImGuiIO& io = ImGui::GetIO();
-        fs::path fontPath = fonts / "RobotoFont.ttf";
         ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16.0f);
 
         if (font == nullptr) {
@@ -528,10 +538,11 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
         m_ecs.Each<PhysicsComponent>(
             [&](EntityECS entity, PhysicsComponent& physicsComp)
             {
-                if (physicsComp.anchored)
-                    
+                if (physicsComp.anchored) {
+                    return;
+                }
 
-                physics.ApplyPhysics(m_ecs, entity, deltatime);
+                physics.ApplyPhysics(m_ecs,entity,deltatime);
             }
         );
     });
@@ -553,9 +564,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
             ImGui::Render();
 
             #if DIRECTX11 == 1
-                ImGui_ImplDX11_RenderDrawData(
-                    ImGui::GetDrawData()
-                );
+                ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
             #endif
         }
     #endif
@@ -564,10 +573,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
     profiler.AddFPS(fps);
 
     #if VULKAN == 1
-        wnd->GetGraphics().DrawAFrame(
-            deltatime,
-            m_ecs
-        );
+        wnd->GetGraphics().DrawAFrame(deltatime, m_ecs);
     #endif
 
     static int updateCounter = 0;
