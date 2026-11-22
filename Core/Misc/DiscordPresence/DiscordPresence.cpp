@@ -1,10 +1,9 @@
 #include "DiscordPresence.h"
 #include "Logger/Logger.h"
 
-bool DiscordPresence::initialized = false;
+bool DiscordPresence::m_inited = false;
 
 #if BORON_USE_DISCORD
-
 #define DISCORDPP_IMPLEMENTATION
 #include <discordpp.h>
 
@@ -13,17 +12,18 @@ bool DiscordPresence::initialized = false;
 static discordpp::Client* discordClient = nullptr;
 #endif
 
-bool DiscordPresence::Initialize() {
+bool DiscordPresence::Init() {
     #if BORON_USE_DISCORD
-        if (initialized)
+        if (m_inited) {
             return true;
+        }
 
         discordClient = new discordpp::Client();
 
         discordClient->SetApplicationId(BORON_DISCORD_APP_ID);
 
-        initialized = true;
-        CreateInfo("Using DC");
+        m_inited = true;
+        CreateInfo("Using discord rich precence");
     #endif
     
     return true;
@@ -31,8 +31,9 @@ bool DiscordPresence::Initialize() {
 
 void DiscordPresence::Update() {
     #if BORON_USE_DISCORD
-        if (!initialized || discordClient == nullptr)
+        if (!m_inited || discordClient == nullptr) {
             return;
+        }
 
         discordpp::Activity activity{};
 
@@ -44,8 +45,7 @@ void DiscordPresence::Update() {
             activity,
             [](const discordpp::ClientResult& result)
             {
-                if (!result.Successful())
-                {
+                if (!result.Successful()) {
                     CreateError("Discord presence update failed!");
                 }
             }
@@ -53,14 +53,15 @@ void DiscordPresence::Update() {
     #endif
 }
 
-void DiscordPresence::Shutdown() {
+void DiscordPresence::Destroy() {
     #if BORON_USE_DISCORD
-        if (!initialized)
+        if (!m_inited) {
             return;
+        }
 
         delete discordClient;
         discordClient = nullptr;
 
-        initialized = false;
+        m_inited = false;
     #endif
 }

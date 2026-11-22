@@ -2,7 +2,7 @@
 
 //Borongui
 #include "BoronGui.h"
-#include "Font/Font.h"
+#include "Widgets/Text.h"
 
 #include <stdexcept>
 #include <chrono>
@@ -51,16 +51,14 @@ Engine::Engine()
     CreateWarning("BoronMathLibrary Version: " + std::to_string(BORONMATHversion));
     CreateWarning("========================");
 
-    dcPresence.Initialize();
-    m_ecs.init(&m_componentManager);
+    dcPresence.Init();
+    m_ecs.Init(&m_componentManager);
+
+    fs::path fontPath = fonts / "RobotoFont.ttf";
+
+    m_boronRobotoFont.Load(fontPath.string());
 
     if (!ImGuiInited) {
-        Borongui::Font boronFont{};
-
-        fs::path fontPath = fonts / "RobotoFont.ttf";
-
-        boronFont.Load(fontPath.string());
-
         std::cout << "ImGui version: " << IMGUI_VERSION << std::endl;
         IMGUI_CHECKVERSION();
         ImGuiContext* context = ImGui::CreateContext();
@@ -141,8 +139,14 @@ Engine::Engine()
     }
 }
 
-Engine::~Engine()
-{
+Engine::~Engine() {
+    SaveProject::Save(m_ecs);
+
+    profiler.PrintInformation();
+
+    dcPresence.Destroy();
+    BoronGui::Destroy();
+
     if (ImGuiInited) {
         #if DIRECTX11 == 1
             ImGui_ImplDX11_Shutdown();
@@ -219,12 +223,6 @@ int Engine::EngineRun() {
 
         EngineDoFrame(&window, deltaTime);
     }
-
-    SaveProject::Save(m_ecs);
-
-    profiler.PrintInformation();
-    
-    BoronGui::Destroy();
 
     return 0;
 }
@@ -512,7 +510,11 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
         frame2.lockInitialization(true);
 
         BoronGui::SubmitWidget(frame2);
-    
+        
+        static Borongui::Text text{};
+
+        text.setText("ABC", m_boronRobotoFont);
+
         makeGui.RenderPopUps(deltatime);
     #endif
 

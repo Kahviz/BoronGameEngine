@@ -2,8 +2,7 @@
 #include "Logger/Logger.h"
 #include "Components.h"
 
-void ECS::init(ComponentManager* componentManager)
-{
+void ECS::Init(ComponentManager* componentManager) {
     m_componentManager = componentManager;
 
     m_componentManager->RegisterComponent<BasicInfoComponent>();

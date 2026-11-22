@@ -386,7 +386,6 @@ void BoronGui_implDX11::CreateDepthStencilState() {
 
 void BoronGui_implDX11::DrawBatch() {
     if (s_indexCount == 0) {
-        CreateWarning("IndexCount is 0");
         return;
     }
 

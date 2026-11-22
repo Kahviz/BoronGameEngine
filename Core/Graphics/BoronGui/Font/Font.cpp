@@ -12,6 +12,8 @@
 bool Borongui::Font::Load(const std::string& p_path) {
 	std::ifstream file(p_path, std::ios::binary);
 
+	m_glyphs.clear();
+
 	if (!file.is_open()) {
 		CreateError("Cannot open file: ", p_path, " for loading the font, make sure its there");
 		return false;
@@ -88,7 +90,6 @@ bool Borongui::Font::Load(const std::string& p_path) {
 		}
 		
 		glyph.advanceWidth = advanceWidth * scale;
-		glyph.bitmap.assign(bitmap, bitmap + (width * height));
 		glyph.size = BML::Int2{ width,height };
 		glyph.leftSideBearing = leftSideBearing * scale;
 		glyph.offset = BML::Int2{ xOffset,yOffset };
@@ -134,7 +135,7 @@ bool Borongui::Font::Load(const std::string& p_path) {
 	}
 
 	const float invAtlasWidth = 1.0f / m_atlasSize.x;
-	const float invAtlasHeight = 1.0f / m_atlasSize.x;
+	const float invAtlasHeight = 1.0f / m_atlasSize.y;
 
 	for (Glyph& glyph : m_glyphs) {
 		glyph.uv1.set(glyph.atlasPos.x() * invAtlasWidth, glyph.atlasPos.y() * invAtlasHeight);
@@ -147,6 +148,7 @@ bool Borongui::Font::Load(const std::string& p_path) {
 
 void Borongui::Font::Destroy() {
 	m_glyphs.clear();
+	m_atlasPixels.clear();
 
 	m_fontData = {};
 	m_fontInfo = {};

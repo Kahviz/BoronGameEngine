@@ -76,8 +76,6 @@ private:
     void CompileShaders();
 
     Camera camera;
-    float Fov = DirectX::XMConvertToRadians(90.0f);
-    float zNear = 0.01f;
 
     ComPtr<ID3D11Device> pDevice;
     ComPtr<ID3D11DeviceContext> pContext;

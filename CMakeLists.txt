@@ -225,6 +225,12 @@ add_executable(BoronEngine
     Core/Graphics/BoronGui/Font/Font.h 
     Core/Graphics/BoronGui/Font/Font.cpp
 
+    Core/Graphics/BoronGui/Font/TextLayout/TextLayout.h 
+    Core/Graphics/BoronGui/Font/TextLayout/TextLayout.cpp
+
+    Core/Graphics/BoronGui/Widgets/Text.h
+    Core/Graphics/BoronGui/Widgets/Text.cpp
+
     #backends
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.h
     Core/Graphics/BoronGui/Backends/BoronGui_implVulkan.cpp
@@ -278,8 +284,11 @@ if(WIN32)
     target_sources(BoronEngine PRIVATE
         Core/Graphics/Dx11/Dx11Adapter.h
         Core/Graphics/Dx11/Dx11Adapter.cpp
-        Core/Instances/Instances/Mesh/DX11/MeshDX11.cpp
         Core/Graphics/Dx11/Dx11Renderer.cpp
+
+        Core/Instances/Instances/Mesh/DX11/MeshDX11.h
+        Core/Instances/Instances/Mesh/DX11/MeshDX11.cpp
+
         Core/Graphics/BoronGui/Backends/BoronGui_implDX11.h
         Core/Graphics/BoronGui/Backends/BoronGui_implDX11.cpp
     )
@@ -320,7 +329,6 @@ target_include_directories(BoronEngine PRIVATE
     Core/Graphics/Texture/
     Core/Graphics/Dx11/
     Core/Graphics/Vulkan/
-    Core/Graphics/BoronGui/
 
     Editor/Camera/
     Core/Services/
@@ -335,6 +343,10 @@ target_include_directories(BoronEngine PRIVATE
 
     #Vulkan
     Core/Vulkan/VulkanBuffer/
+
+    #Borongui
+    Core/Graphics/BoronGui/
+    Core/Graphics/BoronGui/Font/
 )
 
 set(IMGUI_SOURCES

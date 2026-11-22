@@ -3,9 +3,9 @@
 class DiscordPresence
 {
 public:
-    static bool Initialize();
+    static bool Init();
     static void Update();
-    static void Shutdown();
+    static void Destroy();
 private:
-    static bool initialized;
+    static bool m_inited;
 };

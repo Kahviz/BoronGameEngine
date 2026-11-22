@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+
 #include "imgui.h"
 #include "Window/Window.h"
 #include "GLOBALS.h"
@@ -23,6 +24,8 @@
 
 #include "ECS.h"
 
+#include "Font/Font.h"
+
 class Engine {
 public:
     Engine();
@@ -38,21 +41,24 @@ public:
 #if INEDITOR == 1
     MakeGui makeGui;
 #endif
-    Console m_console;
-    DiscordPresence dcPresence;
+    Console m_console{};
+    DiscordPresence dcPresence{};
     Window window;
 
     bool InProject = false;
-    CameraControl camC;
+    CameraControl camC{};
 
     int screen_width = 1280;
     int screen_height = 800;
 
     BML::Vec3 Color3 = { 0.0f, 0.0f, 1.0f };
 
+    //BoronGui
+    Borongui::Font m_boronRobotoFont{};
+
     //ECS
-    ECS m_ecs;
-    ComponentManager m_componentManager;
+    ECS m_ecs{};
+    ComponentManager m_componentManager{};
 
     EntityECS world = m_ecs.createEntity();
 };

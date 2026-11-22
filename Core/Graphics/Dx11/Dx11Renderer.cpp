@@ -37,7 +37,7 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd) {
     float AspectY = screen_height;
     float Aspect = AspectX / AspectY;
 
-    camera.SetProjectionValues(FOVY, Aspect, ZFAR, ZFAR);
+    camera.SetProjectionValues(g_FOV, Aspect, ZFAR, ZFAR);
 
     CreateConstantBuffers();
     CreateShadowResources();
@@ -284,9 +284,9 @@ void Dx11Renderer::CreateDeviceAndSwapChain(int width, int height, HWND hWnd) {
 
     UINT createDeviceFlags = 0;
 
-#ifdef _DEBUG
-    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
+    #ifdef _DEBUG
+        createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+    #endif
 
     D3D_FEATURE_LEVEL featureLevels[] = {
         D3D_FEATURE_LEVEL_11_0,
@@ -552,9 +552,11 @@ void Dx11Renderer::CompileShaders()
     if (FAILED(hr)) throw std::runtime_error("Failed to create input layout");
 }
 
-void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd)
-{
-    if (!pSwap) return;
+void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd) {
+    if (!pSwap) {
+        CreateError("Spap is nullptr");
+        return;
+    }
 
     pTarget.Reset();
     pDepthStencilView.Reset();
@@ -577,20 +579,21 @@ void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd)
     float AspectX = width;
     float AspectY = height;
 
-#if INEDITOR == 1
-    AspectX = viewport_width;
-    AspectY = viewport_height;
-#endif
+    #if INEDITOR == 1
+        AspectX = viewport_width;
+        AspectY = viewport_height;
+    #endif
+
     float Aspect = AspectX / AspectY;
 
     viewport_height = AspectY;
     viewport_width = AspectX;
 
     CreateSceneResources(width, height);
-    camera.SetProjectionValues(g_FOV, Aspect, zNear, 1000.0f);
+    camera.SetProjectionValues(g_FOV, Aspect, ZNEAR, ZFAR);
 }
-void Dx11Renderer::CreateSceneDepthStencil(int width, int height)
-{
+
+void Dx11Renderer::CreateSceneDepthStencil(int width, int height) {
     pSceneDepthStencil.Reset();
     pSceneDepthStencilView.Reset();
 
@@ -696,19 +699,13 @@ void Dx11Renderer::ReSizeViewport(int width, int height)
     viewport_width = width;
     viewport_height = height;
 
-    const float aspect =
-        static_cast<float>(width) /
-        static_cast<float>(height);
+    const float aspect = static_cast<float>(width) / static_cast<float>(height);
 
-    camera.SetProjectionValues(
-        g_FOV,
-        aspect,
-        zNear,
-        1000.0f
-    );
+    camera.SetProjectionValues(g_FOV, aspect, ZNEAR, ZFAR);
 }
 void Dx11Renderer::CreateSceneResources(int width, int height) {
     D3D11_TEXTURE2D_DESC td = {};
+
     td.Width = width;
     td.Height = height;
     td.MipLevels = 1;

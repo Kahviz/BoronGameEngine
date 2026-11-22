@@ -1,17 +1,20 @@
 #pragma once
 
-#include "BoronMathLibrary.h"
 #include "Widget.h"
-#include "Vertex2d.h"
-#include "BoronGuiSettings.h"
+
+#include "TextLayout/TextLayout.h"
 
 namespace Borongui {
 	class Text : public Widget {
 	public:
-		Text() {}
+		Text() {
+
+		}
 
 		void updateSettings() override;
+		void setText(const std::string& p_text, const Borongui::Font p_font);
 	private:
-
+		std::string m_text{};
+		Borongui::TextLayout m_textLayout{};
 	};
 }

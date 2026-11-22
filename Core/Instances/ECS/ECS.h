@@ -9,7 +9,7 @@ using EntityECS = uint32_t;
 
 class ECS {
 public:
-	void init(ComponentManager* componentManager);
+	void Init(ComponentManager* componentManager);
 
 	uint32_t createEntity();
 	void destroyEntity(EntityECS entity);

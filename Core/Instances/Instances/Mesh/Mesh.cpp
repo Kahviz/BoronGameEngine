@@ -1,6 +1,12 @@
 #include "Mesh.h"
-#include "Vulkan/MeshVulkan.h"
-#include "DX11/MeshDX11.h"
+
+#if DIRECTX11 == 1
+    #include "DX11/MeshDX11.h"
+#endif
+
+#if VULKAN == 1
+    #include "Vulkan/MeshVulkan.h"
+#endif
 
 std::shared_ptr<Mesh> Mesh::Load(const fs::path& p_file, MeshStruct& p_meshStruct) {
     static std::unordered_map<fs::path, std::shared_ptr<Mesh>> Cache;
