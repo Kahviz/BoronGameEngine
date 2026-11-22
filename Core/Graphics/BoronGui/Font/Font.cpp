@@ -76,12 +76,16 @@ bool Borongui::Font::Load(const std::string& p_path) {
 
 		unsigned char* bitmap = stbtt_GetCodepointBitmap(&m_fontInfo, scale, scale, character, &width, &height, &xOffset, &yOffset);
 
-		if (!bitmap && width > 0 && height > 0) {
-			CreateError("Bitmap is nullptr for character: ", character);
-			return false;
-		}
-
 		Glyph glyph{};
+		
+		if (width > 0 && height > 0) {
+			if (!bitmap) {
+				CreateError("Bitmap is nullptr for character: ", character);
+				return false;
+			}
+
+			glyph.bitmap.assign(bitmap, bitmap + (width * height));
+		}
 		
 		glyph.advanceWidth = advanceWidth * scale;
 		glyph.bitmap.assign(bitmap, bitmap + (width * height));
@@ -94,20 +98,20 @@ bool Borongui::Font::Load(const std::string& p_path) {
 		stbtt_FreeBitmap(bitmap, nullptr);
 	}
 
-	std::vector<unsigned char> atlasPixels(m_atlasWidth * m_atlasHeight, 0);
+	m_atlasPixels.resize(m_atlasSize.x * m_atlasSize.y, 0);
 
 	int currentX = 0;
 	int currentY = 0;
 	int rowHeight = 0;
 
 	for (Glyph& glyph : m_glyphs) {
-		if (currentX + glyph.size.x() > m_atlasWidth) {
+		if (currentX + glyph.size.x() > m_atlasSize.x) {
 			currentX = 0;
 			currentY += rowHeight + 1;
 			rowHeight = 0;
 		}
 
-		if (currentY + glyph.size.y() > m_atlasHeight) {
+		if (currentY + glyph.size.y() > m_atlasSize.y) {
 			CreateError("Font atlas is too small increase m_atlasWidth or m_atlasHeight");
 			return false;
 		}
@@ -122,15 +126,15 @@ bool Borongui::Font::Load(const std::string& p_path) {
 			for (int x = 0; x < glyph.size.x(); x++) {
 				int sourceIndex = y * glyph.size.x() + x;
 
-				int destinationIndex = (glyph.atlasPos.y() + y) * m_atlasWidth + (glyph.atlasPos.x() + x);
+				int destinationIndex = (glyph.atlasPos.y() + y) * m_atlasSize.x + (glyph.atlasPos.x() + x);
 
-				atlasPixels[destinationIndex] = glyph.bitmap[sourceIndex];
+				m_atlasPixels[destinationIndex] = glyph.bitmap[sourceIndex];
 			}
 		}
 	}
 
-	const float invAtlasWidth = 1.0f / m_atlasWidth;
-	const float invAtlasHeight = 1.0f / m_atlasHeight;
+	const float invAtlasWidth = 1.0f / m_atlasSize.x;
+	const float invAtlasHeight = 1.0f / m_atlasSize.x;
 
 	for (Glyph& glyph : m_glyphs) {
 		glyph.uv1.set(glyph.atlasPos.x() * invAtlasWidth, glyph.atlasPos.y() * invAtlasHeight);
@@ -151,4 +155,28 @@ void Borongui::Font::Destroy() {
 
 bool Borongui::Font::isLoaded() const {
 	return m_isLoaded;
+}
+
+const std::vector<Borongui::Glyph>& Borongui::Font::getGlyphs() {
+	return m_glyphs;
+}
+
+const std::vector<unsigned char>& Borongui::Font::getFontData() {
+	return m_fontData;
+}
+
+const std::vector<unsigned char>& Borongui::Font::getAtlasPixels() {
+	return m_atlasPixels;
+}
+
+const stbtt_fontinfo& Borongui::Font::getFontInfo() {
+	return m_fontInfo;
+}
+
+const int& Borongui::Font::getFontSize() {
+	return m_fontSize;
+}
+
+const GPUVector2& Borongui::Font::getAtlasSize(){
+	return m_atlasSize;
 }

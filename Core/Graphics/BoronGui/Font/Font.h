@@ -31,16 +31,26 @@ namespace Borongui {
         void Destroy();
 
         bool isLoaded() const;
+
+        const std::vector<Glyph>& getGlyphs();
+
+        const std::vector<unsigned char>& getFontData();
+        const std::vector<unsigned char>& getAtlasPixels();
+
+        const stbtt_fontinfo& getFontInfo();
+        const int& getFontSize();
+        const GPUVector2& getAtlasSize();
     private:
         std::vector<Glyph> m_glyphs{};
+
         std::vector<unsigned char> m_fontData{};
+        std::vector<unsigned char> m_atlasPixels{};
 
         stbtt_fontinfo m_fontInfo{};
 
         int m_fontSize = 20;
         bool m_isLoaded = false;
 
-        int m_atlasWidth = 512;
-        int m_atlasHeight = 512;
+        GPUVector2 m_atlasSize{ 512,512 };
     };
 };
