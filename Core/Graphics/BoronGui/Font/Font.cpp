@@ -94,7 +94,7 @@ bool Borongui::Font::Load(const std::string& p_path) {
 		glyph.leftSideBearing = leftSideBearing * scale;
 		glyph.offset = BML::Int2{ xOffset,yOffset };
 
-		m_glyphs.push_back(glyph);
+		m_glyphs.emplace(character, glyph);
 
 		stbtt_FreeBitmap(bitmap, nullptr);
 	}
@@ -105,7 +105,10 @@ bool Borongui::Font::Load(const std::string& p_path) {
 	int currentY = 0;
 	int rowHeight = 0;
 
-	for (Glyph& glyph : m_glyphs) {
+	const float invAtlasWidth = 1.0f / m_atlasSize.x;
+	const float invAtlasHeight = 1.0f / m_atlasSize.y;
+
+	for (auto& [character, glyph] : m_glyphs) {
 		if (currentX + glyph.size.x() > m_atlasSize.x) {
 			currentX = 0;
 			currentY += rowHeight + 1;
@@ -120,26 +123,19 @@ bool Borongui::Font::Load(const std::string& p_path) {
 
 		currentX += glyph.size.x() + 1;
 		rowHeight = std::max(rowHeight, glyph.size.y());
-	}
 
-	for (const Glyph& glyph : m_glyphs) {
 		for (int y = 0; y < glyph.size.y(); y++) {
 			for (int x = 0; x < glyph.size.x(); x++) {
 				int sourceIndex = y * glyph.size.x() + x;
 
-				int destinationIndex = (glyph.atlasPos.y() + y) * m_atlasSize.x + (glyph.atlasPos.x() + x);
+				int destIndex = (glyph.atlasPos.y() + y) * m_atlasSize.x + (glyph.atlasPos.x() + x);
 
-				m_atlasPixels[destinationIndex] = glyph.bitmap[sourceIndex];
+				m_atlasPixels[destIndex] = glyph.bitmap[sourceIndex];
 			}
 		}
-	}
 
-	const float invAtlasWidth = 1.0f / m_atlasSize.x;
-	const float invAtlasHeight = 1.0f / m_atlasSize.y;
-
-	for (Glyph& glyph : m_glyphs) {
-		glyph.uv1.set(glyph.atlasPos.x() * invAtlasWidth, glyph.atlasPos.y() * invAtlasHeight);
-		glyph.uv2.set((glyph.atlasPos.x() + glyph.size.x()) * invAtlasWidth, (glyph.atlasPos.y() + glyph.size.y()) * invAtlasHeight);
+		glyph.uv1.set(glyph.atlasPos.x()* invAtlasWidth, glyph.atlasPos.y()* invAtlasHeight);
+		glyph.uv2.set((glyph.atlasPos.x() + glyph.size.x())* invAtlasWidth, (glyph.atlasPos.y() + glyph.size.y())* invAtlasHeight);
 	}
 
     m_isLoaded = true;
@@ -159,26 +155,35 @@ bool Borongui::Font::isLoaded() const {
 	return m_isLoaded;
 }
 
-const std::vector<Borongui::Glyph>& Borongui::Font::getGlyphs() {
+const std::unordered_map<char, Borongui::Glyph>& Borongui::Font::getGlyphs() {
 	return m_glyphs;
 }
 
-const std::vector<unsigned char>& Borongui::Font::getFontData() {
+const Borongui::Glyph& Borongui::Font::getGlyph(const char& p_character) const {
+	auto it = m_glyphs.find(p_character);
+
+	if (it == m_glyphs.end()) {
+		CreateError("Glyph not found: ", p_character);
+	}
+
+	return it->second;
+}
+const std::vector<unsigned char>& Borongui::Font::getFontData() const {
 	return m_fontData;
 }
 
-const std::vector<unsigned char>& Borongui::Font::getAtlasPixels() {
+const std::vector<unsigned char>& Borongui::Font::getAtlasPixels() const {
 	return m_atlasPixels;
 }
 
-const stbtt_fontinfo& Borongui::Font::getFontInfo() {
+const stbtt_fontinfo& Borongui::Font::getFontInfo() const {
 	return m_fontInfo;
 }
 
-const int& Borongui::Font::getFontSize() {
+const int& Borongui::Font::getFontSize() const {
 	return m_fontSize;
 }
 
-const GPUVector2& Borongui::Font::getAtlasSize(){
+const GPUVector2& Borongui::Font::getAtlasSize() const {
 	return m_atlasSize;
 }

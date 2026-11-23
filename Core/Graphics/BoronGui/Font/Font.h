@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <stb_truetype.h>
 
@@ -32,16 +33,18 @@ namespace Borongui {
 
         bool isLoaded() const;
 
-        const std::vector<Glyph>& getGlyphs();
+        const std::unordered_map<char, Glyph>& getGlyphs();
 
-        const std::vector<unsigned char>& getFontData();
-        const std::vector<unsigned char>& getAtlasPixels();
+        const std::vector<unsigned char>& getFontData() const;
+        const std::vector<unsigned char>& getAtlasPixels() const;
 
-        const stbtt_fontinfo& getFontInfo();
-        const int& getFontSize();
-        const GPUVector2& getAtlasSize();
+        const stbtt_fontinfo& getFontInfo() const;
+        const int& getFontSize() const;
+        const GPUVector2& getAtlasSize() const;
+
+        const Borongui::Glyph& getGlyph(const char& p_character) const;
     private:
-        std::vector<Glyph> m_glyphs{};
+        std::unordered_map<char, Glyph> m_glyphs{};
 
         std::vector<unsigned char> m_fontData{};
         std::vector<unsigned char> m_atlasPixels{};

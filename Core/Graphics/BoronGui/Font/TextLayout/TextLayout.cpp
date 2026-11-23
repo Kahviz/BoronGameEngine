@@ -18,6 +18,10 @@ bool Borongui::TextLayout::Build(const std::string& p_text, const Borongui::Font
 	float cursorY = 0.0f;
 
 	for (char character : p_text) {
-		
+		const Glyph& glyph = p_font.getGlyph(character);
+
+		std::cout << "Character: " << character << '\n';
+		std::cout << "Width: " << glyph.size.x() << '\n';
+		std::cout << "Height: " << glyph.size.y() << '\n';
 	}
 }
