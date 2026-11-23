@@ -18,8 +18,8 @@ namespace Borongui {
 
 	class TextLayout {
 	public:
-        bool Build(const std::string& p_text, const Borongui::Font& p_font);
+        bool Build(const std::string& p_text, const Borongui::Font& p_font, const int& p_lineHeight);
 	private:
         TextMesh m_mesh;
-	};
+    };
 };

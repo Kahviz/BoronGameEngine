@@ -65,7 +65,7 @@ bool Borongui::Font::Load(const std::string& p_path) {
 	float descentPx = descent * scale;
 	float lineGapPx = lineGap * scale;
 
-	for (int character = 32; character < 127; character++) {
+	for (int character = 0; character < 127; character++) {
 		int advanceWidth = 0;
 		int leftSideBearing = 0;
 

@@ -513,7 +513,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
         
         static Borongui::Text text{};
 
-        text.setText("ABC", m_boronRobotoFont);
+        text.setText("\n", m_boronRobotoFont);
 
         makeGui.RenderPopUps(deltatime);
     #endif
