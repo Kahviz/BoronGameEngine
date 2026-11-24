@@ -33,7 +33,7 @@ struct PixelConstantBuffer
 class Dx11Renderer
 {
 public:
-    void InitDx11Renderer(HWND hWnd);
+    void InitDx11Renderer(HWND m_hWnd);
     void SetRenderTargetToScene();
     void SetRenderTargetToBackBuffer();
 
@@ -52,8 +52,8 @@ public:
     
     void ClearBuffer(float r, float g, float b);
     void ClearSceneBuffer(float r, float g, float b);
-    void ReSizeWindow(int width, int height, HWND hWnd);
-    void CreateSceneDepthStencil(int width, int height);
+    void ReSizeWindow(int p_width, int p_height, HWND p_hWnd);
+    void CreateSceneDepthStencil(int p_width, int p_height);
     void ReSizeViewport(int width, int height);
     void CreateSceneResources(int width, int height);
     ID3D11ShaderResourceView* GetSceneSRV();

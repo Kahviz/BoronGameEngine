@@ -20,24 +20,22 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 struct LightingCB {
-    BML::Vector3 lightpos{};     // 12
-    float Brightness{};      // 4
-    BML::Vector3 WorldPos{};     // 12
-    float lightRange{};      // 4
+    BML::Vector3 lightpos{};
+    float Brightness{};
+    BML::Vector3 WorldPos{};
+    float lightRange{};
 };
 
-void Dx11Renderer::InitDx11Renderer(HWND hWnd) {
-    CreateDeviceAndSwapChain(screen_width, screen_height, hWnd);
+void Dx11Renderer::InitDx11Renderer(HWND m_hWnd) {
+    CreateDeviceAndSwapChain(screen_width, screen_height, m_hWnd);
     CreateViewport(screen_width, screen_height);
     CreateDepthStencil(screen_width, screen_height);
     CreateRenderTarget();
     pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
 
-    float AspectX = screen_width;
-    float AspectY = screen_height;
-    float Aspect = AspectX / AspectY;
+    float aspect = static_cast<float>(screen_width) / static_cast<float>(screen_height);
 
-    camera.SetProjectionValues(g_FOV, Aspect, ZNEAR, ZFAR);
+    camera.SetProjectionValues(g_FOV, aspect, ZNEAR, ZFAR);
 
     CreateConstantBuffers();
     CreateShadowResources();
@@ -71,6 +69,7 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd) {
 
 void Dx11Renderer::CreateShadowResources() {
     D3D11_TEXTURE2D_DESC shadowDesc = {};
+
     shadowDesc.Width = SHADOW_MAP_SIZE;
     shadowDesc.Height = SHADOW_MAP_SIZE;
     shadowDesc.MipLevels = 1;
@@ -552,7 +551,7 @@ void Dx11Renderer::CompileShaders()
     if (FAILED(hr)) throw std::runtime_error("Failed to create input layout");
 }
 
-void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd) {
+void Dx11Renderer::ReSizeWindow(int p_width, int p_height, HWND p_hWnd) {
     if (!pSwap) {
         CreateError("Spap is nullptr");
         return;
@@ -563,43 +562,40 @@ void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd) {
     pContext->ClearState();
     pContext->Flush();
 
-    HRESULT hr = pSwap->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+    HRESULT hr = pSwap->ResizeBuffers(0, p_width, p_height, DXGI_FORMAT_UNKNOWN, 0);
     if (FAILED(hr)) {
-        CreateDeviceAndSwapChain(width, height, hWnd);
+        CreateDeviceAndSwapChain(p_width, p_height, p_hWnd);
         CreateRenderTarget();
     }
     else {
         CreateRenderTarget();
     }
 
-    CreateViewport(width, height);
-    CreateDepthStencil(width, height);
+    CreateViewport(p_width, p_height);
+    CreateDepthStencil(p_width, p_height);
     pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
 
-    float AspectX = width;
-    float AspectY = height;
-
-    viewport_height = AspectY;
-    viewport_width = AspectX;
+    viewport_width = p_width;
+    viewport_height = p_height;
 
     #if INEDITOR == 1
-        AspectX = viewport_width;
-        AspectY = viewport_height;
+        p_width = viewport_width;
+        p_height = viewport_height;
     #endif
 
-    float Aspect = AspectX / AspectY;
+    float aspect = static_cast<float>(p_width) / static_cast<float>(p_height);
 
-    CreateSceneResources(width, height);
-    camera.SetProjectionValues(g_FOV, Aspect, ZNEAR, ZFAR);
+    CreateSceneResources(p_width, p_height);
+    camera.SetProjectionValues(g_FOV, aspect, ZNEAR, ZFAR);
 }
 
-void Dx11Renderer::CreateSceneDepthStencil(int width, int height) {
+void Dx11Renderer::CreateSceneDepthStencil(int p_width, int p_height) {
     pSceneDepthStencil.Reset();
     pSceneDepthStencilView.Reset();
 
     D3D11_TEXTURE2D_DESC desc = {};
-    desc.Width = static_cast<UINT>(width);
-    desc.Height = static_cast<UINT>(height);
+    desc.Width = static_cast<UINT>(p_width);
+    desc.Height = static_cast<UINT>(p_height);
     desc.MipLevels = 1;
     desc.ArraySize = 1;
     desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -608,28 +604,16 @@ void Dx11Renderer::CreateSceneDepthStencil(int width, int height) {
     desc.Usage = D3D11_USAGE_DEFAULT;
     desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
-    HRESULT hr = pDevice->CreateTexture2D(
-        &desc,
-        nullptr,
-        &pSceneDepthStencil
-    );
+    BGE_ASSERT_HRESULT(pDevice->CreateTexture2D(&desc, nullptr, &pSceneDepthStencil), "Failed to create scene depth stencil");
 
-    if (FAILED(hr))
-        throw std::runtime_error("Failed to create scene depth stencil");
-
-    hr = pDevice->CreateDepthStencilView(
-        pSceneDepthStencil.Get(),
-        nullptr,
-        &pSceneDepthStencilView
-    );
-
-    if (FAILED(hr))
-        throw std::runtime_error("Failed to create scene depth stencil view");
+    BGE_ASSERT_HRESULT(pDevice->CreateDepthStencilView(pSceneDepthStencil.Get(), nullptr, &pSceneDepthStencilView), "Failed to create scene depthStencilView");
 }
-void Dx11Renderer::ReSizeViewport(int width, int height)
-{
-    if (!pContext || !pDevice || width <= 0 || height <= 0)
+
+void Dx11Renderer::ReSizeViewport(int width, int height) {
+    if (!pContext || !pDevice || width <= 0 || height <= 0) {
+        CreateError("!context or !device or width = 0 or height = 0");
         return;
+    }
 
     pSceneRTV.Reset();
     pSceneSRV.Reset();
@@ -654,35 +638,15 @@ void Dx11Renderer::ReSizeViewport(int width, int height)
     td.Usage = D3D11_USAGE_DEFAULT;
     td.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-    HRESULT hr = pDevice->CreateTexture2D(
-        &td,
-        nullptr,
-        &pSceneTexture
-    );
+    BGE_ASSERT_HRESULT(pDevice->CreateTexture2D(&td, nullptr, &pSceneTexture), "Failed to resize scene texture");
 
-    if (FAILED(hr))
-        throw std::runtime_error("Failed to resize scene texture");
+    BGE_ASSERT_HRESULT(pDevice->CreateRenderTargetView(pSceneTexture.Get(), nullptr, &pSceneRTV), "Failed to resize scene RTV");
 
-    hr = pDevice->CreateRenderTargetView(
-        pSceneTexture.Get(),
-        nullptr,
-        &pSceneRTV
-    );
+    BGE_ASSERT_HRESULT(pDevice->CreateShaderResourceView(pSceneTexture.Get(), nullptr, &pSceneSRV),"Failed to resize scene SRV");
 
-    if (FAILED(hr))
-        throw std::runtime_error("Failed to resize scene RTV");
-
-    hr = pDevice->CreateShaderResourceView(
-        pSceneTexture.Get(),
-        nullptr,
-        &pSceneSRV
-    );
-
-    if (FAILED(hr))
-        throw std::runtime_error("Failed to resize scene SRV");
-
-    if (!viewportTexture)
+    if (!viewportTexture) {
         viewportTexture = std::make_unique<Texture>();
+    }
 
     viewportTexture->SetSRV(pSceneSRV.Get());
 
@@ -699,10 +663,11 @@ void Dx11Renderer::ReSizeViewport(int width, int height)
     viewport_width = width;
     viewport_height = height;
 
-    const float aspect = static_cast<float>(width) / static_cast<float>(height);
+    float aspect = static_cast<float>(width) / static_cast<float>(height);
 
     camera.SetProjectionValues(g_FOV, aspect, ZNEAR, ZFAR);
 }
+
 void Dx11Renderer::CreateSceneResources(int width, int height) {
     D3D11_TEXTURE2D_DESC td = {};
 
