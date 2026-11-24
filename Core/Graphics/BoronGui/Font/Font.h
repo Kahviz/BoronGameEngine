@@ -31,7 +31,7 @@ namespace Borongui {
         bool Load(const std::string& p_path);
         void Destroy();
 
-        bool isLoaded() const;
+        const bool& isLoaded() const;
 
         const std::unordered_map<char, Glyph>& getGlyphs();
 
@@ -43,6 +43,9 @@ namespace Borongui {
         const GPUVector2& getAtlasSize() const;
 
         const Borongui::Glyph& getGlyph(const char& p_character) const;
+
+        const int& getKerning(char p_first, char p_second) const;
+        const float& getScale() const;
     private:
         std::unordered_map<char, Glyph> m_glyphs{};
 
@@ -52,6 +55,7 @@ namespace Borongui {
         stbtt_fontinfo m_fontInfo{};
 
         int m_fontSize = 20;
+        float m_scale = 0;
         bool m_isLoaded = false;
 
         GPUVector2 m_atlasSize{ 512,512 };

@@ -37,7 +37,7 @@ void Dx11Renderer::InitDx11Renderer(HWND hWnd) {
     float AspectY = screen_height;
     float Aspect = AspectX / AspectY;
 
-    camera.SetProjectionValues(g_FOV, Aspect, ZFAR, ZFAR);
+    camera.SetProjectionValues(g_FOV, Aspect, ZNEAR, ZFAR);
 
     CreateConstantBuffers();
     CreateShadowResources();
@@ -579,15 +579,15 @@ void Dx11Renderer::ReSizeWindow(int width, int height, HWND hWnd) {
     float AspectX = width;
     float AspectY = height;
 
+    viewport_height = AspectY;
+    viewport_width = AspectX;
+
     #if INEDITOR == 1
         AspectX = viewport_width;
         AspectY = viewport_height;
     #endif
 
     float Aspect = AspectX / AspectY;
-
-    viewport_height = AspectY;
-    viewport_width = AspectX;
 
     CreateSceneResources(width, height);
     camera.SetProjectionValues(g_FOV, Aspect, ZNEAR, ZFAR);

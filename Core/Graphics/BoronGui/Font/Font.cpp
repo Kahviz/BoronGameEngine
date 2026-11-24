@@ -53,7 +53,7 @@ bool Borongui::Font::Load(const std::string& p_path) {
 		return false;
 	}
 
-	float scale = stbtt_ScaleForPixelHeight(&m_fontInfo, m_fontSize);
+	m_scale = stbtt_ScaleForPixelHeight(&m_fontInfo, m_fontSize);
 
 	int ascent = 0;
 	int descent = 0;
@@ -61,9 +61,9 @@ bool Borongui::Font::Load(const std::string& p_path) {
 
 	stbtt_GetFontVMetrics(&m_fontInfo, &ascent, &descent, &lineGap);
 
-	float ascentPx = ascent * scale;
-	float descentPx = descent * scale;
-	float lineGapPx = lineGap * scale;
+	float ascentPx = ascent * m_scale;
+	float descentPx = descent * m_scale;
+	float lineGapPx = lineGap * m_scale;
 
 	for (int character = 0; character < 127; character++) {
 		int advanceWidth = 0;
@@ -76,7 +76,7 @@ bool Borongui::Font::Load(const std::string& p_path) {
 
 		stbtt_GetCodepointHMetrics(&m_fontInfo, character, &advanceWidth, &leftSideBearing);
 
-		unsigned char* bitmap = stbtt_GetCodepointBitmap(&m_fontInfo, scale, scale, character, &width, &height, &xOffset, &yOffset);
+		unsigned char* bitmap = stbtt_GetCodepointBitmap(&m_fontInfo, m_scale, m_scale, character, &width, &height, &xOffset, &yOffset);
 
 		Glyph glyph{};
 		
@@ -89,9 +89,9 @@ bool Borongui::Font::Load(const std::string& p_path) {
 			glyph.bitmap.assign(bitmap, bitmap + (width * height));
 		}
 		
-		glyph.advanceWidth = advanceWidth * scale;
+		glyph.advanceWidth = advanceWidth * m_scale;
 		glyph.size = BML::Int2{ width,height };
-		glyph.leftSideBearing = leftSideBearing * scale;
+		glyph.leftSideBearing = leftSideBearing * m_scale;
 		glyph.offset = BML::Int2{ xOffset,yOffset };
 
 		m_glyphs.emplace(character, glyph);
@@ -151,7 +151,7 @@ void Borongui::Font::Destroy() {
 	m_isLoaded = false;
 }
 
-bool Borongui::Font::isLoaded() const {
+const bool& Borongui::Font::isLoaded() const {
 	return m_isLoaded;
 }
 
@@ -168,6 +168,15 @@ const Borongui::Glyph& Borongui::Font::getGlyph(const char& p_character) const {
 
 	return it->second;
 }
+
+const int& Borongui::Font::getKerning(char p_first, char p_second) const {
+	return stbtt_GetCodepointKernAdvance(&m_fontInfo, p_first, p_second);
+}
+
+const float& Borongui::Font::getScale() const {
+	return m_scale;
+}
+
 const std::vector<unsigned char>& Borongui::Font::getFontData() const {
 	return m_fontData;
 }

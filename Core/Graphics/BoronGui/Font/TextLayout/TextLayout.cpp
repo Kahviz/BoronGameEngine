@@ -17,41 +17,46 @@ bool Borongui::TextLayout::Build(const std::string& p_text, const Borongui::Font
 	float cursorX = 0.0f;
 	float cursorY = 0.0f;
 
-	for (char character : p_text) {
-		const Glyph& glyph = p_font.getGlyph(character);
+    for (char character : p_text) {
+        if (character == '\n') {
+            cursorX = 0.0f;
+            cursorY -= p_lineHeight;
+            m_previousCharacter = '\0';
+            continue;
+        }
 
-		float x0 = cursorX + glyph.offset.x();
-		float y0 = cursorY - glyph.offset.y();
+        const Glyph& glyph = p_font.getGlyph(character);
 
-		float x1 = x0 + glyph.size.x();
-		float y1 = y0 + glyph.size.y();
+        if (m_previousCharacter != '\0') {
+            cursorX += p_font.getKerning(m_previousCharacter, character) * p_font.getScale();
+        }
 
-		cursorX += glyph.size.x();
+        if (character != ' ') {
+            float x0 = cursorX + glyph.offset.x();
+            float y0 = cursorY - glyph.offset.y();
 
-		if (character == ' ') {
-			continue;
-		}
+            float x1 = x0 + glyph.size.x();
+            float y1 = y0 + glyph.size.y();
 
-		if (character == '\n') {
-			cursorY += p_lineHeight;
-			continue;
-		}
+            uint32_t startIndex = static_cast<uint32_t>(m_mesh.vertices.size());
 
-		uint32_t startIndex = static_cast<uint32_t>(m_mesh.vertices.size());
+            m_mesh.vertices.push_back({ x0, y0 });
+            m_mesh.vertices.push_back({ x1, y0 });
+            m_mesh.vertices.push_back({ x1, y1 });
+            m_mesh.vertices.push_back({ x0, y1 });
 
-		m_mesh.vertices.push_back({ x0, y0 });
-		m_mesh.vertices.push_back({ x1, y0 });
-		m_mesh.vertices.push_back({ x1, y1 });
-		m_mesh.vertices.push_back({ x0, y1 });
+            m_mesh.indices.push_back(startIndex + 0);
+            m_mesh.indices.push_back(startIndex + 1);
+            m_mesh.indices.push_back(startIndex + 2);
 
-		m_mesh.indices.push_back(startIndex + 0);
-		m_mesh.indices.push_back(startIndex + 1);
-		m_mesh.indices.push_back(startIndex + 2);
+            m_mesh.indices.push_back(startIndex + 2);
+            m_mesh.indices.push_back(startIndex + 3);
+            m_mesh.indices.push_back(startIndex + 0);
+        }
 
-		m_mesh.indices.push_back(startIndex + 2);
-		m_mesh.indices.push_back(startIndex + 3);
-		m_mesh.indices.push_back(startIndex + 0);
-	}
+        cursorX += glyph.advanceWidth;
+        m_previousCharacter = character;
+    }
 
 	return true;
 }

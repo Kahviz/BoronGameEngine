@@ -337,6 +337,7 @@ void ScreenResizerDetector(Window* wnd) {
 
     if (screen_width != lastWidth || screen_height != lastHeight) {
         wnd->GetGraphics().ReSizeWindow(screen_width, screen_height, wnd);
+
         lastWidth = screen_width;
         lastHeight = screen_height;
     }
@@ -466,6 +467,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
             Init = true;
         }
     }
+
     #if INEDITOR == 1
         wnd->GetGraphics().SetRenderTargetToScene();
         wnd->GetGraphics().ClearSceneBuffer(0.1f, 0.1f, 0.1f);
