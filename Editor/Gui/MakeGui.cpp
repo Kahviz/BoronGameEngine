@@ -574,18 +574,10 @@ void MakeGui::MakeIMViewPort(Window& wnd) {
 
     static BML::Vector2 lastWindowSize{ 0,0 };
 
-    if (windowSize.x() != lastWindowSize.x() ||
-        windowSize.y() != lastWindowSize.y())
-    {
-        ImGui::SetNextWindowPos(
-            ImVec2(viewportX, viewportY),
-            ImGuiCond_Always
-        );
+    if (windowSize.x() != lastWindowSize.x() ||windowSize.y() != lastWindowSize.y()) {
+        ImGui::SetNextWindowPos(ImVec2(viewportX, viewportY), ImGuiCond_Always);
 
-        ImGui::SetNextWindowSize(
-            ImVec2(viewportWidth, viewportHeight),
-            ImGuiCond_Always
-        );
+        ImGui::SetNextWindowSize(ImVec2(viewportWidth, viewportHeight), ImGuiCond_Always);
 
         lastWindowSize = windowSize;
     }
@@ -599,35 +591,22 @@ void MakeGui::MakeIMViewPort(Window& wnd) {
         int width = static_cast<int>(size.x);
         int height = static_cast<int>(size.y);
 
-        if (width > 0 && height > 0) {
-            wnd.GetGraphics().GetRenderer().ReSizeViewport(width, height);
-        }
+        viewport_width = width;
+        viewport_height = height;
+
+        wnd.GetGraphics().GetRenderer().ReSizeViewport(width, height);
 
         lastSize = size;
     }
 
-#if DIRECTX11 == 1
-    ImGui::Image(
-        (ImTextureID)
-        wnd.GetGraphics()
-        .GetRenderer()
-        .GetViewport()
-        ->GetTextureComPtr()
-        .Get(),
-        size
-    );
+    #if DIRECTX11 == 1
+        ImGui::Image((ImTextureID) wnd.GetGraphics().GetRenderer().GetViewport()->GetTextureComPtr().Get(), size);
+    #endif
 
-#endif
+    #if VULKAN == 1
+        ImGui::Image(wnd.GetGraphics().GetRenderer().GetViewport()->getImGuiTexture(), size);
+    #endif
 
-#if VULKAN == 1
-    ImGui::Image(
-        wnd.GetGraphics()
-        .GetRenderer()
-        .GetViewport()
-        ->getImGuiTexture(),
-        size
-    );
-#endif
     ImGui::End();
 }
 

@@ -99,8 +99,8 @@ private:
     ID3D11Buffer* pMeshIndexBuffer = nullptr;
     UINT MeshIndexCount = 0;
 
-    int currentWidth = 0;
-    int currentHeight = 0;
+    int m_sceneWidth = 1;
+    int m_sceneHeight = 1;
 
     //Viewport
     ComPtr<ID3D11Texture2D> pSceneTexture;

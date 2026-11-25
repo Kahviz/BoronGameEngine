@@ -331,8 +331,7 @@ void Dx11Renderer::CreateDeviceAndSwapChain(int width, int height, HWND hWnd) {
     }
 }
 
-void Dx11Renderer::CreateViewport(int width, int height)
-{
+void Dx11Renderer::CreateViewport(int width, int height) {
     D3D11_VIEWPORT vp = {};
 
     vp.Width = static_cast<float>(width);
@@ -575,14 +574,6 @@ void Dx11Renderer::ReSizeWindow(int p_width, int p_height, HWND p_hWnd) {
     CreateDepthStencil(p_width, p_height);
     pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
 
-    viewport_width = p_width;
-    viewport_height = p_height;
-
-    #if INEDITOR == 1
-        p_width = viewport_width;
-        p_height = viewport_height;
-    #endif
-
     float aspect = static_cast<float>(p_width) / static_cast<float>(p_height);
 
     CreateSceneResources(p_width, p_height);
@@ -614,6 +605,9 @@ void Dx11Renderer::ReSizeViewport(int width, int height) {
         CreateError("!context or !device or width = 0 or height = 0");
         return;
     }
+
+    m_sceneWidth = width;
+    m_sceneHeight = height;
 
     pSceneRTV.Reset();
     pSceneSRV.Reset();
@@ -659,9 +653,6 @@ void Dx11Renderer::ReSizeViewport(int width, int height) {
     vp.MaxDepth = 1.0f;
 
     pContext->RSSetViewports(1, &vp);
-
-    viewport_width = width;
-    viewport_height = height;
 
     float aspect = static_cast<float>(width) / static_cast<float>(height);
 
@@ -771,14 +762,14 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
     pContext->VSSetShader(pVS.Get(), nullptr, 0);
     pContext->PSSetShader(pPSNoTexture.Get(), nullptr, 0);
     
-    float aspect = 1.0f;
+    float aspect{};
 
     #if INEDITOR == 1
-        aspect = (float)viewport_width / (float)viewport_height;
+        aspect = static_cast<float>(viewport_width) / static_cast<float>(viewport_height);
     #endif
 
     #if INEDITOR == 0
-        aspect = (float)screen_width / (float)screen_height;
+        aspect = static_cast<float>(screen_width) / static_cast<float>(screen_height);
     #endif
 
     FRUSTRUM.createFrustumFromCamera(camera, aspect, FOVY * 1.3f, ZNEAR, ZFAR);
