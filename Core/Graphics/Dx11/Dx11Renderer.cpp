@@ -27,13 +27,16 @@ struct LightingCB {
 };
 
 void Dx11Renderer::InitDx11Renderer(HWND m_hWnd) {
-    CreateDeviceAndSwapChain(screen_width, screen_height, m_hWnd);
-    CreateViewport(screen_width, screen_height);
-    CreateDepthStencil(screen_width, screen_height);
+    m_sceneWidth = screen_width;
+    m_sceneHeight = screen_height;
+
+    CreateDeviceAndSwapChain(m_sceneWidth, m_sceneHeight, m_hWnd);
+    CreateViewport(m_sceneWidth, m_sceneHeight);
+    CreateDepthStencil(m_sceneWidth, m_sceneHeight);
     CreateRenderTarget();
     pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
 
-    float aspect = static_cast<float>(screen_width) / static_cast<float>(screen_height);
+    float aspect = m_sceneWidth / m_sceneHeight;
 
     camera.SetProjectionValues(g_FOV, aspect, ZNEAR, ZFAR);
 
@@ -762,15 +765,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
     pContext->VSSetShader(pVS.Get(), nullptr, 0);
     pContext->PSSetShader(pPSNoTexture.Get(), nullptr, 0);
     
-    float aspect{};
-
-    #if INEDITOR == 1
-        aspect = static_cast<float>(viewport_width) / static_cast<float>(viewport_height);
-    #endif
-
-    #if INEDITOR == 0
-        aspect = static_cast<float>(screen_width) / static_cast<float>(screen_height);
-    #endif
+    float aspect = static_cast<float>(m_sceneWidth) / static_cast<float>(m_sceneHeight);
 
     FRUSTRUM.createFrustumFromCamera(camera, aspect, FOVY * 1.3f, ZNEAR, ZFAR);
 

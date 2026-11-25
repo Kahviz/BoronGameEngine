@@ -5,15 +5,15 @@
 
 int screen_width = 800;
 int screen_height = 400;
-extern float viewport_width = 400.0f;
-extern float viewport_height = 200.0f;
+extern float viewport_width = 0;
+extern float viewport_height = 0;
 
 #include <cstdlib>
 
 bool g_vSync = false; //Limit it to the monitors refresh rate, if true
 bool g_Running = true;
 bool g_Typing = false;
-float g_FOV = 100.0f;
+float g_FOV = 90.0f;
 int g_Index = 0;
 
 std::string GetAppDataPath() {

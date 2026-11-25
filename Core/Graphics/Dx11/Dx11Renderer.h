@@ -99,8 +99,8 @@ private:
     ID3D11Buffer* pMeshIndexBuffer = nullptr;
     UINT MeshIndexCount = 0;
 
-    int m_sceneWidth = 1;
-    int m_sceneHeight = 1;
+    float m_sceneWidth = 1.0f;
+    float m_sceneHeight = 1.0f;
 
     //Viewport
     ComPtr<ID3D11Texture2D> pSceneTexture;
@@ -111,21 +111,22 @@ private:
     ComPtr<ID3D11PixelShader> pPSNoTexture;
 
     //Shadows
-    ComPtr<ID3D11Texture2D> pShadowMap;
-    ComPtr<ID3D11DepthStencilView> pShadowDSV;
-    ComPtr<ID3D11ShaderResourceView> pShadowSRV;
-    ComPtr<ID3D11RasterizerState> pShadowRasterizer;
-    ComPtr<ID3D11SamplerState> pShadowSampler;
-    ComPtr<ID3D11Buffer> pShadowCB;
+    ComPtr<ID3D11Texture2D> pShadowMap{};
+    ComPtr<ID3D11DepthStencilView> pShadowDSV{};
+    ComPtr<ID3D11ShaderResourceView> pShadowSRV{};
+    ComPtr<ID3D11RasterizerState> pShadowRasterizer{};
+    ComPtr<ID3D11SamplerState> pShadowSampler{};
+    ComPtr<ID3D11Buffer> pShadowCB{};
 
     struct ShadowCB {
-        XMMATRIX lightViewProj;
-        XMFLOAT3 lightPos;
-        float padding;
+        XMMATRIX lightViewProj{};
+        XMFLOAT3 lightPos{};
+        float padding{};
     };
 
-    ComPtr<ID3D11Texture2D> pSceneDepthStencil;
-    ComPtr<ID3D11DepthStencilView> pSceneDepthStencilView;
+    ComPtr<ID3D11Texture2D> pSceneDepthStencil{};
+    ComPtr<ID3D11DepthStencilView> pSceneDepthStencilView{};
+
     //Light Setting
     float lightAngle = 0.0f;
     float radius = 10.0f;
