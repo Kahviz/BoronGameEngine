@@ -550,7 +550,9 @@ void Dx11Renderer::CompileShaders()
         &pLayout
     );
 
-    if (FAILED(hr)) throw std::runtime_error("Failed to create input layout");
+    if (FAILED(hr)) {
+        CreateError("Failed to create input layout");
+    }
 }
 
 void Dx11Renderer::ReSizeWindow(int p_width, int p_height, HWND p_hWnd) {
@@ -558,6 +560,7 @@ void Dx11Renderer::ReSizeWindow(int p_width, int p_height, HWND p_hWnd) {
         CreateError("Spap is nullptr");
         return;
     }
+    ReSizeViewport(p_width, p_height);
 
     pTarget.Reset();
     pDepthStencilView.Reset();
@@ -578,7 +581,7 @@ void Dx11Renderer::ReSizeWindow(int p_width, int p_height, HWND p_hWnd) {
     pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
 
     float aspect = static_cast<float>(p_width) / static_cast<float>(p_height);
-
+    std::cout << aspect << std::endl;
     CreateSceneResources(p_width, p_height);
     camera.SetProjectionValues(g_FOV, aspect, ZNEAR, ZFAR);
 }
@@ -695,8 +698,7 @@ IDXGISwapChain* Dx11Renderer::getSwapchain() {
     return pSwap.Get();
 }
 
-Dx11Renderer::Dx11Renderer()
-{
+Dx11Renderer::Dx11Renderer() {
 }
 
 Dx11Renderer::~Dx11Renderer()
