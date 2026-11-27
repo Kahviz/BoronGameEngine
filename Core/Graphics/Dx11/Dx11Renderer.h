@@ -54,8 +54,8 @@ public:
     void ClearSceneBuffer(float r, float g, float b);
     void ReSizeWindow(int p_width, int p_height, HWND p_hWnd);
     void CreateSceneDepthStencil(int p_width, int p_height);
-    void ReSizeViewport(int width, int height);
-    void CreateSceneResources(int width, int height);
+    void ReSizeViewport(int p_width, int p_height);
+    void CreateSceneResources(int p_width, int p_height);
     ID3D11ShaderResourceView* GetSceneSRV();
     ID3D11RenderTargetView* GetBackBufferRTV();
     ID3D11RenderTargetView* GetMainTarget() { return pTarget.Get(); }
@@ -98,9 +98,6 @@ private:
     ID3D11Buffer* pMeshVertexBuffer = nullptr;
     ID3D11Buffer* pMeshIndexBuffer = nullptr;
     UINT MeshIndexCount = 0;
-
-    float m_sceneWidth = 1.0f;
-    float m_sceneHeight = 1.0f;
 
     //Viewport
     ComPtr<ID3D11Texture2D> pSceneTexture;

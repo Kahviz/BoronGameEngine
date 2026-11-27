@@ -459,7 +459,7 @@ void Engine::EngineDoFrame(Window* wnd, float deltatime) {
 
             if (m_ecs.getNumberOfEntities() <= 2) {
                 AddAMesh(m_ecs, "Cube.obj", "Cube", { 0,-2,0 }, { 10,1,10 }, false, false,false);
-                AddAMesh(m_ecs, "Cube.obj", "Cube2", { 0,2,0 }, { 1,2,1 }, false, false, true);
+                AddAMesh(m_ecs, "Cube.obj", "Cube2", { 0,2,0 }, { 1,1,1 }, false, false, true);
             }
             
             wnd->GetGraphics().GetCamera().SetPosition(5, 5, 5);

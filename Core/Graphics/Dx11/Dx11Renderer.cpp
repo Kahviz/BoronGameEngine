@@ -21,24 +21,24 @@ using Microsoft::WRL::ComPtr;
 
 struct LightingCB {
     BML::Vector3 lightpos{};
-    float Brightness{};
-    BML::Vector3 WorldPos{};
+    float brightness{};
+    BML::Vector3 worldPos{};
     float lightRange{};
 };
 
 void Dx11Renderer::InitDx11Renderer(HWND m_hWnd) {
-    m_sceneWidth = screen_width;
-    m_sceneHeight = screen_height;
+    float aspectX = screen_width;
+    float aspectY = screen_height;
 
-    CreateDeviceAndSwapChain(m_sceneWidth, m_sceneHeight, m_hWnd);
-    CreateViewport(m_sceneWidth, m_sceneHeight);
-    CreateDepthStencil(m_sceneWidth, m_sceneHeight);
-    CreateRenderTarget();
-    pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
-
-    float aspect = m_sceneWidth / m_sceneHeight;
+    float aspect = aspectX / aspectY;
 
     camera.SetProjectionValues(g_FOV, aspect, ZNEAR, ZFAR);
+
+    CreateDeviceAndSwapChain(aspectX, aspectY, m_hWnd);
+    CreateViewport(aspectX, aspectY);
+    CreateDepthStencil(aspectX, aspectY);
+    CreateRenderTarget();
+    pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
 
     CreateConstantBuffers();
     CreateShadowResources();
@@ -167,7 +167,7 @@ void Dx11Renderer::RenderShadowMap(ECS& ecs) {
     UINT oldVSNumInstances = 0;
     UINT oldPSNumInstances = 0;
     pContext->VSGetShader(&oldVS, &oldVSInstances, &oldVSNumInstances);
-    pContext->PSGetShader(&oldPS, &oldPSInstances, &oldPSNumInstances);
+    pContext->PSGetShader(&oldPS, nullptr, &oldPSNumInstances);
 
     D3D11_VIEWPORT oldViewports[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
     UINT numViewports = 1;
@@ -175,6 +175,7 @@ void Dx11Renderer::RenderShadowMap(ECS& ecs) {
 
     //ShadowRendering Settings
     D3D11_VIEWPORT shadowVP = {};
+
     shadowVP.Width = static_cast<float>(SHADOW_MAP_SIZE);
     shadowVP.Height = static_cast<float>(SHADOW_MAP_SIZE);
     shadowVP.MinDepth = 0.0f;
@@ -547,10 +548,9 @@ void Dx11Renderer::CompileShaders()
 
 void Dx11Renderer::ReSizeWindow(int p_width, int p_height, HWND p_hWnd) {
     if (!pSwap) {
-        CreateError("Spap is nullptr");
+        CreateError("Swap is nullptr");
         return;
     }
-    ReSizeViewport(p_width, p_height);
 
     pTarget.Reset();
     pDepthStencilView.Reset();
@@ -571,7 +571,7 @@ void Dx11Renderer::ReSizeWindow(int p_width, int p_height, HWND p_hWnd) {
     pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDepthStencilView.Get());
 
     float aspect = static_cast<float>(p_width) / static_cast<float>(p_height);
-    std::cout << aspect << std::endl;
+
     CreateSceneResources(p_width, p_height);
     camera.SetProjectionValues(g_FOV, aspect, ZNEAR, ZFAR);
 }
@@ -596,43 +596,20 @@ void Dx11Renderer::CreateSceneDepthStencil(int p_width, int p_height) {
     BGE_ASSERT_HRESULT(pDevice->CreateDepthStencilView(pSceneDepthStencil.Get(), nullptr, &pSceneDepthStencilView), "Failed to create scene depthStencilView");
 }
 
-void Dx11Renderer::ReSizeViewport(int width, int height) {
-    if (!pContext || !pDevice || width <= 0 || height <= 0) {
+void Dx11Renderer::ReSizeViewport(int p_width, int p_height) {
+    if (!pContext || !pDevice || p_width <= 0 || p_height <= 0) {
         CreateError("!context or !device or width = 0 or height = 0");
         return;
     }
 
-    m_sceneWidth = width;
-    m_sceneHeight = height;
-
-    pSceneRTV.Reset();
-    pSceneSRV.Reset();
-    pSceneTexture.Reset();
     pSceneRTV.Reset();
     pSceneSRV.Reset();
     pSceneTexture.Reset();
     pSceneDepthStencil.Reset();
     pSceneDepthStencilView.Reset();
 
-    CreateSceneResources(width, height);
-    CreateSceneDepthStencil(width, height);
-
-    D3D11_TEXTURE2D_DESC td = {};
-    td.Width = static_cast<UINT>(width);
-    td.Height = static_cast<UINT>(height);
-    td.MipLevels = 1;
-    td.ArraySize = 1;
-    td.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    td.SampleDesc.Count = 1;
-    td.SampleDesc.Quality = 0;
-    td.Usage = D3D11_USAGE_DEFAULT;
-    td.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-
-    BGE_ASSERT_HRESULT(pDevice->CreateTexture2D(&td, nullptr, &pSceneTexture), "Failed to resize scene texture");
-
-    BGE_ASSERT_HRESULT(pDevice->CreateRenderTargetView(pSceneTexture.Get(), nullptr, &pSceneRTV), "Failed to resize scene RTV");
-
-    BGE_ASSERT_HRESULT(pDevice->CreateShaderResourceView(pSceneTexture.Get(), nullptr, &pSceneSRV),"Failed to resize scene SRV");
+    CreateSceneResources(p_width, p_height);
+    CreateSceneDepthStencil(p_width, p_height);
 
     if (!viewportTexture) {
         viewportTexture = std::make_unique<Texture>();
@@ -643,23 +620,33 @@ void Dx11Renderer::ReSizeViewport(int width, int height) {
     D3D11_VIEWPORT vp = {};
     vp.TopLeftX = 0.0f;
     vp.TopLeftY = 0.0f;
-    vp.Width = static_cast<float>(width);
-    vp.Height = static_cast<float>(height);
+    vp.Width = static_cast<FLOAT>(p_width);
+    vp.Height = static_cast<FLOAT>(p_height);
     vp.MinDepth = 0.0f;
     vp.MaxDepth = 1.0f;
 
     pContext->RSSetViewports(1, &vp);
 
-    float aspect = static_cast<float>(width) / static_cast<float>(height);
+    std::cout << "Active viewport: "
+        << vp.Width << "x" << vp.Height << '\n';
 
+    float aspect = static_cast<float>(p_width) / static_cast<float>(p_height);
+    
     camera.SetProjectionValues(g_FOV, aspect, ZNEAR, ZFAR);
+
+    D3D11_TEXTURE2D_DESC desc{};
+    pSceneTexture->GetDesc(&desc);
+
+    std::cout << "Scene texture size: "
+        << desc.Width << "x"
+        << desc.Height << '\n';
 }
 
-void Dx11Renderer::CreateSceneResources(int width, int height) {
+void Dx11Renderer::CreateSceneResources(int p_width, int p_height) {
     D3D11_TEXTURE2D_DESC td = {};
-
-    td.Width = width;
-    td.Height = height;
+    std::cout << "DDD " << p_width << "  " << p_height << std::endl;
+    td.Width = p_width;
+    td.Height = p_height;
     td.MipLevels = 1;
     td.ArraySize = 1;
     td.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -670,17 +657,13 @@ void Dx11Renderer::CreateSceneResources(int width, int height) {
     pDevice->CreateTexture2D(&td, nullptr, &pSceneTexture);
     pDevice->CreateRenderTargetView(pSceneTexture.Get(), nullptr, &pSceneRTV);
     pDevice->CreateShaderResourceView(pSceneTexture.Get(), nullptr, &pSceneSRV);
-
-    viewportTexture = std::make_unique<Texture>();
-    viewportTexture->SetSRV(pSceneSRV.Get());
 }
 
 ID3D11ShaderResourceView* Dx11Renderer::GetSceneSRV() {
     return pSceneSRV.Get();
 }
 
-ID3D11RenderTargetView* Dx11Renderer::GetBackBufferRTV()
-{
+ID3D11RenderTargetView* Dx11Renderer::GetBackBufferRTV() {
     return pTarget.Get();
 }
 
@@ -691,8 +674,7 @@ IDXGISwapChain* Dx11Renderer::getSwapchain() {
 Dx11Renderer::Dx11Renderer() {
 }
 
-Dx11Renderer::~Dx11Renderer()
-{
+Dx11Renderer::~Dx11Renderer() {
 }
 
 Camera& Dx11Renderer::GetCamera() {
@@ -728,6 +710,18 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 
     SetShadowMapToShader();
 
+#if INEDITOR == 1
+    D3D11_VIEWPORT vp{};
+    vp.TopLeftX = 0.0f;
+    vp.TopLeftY = 0.0f;
+    vp.Width = static_cast<float>(viewport_width);
+    vp.Height = static_cast<float>(viewport_height);
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+
+    pContext->RSSetViewports(1, &vp);
+#endif
+
     const float lightSpeed = 0.1f;
     lightAngle += lightSpeed * deltaTime;
     if (lightAngle >= DOUBLE_PI) lightAngle -= DOUBLE_PI;
@@ -740,24 +734,21 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
     BML::Matrix4x4 mat = camera.getViewMatrix();
     BML::Matrix4x4 projMat = camera.getProjectionMatrix();
 
-    XMMATRIX proj = XMMATRIX(
-        XMVectorSet(projMat(0, 0), projMat(0, 1), projMat(0, 2), projMat(0, 3)),
-        XMVectorSet(projMat(1, 0), projMat(1, 1), projMat(1, 2), projMat(1, 3)),
-        XMVectorSet(projMat(2, 0), projMat(2, 1), projMat(2, 2), projMat(2, 3)),
-        XMVectorSet(projMat(3, 0), projMat(3, 1), projMat(3, 2), projMat(3, 3))
-    );
-
-    XMMATRIX view = XMMATRIX(
-        XMVectorSet(mat(0, 0), mat(1, 0), mat(2, 0), mat(3, 0)),
-        XMVectorSet(mat(0, 1), mat(1, 1), mat(2, 1), mat(3, 1)),
-        XMVectorSet(mat(0, 2), mat(1, 2), mat(2, 2), mat(3, 2)),
-        XMVectorSet(mat(0, 3), mat(1, 3), mat(2, 3), mat(3, 3))
-    );
+    XMMATRIX proj = XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(projMat.data_ptr()));
+    XMMATRIX view = XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(mat.transposed().data_ptr()));
 
     pContext->VSSetShader(pVS.Get(), nullptr, 0);
     pContext->PSSetShader(pPSNoTexture.Get(), nullptr, 0);
     
-    float aspect = static_cast<float>(m_sceneWidth) / static_cast<float>(m_sceneHeight);
+    float aspect{};
+
+    #if INEDITOR == 1
+        aspect = static_cast<float>(viewport_width) / static_cast<float>(viewport_height);
+    #endif
+
+    #if INEDITOR == 0
+        aspect = static_cast<float>(screen_width) / static_cast<float>(screen_height);
+    #endif
 
     FRUSTRUM.createFrustumFromCamera(camera, aspect, FOVY * 1.3f, ZNEAR, ZFAR);
 
@@ -816,6 +807,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 
                 // VS constant buffer
                 ConstantBuffer cb = {};
+
                 cb.worldViewProj = XMMatrixTranspose(worldViewProj);
                 cb.world = XMMatrixTranspose(world);
                 cb.cubeColor = XMFLOAT3(
@@ -850,15 +842,11 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
                 pContext->Unmap(pColorBuffer.Get(), 0);
 
                 LightingCB lcbPerMesh = lcb;
-                lcbPerMesh.WorldPos = BML::Vector3(pos.x(), pos.y(), pos.z());
-                lcbPerMesh.Brightness = Brightness;
+                lcbPerMesh.worldPos = BML::Vector3(pos.x(), pos.y(), pos.z());
+                lcbPerMesh.brightness = Brightness;
 
-                D3D11_MAPPED_SUBRESOURCE msrLighting;
-                hr = pContext->Map(pLightingBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrLighting);
-
-                if (FAILED(hr)) {
-                    CreateError("Failed to map lighting buffer");
-                }
+                D3D11_MAPPED_SUBRESOURCE msrLighting{};
+                BGE_ASSERT_HRESULT(pContext->Map(pLightingBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msrLighting),"Failed to map lighting buffer");
 
                 memcpy(msrLighting.pData, &lcbPerMesh, sizeof(lcbPerMesh));
 
@@ -896,6 +884,7 @@ void Dx11Renderer::ClearSceneBuffer(float r, float g, float b) {
 
 void Dx11Renderer::ClearBuffer(float r, float g, float b) {
     if (!pContext || !pTarget || !pDepthStencilView) {
+        CreateError("context or target or depthStencilView is nullptr");
         return;
     }
 

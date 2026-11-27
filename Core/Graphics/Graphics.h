@@ -55,8 +55,7 @@ public:
     ID3D11RenderTargetView* GetMainTarget();
 #endif
     
-    IRenderer& GetRenderer()
-    {
+    IRenderer& GetRenderer() {
         return *Renderer;
     }
 private:

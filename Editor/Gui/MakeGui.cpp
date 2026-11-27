@@ -561,46 +561,32 @@ void MakeGui::MakeIMViewPort(Window& wnd) {
 
     float mainTabHeight = screen_h / 4.0f;
     float consoleHeight = screen_h / 4.0f;
-
     float rightPanelWidth = screen_w * 0.30f;
 
-    float viewportX = 0.0f;
-    float viewportY = mainTabHeight;
-
-    float viewportWidth = screen_w - rightPanelWidth;
-    float viewportHeight = screen_h - mainTabHeight - consoleHeight;
-
-    BML::Vector2 windowSize = wnd.GetSize();
-
-    static BML::Vector2 lastWindowSize{ 0,0 };
-
-    if (windowSize.x() != lastWindowSize.x() ||windowSize.y() != lastWindowSize.y()) {
-        ImGui::SetNextWindowPos(ImVec2(viewportX, viewportY), ImGuiCond_Always);
-
-        ImGui::SetNextWindowSize(ImVec2(viewportWidth, viewportHeight), ImGuiCond_Always);
-
-        lastWindowSize = windowSize;
-    }
+    ImGui::SetNextWindowPos(ImVec2(0.0f, mainTabHeight), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(screen_w - rightPanelWidth,screen_h - mainTabHeight - consoleHeight), ImGuiCond_Once);
 
     ImGui::Begin("Viewport", nullptr);
 
     ImVec2 size = ImGui::GetContentRegionAvail();
-    static ImVec2 lastSize(0.0f, 0.0f);
 
-    if (size.x != lastSize.x || size.y != lastSize.y) {
+    if (size.x > 0.0f && size.y > 0.0f) {
         int width = static_cast<int>(size.x);
         int height = static_cast<int>(size.y);
 
-        viewport_width = width;
-        viewport_height = height;
+        if (width != viewport_width || height != viewport_height) {
+            viewport_width = width;
+            viewport_height = height;
 
-        wnd.GetGraphics().GetRenderer().ReSizeViewport(width, height);
-
-        lastSize = size;
+            wnd.GetGraphics().GetRenderer().ReSizeViewport(
+                width,
+                height
+            );
+        }
     }
 
     #if DIRECTX11 == 1
-        ImGui::Image((ImTextureID) wnd.GetGraphics().GetRenderer().GetViewport()->GetTextureComPtr().Get(), size);
+        ImGui::Image((ImTextureID)wnd.GetGraphics().GetRenderer().GetViewport()->GetTextureComPtr().Get(), size);
     #endif
 
     #if VULKAN == 1
