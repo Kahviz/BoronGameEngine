@@ -542,17 +542,7 @@ void Dx11Renderer::CompileShaders()
         { "BRIGHTNESS", 0, DXGI_FORMAT_R32_FLOAT,       0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-    hr = pDevice->CreateInputLayout(
-        ied,
-        ARRAYSIZE(ied),
-        vsBlob->GetBufferPointer(),
-        vsBlob->GetBufferSize(),
-        &pLayout
-    );
-
-    if (FAILED(hr)) {
-        CreateError("Failed to create input layout");
-    }
+    BGE_ASSERT_HRESULT(pDevice->CreateInputLayout(ied, ARRAYSIZE(ied), vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &pLayout), "Failed to create input layout");
 }
 
 void Dx11Renderer::ReSizeWindow(int p_width, int p_height, HWND p_hWnd) {
