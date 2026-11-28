@@ -47,7 +47,7 @@ public:
     ID3D11Device* GetDevice() noexcept;
     ID3D11DeviceContext* GetpContext() noexcept;
 
-    void DrawAFrame(float deltaTime, ECS& ecs);
+    void DrawAFrame(float p_deltaTime, ECS& p_ecs);
     void EndFrame();
     
     void ClearBuffer(float r, float g, float b);

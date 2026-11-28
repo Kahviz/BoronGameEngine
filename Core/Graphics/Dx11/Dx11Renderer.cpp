@@ -697,7 +697,7 @@ void Dx11Renderer::EndFrame() {
     BGE_ASSERT_HRESULT(pSwap->Present(g_vSync, 0), "DirectX device lost");
 }
 
-void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
+void Dx11Renderer::DrawAFrame(float p_deltaTime, ECS& p_ecs) {
     pContext->OMSetDepthStencilState(pDepthStencilState.Get(), 0);
 
     static int counter = 0;
@@ -705,7 +705,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 
     if (counter >= SHADOW_MAP_UPDATE_INTERVAL) {
         counter = 0;
-        RenderShadowMap(ecs);
+        RenderShadowMap(p_ecs);
     }
 
     SetShadowMapToShader();
@@ -723,7 +723,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 #endif
 
     const float lightSpeed = 0.1f;
-    lightAngle += lightSpeed * deltaTime;
+    lightAngle += lightSpeed * p_deltaTime;
     if (lightAngle >= DOUBLE_PI) lightAngle -= DOUBLE_PI;
 
     LightingCB lcb = {};
@@ -752,7 +752,7 @@ void Dx11Renderer::DrawAFrame(float deltaTime, ECS& ecs) {
 
     FRUSTRUM.createFrustumFromCamera(camera, aspect, FOVY * 1.3f, ZNEAR, ZFAR);
 
-    ecs.Each<TextureComponent, ObjectComponent, TransformComponent, ColorComponent>(
+    p_ecs.Each<TextureComponent, ObjectComponent, TransformComponent, ColorComponent>(
         [&](EntityECS entity, TextureComponent& textureComponent, ObjectComponent& objectComponent, TransformComponent& transformComponent, ColorComponent& colorComponent)
         {
             CubeVolume cubeVolume = {};
